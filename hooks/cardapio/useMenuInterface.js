@@ -69,7 +69,7 @@ export const useMenuInterface = () => {
   }, []);
 
   const isLocationVisible = useCallback((categoryId) => {
-    return visibleLocations[categoryId] || false;
+    return visibleLocations[categoryId] !== undefined ? visibleLocations[categoryId] : false;
   }, [visibleLocations]);
 
   // Handlers de notas

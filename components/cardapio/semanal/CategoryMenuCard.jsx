@@ -126,7 +126,7 @@ export default function CategoryMenuCard({
                     </PopoverTrigger>
                     
                     <PopoverContent className="p-0 w-[400px]" align="start">
-                      <Command>
+                      <Command shouldFilter={false}>
                         <div className="flex items-center border-b px-3 py-2">
                           <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                           <CommandInput 
@@ -155,7 +155,7 @@ export default function CategoryMenuCard({
                             filteredRecipes.map(recipe => (
                               <CommandItem
                                 key={recipe.id}
-                                value={recipe.id}
+                                value={recipe.name}
                                 onSelect={() => {
                                   onMenuItemChange(currentDayIndex, category.id, itemIndex, { recipe_id: recipe.id });
                                   handleOpenChange(itemIndex, false);

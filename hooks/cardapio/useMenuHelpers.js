@@ -36,13 +36,23 @@ export const useMenuHelpers = () => {
 
   const filterRecipesBySearch = useCallback((recipes, categoryName, searchTerm) => {
     if (!Array.isArray(recipes) || recipes.length === 0) {
-      return [];
+        return [];
     }
+    
+    // Função para normalizar texto (remover acentos e caracteres especiais)
+    const normalizeText = (text) => {
+      return text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s]/g, '')
+        .trim();
+    };
     
     // Mapeamento de nomes de categorias do sistema para categorias das receitas
     const categoryMapping = {
-      'Acompanhamento': 'Acompanhamentos',
-      'Sobremesas': 'Sobremesa',
+      'Acompanhamento': 'Acompanhamento', // Receitas usam singular mesmo
+      'Sobremesas': 'Sobremesas', // Receitas usam plural mesmo  
       'Padrão': ['Padrão', 'Bhkm4hqX8a8NgALgm7fq']
     };
     
@@ -53,6 +63,7 @@ export const useMenuHelpers = () => {
         ? categoryMapping[categoryName]
         : categoryMapping[categoryName];
     }
+    
     
     const availableRecipes = recipes.filter(r => {
       const isActive = r?.active !== false;
@@ -65,13 +76,38 @@ export const useMenuHelpers = () => {
         matchesCategory = r?.category === targetRecipeCategory;
       }
       
+      
       return isActive && matchesCategory;
     });
     
-    return availableRecipes.filter(recipe => 
-      !searchTerm || 
-      recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    
+    // Se não há termo de busca, retorna todas as receitas da categoria ordenadas alfabeticamente
+    if (!searchTerm || searchTerm.trim() === '') {
+      return availableRecipes.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    }
+    
+    const normalizedSearchTerm = normalizeText(searchTerm);
+    
+    const filteredRecipes = availableRecipes.filter(recipe => {
+      if (!recipe.name) return false;
+      
+      const normalizedRecipeName = normalizeText(recipe.name);
+      
+      // Se o termo de busca for uma palavra só ou sequência contínua, busca diretamente
+      if (!normalizedSearchTerm.includes(' ')) {
+        return normalizedRecipeName.includes(normalizedSearchTerm);
+      }
+      
+      // Para múltiplas palavras, busca por qualquer uma das palavras (OR) em vez de todas (AND)
+      const searchWords = normalizedSearchTerm.split(/\s+/).filter(word => word.length > 0);
+      
+      return searchWords.some(word => 
+        normalizedRecipeName.includes(word)
+      );
+    });
+    
+    // Ordenar resultados filtrados alfabeticamente
+    return filteredRecipes.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
   }, []);
 
   const ensureMinimumItems = useCallback((categoryItems, fixedDropdowns) => {
