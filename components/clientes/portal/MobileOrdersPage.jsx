@@ -125,7 +125,21 @@ const MobileOrdersPage = ({ customerId }) => {
     return days;
   }, [weekStart]);
 
-  const [selectedDay, setSelectedDay] = useState(1);
+  // Função para obter o dia da semana atual (1 = Segunda, 2 = Terça, etc.)
+  const getCurrentWeekDay = useCallback(() => {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+    
+    // Converter para formato do sistema (1 = Segunda, 2 = Terça, etc.)
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      // Domingo ou Sábado - vai para Segunda (1)
+      return 1;
+    }
+    return dayOfWeek; // 1 = Segunda, 2 = Terça, 3 = Quarta, 4 = Quinta, 5 = Sexta
+  }, []);
+
+  const [selectedDay, setSelectedDay] = useState(1); // Será definido após carregar dados
+  const [hasInitializedDay, setHasInitializedDay] = useState(false);
   
 
   // Carregar pedidos existentes da semana
@@ -612,6 +626,7 @@ const MobileOrdersPage = ({ customerId }) => {
     }
   }, [customer, weekNumber, year]);
 
+
   // Carregamento inicial
   useEffect(() => {
     const loadInitialData = async () => {
@@ -663,6 +678,15 @@ const MobileOrdersPage = ({ customerId }) => {
       loadInitialData();
     }
   }, [customerId, weekNumber, year, toast]);
+
+  // Auto-navegação para o dia atual - executa APENAS após dados iniciais carregarem
+  useEffect(() => {
+    if (!loading && customer && recipes.length > 0 && weeklyMenus.length > 0 && !hasInitializedDay) {
+      const currentDay = getCurrentWeekDay();
+      setSelectedDay(currentDay);
+      setHasInitializedDay(true);
+    }
+  }, [loading, customer, recipes, weeklyMenus, hasInitializedDay, getCurrentWeekDay]);
 
   // Preparar itens do pedido baseado no cardápio
   const orderItems = useMemo(() => {
@@ -762,19 +786,44 @@ const MobileOrdersPage = ({ customerId }) => {
         if (item.unique_id === uniqueId) {
           const updatedItem = { ...item };
 
+          // Verificar se é categoria de carne
+          const isCarneCategory = item.category && item.category.toLowerCase().includes('carne');
+          
           if (field === 'base_quantity') {
             const baseQuantity = utilParseQuantity(value);
             updatedItem.base_quantity = baseQuantity;
-            const percentage = updatedItem.adjustment_percentage || 0;
-            const newQuantity = baseQuantity * (1 + (percentage / 100));
-            updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+            
+            if (isCarneCategory && item.unit_type === 'unid') {
+              // Lógica específica para carnes com unidade "unid"
+              // Total Pedido = (Refeições Esperadas * 2) * Porcionamento
+              const percentage = (updatedItem.adjustment_percentage || 0) / 100;
+              const newQuantity = (mealsExpected * 2) * percentage;
+              updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+            } else {
+              // Lógica padrão para outras categorias
+              const percentage = updatedItem.adjustment_percentage || 0;
+              const newQuantity = baseQuantity * (1 + (percentage / 100));
+              updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+            }
+            
             updatedItem.total_price = updatedItem.quantity * (updatedItem.unit_price || 0);
           } else if (field === 'adjustment_percentage') {
             const percentage = utilParseQuantity(value);
             updatedItem.adjustment_percentage = percentage;
-            const baseQuantity = updatedItem.base_quantity || 0;
-            const newQuantity = baseQuantity * (1 + (percentage / 100));
-            updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+            
+            if (isCarneCategory && item.unit_type === 'unid') {
+              // Lógica específica para carnes com unidade "unid"
+              // Total Pedido = (Refeições Esperadas * 2) * Porcionamento
+              const percentageDecimal = percentage / 100;
+              const newQuantity = (mealsExpected * 2) * percentageDecimal;
+              updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+            } else {
+              // Lógica padrão para outras categorias
+              const baseQuantity = updatedItem.base_quantity || 0;
+              const newQuantity = baseQuantity * (1 + (percentage / 100));
+              updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+            }
+            
             updatedItem.total_price = updatedItem.quantity * (updatedItem.unit_price || 0);
           } else {
             updatedItem[field] = value;
@@ -786,7 +835,34 @@ const MobileOrdersPage = ({ customerId }) => {
 
       return { ...prev, items: newItems };
     });
-  }, []);
+  }, [mealsExpected]);
+
+  // Recalcular itens de carne quando as refeições esperadas mudarem
+  useEffect(() => {
+    if (currentOrder?.items && mealsExpected > 0) {
+      setCurrentOrder(prev => {
+        if (!prev?.items) return prev;
+        
+        const newItems = prev.items.map(item => {
+          const isCarneCategory = item.category && item.category.toLowerCase().includes('carne');
+          
+          if (isCarneCategory && item.unit_type === 'unid' && item.adjustment_percentage > 0) {
+            const updatedItem = { ...item };
+            // Recalcular quantity usando a nova fórmula
+            const percentageDecimal = (item.adjustment_percentage || 0) / 100;
+            const newQuantity = (mealsExpected * 2) * percentageDecimal;
+            updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+            updatedItem.total_price = updatedItem.quantity * (updatedItem.unit_price || 0);
+            return updatedItem;
+          }
+          
+          return item;
+        });
+        
+        return { ...prev, items: newItems };
+      });
+    }
+  }, [mealsExpected]);
 
   // Carregar dados de sobras quando a aba waste for selecionada ou quando pedidos mudarem
   useEffect(() => {
@@ -811,8 +887,8 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Resetar pedido quando mudar de dia
   useEffect(() => {
-    // Só executar se já temos dados carregados
-    if (currentOrder && currentOrder.day_of_week !== selectedDay && Object.keys(existingOrders).length > 0) {
+    // Só executar se já temos dados carregados e dia foi inicializado
+    if (hasInitializedDay && currentOrder && currentOrder.day_of_week !== selectedDay && Object.keys(existingOrders).length > 0) {
       setCurrentOrder(null);
       
       // Verificar se existe pedido salvo para este dia
@@ -836,10 +912,13 @@ const MobileOrdersPage = ({ customerId }) => {
       setIsReceivingEditMode(true);
       setIsWasteEditMode(true);
     }
-  }, [selectedDay, currentOrder, existingOrders]);
+  }, [hasInitializedDay, selectedDay, currentOrder, existingOrders]);
 
   // Inicializar pedido quando itens mudam
   useEffect(() => {
+    // Só executar após inicialização do dia
+    if (!hasInitializedDay) return;
+    
     // Se existe pedido salvo para este dia, usar ele
     if (existingOrders[selectedDay] && orderItems.length > 0) {
       const existingOrder = existingOrders[selectedDay];
@@ -883,7 +962,7 @@ const MobileOrdersPage = ({ customerId }) => {
       };
       setCurrentOrder(newOrder);
     }
-  }, [orderItems, customer, selectedDay, weekNumber, year, weekStart, mealsExpected, generalNotes, existingOrders]);
+  }, [hasInitializedDay, orderItems, customer, selectedDay, weekNumber, year, weekStart, mealsExpected, generalNotes, existingOrders]);
 
   // Calcular totais e depreciação por devoluções
   const orderTotals = useMemo(() => {
@@ -1066,10 +1145,10 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Carregar pedidos existentes quando customer muda
   useEffect(() => {
-    if (customer) {
+    if (customer && hasInitializedDay) {
       loadExistingOrders();
     }
-  }, [customer, loadExistingOrders]);
+  }, [customer, hasInitializedDay, loadExistingOrders]);
 
   if (!customerId) {
     return (
@@ -1125,21 +1204,30 @@ const MobileOrdersPage = ({ customerId }) => {
               Semana Anterior
             </Button>
             <div className="flex gap-1">
-              {weekDays.map((day) => (
-                <Button
-                  key={day.dayNumber}
-                  variant={selectedDay === day.dayNumber ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedDay(day.dayNumber)}
-                  className={cn(
-                    "flex flex-col h-16 w-16 p-1 text-xs",
-                    selectedDay === day.dayNumber && "bg-blue-600 text-white"
-                  )}
-                >
-                  <span className="font-medium">{day.dayShort}</span>
-                  <span className="text-xs opacity-80">{day.dayDate}</span>
-                </Button>
-              ))}
+              {weekDays.map((day) => {
+                const isCurrentDay = getCurrentWeekDay() === day.dayNumber;
+                const isSelected = selectedDay === day.dayNumber;
+                
+                return (
+                  <Button
+                    key={day.dayNumber}
+                    variant={isSelected ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedDay(day.dayNumber)}
+                    className={cn(
+                      "flex flex-col h-16 w-16 p-1 text-xs relative",
+                      isSelected && "bg-blue-600 text-white",
+                      isCurrentDay && !isSelected && "border-blue-400 border-2"
+                    )}
+                  >
+                    <span className="font-medium">{day.dayShort}</span>
+                    <span className="text-xs opacity-80">{day.dayDate}</span>
+                    {isCurrentDay && (
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full ring-1 ring-white" />
+                    )}
+                  </Button>
+                );
+              })}
             </div>
             <Button
               variant="outline"
