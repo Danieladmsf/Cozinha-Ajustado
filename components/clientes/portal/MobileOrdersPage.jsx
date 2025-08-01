@@ -1,4 +1,5 @@
 'use client';
+// Navegação e carregamento otimizados - v1.1
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { format, startOfWeek, getWeek, getYear, addDays, parseISO } from "date-fns";
