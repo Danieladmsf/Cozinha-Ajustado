@@ -827,11 +827,11 @@ const MobileOrdersPage = ({ customerId }) => {
             const baseQuantity = utilParseQuantity(value);
             updatedItem.base_quantity = baseQuantity;
             
-            if (isCarneCategory && item.unit_type === 'unid') {
-              // Lógica específica para carnes com unidade "unid"
-              // Total Pedido = (Refeições Esperadas * 2) * Porcionamento
+            if (item.unit_type === 'unid') {
+              // Lógica específica para unidade "unid"
+              // Total Pedido = (Quantidade * 2) * Porcionamento
               const percentage = (updatedItem.adjustment_percentage || 0) / 100;
-              const newQuantity = (mealsExpected * 2) * percentage;
+              const newQuantity = (baseQuantity * 2) * percentage;
               updatedItem.quantity = Math.round(newQuantity * 100) / 100;
             } else {
               // Lógica padrão para outras categorias
@@ -845,11 +845,12 @@ const MobileOrdersPage = ({ customerId }) => {
             const percentage = utilParseQuantity(value);
             updatedItem.adjustment_percentage = percentage;
             
-            if (isCarneCategory && item.unit_type === 'unid') {
-              // Lógica específica para carnes com unidade "unid"
-              // Total Pedido = (Refeições Esperadas * 2) * Porcionamento
+            if (item.unit_type === 'unid') {
+              // Lógica específica para unidade "unid"
+              // Total Pedido = (Quantidade * 2) * Porcionamento
               const percentageDecimal = percentage / 100;
-              const newQuantity = (mealsExpected * 2) * percentageDecimal;
+              const baseQuantity = updatedItem.base_quantity || 0;
+              const newQuantity = (baseQuantity * 2) * percentageDecimal;
               updatedItem.quantity = Math.round(newQuantity * 100) / 100;
             } else {
               // Lógica padrão para outras categorias
@@ -871,32 +872,8 @@ const MobileOrdersPage = ({ customerId }) => {
     });
   }, [mealsExpected]);
 
-  // Recalcular itens de carne quando as refeições esperadas mudarem
-  useEffect(() => {
-    if (currentOrder?.items && mealsExpected > 0) {
-      setCurrentOrder(prev => {
-        if (!prev?.items) return prev;
-        
-        const newItems = prev.items.map(item => {
-          const isCarneCategory = item.category && item.category.toLowerCase().includes('carne');
-          
-          if (isCarneCategory && item.unit_type === 'unid' && item.adjustment_percentage > 0) {
-            const updatedItem = { ...item };
-            // Recalcular quantity usando a nova fórmula
-            const percentageDecimal = (item.adjustment_percentage || 0) / 100;
-            const newQuantity = (mealsExpected * 2) * percentageDecimal;
-            updatedItem.quantity = Math.round(newQuantity * 100) / 100;
-            updatedItem.total_price = updatedItem.quantity * (updatedItem.unit_price || 0);
-            return updatedItem;
-          }
-          
-          return item;
-        });
-        
-        return { ...prev, items: newItems };
-      });
-    }
-  }, [mealsExpected]);
+  // Recalcular itens com unidade "unid" não é mais necessário
+  // pois agora o cálculo é baseado na quantidade base, não nas refeições esperadas
 
   // Carregar dados de sobras automaticamente para cálculo de descontos
   useEffect(() => {
@@ -1074,12 +1051,12 @@ const MobileOrdersPage = ({ customerId }) => {
         
         // Para cada categoria
         orderedCategories.forEach(({ name: categoryName, data: categoryData }) => {
-          const isCarneCategory = categoryName.toLowerCase().includes('carne');
+          const hasUnidItems = categoryData.items.some(item => item.unit_type === 'unid');
           
           inputString += `--- CATEGORIA: ${categoryName} ---\n`;
           outputString += `--- CATEGORIA: ${categoryName} ---\n`;
           
-          if (isCarneCategory) {
+          if (hasUnidItems) {
             inputString += "Item | Quantidade | Unidade | Porcionamento | Total Pedido | Subtotal | Observações\n";
             outputString += "Item | Quantidade | Unidade | Porcionamento | Total Pedido | Subtotal | Observações\n";
           } else {
@@ -1098,7 +1075,7 @@ const MobileOrdersPage = ({ customerId }) => {
             
             const itemHeader = `${item.recipe_name}\n${unitPrice}/${item.unit_type}`;
             
-            if (isCarneCategory) {
+            if (item.unit_type === 'unid') {
               inputString += `${itemHeader} | ${baseQty} | ${unitType} | ${adjustmentPct}% | ${totalQty} ${item.unit_type} | ${subtotal} | ${notes}\n`;
               outputString += `${itemHeader} | ${baseQty} | ${unitType} | ${adjustmentPct}% | ${totalQty} ${item.unit_type} | ${subtotal} | ${notes}\n`;
             } else {

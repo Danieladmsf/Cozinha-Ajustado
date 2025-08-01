@@ -138,8 +138,8 @@ const OrdersTab = ({
       {orderedCategories.map(({ name: categoryName, data: categoryData }) => {
         const { headerStyle } = generateCategoryStyles(categoryData.categoryInfo.color);
         
-        // Verificar se é categoria carne para mostrar porcentagem
-        const isCarneCategory = categoryName.toLowerCase().includes('carne');
+        // Verificar se algum item tem unidade "unid" para mostrar colunas especiais
+        const hasUnidItems = categoryData.items.some(item => item.unit_type === 'unid');
         
         return (
           <div key={categoryName} className="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden hover:shadow-md transition-all duration-300">
@@ -163,7 +163,7 @@ const OrdersTab = ({
                       <th className="text-left p-2 text-xs font-medium text-blue-700 w-1/4">Item</th>
                       <th className="text-center p-2 text-xs font-medium text-blue-700 w-16">Quantidade</th>
                       <th className="text-center p-2 text-xs font-medium text-blue-700 w-16">Unidade</th>
-                      {isCarneCategory && (
+                      {hasUnidItems && (
                         <>
                           <th className="text-center p-2 text-xs font-medium text-blue-700 w-16">Porcionamento</th>
                           <th className="text-center p-2 text-xs font-medium text-blue-700 w-16">Total Pedido</th>
@@ -210,7 +210,7 @@ const OrdersTab = ({
                               {item.unit_type.charAt(0).toUpperCase() + item.unit_type.slice(1)}
                             </div>
                           </td>
-                          {isCarneCategory && (
+                          {item.unit_type === 'unid' && (
                             <>
                               <td className="p-2 text-center">
                                 <DecimalInput
