@@ -55,6 +55,7 @@ import { useCategoryDisplay } from "@/hooks/shared/useCategoryDisplay";
 // Utilitário para cálculos de depreciação
 import { 
   calculateTotalDepreciation, 
+  calculateNonReceivedDiscounts,
   calculateFinalOrderValue,
   formatCurrency as returnFormatCurrency,
   formatQuantity as returnFormatQuantity
@@ -997,12 +998,13 @@ const MobileOrdersPage = ({ customerId }) => {
     }
   }, [hasInitializedDay, isEditMode, orderItems, customer, selectedDay, weekNumber, year, weekStart, existingOrders]);
 
-  // Calcular totais e depreciação por devoluções
+  // Calcular totais, depreciação por devoluções e descontos por não recebimento
   const orderTotals = useMemo(() => {
     if (!currentOrder?.items) return { 
       totalItems: 0, 
       totalAmount: 0, 
       depreciation: null,
+      nonReceivedDiscounts: null,
       finalAmount: 0
     };
     
@@ -1015,18 +1017,29 @@ const MobileOrdersPage = ({ customerId }) => {
     
     // Calcular depreciação baseada nos itens devolvidos (wasteItems)
     const depreciationData = calculateTotalDepreciation(wasteItems || [], currentOrder.items || []);
-    const finalOrderValue = calculateFinalOrderValue(totalAmount, depreciationData.totalDepreciation);
     
+    // Calcular descontos por itens não recebidos (receivingItems)
+    const nonReceivedDiscountsData = calculateNonReceivedDiscounts(receivingItems || [], currentOrder.items || []);
+    
+    // Calcular valor final com ambos os descontos
+    const finalOrderValue = calculateFinalOrderValue(
+      totalAmount, 
+      depreciationData.totalDepreciation,
+      nonReceivedDiscountsData.totalNonReceivedDiscount
+    );
     
     return { 
       totalItems, 
       totalAmount,
       depreciation: depreciationData,
+      nonReceivedDiscounts: nonReceivedDiscountsData,
       finalAmount: finalOrderValue.finalTotal,
       originalAmount: totalAmount,
-      depreciationAmount: depreciationData.totalDepreciation
+      depreciationAmount: depreciationData.totalDepreciation,
+      nonReceivedDiscountAmount: nonReceivedDiscountsData.totalNonReceivedDiscount,
+      totalDiscountAmount: finalOrderValue.totalDiscounts
     };
-  }, [currentOrder, wasteItems]);
+  }, [currentOrder, wasteItems, receivingItems]);
 
   const submitOrder = useCallback(async () => {
     if (!currentOrder || !customer) return;
@@ -1381,10 +1394,15 @@ const MobileOrdersPage = ({ customerId }) => {
           <div className="p-4">
             <div className="flex justify-between items-center mb-3">
               <div className="text-sm text-gray-600">
-                {orderTotals.depreciationAmount > 0 ? (
+                {(orderTotals.depreciationAmount > 0 || orderTotals.nonReceivedDiscountAmount > 0) ? (
                   <div>
                     <div><span className="font-medium">Original:</span> {utilFormatCurrency(orderTotals.originalAmount)}</div>
-                    <div className="text-red-600"><span className="font-medium">Devolução:</span> -{utilFormatCurrency(orderTotals.depreciationAmount)}</div>
+                    {orderTotals.depreciationAmount > 0 && (
+                      <div className="text-red-600"><span className="font-medium">Devolução (25%):</span> -{utilFormatCurrency(orderTotals.depreciationAmount)}</div>
+                    )}
+                    {orderTotals.nonReceivedDiscountAmount > 0 && (
+                      <div className="text-orange-600"><span className="font-medium">Não recebido (100%):</span> -{utilFormatCurrency(orderTotals.nonReceivedDiscountAmount)}</div>
+                    )}
                     <div className="font-bold"><span className="font-medium">Final:</span> {utilFormatCurrency(orderTotals.finalAmount)}</div>
                   </div>
                 ) : (

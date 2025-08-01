@@ -305,12 +305,17 @@ const OrdersTab = ({
             </div>
             <div className="text-right">
               <p className="text-sm font-medium text-blue-700">
-                {orderTotals.depreciationAmount > 0 ? 'Valor Original' : 'Valor Total'}
+                {(orderTotals.depreciationAmount > 0 || orderTotals.nonReceivedDiscountAmount > 0) ? 'Valor Original' : 'Valor Total'}
               </p>
               <p className="text-2xl font-bold text-blue-900">{utilFormatCurrency(orderTotals.totalAmount)}</p>
-              {orderTotals.depreciationAmount > 0 && (
+              {(orderTotals.depreciationAmount > 0 || orderTotals.nonReceivedDiscountAmount > 0) && (
                 <div className="mt-2">
-                  <p className="text-xs text-red-600">Devolução: -{utilFormatCurrency(orderTotals.depreciationAmount)}</p>
+                  {orderTotals.depreciationAmount > 0 && (
+                    <p className="text-xs text-red-600">Devolução (25%): -{utilFormatCurrency(orderTotals.depreciationAmount)}</p>
+                  )}
+                  {orderTotals.nonReceivedDiscountAmount > 0 && (
+                    <p className="text-xs text-orange-600">Não recebido (100%): -{utilFormatCurrency(orderTotals.nonReceivedDiscountAmount)}</p>
+                  )}
                   <p className="text-sm font-bold text-green-700">Valor Final: {utilFormatCurrency(orderTotals.finalAmount)}</p>
                 </div>
               )}
