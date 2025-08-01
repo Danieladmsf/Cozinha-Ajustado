@@ -93,7 +93,6 @@ export default function Customers() {
       const data = await Customer.list() || [];
       setCustomers(data);
     } catch (error) {
-      console.error("Erro ao carregar clientes:", error);
       toast({
         title: "Erro ao carregar",
         description: "Não foi possível buscar a lista de clientes.",
@@ -188,9 +187,7 @@ export default function Customers() {
 
     try {
       // Lógica de salvamento removida  
-      console.log('Dados de cliente preparados:', data);
     } catch (error) {
-      console.error("Erro ao salvar cliente:", error);
       toast({
         title: "Erro ao salvar",
         description: `Não foi possível salvar o cliente. Detalhes: ${error.message || error}`,
@@ -227,7 +224,6 @@ export default function Customers() {
       setShowDeleteDialog(false);
       setCustomerToDelete(null);
     } catch (error) {
-      console.error("Erro ao excluir cliente:", error);
       toast({
         title: "Erro ao excluir",
         description: `Não foi possível excluir o cliente. Detalhes: ${error.message || error}`,
@@ -246,7 +242,6 @@ export default function Customers() {
       });
       loadCustomers();
     } catch (error) {
-      console.error("Erro ao atualizar status do cliente:", error);
       toast({
         title: "Erro ao atualizar",
         description: `Não foi possível alterar o status do cliente. Detalhes: ${error.message || error}`,
@@ -316,7 +311,6 @@ export default function Customers() {
     const encodedMessage = encodeURIComponent(baseMessage);
     const whatsAppUrl = `https://wa.me/${formattedNumber}?text=${encodedMessage}`;
 
-    console.log("Abrindo WhatsApp URL:", whatsAppUrl);
     window.open(whatsAppUrl, '_blank');
   };
 
@@ -335,7 +329,6 @@ export default function Customers() {
          throw new Error(result.error || "Erro no upload do arquivo.");
       }
     } catch (error) {
-      console.error("Erro ao fazer upload da imagem:", error);
       setUploadedPhotoUrl(currentCustomer?.photo || "");
       toast({
         title: "Erro de Upload",
@@ -390,7 +383,6 @@ export default function Customers() {
           description: "Cliente salvo com sucesso!"
         });
       } catch (error) {
-        console.error("Erro ao salvar cliente:", error);
         toast({
           variant: "destructive",
           title: "Erro ao salvar",

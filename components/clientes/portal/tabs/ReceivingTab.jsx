@@ -3,6 +3,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Package, Loader2, Check, X, CheckCircle } from "lucide-react";
@@ -196,23 +197,11 @@ const ReceivingTab = ({
                           </td>
                           <td className="p-2">
                             {item.status === 'partial' || item.status === 'not_received' ? (
-                              <Input
-                                type="text"
-                                inputMode="decimal"
+                              <DecimalInput
                                 value={item.received_quantity === 0 ? '' : item.received_quantity || ''}
                                 onChange={(e) => {
-                                  console.log('[ReceivingTab] Campo quantidade recebida - valor digitado:', e.target.value);
                                   if (isEditMode) {
-                                    console.log('[ReceivingTab] Campo quantidade recebida - enviando para updateReceivingItem');
                                     updateReceivingItem(globalIndex, 'received_quantity', e.target.value);
-                                  }
-                                }}
-                                onInput={(e) => {
-                                  const currentValue = e.target.value;
-                                  console.log('[ReceivingTab] Quantidade recebida onInput - valor atual:', currentValue);
-                                  if (currentValue.includes(',') && isEditMode) {
-                                    console.log('[ReceivingTab] Quantidade recebida onInput - vírgula detectada');
-                                    updateReceivingItem(globalIndex, 'received_quantity', currentValue);
                                   }
                                 }}
                                 className="text-center text-xs h-8 w-16 border-red-300 focus:border-red-500"

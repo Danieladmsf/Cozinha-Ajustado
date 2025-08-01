@@ -106,7 +106,7 @@ export default function Recipes() {
   const [recipeToPrint, setRecipeToPrint] = useState(null);
   const [isSaving, setSaving] = useState(false);
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(null);
   const [priceHistory, setPriceHistory] = useState([]);
 
   const saveTimerRef = useRef(null);
@@ -124,6 +124,11 @@ export default function Recipes() {
     }
   };
 
+  // Fix hydration mismatch - set date only on client
+  useEffect(() => {
+    setSelectedDate(new Date());
+  }, []);
+
   useEffect(() => {
     loadRecipes();
     loadCategories();
@@ -136,6 +141,8 @@ export default function Recipes() {
   }, []);
 
   useEffect(() => {
+    if (!selectedDate) return;
+    
     const recalculatedRecipes = recipes.map(recipe => {
       const variation = calculateVariationForDate(recipe, selectedDate);
       return {
@@ -314,7 +321,6 @@ export default function Recipes() {
       case 'g':
         return numValue;
       default:
-        console.warn(`Unidade desconhecida: ${unit}, assumindo gramas`);
         return numValue;
     }
   };
@@ -358,14 +364,11 @@ export default function Recipes() {
   };
 
   const handleDelete = async (recipe) => {
-    console.log("[Recipes] handleDelete called for recipe:", recipe);
     
     if (window.confirm(`Tem certeza que deseja excluir a receita "${recipe.name}"?`)) {
       try {
-        console.log("[Recipes] Calling Recipe.delete for ID:", recipe.id);
         await Recipe.delete(recipe.id);
         
-        console.log("[Recipes] Recipe deleted successfully, reloading recipes...");
         await loadRecipes();
         
         toast({
@@ -891,7 +894,7 @@ export default function Recipes() {
                     onClick={() => setViewMode("list")}
                   >
                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4">
-                      <path d="M2 3.5C2 3.22386 2.22386 3 2.5 3H12.5C12.7761 3 13 3.22386 13 3.5C13 3.77614 12.7761 4 12.5 4H2.5C2.22386 4 2 3.77614 2 3.5ZM2 7.5C2 7.22386 2.22386 7 2.5 7H12.5C12.7761 7 13 7.22386 13 7.5C13 7.77614 12.7761 8 12.5 8H2.5C2.22386 8 2 7.77614 2 7.5ZM2 11.5C2 11.2239 2.22386 11 2.5 11H12.5C12.7761 11 13 11.2239 13 11.5C13 11.7761 12 12.5 12H2.5C2.22386 12 2 11.7761 2 11.5Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
+                      <path d="M2 3.5C2 3.22386 2.22386 3 2.5 3H12.5C12.7761 3 13 3.22386 13 3.5C13 3.77614 12.7761 4 12.5 4H2.5C2.22386 4 2 3.77614 2 3.5ZM2 7.5C2 7.22386 2.22386 7 2.5 7H12.5C12.7761 7 13 7.22386 13 7.5C13 7.77614 12.7761 8 12.5 8H2.5C2.22386 8 2 7.77614 2 7.5ZM2 11.5C2 11.2239 2.22386 11 2.5 11H12.5C12.7761 11 13 11.2239 13 11.5C13 11.7761 12.7761 12 12.5 12H2.5C2.22386 12 2 11.7761 2 11.5Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
                     </svg>
                   </Button>
                 </div>
@@ -912,7 +915,7 @@ export default function Recipes() {
               <PopoverTrigger asChild>
                 <Button variant="outline" className="min-w-[240px]">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}
+                  {selectedDate ? format(selectedDate, "dd/MM/yyyy", { locale: ptBR }) : "Carregando..."}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -938,7 +941,7 @@ export default function Recipes() {
             {viewMode === "grid" ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredRecipes.map((recipe) => {
-                  const variation = calculateVariationForDate(recipe, selectedDate);
+                  const variation = selectedDate ? calculateVariationForDate(recipe, selectedDate) : 0;
 
                   return (
                     <motion.div
@@ -1345,7 +1348,7 @@ export default function Recipes() {
                                   <TabsContent value="volatilidade">
                                     <div className="space-y-6">
                                       {(() => {
-                                        const variation = calculateVariationForDate(recipe, selectedDate);
+                                        const variation = selectedDate ? calculateVariationForDate(recipe, selectedDate) : null;
                                         
                                         if (!variation) {
                                           return (
@@ -1356,14 +1359,14 @@ export default function Recipes() {
                                           );
                                         }
 
-                                        const formattedDate = format(selectedDate, "dd/MM/yyyy", { locale: ptBR });
+                                        const formattedDate = selectedDate ? format(selectedDate, "dd/MM/yyyy", { locale: ptBR }) : "N/A";
 
                                         const ingredientsWithVariations = recipe.ingredients.map(ing => {
-                                          const currentPrice = getIngredientPriceForDate(ing.ingredient_id, selectedDate) || ing.unit_price;
+                                          const currentPrice = selectedDate ? (getIngredientPriceForDate(ing.ingredient_id, selectedDate) || ing.unit_price) : ing.unit_price;
                                           
-                                          const previousDate = new Date(selectedDate);
-                                          previousDate.setDate(previousDate.getDate() - 1);
-                                          const previousPrice = getIngredientPriceForDate(ing.ingredient_id, previousDate) || ing.unit_price;
+                                          const previousDate = selectedDate ? new Date(selectedDate) : new Date();
+                                          if (selectedDate) previousDate.setDate(previousDate.getDate() - 1);
+                                          const previousPrice = selectedDate ? (getIngredientPriceForDate(ing.ingredient_id, previousDate) || ing.unit_price) : ing.unit_price;
                                           
                                           const percentChange = ((currentPrice - previousPrice) / previousPrice) * 100;
                                           const monetaryChange = (currentPrice - previousPrice) * ing.quantity;

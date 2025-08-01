@@ -3,6 +3,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, AlertTriangle, Loader2, CheckCircle } from "lucide-react";
@@ -137,23 +138,11 @@ const WasteTab = ({
                           </td>
                           <td className="p-2">
                             <div className="flex gap-1 items-center justify-center">
-                              <Input
-                                type="text"
-                                inputMode="decimal"
+                              <DecimalInput
                                 value={item.internal_waste_quantity === 0 ? '' : item.internal_waste_quantity || ''}
                                 onChange={(e) => {
-                                  console.log('[WasteTab] Campo sobra interna - valor digitado:', e.target.value);
                                   if (isEditMode) {
-                                    console.log('[WasteTab] Campo sobra interna - enviando para updateWasteItem');
                                     updateWasteItem(globalIndex, 'internal_waste_quantity', e.target.value);
-                                  }
-                                }}
-                                onInput={(e) => {
-                                  const currentValue = e.target.value;
-                                  console.log('[WasteTab] Sobra interna onInput - valor atual:', currentValue);
-                                  if (currentValue.includes(',') && isEditMode) {
-                                    console.log('[WasteTab] Sobra interna onInput - vírgula detectada');
-                                    updateWasteItem(globalIndex, 'internal_waste_quantity', currentValue);
                                   }
                                 }}
                                 className="text-center text-xs h-8 w-12 border-amber-300 focus:border-amber-500"
@@ -171,23 +160,11 @@ const WasteTab = ({
                           </td>
                           <td className="p-2">
                             <div className="flex gap-1 items-center justify-center">
-                              <Input
-                                type="text"
-                                inputMode="decimal"
+                              <DecimalInput
                                 value={item.client_returned_quantity === 0 ? '' : item.client_returned_quantity || ''}
                                 onChange={(e) => {
-                                  console.log('[WasteTab] Campo cliente devolveu - valor digitado:', e.target.value);
                                   if (isEditMode) {
-                                    console.log('[WasteTab] Campo cliente devolveu - enviando para updateWasteItem');
                                     updateWasteItem(globalIndex, 'client_returned_quantity', e.target.value);
-                                  }
-                                }}
-                                onInput={(e) => {
-                                  const currentValue = e.target.value;
-                                  console.log('[WasteTab] Cliente devolveu onInput - valor atual:', currentValue);
-                                  if (currentValue.includes(',') && isEditMode) {
-                                    console.log('[WasteTab] Cliente devolveu onInput - vírgula detectada');
-                                    updateWasteItem(globalIndex, 'client_returned_quantity', currentValue);
                                   }
                                 }}
                                 className="text-center text-xs h-8 w-12 border-amber-300 focus:border-amber-500"

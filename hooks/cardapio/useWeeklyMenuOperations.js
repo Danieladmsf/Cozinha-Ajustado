@@ -14,15 +14,6 @@ export const useWeeklyMenuOperations = () => {
       const mockUserId = APP_CONSTANTS.MOCK_USER_ID;
       const { weekStart, weekKey, weekNumber, year } = getWeekInfo(currentDate);
 
-      console.log("🆕 CRIANDO NOVO MENU SEMANAL:", {
-        currentDate,
-        weekStart,
-        weekKey,
-        weekNumber,
-        year,
-        mockUserId
-      });
-
       const menuData = {
         user_id: mockUserId,
         week_key: weekKey,
@@ -30,15 +21,11 @@ export const useWeeklyMenuOperations = () => {
         menu_data: {}
       };
 
-      console.log("📝 Dados que serão salvos:", menuData);
-
       const newMenu = await WeeklyMenuEntity.create(menuData);
-
-      console.log("✅ MENU CRIADO COM SUCESSO:", newMenu);
 
       return newMenu;
     } catch (error) {
-      console.error("❌ ERRO AO CRIAR MENU SEMANAL:", error);
+      console.error('Erro ao criar menu semanal:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -47,14 +34,6 @@ export const useWeeklyMenuOperations = () => {
 
   const updateMenuItem = useCallback(async (weeklyMenu, dayIndex, categoryId, itemIndex, newItem) => {
     try {
-      console.log("🔄 ATUALIZANDO ITEM DO MENU:", {
-        weeklyMenuId: weeklyMenu?.id,
-        dayIndex,
-        categoryId,
-        itemIndex,
-        newItem,
-        menuDataAntes: weeklyMenu?.menu_data
-      });
 
       const updatedMenu = { ...weeklyMenu };
       if (!updatedMenu.menu_data) updatedMenu.menu_data = {};
@@ -65,21 +44,7 @@ export const useWeeklyMenuOperations = () => {
       items[itemIndex] = { ...items[itemIndex], ...newItem };
       updatedMenu.menu_data[dayIndex][categoryId] = items;
 
-      console.log("📝 DADOS ATUALIZADOS QUE SERÃO SALVOS:", {
-        menuId: updatedMenu.id,
-        menuDataDepois: updatedMenu.menu_data,
-        itemAtualizado: items[itemIndex]
-      });
-
       const result = await WeeklyMenuEntity.update(updatedMenu.id, { menu_data: updatedMenu.menu_data });
-
-      console.log("✅ ITEM ATUALIZADO NO BANCO:", {
-        result,
-        menuId: updatedMenu.id,
-        dayIndex,
-        categoryId,
-        itemIndex
-      });
       
       toast({
         title: "Item atualizado",
@@ -88,7 +53,7 @@ export const useWeeklyMenuOperations = () => {
 
       return updatedMenu;
     } catch (error) {
-      console.error("❌ ERRO AO ATUALIZAR ITEM:", error);
+      console.error('Erro ao atualizar item:', error);
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o item do menu.",
@@ -100,17 +65,10 @@ export const useWeeklyMenuOperations = () => {
 
   const addMenuItem = useCallback(async (weeklyMenu, dayIndex, categoryId, createWeeklyMenuFn, getActiveLocationIds = null) => {
     try {
-      console.log("➕ ADICIONANDO ITEM AO MENU:", {
-        weeklyMenuExists: !!weeklyMenu,
-        weeklyMenuId: weeklyMenu?.id,
-        dayIndex,
-        categoryId
-      });
 
       let currentMenu = weeklyMenu;
       
       if (!currentMenu) {
-        console.log("📝 Menu não existe, criando novo...");
         currentMenu = await createWeeklyMenuFn();
       }
 
@@ -122,11 +80,6 @@ export const useWeeklyMenuOperations = () => {
       // Selecionar todos os locais ativos por padrão para facilitar o uso
       const defaultLocations = getActiveLocationIds ? getActiveLocationIds() : [];
       
-      console.log("✅ SELEÇÃO AUTOMÁTICA DE LOCAIS:", {
-        defaultLocations,
-        totalLocais: defaultLocations.length,
-        locaisIds: defaultLocations
-      });
       
       const newItem = {
         recipe_id: null,
@@ -135,22 +88,7 @@ export const useWeeklyMenuOperations = () => {
 
       updatedMenu.menu_data[dayIndex][categoryId].push(newItem);
 
-      console.log("📝 ADICIONANDO ITEM - DADOS QUE SERÃO SALVOS:", {
-        menuId: updatedMenu.id,
-        menuData: updatedMenu.menu_data,
-        newItem,
-        totalItemsNaCategoria: updatedMenu.menu_data[dayIndex][categoryId].length
-      });
-
       const result = await WeeklyMenuEntity.update(updatedMenu.id, { menu_data: updatedMenu.menu_data });
-
-      console.log("✅ ITEM ADICIONADO NO BANCO:", {
-        result,
-        menuId: updatedMenu.id,
-        dayIndex,
-        categoryId,
-        totalItems: updatedMenu.menu_data[dayIndex][categoryId].length
-      });
       
       toast({
         title: "Item adicionado",
@@ -159,7 +97,7 @@ export const useWeeklyMenuOperations = () => {
 
       return updatedMenu;
     } catch (error) {
-      console.error("❌ ERRO AO ADICIONAR ITEM:", error);
+      console.error('Erro ao adicionar item:', error);
       throw error;
     }
   }, []);
@@ -198,12 +136,6 @@ export const useWeeklyMenuOperations = () => {
       let locations = item.locations;
       if (!locations || locations.length === 0) {
         locations = getActiveLocationIds ? getActiveLocationIds() : [];
-        console.log("🔄 INICIALIZANDO LOCATIONS:", {
-          itemIndex,
-          locationId,
-          allActiveLocations: locations,
-          action: checked ? 'manter' : 'remover'
-        });
       } else {
         locations = [...locations];
       }
@@ -219,12 +151,6 @@ export const useWeeklyMenuOperations = () => {
         }
       }
 
-      console.log("💾 SALVANDO LOCATIONS:", {
-        itemIndex,
-        locationId,
-        checked,
-        finalLocations: locations
-      });
 
       return await updateMenuItemFn(dayIndex, categoryId, itemIndex, { locations });
     } catch (error) {

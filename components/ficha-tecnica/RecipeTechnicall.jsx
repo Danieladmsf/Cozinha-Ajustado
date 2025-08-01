@@ -339,7 +339,7 @@ export default function RecipeTechnical() {
       setIsDirty(true); // Always mark as dirty if recalculation occurs after user input
 
     } catch (error) {
-      console.error('❌ [CALC] Error during recalculation:', error);
+      console.error('Error during recalculation:', error);
     }
   }, [parseNumericValue]); // Dependencies: only parseNumericValue
 
@@ -755,7 +755,7 @@ export default function RecipeTechnical() {
 
 
     } catch (error) {
-      console.error('[RecipeTechnical] ❌ Erro ao carregar receita:', error);
+      console.error('[RecipeTechnical] Erro ao carregar receita:', error);
       toast({
         variant: "destructive",
         title: "Erro ao Carregar Receita",
@@ -848,11 +848,6 @@ export default function RecipeTechnical() {
         ingredients: [] // Limpar campo antigo
       });
 
-      console.log('💾 [SAVE-DEBUG] Dados a serem salvos:');
-      console.log('💾 [SAVE-DEBUG] portion_cost:', dataToSave.portion_cost);
-      console.log('💾 [SAVE-DEBUG] cuba_cost:', dataToSave.cuba_cost);
-      console.log('💾 [SAVE-DEBUG] cost_per_kg_yield:', dataToSave.cost_per_kg_yield);
-      console.log('💾 [SAVE-DEBUG] cuba_weight:', dataToSave.cuba_weight);
 
       // IMPORTANT: Restore cuba_weight to original string format for UI if needed, but for saving it should be numeric now
       // The sanitizeNumericData will convert cuba_weight to a number for the `dataToSave` object.
@@ -890,13 +885,8 @@ export default function RecipeTechnical() {
 
 
     } catch (err) {
-      console.error('❌ ========== ERRO NO SALVAMENTO ==========');
-      console.error('❌ Erro completo:', err);
-      console.error('❌ Tipo do erro:', typeof err);
-      console.error('❌ Nome do erro:', err.name);
-      console.error('❌ Mensagem do erro:', err.message);
-      console.error('❌ Stack trace:', err.stack);
-      console.error('❌ Dados da receita no momento do erro:', recipeData);
+      console.error('Erro no salvamento:', err);
+      console.error('Dados da receita no momento do erro:', recipeData);
 
       let errorMessage = "Erro interno";
       
@@ -1495,7 +1485,7 @@ export default function RecipeTechnical() {
   const renderProcessTable = (prep, prepIndex) => {
 
     if (!prep || typeof prep !== 'object') {
-      console.error(`🎨 [RENDER] Invalid prep in renderProcessTable:`, prep);
+      console.error('Invalid prep in renderProcessTable:', prep);
       return <div>Erro: dados inválidos</div>;
     }
 
@@ -1631,7 +1621,7 @@ export default function RecipeTechnical() {
               ingredients.map((item, itemIndex) => {
 
                 if (!item || typeof item !== 'object') {
-                  console.error(`🎨 [RENDER] Invalid ingredient at ${itemIndex}:`, item);
+                  console.error(`Invalid ingredient at ${itemIndex}:`, item);
                   return (
                     <tr key={itemIndex}>
                       <td colSpan={15} className="px-4 py-2 text-center text-red-500">
@@ -2172,7 +2162,7 @@ export default function RecipeTechnical() {
   const renderPreparationCards = () => {
 
     if (!Array.isArray(preparationsData)) {
-      console.error("🎨 [RENDER] preparations is not an array:", preparationsData);
+      console.error('Preparations is not an array:', preparationsData);
       setPreparationsData([]); // Fix it
       return (
         <div className="bg-blue-50 p-6 rounded-lg border border-blue-100 text-center">
@@ -2205,7 +2195,7 @@ export default function RecipeTechnical() {
 
       // Ensure prep has required structure
       if (!prep || typeof prep !== 'object') {
-        console.error(`🎨 [RENDER] Invalid prep at index ${prepIndex}:`, prep);
+        console.error(`Invalid prep at index ${prepIndex}:`, prep);
         return null;
       }
 
@@ -2554,7 +2544,7 @@ export default function RecipeTechnical() {
     setPreparationsData(prev => {
 
       if (!Array.isArray(prev)) {
-        console.error(`🔄 [UPDATE] prev is not an array:`, prev);
+        console.error('Previous state is not an array:', prev);
         return [];
       }
 
@@ -2562,19 +2552,19 @@ export default function RecipeTechnical() {
       const targetPrep = newPreparations[prepIndex];
 
       if (!targetPrep) {
-        console.error(`🔄 [UPDATE] No prep at index ${prepIndex}`);
+        console.error(`No prep at index ${prepIndex}`);
         return prev;
       }
 
       if (!Array.isArray(targetPrep.ingredients)) {
-        console.error(`🔄 [UPDATE] targetPrep.ingredients is not an array:`, targetPrep.ingredients);
+        console.error('Target prep ingredients is not an array:', targetPrep.ingredients);
         targetPrep.ingredients = []; // Attempt to fix
         return prev;
       }
 
       const itemToUpdate = targetPrep.ingredients[itemIndex];
       if (!itemToUpdate) {
-        console.error(`🔄 [UPDATE] No item at index ${itemIndex} in prep ${prepIndex}`);
+        console.error(`No item at index ${itemIndex} in prep ${prepIndex}`);
         return prev;
       }
 

@@ -94,7 +94,6 @@ export default function ClientAuthMiddleware({ children, customerId, requiredAcc
       setAccessLevel(level);
 
     } catch (error) {
-      console.error("Erro ao validar acesso do cliente:", error);
       // Usar mensagem mais amigável para o usuário
       if (error.message?.includes('not found') || error.code === 'not-found') {
         setError("O link de acesso não é válido ou expirou");

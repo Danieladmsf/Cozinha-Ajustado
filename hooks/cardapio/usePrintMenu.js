@@ -301,11 +301,8 @@ export const usePrintMenu = () => {
 
   const handlePrintCardapio = useCallback((weeklyMenu, categories, recipes, customers, locations, customerId, currentDate, getCategoryColor) => {
     if (!weeklyMenu) {
-      console.warn('handlePrintCardapio: weeklyMenu não encontrado');
       return;
     }
-
-    console.log('handlePrintCardapio: Iniciando impressão para cliente:', customerId);
 
     // Gerar estrutura HTML para impressão
     const printContent = generatePrintableMenu(weeklyMenu, categories, recipes, customers, locations, customerId, currentDate, getCategoryColor);

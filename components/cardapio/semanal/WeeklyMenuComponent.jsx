@@ -55,15 +55,19 @@ export default function WeeklyMenuComponent() {
     }
   }, [menuConfig?.available_days, menuInterface.currentDayIndex]);
 
+  // Estado para controlar se já aplicamos as configurações iniciais
+  const [hasAppliedInitialConfig, setHasAppliedInitialConfig] = React.useState(false);
+
   useEffect(() => {
-    if (menuConfig?.expanded_categories && menuConfig.expanded_categories.length > 0) {
+    if (menuConfig?.expanded_categories && menuConfig.expanded_categories.length > 0 && !hasAppliedInitialConfig) {
       menuConfig.expanded_categories.forEach(categoryId => {
         if (!menuInterface.isLocationVisible(categoryId)) {
           menuInterface.toggleLocationVisibility(categoryId);
         }
       });
+      setHasAppliedInitialConfig(true);
     }
-  }, [menuConfig?.expanded_categories]);
+  }, [menuConfig?.expanded_categories, hasAppliedInitialConfig]);
 
 
 

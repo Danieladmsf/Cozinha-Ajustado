@@ -3,34 +3,56 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { History, Calendar, Users, DollarSign, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { History, Calendar, Users, DollarSign, CheckCircle, Clock, AlertCircle, Package } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formattedQuantity as utilFormattedQuantity, formatCurrency as utilFormatCurrency } from "@/components/utils/orderUtils";
+import { calculateTotalDepreciation, calculateFinalOrderValue } from "@/lib/returnCalculator";
 
 const HistoryTab = ({
   existingOrders,
   weekDays,
   year,
   weekNumber,
-  customer
+  customer,
+  existingWasteData = {}
 }) => {
-  // Calcular totais da semana
+  // Calcular totais da semana considerando devoluções
   const weeklyTotals = React.useMemo(() => {
     let totalMeals = 0;
-    let totalAmount = 0;
+    let originalTotalAmount = 0;
+    let totalDepreciation = 0;
     let ordersCount = 0;
+    let totalItemsCount = 0;
 
-    Object.values(existingOrders).forEach(order => {
+    Object.entries(existingOrders).forEach(([dayIndex, order]) => {
       if (order) {
         totalMeals += order.total_meals_expected || 0;
-        totalAmount += order.total_amount || 0;
+        originalTotalAmount += order.total_amount || 0;
+        totalItemsCount += order.total_items || 0;
         ordersCount += 1;
+
+        // Calcular depreciação para este dia específico
+        const wasteDataForDay = existingWasteData[dayIndex];
+        if (wasteDataForDay && wasteDataForDay.items && order.items) {
+          const depreciationData = calculateTotalDepreciation(wasteDataForDay.items, order.items);
+          totalDepreciation += depreciationData.totalDepreciation;
+        }
       }
     });
 
-    return { totalMeals, totalAmount, ordersCount };
-  }, [existingOrders]);
+    const finalTotalAmount = originalTotalAmount - totalDepreciation;
+
+    return { 
+      totalMeals, 
+      originalTotalAmount,
+      totalDepreciation,
+      finalTotalAmount,
+      ordersCount,
+      totalItemsCount,
+      hasReturns: totalDepreciation > 0
+    };
+  }, [existingOrders, existingWasteData]);
 
   const getDayStatus = (dayIndex) => {
     const order = existingOrders[dayIndex];
@@ -107,12 +129,60 @@ const HistoryTab = ({
               </div>
               <div>
                 <p className="text-sm text-gray-600">Valor Total</p>
-                <p className="text-lg font-semibold text-gray-800">{utilFormatCurrency(weeklyTotals.totalAmount)}</p>
+                <p className="text-lg font-semibold text-gray-800">{utilFormatCurrency(weeklyTotals.finalTotalAmount)}</p>
+                {weeklyTotals.hasReturns && (
+                  <p className="text-xs text-gray-500">
+                    Original: {utilFormatCurrency(weeklyTotals.originalTotalAmount)}
+                  </p>
+                )}
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Resumo de devoluções se existirem */}
+      {weeklyTotals.hasReturns && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Users className="w-5 h-5 text-gray-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Refeições Esperadas</p>
+                  <p className="text-lg font-semibold text-gray-800">{weeklyTotals.totalMeals}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Package className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total de Itens</p>
+                  <p className="text-lg font-semibold text-gray-800">{weeklyTotals.totalItemsCount}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Valor Original</p>
+                  <p className="text-lg font-semibold text-gray-800">{utilFormatCurrency(weeklyTotals.originalTotalAmount)}</p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 pt-4 border-t border-orange-200">
+              <div className="flex justify-between items-center">
+                <span className="text-orange-700 font-medium">Devolução: -{utilFormatCurrency(weeklyTotals.totalDepreciation)}</span>
+                <span className="text-lg font-bold text-orange-800">Valor Final: {utilFormatCurrency(weeklyTotals.finalTotalAmount)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Lista de pedidos por dia */}
       <div className="space-y-4">
@@ -202,9 +272,27 @@ const HistoryTab = ({
                     <span className="font-semibold">{weeklyTotals.totalMeals}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-green-700">Valor Total da Semana:</span>
-                    <span className="font-semibold">{utilFormatCurrency(weeklyTotals.totalAmount)}</span>
+                    <span className="text-green-700">Valor Original da Semana:</span>
+                    <span className="font-semibold">{utilFormatCurrency(weeklyTotals.originalTotalAmount)}</span>
                   </div>
+                  {weeklyTotals.hasReturns && (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-green-700">Desconto por Devoluções:</span>
+                        <span className="font-semibold">-{utilFormatCurrency(weeklyTotals.totalDepreciation)}</span>
+                      </div>
+                      <div className="flex justify-between border-t pt-2">
+                        <span className="text-green-700 font-bold">Valor Final da Semana:</span>
+                        <span className="font-bold">{utilFormatCurrency(weeklyTotals.finalTotalAmount)}</span>
+                      </div>
+                    </>
+                  )}
+                  {!weeklyTotals.hasReturns && (
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Valor Total da Semana:</span>
+                      <span className="font-semibold">{utilFormatCurrency(weeklyTotals.finalTotalAmount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-green-700">Dias com Pedidos:</span>
                     <span className="font-semibold">{weeklyTotals.ordersCount}/5</span>

@@ -164,8 +164,6 @@ export function useRecipeOperations() {
 
   const loadRecipe = useCallback(async (recipeId) => {
     try {
-      console.log('Carregando receita via API:', recipeId);
-      
       const response = await fetch(`/api/recipes?id=${recipeId}`);
       const result = await response.json();
       
@@ -178,8 +176,6 @@ export function useRecipeOperations() {
       if (!recipe) {
         throw new Error('Receita não encontrada');
       }
-      
-      console.log('Receita carregada:', recipe);
       
       return { 
         success: true, 
@@ -201,8 +197,6 @@ export function useRecipeOperations() {
         preparations: recipe.preparations || [] 
       };
     } catch (error) {
-      console.error('Erro ao carregar receita:', error);
-      
       toast({
         title: "Erro ao carregar",
         description: "Ocorreu um erro ao carregar a receita: " + error.message,

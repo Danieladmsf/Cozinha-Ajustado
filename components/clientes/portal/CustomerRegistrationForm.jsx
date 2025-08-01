@@ -78,7 +78,6 @@ export default function CustomerRegistrationForm({ customerId }) {
       });
       
     } catch (error) {
-      console.error('Erro ao carregar cliente:', error);
       toast({
         title: "Erro ao carregar dados",
         description: "Não foi possível carregar os dados do cliente.",
@@ -105,7 +104,6 @@ export default function CustomerRegistrationForm({ customerId }) {
         throw new Error(result.error || "Erro no upload do arquivo.");
       }
     } catch (error) {
-      console.error("Erro ao fazer upload da imagem:", error);
       toast({
         title: "Erro de Upload",
         description: `Não foi possível carregar a foto. ${error.message}`,
@@ -155,7 +153,6 @@ export default function CustomerRegistrationForm({ customerId }) {
       }, 2000);
 
     } catch (error) {
-      console.error('Erro ao salvar cadastro:', error);
       toast({
         title: "Erro ao salvar",
         description: `Não foi possível salvar o cadastro. ${error.message}`,

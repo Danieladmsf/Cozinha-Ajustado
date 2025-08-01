@@ -1,0 +1,8 @@
+# Ignorar arquivos do VS Code que podem causar 404s
+.vscode/
+.vsda/
+*.vsix
+*.vsda
+node_modules/vsda/
+**/vsda/**
+static/node_modules/vsda/

@@ -37,7 +37,6 @@ export function useRecipeConfig() {
       setCategoryTypes(types || []);
       return { success: true, types };
     } catch (error) {
-      console.error('[useRecipeConfig] Erro ao carregar tipos de categoria:', error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar os tipos de categoria.",
@@ -67,7 +66,6 @@ export function useRecipeConfig() {
       }
       return { success: true, userData };
     } catch (error) {
-      console.error('[useRecipeConfig] Erro ao carregar configuração do usuário:', error);
       return { success: false, error };
     }
   }, [updateConfig]);
@@ -110,7 +108,6 @@ export function useRecipeConfig() {
       
       return { success: true };
     } catch (error) {
-      console.error('[useRecipeConfig] Erro ao salvar configurações:', error);
       toast({
         title: "Erro ao salvar",
         description: "Não foi possível salvar suas configurações.",
@@ -149,12 +146,6 @@ export function useRecipeConfig() {
     setConfigSaving(true);
     
     try {
-      console.log('[useRecipeConfig] Iniciando salvamento da receita:', {
-        id: recipeData.id,
-        name: recipeData.name,
-        hasId: !!recipeData.id
-      });
-
       // Preparar dados da receita para salvamento (sanitizar undefined values)
       const recipeToSave = {
         name: recipeData.name || '',
@@ -177,16 +168,10 @@ export function useRecipeConfig() {
       // Recursively remove undefined values to prevent Firebase errors
       const sanitizedRecipe = removeUndefined(recipeToSave);
 
-      console.log('💾 [CONFIG-SAVE-DEBUG] portion_cost incluído nos dados:', sanitizedRecipe.portion_cost);
-      console.log('💾 [CONFIG-SAVE-DEBUG] cuba_cost incluído nos dados:', sanitizedRecipe.cuba_cost);
-      console.log('💾 [CONFIG-SAVE-DEBUG] cost_per_kg_yield:', sanitizedRecipe.cost_per_kg_yield);
-      console.log('💾 [CONFIG-SAVE-DEBUG] cuba_weight:', sanitizedRecipe.cuba_weight);
-
       let result;
       
       if (recipeData.id) {
         // Atualizar receita existente
-        console.log('[useRecipeConfig] Atualizando receita existente:', recipeData.id);
         result = await Recipe.update(recipeData.id, sanitizedRecipe);
         
         toast({
@@ -195,7 +180,6 @@ export function useRecipeConfig() {
         });
       } else {
         // Criar nova receita
-        console.log('[useRecipeConfig] Criando nova receita');
         result = await Recipe.create(sanitizedRecipe);
         
         toast({
@@ -204,12 +188,9 @@ export function useRecipeConfig() {
         });
       }
 
-      console.log('[useRecipeConfig] Receita salva com sucesso:', result);
       return { success: true, recipe: result };
       
     } catch (error) {
-      console.error('[useRecipeConfig] Erro ao salvar receita:', error);
-      
       toast({
         title: "Erro ao salvar",
         description: "Não foi possível salvar a receita: " + error.message,

@@ -9,17 +9,14 @@ export const calculateWeekDates = (weekNumber, year) => {
 
 // PDF generation functions (placeholder implementations)
 export const exportRecipePDF = async (recipe) => {
-  console.warn('exportRecipePDF not implemented');
   return { success: false, error: 'Function not implemented' };
 };
 
 export const generateRecipePDF = async (recipe) => {
-  console.warn('generateRecipePDF not implemented');
   return { success: false, error: 'Function not implemented' };
 };
 
 export const generateSimplifiedRecipePDF = async (recipe) => {
-  console.warn('generateSimplifiedRecipePDF not implemented');
   return { success: false, error: 'Function not implemented' };
 };
 
@@ -55,12 +52,10 @@ export const generatePeriodReport = async (data) => {
 
 // Import functions (placeholder implementations)
 export const importPriceHistory = async (data) => {
-  console.warn('importPriceHistory not implemented');
   return { success: false, error: 'Function not implemented' };
 };
 
 export const importIngredients = async (data) => {
-  console.warn('importIngredients not implemented');
   return { success: false, error: 'Function not implemented' };
 };
 

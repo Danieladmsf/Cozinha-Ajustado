@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 // GET /api/category-tree - Buscar categorias da árvore
 export async function GET(request) {
   try {
-    console.log('[API] Getting CategoryTree...');
     
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
@@ -18,7 +17,6 @@ export async function GET(request) {
       );
     }
     
-    console.log(`[API] Found ${categories.length} categories`);
     
     return NextResponse.json(categories);
     
@@ -35,7 +33,6 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const categoryData = await request.json();
-    console.log('[API] Creating category:', categoryData);
     
     const newCategory = await CategoryTree.create(categoryData);
     
@@ -64,7 +61,6 @@ export async function PUT(request) {
     }
     
     const categoryData = await request.json();
-    console.log('[API] Updating category:', id, categoryData);
     
     const updatedCategory = await CategoryTree.update(id, categoryData);
     

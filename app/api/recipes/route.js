@@ -12,7 +12,6 @@ export async function GET(request) {
     
     if (id) {
       // Get single recipe by ID
-      console.log(`[API] Getting recipe by ID: ${id}`);
       const recipe = await Recipe.getById(id);
       
       if (!recipe) {
@@ -28,7 +27,6 @@ export async function GET(request) {
       });
     } else {
       // Get all recipes
-      console.log('[API] Getting all recipes');
       const recipes = await Recipe.getAll();
       
       return Response.json({ 
@@ -49,15 +47,10 @@ export async function POST(request) {
   try {
     const data = await request.json();
     
-    console.log('[API] Creating new recipe');
-    console.log('[API] Data received:', data);
-    console.log('[API] name_complement:', data.name_complement);
     
     // Create new recipe
     const savedRecipe = await Recipe.create(data);
     
-    console.log('[API] Recipe created successfully:', savedRecipe.id);
-    console.log('[API] name_complement saved:', savedRecipe.name_complement);
     
     return Response.json({ 
       success: true, 
@@ -86,15 +79,10 @@ export async function PUT(request) {
     
     const data = await request.json();
     
-    console.log(`[API] Updating recipe ${id}`);
-    console.log('[API] Data received:', data);
-    console.log('[API] name_complement:', data.name_complement);
     
     // Update recipe
     const updatedRecipe = await Recipe.update(id, data);
     
-    console.log('[API] Recipe updated successfully');
-    console.log('[API] name_complement updated:', updatedRecipe.name_complement);
     
     return Response.json({ 
       success: true, 
@@ -121,12 +109,10 @@ export async function DELETE(request) {
       }, { status: 400 });
     }
     
-    console.log(`[API] Deleting recipe ${id}`);
     
     // Delete recipe
     await Recipe.delete(id);
     
-    console.log('[API] Recipe deleted successfully');
     
     return Response.json({ 
       success: true, 

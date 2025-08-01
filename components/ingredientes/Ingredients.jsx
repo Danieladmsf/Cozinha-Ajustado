@@ -71,7 +71,6 @@ export default function Ingredients() {
     try {
       setLoading(true);
       setError(null);
-      console.log('[Ingredients] Starting ingredients load...');
 
       // Carregar apenas ingredientes unificados com timeout
       const timeoutPromise = new Promise((_, reject) =>
@@ -84,7 +83,6 @@ export default function Ingredients() {
       });
 
       const allIngredients = await Promise.race([loadPromise, timeoutPromise]);
-      console.log('[Ingredients] Loaded', allIngredients?.length || 0, 'ingredients from database');
 
       // Processar ingredientes
       const processedIngredients = (allIngredients || []).map(ingredient => ({
@@ -97,7 +95,6 @@ export default function Ingredients() {
 
       // Filtrar ingredientes ativos
       const activeIngredients = processedIngredients.filter(ing => ing.active !== false);
-      console.log('[Ingredients] Filtered to', activeIngredients.length, 'active ingredients');
 
       setIngredients(activeIngredients);
       setStats({
@@ -111,7 +108,6 @@ export default function Ingredients() {
         ).length
       });
       
-      console.log('[Ingredients] Data load completed successfully');
 
     } catch (err) {
       console.error('[Ingredients] Critical error loading ingredients:', err);
@@ -121,7 +117,6 @@ export default function Ingredients() {
       setStats({ total: 0, active: 0, traditional: 0, commercial: 0 });
     } finally {
       setLoading(false);
-      console.log('[Ingredients] Loading state set to false');
     }
   };
 

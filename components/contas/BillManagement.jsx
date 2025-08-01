@@ -492,7 +492,6 @@ export default function BillManagement() {
       }
       
       // Lógica de salvamento de pagamento removida
-      console.log('Dados de pagamento preparados:', paymentRecord);
       
       // Atualize imediatamente o estado local
       setMonthlyBills(prev => prev.map(b => {
@@ -545,7 +544,6 @@ export default function BillManagement() {
         };
         
         // Lógica de criação/exclusão removida
-        console.log('Dados de conta variável preparados:', variableBillData);
       }
       
       // Recarregar dados

@@ -17,7 +17,7 @@
   .print\\:break-after-page * {
     visibility: visible !important;
     -webkit-print-color-adjust: exact;
-    color-adjust: exact;
+    print-color-adjust: exact;
   }
   
   /* Ocultar menu lateral, navegação e outros elementos da UI */

@@ -151,14 +151,6 @@ export const syncClientOrderToKitchen = async (clientOrderData, customer, recipe
     // Criar notificação para a cozinha (pode ser implementado depois)
     const notification = createKitchenNotification(savedOrder, customer);
     
-    // Log para auditoria
-    console.log(`[OrderSync] Pedido sincronizado: Cliente ${customer.name}, ID ${savedOrder.id}`, {
-      orderId: savedOrder.id,
-      customerId: customer.id,
-      itemCount: savedOrder.items?.length,
-      totalAmount: savedOrder.total_amount,
-      notification
-    });
 
     return {
       success: true,
@@ -167,7 +159,6 @@ export const syncClientOrderToKitchen = async (clientOrderData, customer, recipe
     };
 
   } catch (error) {
-    console.error("[OrderSync] Erro na sincronização:", error);
     return {
       success: false,
       error: error.message
@@ -223,7 +214,6 @@ export const getClientOrders = async (customerId, filters = {}) => {
     }));
 
   } catch (error) {
-    console.error("[OrderSync] Erro ao buscar pedidos do cliente:", error);
     throw error;
   }
 };

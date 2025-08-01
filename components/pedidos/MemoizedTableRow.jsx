@@ -4,14 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-// Função de log específica para MemoizedTableRow
-const debugLog = (context, data) => {
-  console.log({
-    timestamp: new Date().toISOString(),
-    context,
-    ...data
-  });
-};
+// Debug logging removed for production cleanup
 
 const MemoizedTableRow = ({
   item,

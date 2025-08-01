@@ -344,7 +344,7 @@ export class RecipeCalculator {
 
   static calculateRecipeMetrics(recipeData, preparationsData, debug = false) {
     RecipeCalculator.DEBUG_MODE = debug;
-    this.log('🎯 ========== INICIANDO CÁLCULO COM LÓGICA DE MONTAGEM ==========');
+    this.log('========== INICIANDO CÁLCULO COM LÓGICA DE MONTAGEM ==========');
 
     const updatedRecipe = { ...recipeData };
     const updatedPreparations = JSON.parse(JSON.stringify(preparationsData));
@@ -355,12 +355,12 @@ export class RecipeCalculator {
     );
 
     if (!montagemEtapa) {
-      this.log('⚠️ Nenhuma etapa de montagem encontrada - usando lógica padrão');
+      this.log('Nenhuma etapa de montagem encontrada - usando lógica padrão');
       return this.calculateWithoutAssembly(updatedRecipe, updatedPreparations);
     }
 
     // PASSO 1: Calcular custos e pesos das etapas normais PRIMEIRO
-    this.log('📊 ========== CALCULANDO ETAPAS NORMAIS PRIMEIRO ==========');
+    this.log('========== CALCULANDO ETAPAS NORMAIS PRIMEIRO ==========');
     
     let custoTotalConvertido = 0;
     let pesoTotalBrutoConvertido = 0;
@@ -372,7 +372,7 @@ export class RecipeCalculator {
     );
 
     etapasSemMontagem.forEach((prep, prepIndex) => {
-      this.log(`\n📊 Calculando etapa ${prepIndex + 1}: "${prep.title}"`);
+      this.log(`\nCalculando etapa ${prepIndex + 1}: "${prep.title}"`);
       
       let pesoBrutoEtapa = 0;
       let pesoRendimentoEtapa = 0;
@@ -380,20 +380,20 @@ export class RecipeCalculator {
 
       if (prep.ingredients && prep.ingredients.length > 0) {
         prep.ingredients.forEach((ing, ingIdx) => {
-          this.log(`  🥕 Processando ingrediente ${ingIdx + 1}: ${ing.name}`);
+          this.log(`  Processando ingrediente ${ingIdx + 1}: ${ing.name}`);
           
           // CORREÇÃO: Garantir que quantity é número
           const quantityOriginal = this.parseNumericValue(ing.quantity || 0);
           const precoUnitario = this.parseNumericValue(ing.current_price || ing.unit_price || 0);
           
-          this.log(`    📊 Quantity: ${quantityOriginal}kg, Preço: R$ ${precoUnitario}`);
+          this.log(`    Quantity: ${quantityOriginal}kg, Preço: R$ ${precoUnitario}`);
 
           // Calcular custo do ingrediente
           const custoIngrediente = quantityOriginal * precoUnitario;
           ing.total_cost = custoIngrediente;
           ing.unit_price = precoUnitario;
 
-          this.log(`    💰 Custo calculado: R$ ${custoIngrediente.toFixed(2)}`);
+          this.log(`    Custo calculado: R$ ${custoIngrediente.toFixed(2)}`);
 
           // CORREÇÃO: Calcular peso final baseado nos processos
           let pesoFinal = quantityOriginal; // Peso inicial
@@ -414,7 +414,7 @@ export class RecipeCalculator {
               // Para arroz, aplicar fator de expansão (arroz dobra de volume quando cozido)
               if (ing.name && ing.name.toLowerCase().includes('arroz')) {
                 ing.weight_cooked = quantityOriginal * 2; // Arroz dobra quando cozido
-                this.log(`    🍚 Arroz detectado - aplicando fator de expansão 2x: ${ing.weight_cooked}kg`);
+                this.log(`    Arroz detectado - aplicando fator de expansão 2x: ${ing.weight_cooked}kg`);
               } else {
                 // Para outros ingredientes, usar 100% (sem perda)
                 ing.weight_cooked = pesoPreCoccao;
@@ -433,7 +433,7 @@ export class RecipeCalculator {
             pesoFinal = this.parseNumericValue(ing.weight_portioned);
           }
 
-          this.log(`    ⚖️ Peso inicial: ${quantityOriginal}kg → Peso final: ${pesoFinal}kg`);
+          this.log(`    Peso inicial: ${quantityOriginal}kg → Peso final: ${pesoFinal}kg`);
 
           pesoBrutoEtapa += quantityOriginal;
           pesoRendimentoEtapa += pesoFinal;
@@ -445,7 +445,7 @@ export class RecipeCalculator {
       prep.total_yield_weight_prep = pesoRendimentoEtapa;
       prep.total_cost_prep = custoEtapa;
 
-      this.log(`  ✅ Totais da etapa "${prep.title}":`, {
+      this.log(`  Totais da etapa "${prep.title}":`, {
         peso_bruto: pesoBrutoEtapa,
         peso_rendimento: pesoRendimentoEtapa,
         custo: custoEtapa
@@ -458,7 +458,7 @@ export class RecipeCalculator {
     });
 
     // PASSO 2: Processar etapa de montagem
-    this.log('\n🏗️ ========== PROCESSANDO ETAPA DE MONTAGEM ==========');
+    this.log('\n========== PROCESSANDO ETAPA DE MONTAGEM ==========');
     
     // Encontrar peso alvo da montagem
     let pesoAlvoMontagem = this.parseNumericValue(montagemEtapa.assembly_config?.total_weight);
@@ -468,13 +468,13 @@ export class RecipeCalculator {
       pesoAlvoMontagem = montagemEtapa.sub_components.reduce((total, sc) => {
         return total + this.parseNumericValue(sc.assembly_weight_kg || 0);
       }, 0);
-      this.log(`🔧 Peso da montagem calculado automaticamente a partir dos subcomponentes: ${pesoAlvoMontagem}kg`);
+      this.log(`Peso da montagem calculado automaticamente a partir dos subcomponentes: ${pesoAlvoMontagem}kg`);
     }
 
     // Se ainda é 0, usar o peso total de rendimento das etapas anteriores
     if (pesoAlvoMontagem === 0) {
       pesoAlvoMontagem = pesoTotalRendimentoConvertido;
-      this.log(`🔧 Usando peso total das etapas anteriores como alvo para montagem: ${pesoAlvoMontagem}kg`);
+      this.log(`Usando peso total das etapas anteriores como alvo para montagem: ${pesoAlvoMontagem}kg`);
     }
 
     // Processar montagem
@@ -497,14 +497,14 @@ export class RecipeCalculator {
           sc.total_cost = custoProporcional;
           custoMontagem += custoProporcional;
           
-          this.log(`📦 Componente ${scIdx + 1} (${sc.name}):`, {
+          this.log(`Componente ${scIdx + 1} (${sc.name}):`, {
             peso: pesoMontagem,
             custo: custoProporcional,
             proporcao: proporcao
           });
         } else {
           sc.total_cost = 0;
-          this.log(`⚠️ Etapa fonte não encontrada ou sem custo para: ${sc.name}`);
+          this.log(`Etapa fonte não encontrada ou sem custo para: ${sc.name}`);
         }
       });
       
@@ -522,8 +522,8 @@ export class RecipeCalculator {
     const cubaWeightNumeric = this.parseNumericValue(updatedRecipe.cuba_weight);
     updatedRecipe.cuba_cost = cubaWeightNumeric * updatedRecipe.cost_per_kg_yield;
 
-    this.log('\n🎉 ========== CÁLCULO FINALIZADO ==========');
-    this.log('📊 Métricas finais da receita:', {
+    this.log('\n========== CÁLCULO FINALIZADO ==========');
+    this.log('Métricas finais da receita:', {
       total_weight: updatedRecipe.total_weight,
       yield_weight: updatedRecipe.yield_weight,
       total_cost: updatedRecipe.total_cost,
@@ -537,7 +537,7 @@ export class RecipeCalculator {
 
   // Método auxiliar para casos sem montagem (lógica antiga)
   static calculateWithoutAssembly(updatedRecipe, updatedPreparations) {
-    this.log('📊 Calculando sem etapa de montagem (lógica padrão)');
+    this.log('Calculando sem etapa de montagem (lógica padrão)');
     
     let recipeTotalRawWeight = 0;
     let recipeTotalYieldWeight = 0;
@@ -605,11 +605,11 @@ export class RecipeCalculator {
     updatedRecipe.cost_per_kg_yield = recipeTotalYieldWeight > 0 ? recipeTotalCost / recipeTotalYieldWeight : 0;
 
     // CRITICAL: Preserve original cuba_weight from user input, do not auto-set or overwrite.
-    this.log('🔒 Mantendo cuba_weight original do usuário (em calculateWithoutAssembly):', updatedRecipe.cuba_weight);
+    this.log('Mantendo cuba_weight original do usuário (em calculateWithoutAssembly):', updatedRecipe.cuba_weight);
     const cubaWeightNumeric = this.parseNumericValue(updatedRecipe.cuba_weight);
     updatedRecipe.cuba_cost = cubaWeightNumeric * updatedRecipe.cost_per_kg_yield;
 
-    this.log('🎉 Métricas finais da receita (sem montagem):', {
+    this.log('Métricas finais da receita (sem montagem):', {
       total_weight: updatedRecipe.total_weight,
       yield_weight: updatedRecipe.yield_weight,
       total_cost: updatedRecipe.total_cost,

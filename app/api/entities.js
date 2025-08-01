@@ -20,13 +20,10 @@ const createEntity = (collectionName) => {
     // Get all documents
     getAll: async () => {
       try {
-        console.log(`[Firebase] Getting all documents from ${collectionName}...`);
         const querySnapshot = await getDocs(collection(db, collectionName));
         const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log(`[Firebase] Successfully loaded ${docs.length} documents from ${collectionName}`);
         return docs;
       } catch (error) {
-        console.error(`[Firebase] Error getting documents from ${collectionName}:`, error);
         // Rethrow the error so calling code can handle it
         throw new Error(`Failed to load data from ${collectionName}: ${error.message}`);
       }
@@ -35,48 +32,15 @@ const createEntity = (collectionName) => {
     // Alias for getAll (for compatibility)
     list: async () => {
       try {
-        console.log(`[Firebase] Listing all documents from ${collectionName}...`);
-        console.log(`[Firebase] Database instance:`, db ? 'Connected' : 'Not connected');
-        console.log(`[Firebase] Collection path: ${collectionName}`);
-        
         const querySnapshot = await getDocs(collection(db, collectionName));
-        console.log(`[Firebase] Query executed successfully for ${collectionName}`);
-        console.log(`[Firebase] QuerySnapshot empty:`, querySnapshot.empty);
-        console.log(`[Firebase] QuerySnapshot size:`, querySnapshot.size);
         
         const docs = querySnapshot.docs.map(doc => {
           const data = { id: doc.id, ...doc.data() };
-          if (collectionName === 'Recipe') {
-            console.log(`[Firebase-Recipe] Document ${doc.id}:`, {
-              name: data.name,
-              active: data.active,
-              category: data.category,
-              cost_per_kg_yield: data.cost_per_kg_yield,
-              container_type: data.container_type,
-              cuba_cost: data.cuba_cost,
-              cuba_weight: data.cuba_weight
-            });
-            console.log(`[Firebase-Recipe] ALL FIELDS for ${doc.id}:`, data);
-          }
           return data;
         });
         
-        console.log(`[Firebase] Successfully listed ${docs.length} documents from ${collectionName}`);
-        
-        if (collectionName === 'Recipe') {
-          console.log(`[Firebase-Recipe] Active recipes:`, docs.filter(r => r.active !== false).length);
-          console.log(`[Firebase-Recipe] Sample recipe data:`, docs[0]);
-        }
-        
-        
         return docs;
       } catch (error) {
-        console.error(`[Firebase] Error listing documents from ${collectionName}:`, error);
-        console.error(`[Firebase] Error details:`, {
-          code: error.code,
-          message: error.message,
-          stack: error.stack
-        });
         // Rethrow the error so calling code can handle it
         throw new Error(`Failed to list data from ${collectionName}: ${error.message}`);
       }
@@ -98,14 +62,11 @@ const createEntity = (collectionName) => {
           };
         }
         
-        console.log(`[Firebase] Getting document ${id} from ${collectionName}...`);
         const docRef = doc(db, collectionName, id);
         const docSnap = await getDoc(docRef);
         const result = docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
-        console.log(`[Firebase] Document ${id} from ${collectionName}:`, result ? 'found' : 'not found');
         return result;
       } catch (error) {
-        console.error(`[Firebase] Error getting document ${id} from ${collectionName}:`, error);
         throw new Error(`Failed to get document ${id} from ${collectionName}: ${error.message}`);
       }
     },
@@ -139,17 +100,14 @@ const createEntity = (collectionName) => {
 
     // Delete document
     delete: async (id) => {
-      console.log(`[Firebase] Deleting document ${id} from ${collectionName}...`);
       const docRef = doc(db, collectionName, id);
       await deleteDoc(docRef);
-      console.log(`[Firebase] Successfully deleted document ${id} from ${collectionName}`);
       return { id, deleted: true };
     },
 
     // Query with filters
     query: async (filters = [], orderByField = null, limitCount = null) => {
       try {
-        console.log(`[Firebase] Querying ${collectionName} with filters:`, filters);
         let q = collection(db, collectionName);
         
         if (filters.length > 0) {
@@ -167,10 +125,8 @@ const createEntity = (collectionName) => {
 
         const querySnapshot = await getDocs(q);
         const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log(`[Firebase] Query returned ${docs.length} documents from ${collectionName}`);
         return docs;
       } catch (error) {
-        console.error(`[Firebase] Error querying ${collectionName}:`, error);
         throw new Error(`Failed to query ${collectionName}: ${error.message}`);
       }
     }
@@ -229,7 +185,6 @@ export const User = {
       
       return { id: userId, ...newUserData };
     } catch (error) {
-      console.error('Erro ao criar usuário com ID específico:', error);
       throw new Error('Falha ao criar usuário: ' + error.message);
     }
   },
@@ -255,7 +210,6 @@ export const User = {
       const userData = await UserEntity.getById(userId);
       return userData;
     } catch (error) {
-      console.error('Erro ao carregar dados do usuário:', error);
       return null;
     }
   },
@@ -300,7 +254,6 @@ export const User = {
         message: 'Dados do usuário salvos com sucesso no Firestore'
       };
     } catch (error) {
-      console.error('Erro ao salvar dados do usuário:', error);
       throw new Error('Falha ao salvar configurações: ' + error.message);
     }
   }

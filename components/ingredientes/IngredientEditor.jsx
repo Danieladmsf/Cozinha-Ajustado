@@ -267,7 +267,6 @@ export default function IngredientEditor() {
       const ingredient = await Ingredient.get(id);
       
       if (!ingredient) {
-        console.warn("⚠️ Ingrediente não encontrado para ID:", id);
         setError("Ingrediente não encontrado. Redirecionando para criação de novo ingrediente.");
         router.push('/ingredienteditor?id=new');
         resetFormForNewIngredient();
@@ -314,7 +313,7 @@ export default function IngredientEditor() {
       setCurrentIngredientId(id);
 
     } catch (err) {
-      console.error('[IngredientEditor] ❌ Erro geral ao carregar ingrediente:', err);
+      console.error('[IngredientEditor] Erro geral ao carregar ingrediente:', err);
       setError('Erro ao carregar ingrediente: ' + err.message);
       router.push('/ingredienteditor?id=new');
       resetFormForNewIngredient();
@@ -432,7 +431,6 @@ export default function IngredientEditor() {
 
 
       // Lógica de salvamento removida
-      console.log('Dados preparados para salvamento:', ingredientDataToSave);
 
     } catch (err) {
       console.error("Erro ao salvar:", err);

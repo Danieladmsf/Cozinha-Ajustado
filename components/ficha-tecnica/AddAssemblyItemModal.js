@@ -59,18 +59,6 @@ const AddAssemblyItemModal = ({
     onClose();
   };
 
-  // Debug detalhado - sempre que modal abre ou ingredients mudam
-  if (isOpen) {
-    console.log('🔍 [MODAL DEBUG] Estado atual:', {
-      modalAberto: isOpen,
-      ingredients: ingredients,
-      ingredientsType: typeof ingredients,
-      ingredientsLength: ingredients?.length || 0,
-      ingredientsIsArray: Array.isArray(ingredients),
-      primeirosIngredientes: ingredients?.slice(0, 3),
-      searchTerm: searchTerm
-    });
-  }
 
   const filteredPreviousProcesses = (preparationsData || [])
     .filter((p, idx) => {
@@ -99,12 +87,6 @@ const AddAssemblyItemModal = ({
   // Filtrar ingredientes com busca inteligente
   const filteredIngredients = (ingredients || [])
     .filter((ingredient, index) => {
-      // Debug apenas do primeiro ingrediente para verificar estrutura
-      if (index === 0 && ingredients?.length > 0) {
-        console.log('🔍 [DEBUG] Primeiro ingrediente:', ingredient);
-        console.log('🔍 [DEBUG] Campos disponíveis:', Object.keys(ingredient));
-        console.log('🔍 [DEBUG] Campo active:', ingredient.active, typeof ingredient.active);
-      }
       
       // Apenas ingredientes ativos (verificar se active === false especificamente)
       if (ingredient.active === false) return false;
@@ -121,13 +103,6 @@ const AddAssemblyItemModal = ({
       return true;
     });
 
-  // Debug adicional após filteredIngredients estar definido
-  if (isOpen && process.env.NODE_ENV === 'development') {
-    console.log('🔍 [MODAL] Ingredientes filtrados:', {
-      filteredLength: filteredIngredients?.length || 0,
-      primeiros3Filtrados: filteredIngredients?.slice(0, 3)
-    });
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>

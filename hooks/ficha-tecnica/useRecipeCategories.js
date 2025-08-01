@@ -70,7 +70,6 @@ export function useRecipeCategories() {
       }
 
       if (filteredCategories.length === 0) {
-        console.warn('[useRecipeCategories] Nenhuma categoria encontrada para o tipo:', categoryType);
         // Fallback para categorias padrão
         const defaultCategories = [
           { id: 'entrada', name: 'Entrada', value: 'entrada' },
@@ -97,7 +96,6 @@ export function useRecipeCategories() {
       setCategories(processedCategories);
 
     } catch (error) {
-      console.error('[useRecipeCategories] Erro ao carregar categorias:', error);
       setError(error.message);
       
       // Fallback para categorias padrão em caso de erro

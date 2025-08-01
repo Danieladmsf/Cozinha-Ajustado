@@ -122,8 +122,6 @@ export const useMenuHelpers = () => {
   }, []);
 
   const generateCategoryStyles = useCallback((categoryColor) => {
-    console.log('🎨 [generateCategoryStyles] Gerando estilos para cor:', categoryColor);
-    
     const lighterColor = `${categoryColor}22`;
     const darkColor = `${categoryColor}99`;
     
@@ -137,8 +135,6 @@ export const useMenuHelpers = () => {
         color: categoryColor
       }
     };
-    
-    console.log('🎨 [generateCategoryStyles] Estilos gerados:', styles);
     
     return styles;
   }, []);

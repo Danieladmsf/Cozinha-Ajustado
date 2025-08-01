@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 // GET /api/ingredients - Buscar ingredientes
 export async function GET(request) {
   try {
-    console.log('[API] Getting ingredients...');
     
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search');
@@ -27,7 +26,6 @@ export async function GET(request) {
       );
     }
     
-    console.log(`[API] Found ${ingredients.length} ingredients`);
     
     return NextResponse.json(ingredients);
     
@@ -44,7 +42,6 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const ingredientData = await request.json();
-    console.log('[API] Creating ingredient:', ingredientData);
     
     const newIngredient = await Ingredient.create(ingredientData);
     
@@ -73,7 +70,6 @@ export async function PUT(request) {
     }
     
     const ingredientData = await request.json();
-    console.log('[API] Updating ingredient:', id, ingredientData);
     
     const updatedIngredient = await Ingredient.update(id, ingredientData);
     

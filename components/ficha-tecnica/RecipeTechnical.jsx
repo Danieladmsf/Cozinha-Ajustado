@@ -230,11 +230,9 @@ export default function RecipeTechnical() {
     
     try {
       setLoading(true);
-      console.log('Carregando receita por ID:', recipeId);
       
       const result = await loadRecipe(recipeId);
       if (result.success) {
-        console.log('Receita carregada com sucesso:', result.recipe);
         
         // Atualizar estados com os dados da receita (como no Editar Cliente)
         setRecipeData(result.recipe);
@@ -306,7 +304,6 @@ export default function RecipeTechnical() {
         
         // Atualizar dados locais com os dados retornados do servidor
         if (result.recipe) {
-          console.log('Atualizando recipeData com dados retornados do servidor:', result.recipe);
           setRecipeData(prev => ({
             ...prev,
             ...result.recipe
@@ -314,7 +311,6 @@ export default function RecipeTechnical() {
           
           // Se é uma nova receita (não tinha ID antes)
           if (result.recipe.id && !recipeData.id) {
-            console.log('Nova receita criada com ID:', result.recipe.id);
             setCurrentRecipeId(result.recipe.id);
             setIsEditing(true);
           }
@@ -323,15 +319,12 @@ export default function RecipeTechnical() {
         // Atualizar lista de receitas na busca
         try {
           await refreshRecipes();
-          console.log('Lista de receitas atualizada após salvamento');
           
           // Atualizar campo de busca se estivermos editando uma receita
           if (isEditing && result.recipe?.name) {
             setRecipeSearchQuery(result.recipe.name);
-            console.log('Campo de busca atualizado com novo nome:', result.recipe.name);
           }
         } catch (error) {
-          console.warn('Erro ao atualizar lista de receitas:', error);
         }
       }
     } catch (error) {
@@ -352,33 +345,17 @@ export default function RecipeTechnical() {
 
   // ==== FUNÇÃO DE RECÁLCULO AUTOMÁTICO ====
   const recalculateRecipeMetrics = useCallback(() => {
-    console.log('🟢 [RECIPE-CALC] ==================== RECALCULAR MÉTRICAS ====================');
-    console.log('🟢 [RECIPE-CALC] Dados de entrada:', {
-      preparationsCount: preparationsData?.length || 0,
-      recipeHasName: !!recipeData?.name,
-      recipeHasId: !!recipeData?.id,
-      currentMetrics: {
-        total_weight: recipeData?.total_weight,
-        yield_weight: recipeData?.yield_weight,
-        total_cost: recipeData?.total_cost,
-        cuba_weight: recipeData?.cuba_weight
-      }
-    });
-    
     // Verificar se é uma chamada válida (evitar execução com dados vazios na inicialização)
     const hasValidData = (preparationsData && preparationsData.length > 0) || 
                          (recipeData && (recipeData.name || recipeData.id));
     
     if (!hasValidData) {
-      console.log('🟡 [RECIPE-CALC] Dados ainda não carregados, ignorando recálculo');
       return;
     }
     
     try {
       // Se não há preparações, zerar as métricas
       if (!preparationsData || preparationsData.length === 0) {
-        console.log('🔴 [RECIPE-CALC] Nenhuma preparação encontrada, zerando métricas');
-        
         const hasCurrentMetrics = 
           (recipeData?.total_weight || 0) > 0 ||
           (recipeData?.total_cost || 0) > 0 ||
@@ -386,8 +363,6 @@ export default function RecipeTechnical() {
           (recipeData?.cost_per_kg_yield || 0) > 0 ||
           (recipeData?.yield_weight || 0) > 0 ||
           (recipeData?.cuba_weight || 0) > 0;
-
-        console.log('🟡 [RECIPE-CALC] Tem métricas atuais para limpar:', hasCurrentMetrics);
 
         if (hasCurrentMetrics && recipeData) {
           setRecipeData(prev => ({
@@ -406,30 +381,9 @@ export default function RecipeTechnical() {
         return;
       }
 
-      console.log('🟡 [RECIPE-CALC] Processando preparações:', preparationsData.map((prep, index) => ({
-        index,
-        title: prep.title,
-        ingredients: prep.ingredients?.length || 0,
-        subComponents: prep.sub_components?.length || 0,
-        processType: prep.process_type
-      })));
-
       // Calcular todas as métricas usando nossa nova calculadora (incluindo métricas das preparações)
       const metricsResult = updateRecipeMetrics(preparationsData, recipeData, recipeData);
       const newMetrics = metricsResult;
-      
-      console.log('🟡 [RECIPE-CALC] Métricas calculadas:', {
-        antigas: {
-          total_weight: recipeData.total_weight,
-          total_cost: recipeData.total_cost,
-          cost_per_kg_raw: recipeData.cost_per_kg_raw
-        },
-        novas: {
-          total_weight: newMetrics.total_weight,
-          total_cost: newMetrics.total_cost,
-          cost_per_kg_raw: newMetrics.cost_per_kg_raw
-        }
-      });
       
       // Atualizar apenas se houve mudança significativa
       const hasSignificantChange = 
@@ -440,10 +394,7 @@ export default function RecipeTechnical() {
         (newMetrics.weight_field_name !== recipeData.weight_field_name) ||
         (newMetrics.cost_field_name !== recipeData.cost_field_name);
 
-      console.log('🟡 [RECIPE-CALC] Tem mudança significativa:', hasSignificantChange);
-
       if (hasSignificantChange) {
-        console.log('🟢 [RECIPE-CALC] Atualizando estado da receita');
         
         setRecipeData(prev => ({
           ...prev,
@@ -463,60 +414,29 @@ export default function RecipeTechnical() {
         
         // Atualizar também as preparações com as métricas calculadas
         if (metricsResult.updatedPreparations) {
-          console.log('🟢 [RECIPE-CALC] Atualizando preparações com métricas calculadas');
           setPreparationsData(metricsResult.updatedPreparations);
         }
         
         setIsDirty(true);
-      } else {
-        console.log('🟡 [RECIPE-CALC] Nenhuma mudança significativa detectada');
       }
     } catch (error) {
-      console.error('❌ [RECIPE-CALC] Erro ao recalcular métricas:', error);
-      console.error('❌ [RECIPE-CALC] Stack:', error.stack);
+      console.error('Erro ao recalcular métricas:', error);
     }
-    
-    console.log('🟢 [RECIPE-CALC] ==================== FIM DO RECÁLCULO ====================');
   }, [preparationsData, recipeData, setRecipeData, setPreparationsData, setIsDirty]);
 
   // ==== EFFECT PARA DEBUG DOS ESTADOS INICIAIS ====
-  useEffect(() => {
-    console.log('🐛 [DEBUG-MOUNT] Componente RecipeTechnical montado:', {
-      recipeDataExists: !!recipeData,
-      recipeDataKeys: Object.keys(recipeData || {}),
-      preparationsDataExists: !!preparationsData,
-      preparationsLength: preparationsData?.length || 0,
-      isEditing,
-      currentRecipeId,
-      loading,
-      error
-    });
-  }, []); // Executa apenas na montagem
+  // Debug effect removed for production
 
   // ==== EFFECT PARA RECÁLCULO AUTOMÁTICO ====
   useEffect(() => {
-    console.log('🔄 [EFFECT] useEffect de recálculo disparado:', {
-      preparationsLength: preparationsData?.length || 0,
-      recipeDataKeys: Object.keys(recipeData || {}),
-      currentMetrics: {
-        total_weight: recipeData?.total_weight,
-        yield_weight: recipeData?.yield_weight,
-        total_cost: recipeData?.total_cost
-      },
-      timestamp: new Date().toISOString()
-    });
-    
     // Só recalcular se há preparações ou se a receita tem dados relevantes
     const hasPreparations = preparationsData && preparationsData.length > 0;
     const hasRecipeData = recipeData && (recipeData.name || recipeData.id);
     
     if (hasPreparations || hasRecipeData) {
-      console.log('🟢 [EFFECT] Executando recálculo - dados válidos encontrados');
       recalculateRecipeMetrics();
-    } else {
-      console.log('🟡 [EFFECT] Ignorando recálculo - aguardando dados válidos');
     }
-  }, [preparationsData, recalculateRecipeMetrics, recipeData.name, recipeData.id]);
+  }, [preparationsData?.length, recipeData.name, recipeData.id]);
 
   const handleOpenProcessModal = () => {
     openProcessCreatorModal(setIsProcessCreatorOpen, setSelectedProcesses);
@@ -695,12 +615,6 @@ export default function RecipeTechnical() {
       return;
     }
 
-    console.log('🔍 [RECIPE-SELECTION] Receita selecionada:', {
-      id: selectedRecipe.id,
-      name: selectedRecipe.name,
-      hasPreparations: !!selectedRecipe.preparations,
-      preparationsCount: selectedRecipe.preparations?.length || 0
-    });
 
     // Popular dados básicos da receita - usar todos os dados da receita selecionada
     const newRecipeData = {
@@ -724,10 +638,8 @@ export default function RecipeTechnical() {
 
     // Se há dados de preparação, carregá-los também
     if (selectedRecipe.preparations && Array.isArray(selectedRecipe.preparations)) {
-      console.log('🔍 [RECIPE-SELECTION] Carregando preparações:', selectedRecipe.preparations.length);
       setPreparationsData(selectedRecipe.preparations);
     } else {
-      console.log('🔍 [RECIPE-SELECTION] Nenhuma preparação encontrada, limpando array');
       setPreparationsData([]);
     }
 
@@ -738,7 +650,6 @@ export default function RecipeTechnical() {
     
     // Forçar recálculo das métricas após um pequeno delay para garantir que os estados foram atualizados
     setTimeout(() => {
-      console.log('🔍 [RECIPE-SELECTION] Forçando recálculo após seleção da receita');
       recalculateRecipeMetrics();
     }, 100);
   }, [setRecipeData, setPreparationsData, setIsEditing, setCurrentRecipeId, setIsDirty, recalculateRecipeMetrics]);

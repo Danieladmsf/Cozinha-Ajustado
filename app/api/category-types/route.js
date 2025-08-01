@@ -4,11 +4,9 @@ import { NextResponse } from 'next/server';
 // GET /api/category-types - Buscar tipos de categoria
 export async function GET(request) {
   try {
-    console.log('[API] Getting CategoryTypes...');
     
     const categoryTypes = await CategoryType.getAll();
     
-    console.log(`[API] Found ${categoryTypes.length} category types`);
     
     return NextResponse.json(categoryTypes);
     
@@ -25,7 +23,6 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const typeData = await request.json();
-    console.log('[API] Creating category type:', typeData);
     
     const newType = await CategoryType.create(typeData);
     

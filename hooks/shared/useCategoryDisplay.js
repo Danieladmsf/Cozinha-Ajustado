@@ -18,19 +18,11 @@ export const useCategoryDisplay = () => {
         loadMenuConfig()
       ]);
       
-      console.log('🎨 [useCategoryDisplay] Dados carregados:');
-      console.log('📂 Categorias:', categoriesData);
-      console.log('📂 [DETALHADO] Nomes das categorias:', categoriesData?.map(c => ({ id: c.id, name: c.name })));
-      console.log('⚙️ Configuração do menu:', configData);
-      console.log('🌈 Cores por categoria:', configData?.category_colors);
-      console.log('🌈 [DETALHADO] Todas as chaves de cores:', Object.keys(configData?.category_colors || {}));
-      console.log('📋 Ordem das categorias:', configData?.category_order);
-      console.log('📋 [DETALHADO] IDs na ordem:', configData?.category_order);
       
       setCategories(categoriesData || []);
       setMenuConfig(configData);
     } catch (error) {
-      console.error('❌ [useCategoryDisplay] Erro ao carregar dados de categorias:', error);
+      console.error('[useCategoryDisplay] Erro ao carregar dados de categorias:', error);
       setCategories([]);
       setMenuConfig(null);
     } finally {
@@ -41,32 +33,23 @@ export const useCategoryDisplay = () => {
   const loadMenuConfig = async () => {
     try {
       const mockUserId = APP_CONSTANTS.MOCK_USER_ID;
-      console.log('🔍 [useCategoryDisplay] Buscando configuração do menu para usuário:', mockUserId);
       
       const configs = await MenuConfig.query([
         { field: 'user_id', operator: '==', value: mockUserId },
         { field: 'is_default', operator: '==', value: true }
       ]);
       
-      console.log('📋 [useCategoryDisplay] Configurações encontradas:', configs);
-      console.log('📋 [DETALHADO] Todas as configurações:', configs?.map(c => ({
-        id: c.id,
-        is_default: c.is_default,
-        user_id: c.user_id,
-        category_colors_keys: Object.keys(c.category_colors || {}),
-        category_order_length: c.category_order?.length || 0
-      })));
       
       return configs && configs.length > 0 ? configs[0] : null;
     } catch (error) {
-      console.error("❌ [useCategoryDisplay] Erro ao carregar configuração do menu:", error);
+      console.error('[useCategoryDisplay] Erro ao carregar configuração do menu:', error);
       return null;
     }
   };
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, []);
 
   const getCategoryInfo = useCallback((categoryId) => {
     const findCategory = () => {

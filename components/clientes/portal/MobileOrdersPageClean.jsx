@@ -264,7 +264,7 @@ const MobileOrdersPage = ({ customerId }) => {
       const item = { ...updatedItems[index] };
       
       if (field === 'received_quantity') {
-        item.received_quantity = Math.max(0, parseFloat(value) || 0);
+        item.received_quantity = Math.max(0, utilParseQuantity(value) || 0);
         // Atualizar status baseado na quantidade recebida
         if (item.received_quantity === 0) {
           item.status = 'not_received';
@@ -369,7 +369,7 @@ const MobileOrdersPage = ({ customerId }) => {
       const item = { ...updatedItems[index] };
       
       if (field === 'internal_waste_quantity' || field === 'client_returned_quantity') {
-        item[field] = Math.max(0, parseFloat(value) || 0);
+        item[field] = Math.max(0, utilParseQuantity(value) || 0);
       } else {
         item[field] = value;
       }

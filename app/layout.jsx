@@ -23,6 +23,8 @@ import { Button } from "@/components/ui/button";
 import SidebarNav from "@/components/shared/navigation";
 import { Toaster } from "@/components/ui/toaster";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { setupConsoleFilters } from "@/lib/consoleUtils";
+import { addDialogDescriptions, addSROnlyStyles } from "@/lib/dialogDescriptionFixer";
 
 function _getCurrentPage(pathname) {
   if (pathname === "/") return "Dashboard";
@@ -64,6 +66,13 @@ export default function RootLayout({ children }) {
     }
     
     setActiveItem(currentPageName);
+    
+    // Configurar filtros de console apenas em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      setupConsoleFilters();
+      addSROnlyStyles();
+      addDialogDescriptions();
+    }
   }, [pathname, currentPageName]);
 
   const handleMouseEnter = () => {
@@ -104,7 +113,7 @@ export default function RootLayout({ children }) {
             {children}
           </div>
           <Toaster />
-          <SpeedInsights />
+          {process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_DISABLE_SPEED_INSIGHTS && <SpeedInsights />}
         </body>
       </html>
     );

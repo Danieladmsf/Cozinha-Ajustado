@@ -108,7 +108,6 @@ export default function NutritionFoodEditor() {
               }
             }
             
-            console.log("category_name final:", categoryName);
             
             // Preencher form com dados do alimento
             const newFormData = {
@@ -128,8 +127,6 @@ export default function NutritionFoodEditor() {
               description: food.description || ""
             };
             
-            console.log("=== FORM DATA FINAL ===");
-            console.log(newFormData);
             
             setFormData(newFormData);
           }, 100); // Pequeno delay para garantir que o state foi atualizado
@@ -183,11 +180,8 @@ export default function NutritionFoodEditor() {
   };
 
   const handleCategoryChange = (categoryId) => {
-    console.log("=== MUDANÇA DE CATEGORIA ===");
-    console.log("categoryId selecionado:", categoryId);
     
     const selectedCategory = categories.find(c => c.id === categoryId);
-    console.log("Categoria encontrada:", selectedCategory);
     
     setFormData(prev => {
       const newData = {
@@ -195,7 +189,6 @@ export default function NutritionFoodEditor() {
         category_id: categoryId,
         category_name: selectedCategory ? selectedCategory.category : ""
       };
-      console.log("Novo formData:", newData);
       return newData;
     });
   };
@@ -281,10 +274,8 @@ export default function NutritionFoodEditor() {
         dataToSave.saturated_g = formData.saturated_fats.toString();
       }
       
-      console.log("Dados finais para salvar:", dataToSave);
       
       // Lógica de salvamento removida
-      console.log('Dados de alimento preparados:', dataToSave);
       
       // Redirecionar
       router.push('/nutrition');

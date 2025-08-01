@@ -12,8 +12,6 @@ export const useSobrasData = (currentDate) => {
 
   const loadStaticData = useCallback(async () => {
     try {
-      console.log('[SobrasData] Carregando dados estáticos...');
-      
       const [customersData, recipesData] = await Promise.all([
         Customer.list(),
         Recipe.list()
@@ -22,13 +20,8 @@ export const useSobrasData = (currentDate) => {
       setCustomers(customersData || []);
       setRecipes(recipesData || []);
 
-      console.log('[SobrasData] Dados estáticos carregados:', {
-        customers: customersData?.length || 0,
-        recipes: recipesData?.length || 0
-      });
-
     } catch (error) {
-      console.error("Erro ao carregar dados estáticos:", error);
+      // Erro ao carregar dados estáticos
     }
   }, []);
 
@@ -37,8 +30,6 @@ export const useSobrasData = (currentDate) => {
       setLoading(true);
       const { weekNumber, year } = getWeekInfo(date);
       
-      console.log('[SobrasData] Carregando dados da semana:', { weekNumber, year });
-
       const [weeklyMenusData, ordersData, wasteData] = await Promise.all([
         WeeklyMenu.query([
           { field: 'week_number', operator: '==', value: weekNumber },
@@ -58,14 +49,8 @@ export const useSobrasData = (currentDate) => {
       setOrders(ordersData || []);
       setWasteHistory(wasteData || []);
 
-      console.log('[SobrasData] Dados da semana carregados:', {
-        weeklyMenus: weeklyMenusData?.length || 0,
-        orders: ordersData?.length || 0,
-        wasteRecords: wasteData?.length || 0
-      });
-
     } catch (error) {
-      console.error("Erro ao carregar dados da semana:", error);
+      // Erro ao carregar dados da semana
     } finally {
       setLoading(false);
     }
@@ -73,17 +58,11 @@ export const useSobrasData = (currentDate) => {
 
   const loadAllWasteHistory = useCallback(async () => {
     try {
-      console.log('[SobrasData] Carregando histórico completo de sobras...');
-      
       const allWasteData = await OrderWaste.list();
       setWasteHistory(allWasteData || []);
 
-      console.log('[SobrasData] Histórico completo carregado:', {
-        totalWasteRecords: allWasteData?.length || 0
-      });
-
     } catch (error) {
-      console.error("Erro ao carregar histórico de sobras:", error);
+      // Erro ao carregar histórico de sobras
     }
   }, []);
 
@@ -95,7 +74,7 @@ export const useSobrasData = (currentDate) => {
     };
 
     loadInitialData();
-  }, [loadStaticData, loadWeekData, currentDate]);
+  }, [currentDate]);
 
   // Função para recarregar todos os dados
   const refreshAllData = useCallback(async () => {

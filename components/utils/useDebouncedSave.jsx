@@ -62,6 +62,6 @@ export function useDebouncedSave({ onSave, delay = 1500, debugLog }) {
   return {
     debouncedSave,
     saveNow,
-    isDirty: isDirtyRef.current
+    isDirty: () => isDirtyRef.current
   };
 }

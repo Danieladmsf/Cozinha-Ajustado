@@ -96,6 +96,7 @@ const MobileOrdersPage = ({ customerId }) => {
   const [wasteNotes, setWasteNotes] = useState("");
   const [existingWaste, setExistingWaste] = useState(null);
   const [wasteLoading, setWasteLoading] = useState(false);
+  const [weeklyWasteData, setWeeklyWasteData] = useState({});
 
   // Estados para Recebimento
   const [receivingItems, setReceivingItems] = useState([]);
@@ -125,6 +126,7 @@ const MobileOrdersPage = ({ customerId }) => {
   }, [weekStart]);
 
   const [selectedDay, setSelectedDay] = useState(1);
+  
 
   // Carregar pedidos existentes da semana
   const loadExistingOrders = useCallback(async () => {
@@ -156,7 +158,7 @@ const MobileOrdersPage = ({ customerId }) => {
       }
       
     } catch (error) {
-      console.error("Erro ao carregar pedidos existentes:", error);
+      // Erro ao carregar pedidos existentes
     }
   }, [customer, weekNumber, year, selectedDay]);
 
@@ -381,7 +383,6 @@ const MobileOrdersPage = ({ customerId }) => {
 
       setReceivingItems(items);
     } catch (error) {
-      console.error("Erro ao carregar dados de recebimento:", error);
       toast({ variant: "destructive", description: "Erro ao carregar dados de recebimento." });
     } finally {
       setReceivingLoading(false);
@@ -394,7 +395,7 @@ const MobileOrdersPage = ({ customerId }) => {
       const item = { ...updatedItems[index] };
       
       if (field === 'received_quantity') {
-        item.received_quantity = Math.max(0, parseFloat(value) || 0);
+        item.received_quantity = Math.max(0, utilParseQuantity(value) || 0);
         // Atualizar status baseado na quantidade recebida
         if (item.received_quantity === 0) {
           item.status = 'not_received';
@@ -506,7 +507,7 @@ const MobileOrdersPage = ({ customerId }) => {
       const item = { ...updatedItems[index] };
       
       if (field === 'internal_waste_quantity' || field === 'client_returned_quantity') {
-        item[field] = Math.max(0, parseFloat(value) || 0);
+        item[field] = Math.max(0, utilParseQuantity(value) || 0);
       } else {
         item[field] = value;
       }
@@ -587,6 +588,30 @@ const MobileOrdersPage = ({ customerId }) => {
     }
   }, [customer, wasteItems, wasteNotes, existingWaste, weekNumber, year, selectedDay, weekStart, toast]);
 
+  // Carregar dados de waste da semana inteira para histórico
+  const loadWeeklyWasteData = useCallback(async () => {
+    if (!customer) return;
+    
+    try {
+      // Buscar todos os registros de sobra da semana
+      const weeklyWastes = await OrderWaste.query([
+        { field: 'customer_id', operator: '==', value: customer.id },
+        { field: 'week_number', operator: '==', value: weekNumber },
+        { field: 'year', operator: '==', value: year }
+      ]);
+      
+      // Organizar por dia da semana
+      const wasteDataByDay = {};
+      weeklyWastes.forEach(waste => {
+        wasteDataByDay[waste.day_of_week] = waste;
+      });
+      
+      setWeeklyWasteData(wasteDataByDay);
+    } catch (error) {
+      console.error('Erro ao carregar dados de sobra da semana:', error);
+    }
+  }, [customer, weekNumber, year]);
+
   // Carregamento inicial
   useEffect(() => {
     const loadInitialData = async () => {
@@ -654,12 +679,13 @@ const MobileOrdersPage = ({ customerId }) => {
 
     const items = [];
     let uniqueCounter = 0;
+
     Object.entries(menuData).forEach(([categoryId, categoryData]) => {
       // Verificar se categoryData é um array direto (estrutura do Firebase mostrada)
       const itemsArray = Array.isArray(categoryData) ? categoryData : categoryData.items;
       
       if (itemsArray && Array.isArray(itemsArray)) {
-        itemsArray.forEach((item) => {
+        itemsArray.forEach((item, itemIndex) => {
           // Verificar se deve incluir este item baseado em locations
           const itemLocations = item.locations;
           const shouldInclude = !itemLocations || itemLocations.length === 0 || 
@@ -669,6 +695,7 @@ const MobileOrdersPage = ({ customerId }) => {
             const recipe = recipes.find(r => r.id === item.recipe_id && r.active !== false);
             
             if (recipe) {
+
               // Buscar container_type na estrutura correta
               let containerType = "cuba"; // default
               if (recipe.preparations && recipe.preparations.length > 0) {
@@ -728,7 +755,6 @@ const MobileOrdersPage = ({ customerId }) => {
   }, [weeklyMenus, recipes, customer, selectedDay]);
 
   const updateOrderItem = useCallback((uniqueId, field, value) => {
-    console.log('[updateOrderItem] Recebido:', { uniqueId, field, value });
     setCurrentOrder(prev => {
       if (!prev?.items) return prev;
 
@@ -737,18 +763,14 @@ const MobileOrdersPage = ({ customerId }) => {
           const updatedItem = { ...item };
 
           if (field === 'base_quantity') {
-            console.log('[updateOrderItem] Processando base_quantity:', value);
             const baseQuantity = utilParseQuantity(value);
-            console.log('[updateOrderItem] base_quantity após parse:', baseQuantity);
             updatedItem.base_quantity = baseQuantity;
             const percentage = updatedItem.adjustment_percentage || 0;
             const newQuantity = baseQuantity * (1 + (percentage / 100));
             updatedItem.quantity = Math.round(newQuantity * 100) / 100;
             updatedItem.total_price = updatedItem.quantity * (updatedItem.unit_price || 0);
           } else if (field === 'adjustment_percentage') {
-            console.log('[updateOrderItem] Processando adjustment_percentage:', value);
             const percentage = utilParseQuantity(value);
-            console.log('[updateOrderItem] adjustment_percentage após parse:', percentage);
             updatedItem.adjustment_percentage = percentage;
             const baseQuantity = updatedItem.base_quantity || 0;
             const newQuantity = baseQuantity * (1 + (percentage / 100));
@@ -779,6 +801,13 @@ const MobileOrdersPage = ({ customerId }) => {
       loadReceivingData();
     }
   }, [activeTab, customer, selectedDay, weeklyMenus, recipes, existingOrders, loadReceivingData]);
+
+  // Carregar dados de waste da semana quando a aba history for selecionada
+  useEffect(() => {
+    if (activeTab === "history" && customer) {
+      loadWeeklyWasteData();
+    }
+  }, [activeTab, customer, loadWeeklyWasteData]);
 
   // Resetar pedido quando mudar de dia
   useEffect(() => {
@@ -811,22 +840,8 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Inicializar pedido quando itens mudam
   useEffect(() => {
-    // Só criar novo pedido se não existe um pedido salvo para este dia
-    if (orderItems.length > 0 && !currentOrder && !existingOrders[selectedDay]) {
-      const newOrder = {
-        customer_id: customer?.id,
-        customer_name: customer?.name,
-        day_of_week: selectedDay,
-        week_number: weekNumber,
-        year: year,
-        date: format(addDays(weekStart, selectedDay - 1), "yyyy-MM-dd"),
-        total_meals_expected: mealsExpected,
-        general_notes: generalNotes,
-        items: orderItems
-      };
-      setCurrentOrder(newOrder);
-    } else if (existingOrders[selectedDay] && !currentOrder && orderItems.length > 0) {
-      // Se existe pedido salvo mas currentOrder não foi definido, definir agora
+    // Se existe pedido salvo para este dia, usar ele
+    if (existingOrders[selectedDay] && orderItems.length > 0) {
       const existingOrder = existingOrders[selectedDay];
       
       // Atualizar preços dos itens existentes com valores atuais das receitas
@@ -853,8 +868,22 @@ const MobileOrdersPage = ({ customerId }) => {
       setMealsExpected(existingOrder.total_meals_expected || 0);
       setGeneralNotes(existingOrder.general_notes || "");
       setIsEditMode(false);
+    } else if (orderItems.length > 0 && (!currentOrder || currentOrder.day_of_week !== selectedDay)) {
+      // Criar novo pedido se não existe pedido salvo E (não existe currentOrder OU currentOrder é de outro dia)
+      const newOrder = {
+        customer_id: customer?.id,
+        customer_name: customer?.name,
+        day_of_week: selectedDay,
+        week_number: weekNumber,
+        year: year,
+        date: format(addDays(weekStart, selectedDay - 1), "yyyy-MM-dd"),
+        total_meals_expected: mealsExpected,
+        general_notes: generalNotes,
+        items: orderItems
+      };
+      setCurrentOrder(newOrder);
     }
-  }, [orderItems, customer, selectedDay, weekNumber, year, weekStart, mealsExpected, generalNotes, currentOrder, existingOrders]);
+  }, [orderItems, customer, selectedDay, weekNumber, year, weekStart, mealsExpected, generalNotes, existingOrders]);
 
   // Calcular totais e depreciação por devoluções
   const orderTotals = useMemo(() => {
@@ -865,7 +894,11 @@ const MobileOrdersPage = ({ customerId }) => {
       finalAmount: 0
     };
     
-    const totalItems = currentOrder.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    const totalItems = currentOrder.items.reduce((sum, item) => {
+      // Use quantity if available, otherwise use base_quantity as fallback
+      const itemQuantity = item.quantity || item.base_quantity || 0;
+      return sum + itemQuantity;
+    }, 0);
     const totalAmount = currentOrder.items.reduce((sum, item) => sum + (item.total_price || 0), 0);
     
     // Calcular depreciação baseada nos itens devolvidos (wasteItems)
@@ -885,6 +918,16 @@ const MobileOrdersPage = ({ customerId }) => {
 
   const submitOrder = useCallback(async () => {
     if (!currentOrder || !customer) return;
+
+    // Validar se refeições esperadas foi preenchido
+    if (!mealsExpected || mealsExpected <= 0) {
+      toast({ 
+        variant: "destructive", 
+        title: "Campo Obrigatório", 
+        description: "Por favor, preencha o número de refeições esperadas antes de enviar o pedido." 
+      });
+      return;
+    }
 
     try {
       // Criar strings dos inputs e outputs da aba pedidos
@@ -1204,6 +1247,7 @@ const MobileOrdersPage = ({ customerId }) => {
             year={year}
             weekNumber={weekNumber}
             customer={customer}
+            existingWasteData={weeklyWasteData}
           />
         )}
       </div>
@@ -1228,7 +1272,7 @@ const MobileOrdersPage = ({ customerId }) => {
                 <span className="font-medium">Itens:</span> {utilFormattedQuantity(orderTotals.totalItems)}
               </div>
             </div>
-            {isEditMode || showSuccessEffect ? (
+            {(isEditMode || showSuccessEffect) ? (
               <Button 
                 onClick={submitOrder}
                 className={`w-full text-white transition-all duration-500 ${
@@ -1236,7 +1280,7 @@ const MobileOrdersPage = ({ customerId }) => {
                     ? 'bg-green-600 hover:bg-green-700 scale-105 shadow-lg' 
                     : 'bg-blue-600 hover:bg-blue-700'
                 }`}
-                disabled={orderTotals.totalItems === 0 || showSuccessEffect}
+                disabled={orderTotals.totalItems === 0 || showSuccessEffect || !mealsExpected || mealsExpected <= 0}
               >
                 {showSuccessEffect ? (
                   <>

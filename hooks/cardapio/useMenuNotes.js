@@ -24,7 +24,6 @@ export const useMenuNotes = (currentDate) => {
 
       setNotes(notesData || []);
     } catch (error) {
-      console.error("Erro ao carregar notas:", error);
       setError("Erro ao carregar notas do menu");
       setNotes([]);
     } finally {
@@ -49,7 +48,6 @@ export const useMenuNotes = (currentDate) => {
       setNotes(prev => [...prev, newNote]);
       return newNote;
     } catch (error) {
-      console.error("Erro ao adicionar nota:", error);
       setError("Erro ao adicionar nota");
       throw error;
     } finally {
@@ -69,7 +67,6 @@ export const useMenuNotes = (currentDate) => {
       
       return updatedNote;
     } catch (error) {
-      console.error("Erro ao atualizar nota:", error);
       setError("Erro ao atualizar nota");
       throw error;
     } finally {
@@ -85,7 +82,6 @@ export const useMenuNotes = (currentDate) => {
       
       setNotes(prev => prev.filter(note => note.id !== noteId));
     } catch (error) {
-      console.error("Erro ao deletar nota:", error);
       setError("Erro ao deletar nota");
       throw error;
     } finally {

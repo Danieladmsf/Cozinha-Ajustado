@@ -37,7 +37,6 @@ export function useRecipeSearch() {
       
       return { success: true, recipes: activeRecipes };
     } catch (error) {
-      console.error("Erro ao carregar lista de receitas:", error);
       setError(error.message);
       
       toast({

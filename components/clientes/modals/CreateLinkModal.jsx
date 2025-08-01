@@ -8,6 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
 import { User, Loader2 } from 'lucide-react';
@@ -50,6 +51,9 @@ export default function CreateLinkModal({
             <User className="w-5 h-5" />
             Criar Link de Cadastro
           </DialogTitle>
+          <DialogDescription>
+            Crie um link personalizado para que o cliente possa se cadastrar no sistema
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">

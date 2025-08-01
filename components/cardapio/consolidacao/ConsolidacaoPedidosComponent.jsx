@@ -135,17 +135,6 @@ const ConsolidacaoPedidosComponent = () => {
       grouped[order.customer_id].total_amount += orderAmount;
       grouped[order.customer_id].total_items += order.total_items || 0;
       
-      // Debug: Log para verificar os valores
-      console.log('Order data:', {
-        customer: order.customer_name,
-        total_amount: order.total_amount,
-        original_amount: order.original_amount,
-        final_amount: order.final_amount,
-        orderAmount: orderAmount,
-        total_meals_expected: order.total_meals_expected,
-        total_items: order.total_items,
-        items: order.items?.length
-      });
     });
     
     return Object.values(grouped);

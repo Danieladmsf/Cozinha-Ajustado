@@ -7,15 +7,11 @@
  * @returns {number} O valor numérico, ou 0 se a conversão falhar.
  */
 export function parseQuantity(value) {
-  console.log('[parseQuantity] Input recebido:', value, 'tipo:', typeof value);
   if (typeof value === 'number') return value;
   if (typeof value !== 'string') return 0;
   const cleanedValue = value.trim().replace(',', '.');
-  console.log('[parseQuantity] Valor limpo:', cleanedValue);
   const parsed = parseFloat(cleanedValue);
-  console.log('[parseQuantity] Valor parseado:', parsed);
   const result = isNaN(parsed) || !isFinite(parsed) ? 0 : parsed;
-  console.log('[parseQuantity] Resultado final:', result);
   return result;
 }
 

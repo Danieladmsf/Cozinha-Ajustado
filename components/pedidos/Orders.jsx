@@ -74,7 +74,6 @@ import { generatePeriodReport } from "@/app/api/functions"; // Importar a funç�
 const validateDate = (date, context = 'unknown') => {
   try {
     if (!date) {
-      console.warn(`[validateDate] Data nula/undefined no contexto: ${context}. Usando data atual como fallback.`, { originalDate: date });
       return new Date();
     }
     
@@ -84,12 +83,10 @@ const validateDate = (date, context = 'unknown') => {
     } else if (typeof date === 'string') {
       dateObj = parseISO(date);
     } else {
-      console.warn(`[validateDate] Tipo de data inválido no contexto: ${context}. Usando data atual como fallback.`, { date, type: typeof date });
       return new Date();
     }
     
     if (isNaN(dateObj.getTime())) {
-      console.warn(`[validateDate] Data inválida detectada (NaN) no contexto: ${context}. Usando data atual como fallback.`, { originalDate: date, parsedDate: dateObj });
       return new Date();
     }
     
@@ -113,12 +110,10 @@ const safeFormatDate = (date, formatStr, context = 'unknown') => {
 
 const debugLog = (message, data, type = 'DEBUG') => {
   // Remover todos os logs de debug em produção
-  // console.log(`%c[ORDERS ${type}] ${message}`, 'background: #f3f4f6; color: #374151; padding: 2px 4px; border-radius: 2px;', data);
 };
 
 const orderValueLog = (message, data) => {
   // Manter apenas logs críticos de valor do pedido se necessário
-  // console.log(`%c[ORDER VALUE] ${message}`, 'background: #fef3c7; color: #92400e; padding: 2px 4px; border-radius: 2px;', data);
 };
 
 

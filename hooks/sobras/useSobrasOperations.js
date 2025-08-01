@@ -74,7 +74,6 @@ export const useSobrasOperations = () => {
 
       return { success: true };
     } catch (error) {
-      console.error("Erro ao salvar sobras:", error);
       toast({ 
         variant: "destructive", 
         title: "Erro ao Salvar Sobras", 
@@ -96,7 +95,6 @@ export const useSobrasOperations = () => {
       });
       return { success: true };
     } catch (error) {
-      console.error("Erro ao deletar sobra:", error);
       toast({ 
         variant: "destructive", 
         title: "Erro ao Deletar Sobra", 

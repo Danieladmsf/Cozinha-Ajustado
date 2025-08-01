@@ -124,7 +124,6 @@ export default function Nutrition() {
       const enhancedCategories = dynamicCategories.map(dynCat => {
         // Verificar se dynCat.category existe antes de chamar toLowerCase()
         if (!dynCat.category) {
-          console.warn("Categoria indefinida encontrada:", dynCat);
           return {
             ...dynCat,
             category: 'Sem Categoria',

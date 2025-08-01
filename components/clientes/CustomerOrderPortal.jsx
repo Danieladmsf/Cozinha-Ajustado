@@ -41,7 +41,6 @@ export default function CustomerOrderPortal() {
 
       setCustomer(customerData);
     } catch (error) {
-      console.error('Erro ao carregar cliente:', error);
       toast({
         title: "Erro ao carregar dados",
         description: "Não foi possível carregar os dados do cliente.",

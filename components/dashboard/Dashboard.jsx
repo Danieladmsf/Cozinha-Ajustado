@@ -60,11 +60,9 @@ export default function Dashboard() {
     try {
       setLoading(true);
       setError(null);
-      console.log("[Dashboard] Starting data load...");
 
       // Only load data on client side to avoid build issues
       if (typeof window === 'undefined') {
-        console.log("[Dashboard] Server-side render, skipping data load");
         setRecipes([]);
         setIngredients([]);
         setLoading(false);
@@ -72,23 +70,19 @@ export default function Dashboard() {
       }
 
       // Load recipes with better error handling
-      console.log("[Dashboard] Loading recipes...");
       const recipesData = await Recipe.getAll().catch(error => {
         console.error("[Dashboard] Error loading recipes:", error);
         return []; // Return empty array on error instead of throwing
       });
-      console.log("[Dashboard] Loaded", recipesData?.length || 0, "recipes");
 
       // Add small delay between requests
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Load ingredients with better error handling
-      console.log("[Dashboard] Loading ingredients...");
       const ingredientsData = await Ingredient.getAll().catch(error => {
         console.error("[Dashboard] Error loading ingredients:", error);
         return []; // Return empty array on error instead of throwing
       });
-      console.log("[Dashboard] Loaded", ingredientsData?.length || 0, "ingredients");
 
       // Garantir que todos os dados tenham IDs válidos
       const validatedRecipes = (recipesData || []).map((recipe, index) => ({
@@ -103,13 +97,11 @@ export default function Dashboard() {
 
       setRecipes(validatedRecipes);
       setIngredients(validatedIngredients);
-      console.log("[Dashboard] Data load completed successfully");
     } catch (error) {
       console.error("[Dashboard] Critical error loading data:", error);
       setError("Erro ao carregar dados. Por favor, recarregue a página.");
     } finally {
       setLoading(false);
-      console.log("[Dashboard] Loading state set to false");
     }
   };
 

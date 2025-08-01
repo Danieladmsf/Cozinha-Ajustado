@@ -69,13 +69,13 @@ export default function ImportProgressView({
         });
         
         if (similarMatch) {
-          addLog(`🔍 Ingrediente similar encontrado: "${name}" -> "${similarMatch.name}" (ID: ${similarMatch.id})`, "info");
+          addLog(`Ingrediente similar encontrado: "${name}" -> "${similarMatch.name}" (ID: ${similarMatch.id})`, "info");
         }
         return similarMatch || null;
       }
-      addLog(`🔍 Nenhum ingrediente encontrado para "${name}"`, "info");
+      addLog(`Nenhum ingrediente encontrado para "${name}"`, "info");
       return null;
-    } catch (error) {addLog(`❌ Erro ao buscar ingrediente "${name}": ${error.message}`, "error");
+    } catch (error) {addLog(`Erro ao buscar ingrediente "${name}": ${error.message}`, "error");
       return null;
     }
   };
@@ -83,7 +83,7 @@ export default function ImportProgressView({
   // Função para buscar ou criar fornecedor
   const findOrCreateSupplier = async (supplierData) => {
     if (!supplierData || !supplierData.company_name) {
-      addLog(`⚠️ Dados do fornecedor incompletos. Não é possível buscar/criar.`, "warning");
+      addLog(`Dados do fornecedor incompletos. Não é possível buscar/criar.`, "warning");
       return null;
     }
     
@@ -94,20 +94,20 @@ export default function ImportProgressView({
       });
       
       if (existingSuppliers && existingSuppliers.length > 0) {
-        addLog(`🏢 Fornecedor encontrado: "${supplierData.company_name}" (ID: ${existingSuppliers[0].id})`, "info");
+        addLog(`Fornecedor encontrado: "${supplierData.company_name}" (ID: ${existingSuppliers[0].id})`, "info");
         return existingSuppliers[0];
       }
       
       // Criar novo fornecedor
-      addLog(`➕ Criando novo fornecedor: "${supplierData.company_name}"`, "info");
+      addLog(`Criando novo fornecedor: "${supplierData.company_name}"`, "info");
       const newSupplier = await Supplier.create({
         company_name: supplierData.company_name,
         cnpj: supplierData.cnpj || '',
         active: true
       });
-      addLog(`✅ Fornecedor criado: "${newSupplier.company_name}" (ID: ${newSupplier.id})`, "success");
+      addLog(`Fornecedor criado: "${newSupplier.company_name}" (ID: ${newSupplier.id})`, "success");
       return newSupplier;
-    } catch (error) {addLog(`❌ Erro ao buscar/criar fornecedor "${supplierData.company_name}": ${error.message}`, "error");
+    } catch (error) {addLog(`Erro ao buscar/criar fornecedor "${supplierData.company_name}": ${error.message}`, "error");
       return null;
     }
   };
@@ -120,34 +120,34 @@ export default function ImportProgressView({
     if (newData.current_price !== existingIngredient.current_price) {
       consolidated.current_price = newData.current_price;
       consolidated.last_update = newData.last_update;
-      addLog(`📊 Preço atualizado de ${existingIngredient.current_price} para ${newData.current_price}`, "info");
+      addLog(`Preço atualizado de ${existingIngredient.current_price} para ${newData.current_price}`, "info");
     }
     
     // Consolidar outros campos se vazios no existente ou se newData for mais específico
     if (newData.main_supplier && (!consolidated.main_supplier || consolidated.main_supplier === '')) {
       consolidated.main_supplier = newData.main_supplier;
-      addLog(`🔗 Fornecedor principal definido: ${newData.main_supplier}`, "info");
+      addLog(`Fornecedor principal definido: ${newData.main_supplier}`, "info");
     }
     if (newData.supplier_id && (!consolidated.supplier_id || consolidated.supplier_id === '')) {
       consolidated.supplier_id = newData.supplier_id;
-      addLog(`🔗 ID do fornecedor definido: ${newData.supplier_id}`, "info");
+      addLog(`ID do fornecedor definido: ${newData.supplier_id}`, "info");
     }
     if (newData.supplier_code && (!consolidated.supplier_code || consolidated.supplier_code === '')) {
       consolidated.supplier_code = newData.supplier_code;
-      addLog(`🆔 Código do fornecedor definido: ${newData.supplier_code}`, "info");
+      addLog(`Código do fornecedor definido: ${newData.supplier_code}`, "info");
     }
     if (newData.brand && (!consolidated.brand || consolidated.brand === '')) {
       consolidated.brand = newData.brand;
-      addLog(`🏷️ Marca definida: ${newData.brand}`, "info");
+      addLog(`Marca definida: ${newData.brand}`, "info");
     }
     if (newData.commercial_name && (!consolidated.commercial_name || consolidated.commercial_name === '')) {
       consolidated.commercial_name = newData.commercial_name;
-      addLog(`📈 Nome comercial definido: ${newData.commercial_name}`, "info");
+      addLog(`Nome comercial definido: ${newData.commercial_name}`, "info");
     }
     // Priorize a categoria do newData se a existente for "Outros" ou vazia
     if (newData.category && (consolidated.category === 'Outros' || !consolidated.category || consolidated.category === '')) {
       consolidated.category = newData.category;
-      addLog(`📁 Categoria definida: ${newData.category}`, "info");
+      addLog(`Categoria definida: ${newData.category}`, "info");
     }
     
     // Consolidar notas (append new notes)
@@ -156,11 +156,11 @@ export default function ImportProgressView({
       if (consolidated.notes) {
         if (!consolidated.notes.includes(newNote)) { // Avoid duplicating notes if identical
           consolidated.notes += ` | ${newNote}`;
-          addLog(`📝 Notas atualizadas: "${newNote}" adicionada`, "info");
+          addLog(`Notas atualizadas: "${newNote}" adicionada`, "info");
         }
       } else {
         consolidated.notes = newNote;
-        addLog(`📝 Notas adicionadas: "${newNote}"`, "info");
+        addLog(`Notas adicionadas: "${newNote}"`, "info");
       }
     }
     
@@ -175,37 +175,37 @@ export default function ImportProgressView({
     setResults(null); // Clear previous results
 
     try {
-      addLog("🚀 Iniciando importação com consolidação inteligente...", "info");
-      addLog(`📊 Dados recebidos - Tipo: ${typeof importData}`, "info");
-      addLog(`📊 Estrutura dos dados: ${JSON.stringify(Object.keys(importData || {})).slice(0, 100)}${(Object.keys(importData || {}).length > 100 ? '...' : '')}`, "info");
+      addLog("Iniciando importação com consolidação inteligente...", "info");
+      addLog(`Dados recebidos - Tipo: ${typeof importData}`, "info");
+      addLog(`Estrutura dos dados: ${JSON.stringify(Object.keys(importData || {})).slice(0, 100)}${(Object.keys(importData || {}).length > 100 ? '...' : '')}`, "info");
       
       let ingredientsToProcess = [];
       
       if (Array.isArray(importData)) {
         ingredientsToProcess = importData;
-        addLog(`📋 Detectado array direto com ${ingredientsToProcess.length} itens`, "info");
+        addLog(`Detectado array direto com ${ingredientsToProcess.length} itens`, "info");
       } else if (importData && Array.isArray(importData.ingredients)) {
         ingredientsToProcess = importData.ingredients;
-        addLog(`📋 Detectado objeto com propriedade 'ingredients': ${ingredientsToProcess.length} itens`, "info");
+        addLog(`Detectado objeto com propriedade 'ingredients': ${ingredientsToProcess.length} itens`, "info");
       } else if (importData && importData.commercial_data && Array.isArray(importData.commercial_data)) {
         ingredientsToProcess = importData.commercial_data;
-        addLog(`📋 Detectado dados comerciais: ${ingredientsToProcess.length} itens`, "info");
+        addLog(`Detectado dados comerciais: ${ingredientsToProcess.length} itens`, "info");
       } else if (importData && typeof importData === 'object') {
         const keys = Object.keys(importData);
         for (const key of keys) {
           if (Array.isArray(importData[key]) && importData[key].length > 0) {
             ingredientsToProcess = importData[key];
-            addLog(`📋 Detectado array na propriedade '${key}': ${ingredientsToProcess.length} itens`, "info");
+            addLog(`Detectado array na propriedade '${key}': ${ingredientsToProcess.length} itens`, "info");
             break;
           }
         }
       }
 
-      addLog(`🔍 Total de ingredientes extraídos para processar: ${ingredientsToProcess.length}`, "info");
+      addLog(`Total de ingredientes extraídos para processar: ${ingredientsToProcess.length}`, "info");
       
       if (ingredientsToProcess.length === 0) {
-        addLog("❌ ERRO: Nenhum ingrediente válido encontrado nos dados", "error");
-        addLog(`🔍 Debug - Dados completos recebidos (primeiros 500 chars): ${JSON.stringify(importData, null, 2).slice(0, 500)}${(JSON.stringify(importData, null, 2).length > 500 ? '...' : '')}`, "error");
+        addLog("ERRO: Nenhum ingrediente válido encontrado nos dados", "error");
+        addLog(`Debug - Dados completos recebidos (primeiros 500 chars): ${JSON.stringify(importData, null, 2).slice(0, 500)}${(JSON.stringify(importData, null, 2).length > 500 ? '...' : '')}`, "error");
         setError("Nenhum ingrediente válido encontrado nos dados de importação. Verifique a estrutura do arquivo.");
         setIsProcessing(false); // Make sure processing state is reset
         return;
@@ -213,9 +213,9 @@ export default function ImportProgressView({
 
       // Log dos primeiros itens para verificar estrutura
       if (ingredientsToProcess.length > 0) {
-        addLog(`🔍 Exemplo do primeiro item: ${JSON.stringify(ingredientsToProcess[0], null, 2).slice(0, 200)}${(JSON.stringify(ingredientsToProcess[0], null, 2).length > 200 ? '...' : '')}`, "info");
+        addLog(`Exemplo do primeiro item: ${JSON.stringify(ingredientsToProcess[0], null, 2).slice(0, 200)}${(JSON.stringify(ingredientsToProcess[0], null, 2).length > 200 ? '...' : '')}`, "info");
         if (ingredientsToProcess.length > 1) {
-          addLog(`🔍 Exemplo do segundo item: ${JSON.stringify(ingredientsToProcess[1], null, 2).slice(0, 200)}${(JSON.stringify(ingredientsToProcess[1], null, 2).length > 200 ? '...' : '')}`, "info");
+          addLog(`Exemplo do segundo item: ${JSON.stringify(ingredientsToProcess[1], null, 2).slice(0, 200)}${(JSON.stringify(ingredientsToProcess[1], null, 2).length > 200 ? '...' : '')}`, "info");
         }
       }
 
@@ -233,7 +233,7 @@ export default function ImportProgressView({
       };
 
       const startTime = Date.now();
-      addLog(`⏱️ Iniciando processamento de ${ingredientsToProcess.length} ingredientes`, "info");
+      addLog(`Iniciando processamento de ${ingredientsToProcess.length} ingredientes`, "info");
 
       for (let i = 0; i < ingredientsToProcess.length; i++) {
         const item = ingredientsToProcess[i];
@@ -242,7 +242,7 @@ export default function ImportProgressView({
         const finalName = item._mapping?.finalName || item.name || item.commercial_name || `Item ${i + 1}`;
         const actionType = item._mapping?.action || 'auto'; // 'create', 'update', 'auto' (implies consolidate if exists, else create)
 
-        addLog(`📦 [${i + 1}/${ingredientsToProcess.length}] Processando: "${finalName}" (Ação intencional: ${actionType})`, "info");
+        addLog(`[${i + 1}/${ingredientsToProcess.length}] Processando: "${finalName}" (Ação intencional: ${actionType})`, "info");
         setCurrentItem(`Processando ${i + 1}/${ingredientsToProcess.length}: ${finalName}`);
 
         try {
@@ -253,7 +253,7 @@ export default function ImportProgressView({
 
           // Validações básicas
           if (!finalName || finalName.trim().length === 0) {
-            addLog(`❌ Nome final vazio para item ${i + 1}. Pulando.`, "error");
+            addLog(`Nome final vazio para item ${i + 1}. Pulando.`, "error");
             importResults.errors.push({
               item_index: i + 1,
               name: `Item ${i + 1} (Nome vazio)`,
@@ -264,7 +264,7 @@ export default function ImportProgressView({
 
           const currentPrice = safeToNumber(item.base_price || item.current_price, -1);
           if (currentPrice <= 0) {
-            addLog(`❌ Preço inválido (${currentPrice}) para "${finalName}". Pulando.`, "error");
+            addLog(`Preço inválido (${currentPrice}) para "${finalName}". Pulando.`, "error");
             importResults.errors.push({
               item_index: i + 1,
               name: finalName,
@@ -274,7 +274,7 @@ export default function ImportProgressView({
           }
 
           // Buscar ingrediente existente
-          addLog(`🔍 Buscando ingrediente existente para "${finalName}"...`, "info");
+          addLog(`Buscando ingrediente existente para "${finalName}"...`, "info");
           const existingIngredient = await findExistingIngredient(finalName);
           
           let savedIngredient;
@@ -283,7 +283,7 @@ export default function ImportProgressView({
             addLog(`Found existing ingredient "${existingIngredient.name}" (ID: ${existingIngredient.id}). Action type from mapping: "${actionType}"`, "info");
 
             if (actionType === 'create') {
-              addLog(`❌ Conflito: Tentou criar "${finalName}" mas um ingrediente existente foi encontrado (ID: ${existingIngredient.id}). Pulando para evitar duplicação.`, "error");
+              addLog(`Conflito: Tentou criar "${finalName}" mas um ingrediente existente foi encontrado (ID: ${existingIngredient.id}). Pulando para evitar duplicação.`, "error");
               importResults.errors.push({
                 item_index: i + 1,
                 name: finalName,
@@ -292,7 +292,7 @@ export default function ImportProgressView({
               continue; // Skip this item
             }
             // Default behavior for existing ingredient (including actionType 'update' or 'auto') is to update/consolidate
-            addLog(`🔄 Atualizando/Consolidando "${existingIngredient.name}" (ID: ${existingIngredient.id})`, "info");
+            addLog(`Atualizando/Consolidando "${existingIngredient.name}" (ID: ${existingIngredient.id})`, "info");
             const consolidatedData = consolidateIngredientData(existingIngredient, {
                 name: finalName.trim(), // Pass finalName for consolidation logic if needed
                 unit: item.unit || existingIngredient.unit || 'kg', // Use existing unit if new is not provided
@@ -314,11 +314,11 @@ export default function ImportProgressView({
               id: savedIngredient.id,
               action: 'updated_consolidated'
             });
-            addLog(`✅ Ingrediente atualizado: "${finalName}"`, "success");
+            addLog(`Ingrediente atualizado: "${finalName}"`, "success");
 
           } else { // No existing ingredient found
             if (actionType === 'update') {
-              addLog(`❌ Erro: Tentou atualizar "${finalName}" mas nenhum ingrediente existente foi encontrado. Pulando.`, "error");
+              addLog(`Erro: Tentou atualizar "${finalName}" mas nenhum ingrediente existente foi encontrado. Pulando.`, "error");
               importResults.errors.push({
                 item_index: i + 1,
                 name: finalName,
@@ -327,12 +327,12 @@ export default function ImportProgressView({
               continue; // Skip this item
             }
             // Default behavior for non-existing ingredient (including actionType 'create' or 'auto') is to create
-            addLog(`➕ Criando novo ingrediente: "${finalName}"`, "info");
+            addLog(`Criando novo ingrediente: "${finalName}"`, "info");
 
             // Buscar/criar fornecedor antes de criar o ingrediente
             let supplierId = null;
             if (item.supplier_name) {
-              addLog(`🏢 Processando fornecedor para "${finalName}": "${item.supplier_name}"`, "info");
+              addLog(`Processando fornecedor para "${finalName}": "${item.supplier_name}"`, "info");
               const supplier = await findOrCreateSupplier({
                 company_name: item.supplier_name,
                 cnpj: item.supplier_cnpj
@@ -340,7 +340,7 @@ export default function ImportProgressView({
               if (supplier) {
                 supplierId = supplier.id;
                 importResults.suppliers_created++; // Only count if supplier was new for this item
-                addLog(`✅ Fornecedor processado: ID ${supplierId}`, "info");
+                addLog(`Fornecedor processado: ID ${supplierId}`, "info");
               }
             }
             
@@ -370,7 +370,7 @@ export default function ImportProgressView({
               id: savedIngredient.id,
               action: 'created_new'
             });
-            addLog(`✅ Novo ingrediente criado: "${finalName}" (ID: ${savedIngredient.id})`, "success");
+            addLog(`Novo ingrediente criado: "${finalName}" (ID: ${savedIngredient.id})`, "success");
           }
 
           // Criar histórico de preços (para ambos, criados e atualizados)
@@ -390,13 +390,13 @@ export default function ImportProgressView({
 
               await PriceHistory.create(historyPayload);
               importResults.price_history_created_count++;
-              addLog(`📈 Histórico de preços criado para "${finalName}"`, "info");
+              addLog(`Histórico de preços criado para "${finalName}"`, "info");
             } catch (historyError) {
-              addLog(`⚠️ Erro ao criar histórico para "${finalName}": ${historyError.message}`, "warning");}
+              addLog(`Erro ao criar histórico para "${finalName}": ${historyError.message}`, "warning");}
           }
 
         } catch (error) {
-          addLog(`❌ Erro crítico ao processar "${finalName}": ${error.message}`, "error");importResults.errors.push({
+          addLog(`Erro crítico ao processar "${finalName}": ${error.message}`, "error");importResults.errors.push({
             item_index: i + 1,
             name: finalName,
             reason: `Erro: ${error.message}`
@@ -411,20 +411,20 @@ export default function ImportProgressView({
       importResults.metadata.processing_time_ms = endTime - startTime;
 
       // Final logs
-      addLog(`🎉 Importação concluída!`, "success");
-      addLog(`✅ Novos ingredientes criados: ${importResults.created.length}`, "success");
-      addLog(`🔄 Ingredientes atualizados/consolidados: ${importResults.updated.length}`, "success");
-      addLog(`🏢 Novos fornecedores criados: ${importResults.suppliers_created}`, "info");
-      addLog(`📈 Registros de histórico de preços criados: ${importResults.price_history_created_count}`, "info");
-      addLog(`❌ Itens com erros: ${importResults.errors.length}`, importResults.errors.length > 0 ? "error" : "info");
-      addLog(`⏱️ Tempo total de processamento: ${importResults.metadata.processing_time_ms}ms`, "info");
+      addLog(`Importação concluída!`, "success");
+      addLog(`Novos ingredientes criados: ${importResults.created.length}`, "success");
+      addLog(`Ingredientes atualizados/consolidados: ${importResults.updated.length}`, "success");
+      addLog(`Novos fornecedores criados: ${importResults.suppliers_created}`, "info");
+      addLog(`Registros de histórico de preços criados: ${importResults.price_history_created_count}`, "info");
+      addLog(`Itens com erros: ${importResults.errors.length}`, importResults.errors.length > 0 ? "error" : "info");
+      addLog(`Tempo total de processamento: ${importResults.metadata.processing_time_ms}ms`, "info");
       
       setResults(importResults);
       setCurrentItem('');
       setProgress(100); // Ensure progress is 100% on completion
 
     } catch (err) {setError(err.message || 'Erro desconhecido durante a importação');
-      addLog(`💥 Erro crítico geral: ${err.message}`, "error");
+      addLog(`Erro crítico geral: ${err.message}`, "error");
     } finally {
       setIsProcessing(false);
     }

@@ -53,12 +53,6 @@ export const useMenuLocations = () => {
 
   const getActiveLocationIds = () => {
     const activeIds = locations.filter(loc => loc.active).map(loc => loc.id);
-    console.log("🎯 DEBUG getActiveLocationIds:", {
-      totalLocations: locations.length,
-      locations: locations.map(l => ({ id: l.id, name: l.name, active: l.active })),
-      activeIds: activeIds,
-      activeCount: activeIds.length
-    });
     return activeIds;
   };
 

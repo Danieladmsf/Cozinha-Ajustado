@@ -29,11 +29,6 @@ export const useMenuData = (currentDate) => {
 
       // Log resumido apenas uma vez
       if (process.env.NODE_ENV === 'development') {
-        console.log("📊 Dados carregados:", {
-          categories: categoriesData?.length || 0,
-          recipes: recipesData?.length || 0,
-          customers: customersData?.length || 0
-        });
       }
 
       setCategories(categoriesData || []);
@@ -132,7 +127,7 @@ export const useMenuData = (currentDate) => {
         setWeeklyMenu(null);
       }
     } catch (error) {
-      console.error("❌ ERRO AO CARREGAR MENU SEMANAL:", error);
+      console.error("ERRO AO CARREGAR MENU SEMANAL:", error);
       setWeeklyMenu(null);
     }
   };
@@ -148,7 +143,6 @@ export const useMenuData = (currentDate) => {
 
   const forceReloadFromDatabase = useCallback(async () => {
     try {
-      console.log("🔄 Forçando recarregamento direto do banco de dados...");
       
       // Limpar cache
       localStorage.removeItem('menuConfig');
@@ -161,41 +155,36 @@ export const useMenuData = (currentDate) => {
 
       if (configs && configs.length > 0) {
         const config = configs[0];
-        console.log("🏦 Configuração FORÇADA do banco:", config);
-        console.log("🎨 Cores FORÇADAS do banco:", config.category_colors);
         
         // Atualizar cache e estado
         localStorage.setItem('menuConfig', JSON.stringify(config));
         setMenuConfig(config);
         
-        console.log("✅ Recarregamento forçado concluído");
         return config;
       } else {
-        console.log("❌ Nenhuma configuração encontrada no banco");
         return null;
       }
     } catch (error) {
-      console.error("❌ Erro no recarregamento forçado:", error);
+      console.error("Erro no recarregamento forçado:", error);
       return null;
     }
   }, []);
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, [currentDate]);
 
   // Detectar mudanças no localStorage e recarregar config
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === 'menuConfig') {
-        console.log("Detectada mudança na configuração, recarregando...");
         refreshMenuConfig();
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [refreshMenuConfig]);
+  }, []);
 
   return {
     categories,

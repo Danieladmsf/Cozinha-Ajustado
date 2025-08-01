@@ -57,7 +57,6 @@ export function useCustomerLink() {
       return { customer: newCustomer, link, needsManualCopy: false };
       
     } catch (error) {
-      console.error("Erro ao criar cliente:", error);
       toast({
         title: "Erro ao criar cliente",
         description: `Não foi possível criar o cliente. Detalhes: ${error.message || error}`,

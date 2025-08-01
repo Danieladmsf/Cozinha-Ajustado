@@ -57,7 +57,6 @@ export default function NamesImportDialog({
             name: name,
             reason: "Ingrediente já existe no sistema"
           });
-          console.log(`Ingrediente duplicado: ${name}`);
           continue;
         }
 

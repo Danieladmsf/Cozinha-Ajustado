@@ -16,11 +16,8 @@ export function useRecipeInterface({ recipeData, preparationsData, updateRecipeD
         Object.keys(metrics).forEach(key => {
           updateRecipeData(key, metrics[key]);
         });
-        console.log('✅ [useRecipeInterface] Métricas calculadas e atualizadas');
-        console.log('🔧 [useRecipeInterface] portion_cost atualizado:', metrics.portion_cost);
-        console.log('🔧 [useRecipeInterface] cuba_cost atualizado:', metrics.cuba_cost);
       } catch (error) {
-        console.error('❌ [useRecipeInterface] Erro no cálculo automático:', error);
+        // Erro no cálculo automático
       }
     }
   }, [preparationsData?.length]);
@@ -66,7 +63,6 @@ export function useRecipeInterface({ recipeData, preparationsData, updateRecipeD
     
     // Ignorar mudanças no campo cuba_weight pois é calculado automaticamente
     if (name === 'cuba_weight') {
-      console.log('⚠️ [INTERFACE] Tentativa de alterar cuba_weight ignorada - campo é calculado automaticamente');
       return;
     }
     

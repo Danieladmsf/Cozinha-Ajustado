@@ -45,13 +45,11 @@ const retryWithDelay = async (fn, retries = 5, initialDelay = 2500) => {
       
       return await fn();
     } catch (error) {
-      console.warn(`Tentativa ${attempt + 1}/${retries} falhou:`, error.message);
       lastError = error;
       
       // Se for erro de rate limit, aguarde mais tempo entre tentativas
       if (error?.response?.status === 429) {
         const delay = initialDelay * Math.pow(1.5, attempt); // Backoff exponencial
-        console.log(`Rate limit atingido. Aguardando ${delay}ms antes da próxima tentativa...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       } else {
         // Se for outro tipo de erro, não tente novamente
@@ -148,7 +146,7 @@ export default function NutritionImport() {
       // Resumo final
       setResults(prev => [
         {
-          name: "✅ Correção de IDs concluída",
+          name: "Correção de IDs concluída",
           status: 'success',
           message: `Total corrigido: ${fixed}, Erros: ${errors}`
         },
@@ -164,7 +162,7 @@ export default function NutritionImport() {
       console.error('[TACO] Erro na correção de IDs:', err);
       setResults(prev => [
         {
-          name: "❌ Erro na correção",
+          name: "Erro na correção",
           status: 'error',
           error: err.message
         },
@@ -254,7 +252,7 @@ export default function NutritionImport() {
       console.error('[TACO] Erro na correção de IDs TACO:', err);
       setResults(prev => [
         {
-          name: "❌ Erro na correção",
+          name: "Erro na correção",
           status: 'error',
           error: err.message
         },
@@ -509,7 +507,7 @@ export default function NutritionImport() {
         
         setResults([
             {
-                name: isNameUpdate ? "Atualização concluída" : "✅ Importação concluída",
+                name: isNameUpdate ? "Atualização concluída" : "Importação concluída",
                 status: 'success',
                 message: `Total: ${summary.total}, Criados: ${summary.success}, Pulados: ${summary.skipped}, Erros: ${summary.errors}`
             },
@@ -526,7 +524,7 @@ export default function NutritionImport() {
         setError(error.message);
         
         setResults([{
-            name: "❌ Erro na importação",
+            name: "Erro na importação",
             status: 'error',
             error: error.message
         }]);

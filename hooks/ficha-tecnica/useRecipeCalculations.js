@@ -26,19 +26,16 @@ export function useRecipeCalculations() {
    * Interface simplificada para componentes React
    */
   const calculateRecipeMetrics = useCallback((preparationsData, recipeData = {}) => {
-    console.log('⚛️ [HOOK-CALC] Calculando métricas via hook...');
     
     if (!preparationsData || preparationsData.length === 0) {
-      console.log('⚛️ [HOOK-CALC] Nenhuma preparação, retornando métricas vazias');
       return RecipeCalculator.getEmptyMetrics();
     }
     
     try {
       const result = RecipeCalculator.calculateRecipeMetrics(preparationsData, recipeData);
-      console.log('✅ [HOOK-CALC] Métricas calculadas com sucesso');
       return result;
     } catch (error) {
-      console.error('❌ [HOOK-CALC] Erro no cálculo:', error);
+      console.error('[HOOK-CALC] Erro no cálculo:', error);
       return RecipeCalculator.getEmptyMetrics();
     }
   }, []);
@@ -47,12 +44,11 @@ export function useRecipeCalculations() {
    * Atualiza métricas quando dados mudam (versão otimizada)
    */
   const updateRecipeMetricsOptimized = useCallback((preparationsData, currentMetrics = {}, recipeData = {}) => {
-    console.log('⚛️ [HOOK-UPDATE] Atualizando métricas...');
     
     try {
       return updateRecipeMetrics(preparationsData, currentMetrics, recipeData);
     } catch (error) {
-      console.error('❌ [HOOK-UPDATE] Erro na atualização:', error);
+      console.error('[HOOK-UPDATE] Erro na atualização:', error);
       return RecipeCalculator.getEmptyMetrics();
     }
   }, []);
@@ -181,7 +177,7 @@ export function useRecipeCalculations() {
         averageYield: metrics.averageYield
       };
     } catch (error) {
-      console.error('❌ [HOOK-PREP] Erro no cálculo da preparação:', error);
+      console.error('[HOOK-PREP] Erro no cálculo da preparação:', error);
       return {
         totalWeight: 0,
         yieldWeight: 0,
@@ -289,7 +285,7 @@ export function useRecipeCalculations() {
     try {
       return RecipeCalculator.generateDebugReport(preparations, recipeData);
     } catch (error) {
-      console.error('❌ [HOOK-DEBUG] Erro ao gerar relatório:', error);
+      console.error('[HOOK-DEBUG] Erro ao gerar relatório:', error);
       return {
         timestamp: new Date().toISOString(),
         error: error.message,

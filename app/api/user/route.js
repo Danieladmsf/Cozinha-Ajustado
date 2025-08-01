@@ -4,11 +4,9 @@ import { NextResponse } from 'next/server';
 // GET /api/user - Buscar dados do usuário
 export async function GET(request) {
   try {
-    console.log('[API] Getting user data...');
     
     const userData = await User.getMyUserData();
     
-    console.log('[API] User data retrieved:', userData ? 'OK' : 'NULL');
     
     return NextResponse.json(userData || {});
     
@@ -25,7 +23,6 @@ export async function GET(request) {
 export async function PUT(request) {
   try {
     const userData = await request.json();
-    console.log('[API] Updating user data:', userData);
     
     const result = await User.updateMyUserData(userData);
     
@@ -48,7 +45,6 @@ export async function POST(request) {
     
     if (type === 'recipe-config') {
       const configData = await request.json();
-      console.log('[API] Saving recipe config:', configData);
       
       const result = await User.updateMyUserData({
         recipe_config: configData

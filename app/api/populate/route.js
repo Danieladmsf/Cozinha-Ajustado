@@ -135,7 +135,6 @@ const SAMPLE_RECIPES = [
 // POST /api/populate - Popular banco de dados
 export async function POST(request) {
   try {
-    console.log('[POPULATE] Iniciando população do banco de dados...');
     
     const results = {
       ingredients: [],
@@ -158,10 +157,8 @@ export async function POST(request) {
       
       const created = await User.createWithId('mock-user-id', mockUser);
       results.user = created;
-      console.log('[POPULATE] Usuário mock criado com sucesso');
     } catch (error) {
       if (error.message.includes('already exists')) {
-        console.log('[POPULATE] Usuário mock já existe, pulando...');
         results.user = { id: 'mock-user-id', status: 'already_exists' };
       } else {
         results.errors.push(`Erro ao criar usuário: ${error.message}`);
@@ -173,7 +170,6 @@ export async function POST(request) {
       try {
         const created = await Ingredient.create(ingredient);
         results.ingredients.push(created);
-        console.log(`[POPULATE] Ingrediente criado: ${created.name}`);
       } catch (error) {
         results.errors.push(`Erro ao criar ingrediente ${ingredient.name}: ${error.message}`);
       }
@@ -184,14 +180,11 @@ export async function POST(request) {
       try {
         const created = await Recipe.create(recipe);
         results.recipes.push(created);
-        console.log(`[POPULATE] Receita criada: ${created.name}`);
       } catch (error) {
         results.errors.push(`Erro ao criar receita ${recipe.name}: ${error.message}`);
       }
     }
 
-    console.log('[POPULATE] População concluída!');
-    console.log(`[POPULATE] Resultados: ${results.ingredients.length} ingredientes, ${results.recipes.length} receitas`);
 
     return NextResponse.json({
       success: true,

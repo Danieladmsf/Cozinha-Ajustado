@@ -1,8 +1,9 @@
 'use client';
 
-import React from "react";
+import React, { useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { DecimalInput } from "@/components/ui/decimal-input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Utensils, CheckCircle } from "lucide-react";
@@ -11,6 +12,7 @@ import {
   formattedQuantity as utilFormattedQuantity, 
   formatCurrency as utilFormatCurrency 
 } from "@/components/utils/orderUtils";
+import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 
 const OrdersTab = ({
   currentOrder,
@@ -32,6 +34,9 @@ const OrdersTab = ({
   getOrderedCategories,
   generateCategoryStyles
 }) => {
+  const { registerInput, handleKeyDown } = useKeyboardNavigation();
+  
+
   if (!currentOrder?.items || currentOrder.items.length === 0) {
     return (
       <Card>
@@ -75,14 +80,24 @@ const OrdersTab = ({
       {!isEditMode && existingOrder && !showSuccessEffect && (
         <Card className="border-green-200 bg-green-50">
           <CardContent className="p-4">
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center mr-3">
-                <CheckCircle className="w-6 h-6 text-white" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-green-700">Pedido Enviado com Sucesso</h3>
+                  <p className="text-sm text-green-600">Este pedido já foi processado e enviado. Clique em "Editar" para fazer alterações.</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-green-700">Pedido Enviado com Sucesso</h3>
-                <p className="text-sm text-green-600">Este pedido já foi processado e enviado. Use o botão abaixo para editar.</p>
-              </div>
+              <Button 
+                onClick={enableEditMode}
+                variant="outline"
+                size="sm"
+                className="border-green-300 text-green-700 hover:bg-green-100"
+              >
+                Editar Pedido
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -94,31 +109,24 @@ const OrdersTab = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-blue-700 mb-2">
-                Refeições Esperadas
+                Refeições Esperadas <span className="text-red-500">*</span>
               </label>
-              <Input
-                type="text"
-                inputMode="decimal"
+              <DecimalInput
+                ref={(ref) => registerInput('meals-expected', ref)}
                 value={mealsExpected === 0 ? '' : mealsExpected || ''}
                 onChange={(e) => {
-                  console.log('[OrdersTab] Campo refeições - valor digitado:', e.target.value);
                   if (isEditMode) {
                     const parsedValue = utilParseQuantity(e.target.value);
-                    console.log('[OrdersTab] Campo refeições - valor após parse:', parsedValue);
                     setMealsExpected(parsedValue);
                   }
                 }}
-                onInput={(e) => {
-                  const currentValue = e.target.value;
-                  console.log('[OrdersTab] Refeições onInput - valor atual:', currentValue);
-                  if (currentValue.includes(',') && isEditMode) {
-                    console.log('[OrdersTab] Refeições onInput - vírgula detectada');
-                    const parsedValue = utilParseQuantity(currentValue);
-                    setMealsExpected(parsedValue);
-                  }
-                }}
-                className="border-blue-300 focus:border-blue-500"
-                placeholder="Número de refeições esperadas"
+                onKeyDown={(e) => handleKeyDown(e, 'meals-expected')}
+                className={`border-blue-300 focus:border-blue-500 ${
+                  (!mealsExpected || mealsExpected <= 0) && isEditMode 
+                    ? 'border-red-300 bg-red-50' 
+                    : ''
+                }`}
+                placeholder="Número de refeições esperadas (obrigatório)"
                 disabled={!isEditMode}
               />
             </div>
@@ -167,6 +175,11 @@ const OrdersTab = ({
                   </thead>
                   <tbody>
                     {categoryData.items.map((item, index) => {
+                      const categoryIndex = orderedCategories.findIndex(cat => cat.name === categoryName);
+                      const baseInputId = `qty-${categoryIndex}-${index}`;
+                      const percentInputId = `pct-${categoryIndex}-${index}`;
+                      const notesInputId = `notes-${categoryIndex}-${index}`;
+                      
                       return (
                         <tr key={item.unique_id} className="border-b border-blue-50">
                           <td className="p-2">
@@ -178,28 +191,15 @@ const OrdersTab = ({
                             </div>
                           </td>
                           <td className="p-2 text-center">
-                            <Input
-                              type="text"
-                              inputMode="decimal"
+                            <DecimalInput
+                              ref={(ref) => registerInput(baseInputId, ref)}
                               value={item.base_quantity === 0 ? '' : item.base_quantity || ''}
                               onChange={(e) => {
-                                console.log('[OrdersTab] Campo quantidade - valor digitado:', e.target.value);
                                 if (isEditMode) {
-                                  console.log('[OrdersTab] Campo quantidade - enviando para updateOrderItem');
                                   updateOrderItem(item.unique_id, 'base_quantity', e.target.value);
                                 }
                               }}
-                              onInput={(e) => {
-                                // Capturar commas no onInput que é disparado em tempo real
-                                const currentValue = e.target.value;
-                                console.log('[OrdersTab] onInput - valor atual:', currentValue);
-                                
-                                // Se digitou uma vírgula e não tem vírgula nem ponto ainda
-                                if (currentValue.includes(',') && isEditMode) {
-                                  console.log('[OrdersTab] onInput - vírgula detectada no valor');
-                                  updateOrderItem(item.unique_id, 'base_quantity', currentValue);
-                                }
-                              }}
+                              onKeyDown={(e) => handleKeyDown(e, baseInputId)}
                               className="text-center text-xs h-8 w-16 border-blue-300 focus:border-blue-500 mx-auto"
                               placeholder="0"
                               disabled={!isEditMode}
@@ -213,25 +213,15 @@ const OrdersTab = ({
                           {isCarneCategory && (
                             <>
                               <td className="p-2 text-center">
-                                <Input
-                                  type="text"
-                                  inputMode="decimal"
+                                <DecimalInput
+                                  ref={(ref) => registerInput(percentInputId, ref)}
                                   value={item.adjustment_percentage === 0 ? '' : item.adjustment_percentage || ''}
                                   onChange={(e) => {
-                                    console.log('[OrdersTab] Campo porcentagem - valor digitado:', e.target.value);
                                     if (isEditMode) {
-                                      console.log('[OrdersTab] Campo porcentagem - enviando para updateOrderItem');
                                       updateOrderItem(item.unique_id, 'adjustment_percentage', e.target.value);
                                     }
                                   }}
-                                  onInput={(e) => {
-                                    const currentValue = e.target.value;
-                                    console.log('[OrdersTab] Porcentagem onInput - valor atual:', currentValue);
-                                    if (currentValue.includes(',') && isEditMode) {
-                                      console.log('[OrdersTab] Porcentagem onInput - vírgula detectada');
-                                      updateOrderItem(item.unique_id, 'adjustment_percentage', currentValue);
-                                    }
-                                  }}
+                                  onKeyDown={(e) => handleKeyDown(e, percentInputId)}
                                   className="text-center text-xs h-8 w-16 border-blue-300 focus:border-blue-500 mx-auto"
                                   placeholder="0"
                                   disabled={!isEditMode}
@@ -252,9 +242,11 @@ const OrdersTab = ({
                           </td>
                           <td className="p-2">
                             <Input
+                              ref={(ref) => registerInput(notesInputId, ref)}
                               type="text"
                               value={item.notes || ''}
                               onChange={(e) => isEditMode && updateOrderItem(item.unique_id, 'notes', e.target.value)}
+                              onKeyDown={(e) => handleKeyDown(e, notesInputId)}
                               className="text-xs h-8 border-blue-300 focus:border-blue-500"
                               placeholder="Observações..."
                               disabled={!isEditMode}
@@ -331,8 +323,15 @@ const OrdersTab = ({
               Observações Gerais
             </label>
             <Textarea
+              ref={(ref) => registerInput('general-notes', ref)}
               value={generalNotes}
               onChange={(e) => isEditMode && setGeneralNotes(e.target.value)}
+              onKeyDown={(e) => {
+                // Para Textarea, Enter não navega - só Tab
+                if (e.key === 'Tab') {
+                  handleKeyDown(e, 'general-notes');
+                }
+              }}
               placeholder="Observações gerais sobre o pedido..."
               className="min-h-[80px] border-blue-300 focus:border-blue-500"
               rows={3}

@@ -176,7 +176,6 @@ export default function MenuConfig({ categories, onConfigChange }) {
       };
       
       // Lógica de criação de configuração removida
-      console.log('Configuração padrão preparada:', defaultConfig);
       
       // Atualizar estado local
       setConfigId(newConfig.id);
@@ -246,7 +245,6 @@ export default function MenuConfig({ categories, onConfigChange }) {
       });
       
       // Lógica de salvamento de configuração removida
-      console.log('Dados de configuração preparados:', configData);
       
       toast({
         description: "Configurações salvas com sucesso",

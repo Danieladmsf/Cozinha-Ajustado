@@ -34,7 +34,6 @@ export default function CustomerPortalRedirect({ customerId }) {
       }
 
     } catch (error) {
-      console.error('Erro ao verificar cliente:', error);
       // Em caso de erro, redirecionar para home
       router.push('/');
     } finally {

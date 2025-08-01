@@ -25,10 +25,8 @@ export function useIngredientSearch() {
         throw new Error(allIngredients.error || 'Erro ao carregar ingredientes');
       }
       
-      console.log('Ingredientes carregados:', allIngredients.length);
       setIngredients(allIngredients);
     } catch (error) {
-      console.error('Erro ao carregar ingredientes:', error);
       toast({
         title: "Erro ao carregar ingredientes",
         description: "Não foi possível carregar a lista de ingredientes.",
