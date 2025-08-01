@@ -889,7 +889,8 @@ const MobileOrdersPage = ({ customerId }) => {
   // Resetar pedido quando mudar de dia
   useEffect(() => {
     // Só executar se já temos dados carregados e dia foi inicializado
-    if (hasInitializedDay && currentOrder && currentOrder.day_of_week !== selectedDay && Object.keys(existingOrders).length > 0) {
+    // E NÃO estamos em modo de edição (para evitar reset durante edição)
+    if (hasInitializedDay && !isEditMode && currentOrder && currentOrder.day_of_week !== selectedDay && Object.keys(existingOrders).length > 0) {
       setCurrentOrder(null);
       
       // Verificar se existe pedido salvo para este dia
@@ -913,7 +914,7 @@ const MobileOrdersPage = ({ customerId }) => {
       setIsReceivingEditMode(true);
       setIsWasteEditMode(true);
     }
-  }, [hasInitializedDay, selectedDay, currentOrder, existingOrders]);
+  }, [hasInitializedDay, isEditMode, selectedDay, currentOrder, existingOrders]);
 
   // Inicializar pedido quando itens mudam
   useEffect(() => {
