@@ -680,14 +680,42 @@ const MobileOrdersPage = ({ customerId }) => {
     }
   }, [customerId, weekNumber, year, toast]);
 
-  // Auto-navegação para o dia atual - executa APENAS após dados iniciais carregarem
+  // Função para determinar qual dia selecionar baseado na semana
+  const getInitialDay = useCallback(() => {
+    const today = new Date();
+    const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+    const viewingWeekStart = weekStart;
+    
+    // Verificar se estamos visualizando a semana atual
+    const isCurrentWeek = format(currentWeekStart, 'yyyy-MM-dd') === format(viewingWeekStart, 'yyyy-MM-dd');
+    
+    if (isCurrentWeek) {
+      // Semana atual: ir para o dia atual
+      return getCurrentWeekDay();
+    } else {
+      // Outras semanas: sempre ir para segunda-feira
+      return 1;
+    }
+  }, [weekStart, getCurrentWeekDay]);
+
+  // Auto-navegação para o dia correto - executa APENAS após dados iniciais carregarem
   useEffect(() => {
     if (!loading && customer && recipes.length > 0 && weeklyMenus.length > 0 && !hasInitializedDay) {
-      const currentDay = getCurrentWeekDay();
-      setSelectedDay(currentDay);
+      const initialDay = getInitialDay();
+      setSelectedDay(initialDay);
       setHasInitializedDay(true);
     }
-  }, [loading, customer, recipes, weeklyMenus, hasInitializedDay, getCurrentWeekDay]);
+  }, [loading, customer, recipes, weeklyMenus, hasInitializedDay, getInitialDay]);
+
+  // Detectar mudança de semana e ajustar dia selecionado
+  useEffect(() => {
+    if (hasInitializedDay) {
+      const correctDay = getInitialDay();
+      if (selectedDay !== correctDay) {
+        setSelectedDay(correctDay);
+      }
+    }
+  }, [weekStart, hasInitializedDay, getInitialDay, selectedDay]);
 
   // Preparar itens do pedido baseado no cardápio
   const orderItems = useMemo(() => {
