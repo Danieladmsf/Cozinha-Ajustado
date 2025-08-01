@@ -946,9 +946,12 @@ const MobileOrdersPage = ({ customerId }) => {
       };
       
       setCurrentOrder(updatedOrder);
-      setMealsExpected(existingOrder.total_meals_expected || 0);
-      setGeneralNotes(existingOrder.general_notes || "");
-      setIsEditMode(false);
+      // Só resetar valores e modo de edição se NÃO estivermos editando
+      if (!isEditMode) {
+        setMealsExpected(existingOrder.total_meals_expected || 0);
+        setGeneralNotes(existingOrder.general_notes || "");
+        setIsEditMode(false);
+      }
     } else if (orderItems.length > 0 && (!currentOrder || currentOrder.day_of_week !== selectedDay)) {
       // Criar novo pedido se não existe pedido salvo E (não existe currentOrder OU currentOrder é de outro dia)
       const newOrder = {
@@ -964,7 +967,7 @@ const MobileOrdersPage = ({ customerId }) => {
       };
       setCurrentOrder(newOrder);
     }
-  }, [hasInitializedDay, orderItems, customer, selectedDay, weekNumber, year, weekStart, mealsExpected, generalNotes, existingOrders]);
+  }, [hasInitializedDay, isEditMode, orderItems, customer, selectedDay, weekNumber, year, weekStart, existingOrders]);
 
   // Calcular totais e depreciação por devoluções
   const orderTotals = useMemo(() => {
