@@ -826,18 +826,14 @@ const MobileOrdersPage = ({ customerId }) => {
             updatedItem.base_quantity = baseQuantity;
             
             if (isCarneCategory) {
-              // Lógica específica para categoria carne
-              if (item.unit_type === 'unid') {
-                // Para unidade "unid": Total = (Quantidade * 2) * Porcentagem
-                const percentage = (updatedItem.adjustment_percentage || 0) / 100;
-                const newQuantity = (baseQuantity * 2) * percentage;
-                updatedItem.quantity = Math.round(newQuantity * 100) / 100;
-              } else {
-                // Para outras unidades em carne: Total = Quantidade * (1 + Porcentagem/100)
-                const percentage = updatedItem.adjustment_percentage || 0;
-                const newQuantity = baseQuantity * (1 + (percentage / 100));
-                updatedItem.quantity = Math.round(newQuantity * 100) / 100;
-              }
+              // Lógica unificada para categoria carne
+              // Quantidade base: SEMPRE usar valor informado diretamente para categoria carne
+              const quantidadeBase = baseQuantity;
+              
+              // Total Pedido: Sempre (Quantidade * 2) * (Porcentagem/100)
+              const percentage = (updatedItem.adjustment_percentage || 0) / 100;
+              const newQuantity = (quantidadeBase * 2) * percentage;
+              updatedItem.quantity = Math.round(newQuantity * 100) / 100;
             } else {
               // Lógica padrão para outras categorias
               const percentage = updatedItem.adjustment_percentage || 0;
@@ -851,19 +847,14 @@ const MobileOrdersPage = ({ customerId }) => {
             updatedItem.adjustment_percentage = percentage;
             
             if (isCarneCategory) {
-              // Lógica específica para categoria carne
-              if (item.unit_type === 'unid') {
-                // Para unidade "unid": Total = (Quantidade * 2) * Porcentagem
-                const percentageDecimal = percentage / 100;
-                const baseQuantity = updatedItem.base_quantity || 0;
-                const newQuantity = (baseQuantity * 2) * percentageDecimal;
-                updatedItem.quantity = Math.round(newQuantity * 100) / 100;
-              } else {
-                // Para outras unidades em carne: Total = Quantidade * (1 + Porcentagem/100)
-                const baseQuantity = updatedItem.base_quantity || 0;
-                const newQuantity = baseQuantity * (1 + (percentage / 100));
-                updatedItem.quantity = Math.round(newQuantity * 100) / 100;
-              }
+              // Lógica unificada para categoria carne
+              // Quantidade base: SEMPRE usar valor informado diretamente para categoria carne
+              const quantidadeBase = updatedItem.base_quantity || 0;
+              
+              // Total Pedido: Sempre (Quantidade * 2) * (Porcentagem/100)
+              const percentageDecimal = percentage / 100;
+              const newQuantity = (quantidadeBase * 2) * percentageDecimal;
+              updatedItem.quantity = Math.round(newQuantity * 100) / 100;
             } else {
               // Lógica padrão para outras categorias
               const baseQuantity = updatedItem.base_quantity || 0;
@@ -884,8 +875,7 @@ const MobileOrdersPage = ({ customerId }) => {
     });
   }, [mealsExpected]);
 
-  // Recalcular itens com unidade "unid" não é mais necessário
-  // pois agora o cálculo é baseado na quantidade base, não nas refeições esperadas
+  // Categoria carne agora sempre usa valor informado diretamente - não precisa recalcular por mealsExpected
 
   // Carregar dados de sobras automaticamente para cálculo de descontos
   useEffect(() => {
