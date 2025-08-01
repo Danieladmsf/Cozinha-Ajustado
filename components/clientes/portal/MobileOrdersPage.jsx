@@ -196,8 +196,10 @@ const MobileOrdersPage = ({ customerId }) => {
       setExistingWaste(wasteRecord);
       setWasteNotes(wasteRecord?.general_notes || "");
       
-      // Definir modo de edição baseado se já existe dados salvos
-      setIsWasteEditMode(!wasteRecord);
+      // Definir modo de edição baseado se já existe dados salvos (apenas se estiver na aba waste)
+      if (activeTab === "waste") {
+        setIsWasteEditMode(!wasteRecord);
+      }
 
       // Criar itens simples baseados no cardápio
       const menu = weeklyMenus[0];
@@ -280,7 +282,7 @@ const MobileOrdersPage = ({ customerId }) => {
     } finally {
       setWasteLoading(false);
     }
-  }, [customer, weeklyMenus, recipes, weekNumber, year, selectedDay, existingOrders, toast]);
+  }, [activeTab, customer, weeklyMenus, recipes, weekNumber, year, selectedDay, existingOrders, toast]);
 
   // Funções para Recebimento
   const loadReceivingData = useCallback(async () => {
@@ -301,8 +303,10 @@ const MobileOrdersPage = ({ customerId }) => {
       setExistingReceiving(receivingRecord);
       setReceivingNotes(receivingRecord?.general_notes || "");
       
-      // Definir modo de edição baseado se já existe dados salvos
-      setIsReceivingEditMode(!receivingRecord);
+      // Definir modo de edição baseado se já existe dados salvos (apenas se estiver na aba receive)
+      if (activeTab === "receive") {
+        setIsReceivingEditMode(!receivingRecord);
+      }
 
       // Criar itens de recebimento baseados no cardápio (como a aba de pedidos)
       const menu = weeklyMenus[0];
@@ -403,7 +407,7 @@ const MobileOrdersPage = ({ customerId }) => {
     } finally {
       setReceivingLoading(false);
     }
-  }, [customer, weeklyMenus, recipes, weekNumber, year, selectedDay, existingOrders, toast]);
+  }, [activeTab, customer, weeklyMenus, recipes, weekNumber, year, selectedDay, existingOrders, toast]);
 
   const updateReceivingItem = useCallback((index, field, value) => {
     setReceivingItems(prevItems => {
@@ -894,19 +898,19 @@ const MobileOrdersPage = ({ customerId }) => {
     }
   }, [mealsExpected]);
 
-  // Carregar dados de sobras quando a aba waste for selecionada ou quando pedidos mudarem
+  // Carregar dados de sobras automaticamente para cálculo de descontos
   useEffect(() => {
-    if (activeTab === "waste" && customer && weeklyMenus.length && recipes.length) {
+    if (customer && weeklyMenus.length && recipes.length && hasInitializedDay) {
       loadWasteData();
     }
-  }, [activeTab, customer, selectedDay, weeklyMenus, recipes, existingOrders, loadWasteData]);
+  }, [customer, selectedDay, weeklyMenus, recipes, existingOrders, hasInitializedDay, loadWasteData]);
 
-  // Carregar dados de recebimento quando a aba receive for selecionada ou quando pedidos mudarem
+  // Carregar dados de recebimento automaticamente para cálculo de descontos
   useEffect(() => {
-    if (activeTab === "receive" && customer && weeklyMenus.length && recipes.length) {
+    if (customer && weeklyMenus.length && recipes.length && hasInitializedDay) {
       loadReceivingData();
     }
-  }, [activeTab, customer, selectedDay, weeklyMenus, recipes, existingOrders, loadReceivingData]);
+  }, [customer, selectedDay, weeklyMenus, recipes, existingOrders, hasInitializedDay, loadReceivingData]);
 
   // Carregar dados de waste da semana quando a aba history for selecionada
   useEffect(() => {
