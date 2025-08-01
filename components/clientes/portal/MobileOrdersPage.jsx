@@ -716,11 +716,9 @@ const MobileOrdersPage = ({ customerId }) => {
   useEffect(() => {
     if (hasInitializedDay) {
       const correctDay = getInitialDay();
-      if (selectedDay !== correctDay) {
-        setSelectedDay(correctDay);
-      }
+      setSelectedDay(correctDay);
     }
-  }, [weekStart, hasInitializedDay, getInitialDay, selectedDay]);
+  }, [weekStart, hasInitializedDay, getInitialDay]); // Removido selectedDay das dependências
 
   // Preparar itens do pedido baseado no cardápio
   const orderItems = useMemo(() => {
