@@ -335,20 +335,34 @@ const MobileOrdersPage = ({ customerId }) => {
               const recipe = recipes.find(r => r.id === item.recipe_id && r.active !== false);
               if (recipe) {
                 // Buscar container_type na estrutura correta
-                let containerType = "cuba"; // default
+                console.log(`🔍 [DEBUG-RECEIVING] Buscando container_type para receita: ${recipe.name}`);
+                console.log(`🔍 [DEBUG-RECEIVING] Recipe completa:`, recipe);
+                
+                let containerType = null;
                 if (recipe.preparations && recipe.preparations.length > 0) {
                   const lastPrep = recipe.preparations[recipe.preparations.length - 1];
+                  console.log(`🔍 [DEBUG-RECEIVING] Última preparation:`, lastPrep);
                   if (lastPrep.assembly_config?.container_type) {
                     containerType = lastPrep.assembly_config.container_type.toLowerCase();
+                    console.log(`🔍 [DEBUG-RECEIVING] Container_type encontrado em assembly_config: ${containerType}`);
                   }
                 }
                 
                 // Se não encontrou, verificar se tem direto na receita
-                if (!containerType || containerType === "cuba") {
+                if (!containerType) {
                   if (recipe.container_type) {
                     containerType = recipe.container_type.toLowerCase();
+                    console.log(`🔍 [DEBUG-RECEIVING] Container_type encontrado direto na receita: ${containerType}`);
                   }
                 }
+                
+                // Default final se nada for encontrado
+                if (!containerType) {
+                  containerType = "cuba";
+                  console.log(`🔍 [DEBUG-RECEIVING] Usando container_type padrão: ${containerType}`);
+                }
+                
+                console.log(`🔍 [DEBUG-RECEIVING] Container_type final: ${containerType}`);
 
                 const receivingItem = {
                   unique_id: `${item.recipe_id}_${uniqueCounter++}`,
@@ -753,20 +767,34 @@ const MobileOrdersPage = ({ customerId }) => {
             if (recipe) {
 
               // Buscar container_type na estrutura correta
-              let containerType = "cuba"; // default
+              console.log(`🔍 [DEBUG] Buscando container_type para receita: ${recipe.name}`);
+              console.log(`🔍 [DEBUG] Recipe completa:`, recipe);
+              
+              let containerType = null;
               if (recipe.preparations && recipe.preparations.length > 0) {
                 const lastPrep = recipe.preparations[recipe.preparations.length - 1];
+                console.log(`🔍 [DEBUG] Última preparation:`, lastPrep);
                 if (lastPrep.assembly_config?.container_type) {
                   containerType = lastPrep.assembly_config.container_type.toLowerCase();
+                  console.log(`🔍 [DEBUG] Container_type encontrado em assembly_config: ${containerType}`);
                 }
               }
               
               // Se não encontrou, verificar se tem direto na receita
-              if (!containerType || containerType === "cuba") {
+              if (!containerType) {
                 if (recipe.container_type) {
                   containerType = recipe.container_type.toLowerCase();
+                  console.log(`🔍 [DEBUG] Container_type encontrado direto na receita: ${containerType}`);
                 }
               }
+              
+              // Default final se nada for encontrado
+              if (!containerType) {
+                containerType = "cuba";
+                console.log(`🔍 [DEBUG] Usando container_type padrão: ${containerType}`);
+              }
+              
+              console.log(`🔍 [DEBUG] Container_type final: ${containerType}`);
               
               // Definir preço baseado no container_type
               let unitPrice = 0;
@@ -800,6 +828,8 @@ const MobileOrdersPage = ({ customerId }) => {
                 adjustment_percentage: 0
               };
               
+              console.log(`🔍 [DEBUG] Item criado com unit_type: ${newItem.unit_type} para receita: ${recipe.name}`);
+              
               items.push(newItem);
             }
           }
@@ -817,6 +847,7 @@ const MobileOrdersPage = ({ customerId }) => {
       const newItems = prev.items.map(item => {
         if (item.unique_id === uniqueId) {
           const updatedItem = { ...item };
+          console.log(`🔍 [DEBUG-UPDATE] Atualizando item ${item.recipe_name} - unit_type atual: ${item.unit_type}`);
 
           // Verificar se é categoria de carne
           const isCarneCategory = item.category && item.category.toLowerCase().includes('carne');
@@ -866,6 +897,7 @@ const MobileOrdersPage = ({ customerId }) => {
           } else {
             updatedItem[field] = value;
           }
+          console.log(`🔍 [DEBUG-UPDATE] Item ${updatedItem.recipe_name} após update - unit_type: ${updatedItem.unit_type}`);
           return updatedItem;
         }
         return item;
@@ -936,18 +968,23 @@ const MobileOrdersPage = ({ customerId }) => {
     // Se existe pedido salvo para este dia, usar ele
     if (existingOrders[selectedDay] && orderItems.length > 0) {
       const existingOrder = existingOrders[selectedDay];
+      console.log(`🔍 [DEBUG-EXISTING] Carregando pedido existente:`, existingOrder);
       
       // Atualizar preços dos itens existentes com valores atuais das receitas
       const updatedItems = existingOrder.items.map(existingItem => {
+        console.log(`🔍 [DEBUG-EXISTING] Item existente: ${existingItem.recipe_name} - unit_type: ${existingItem.unit_type}`);
         // Encontrar item correspondente nos orderItems atualizados (com preços novos)
         const currentItem = orderItems.find(oi => oi.unique_id === existingItem.unique_id || oi.recipe_id === existingItem.recipe_id);
         if (currentItem) {
-          // Manter quantidades e notas do pedido salvo, mas atualizar preços
-          return {
+          // Manter quantidades e notas do pedido salvo, mas atualizar preços E unit_type
+          const updatedItem = {
             ...existingItem,
             unit_price: currentItem.unit_price,
+            unit_type: currentItem.unit_type, // ATUALIZAR unit_type com valor atual da receita
             total_price: (existingItem.quantity || 0) * (currentItem.unit_price || 0)
           };
+          console.log(`🔍 [DEBUG-MIGRATION] Item ${existingItem.recipe_name}: ${existingItem.unit_type} → ${currentItem.unit_type}`);
+          return updatedItem;
         }
         return existingItem;
       });

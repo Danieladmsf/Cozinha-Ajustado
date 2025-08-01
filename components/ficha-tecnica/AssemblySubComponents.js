@@ -132,7 +132,8 @@ const AssemblySubComponents = ({
                 <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="cuba">Cuba</SelectItem>
+                <SelectItem value="cupa-p">Cupa P</SelectItem>
+                <SelectItem value="cuba-g">Cuba G</SelectItem>
                 <SelectItem value="descartavel">Embalagem Descartável</SelectItem>
                 <SelectItem value="Unid.">Porção Individual</SelectItem>
                 <SelectItem value="kg">Kg</SelectItem>
