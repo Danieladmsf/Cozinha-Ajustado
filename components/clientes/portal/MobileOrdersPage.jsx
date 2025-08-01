@@ -1210,7 +1210,9 @@ const MobileOrdersPage = ({ customerId }) => {
             </Button>
             <div className="flex gap-1">
               {weekDays.map((day) => {
-                const isCurrentDay = getCurrentWeekDay() === day.dayNumber;
+                // Verificar se é realmente o dia atual (data exata, não apenas número do dia)
+                const today = new Date();
+                const isCurrentDay = format(today, 'yyyy-MM-dd') === format(day.date, 'yyyy-MM-dd');
                 const isSelected = selectedDay === day.dayNumber;
                 
                 return (
