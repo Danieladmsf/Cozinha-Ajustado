@@ -825,12 +825,19 @@ const MobileOrdersPage = ({ customerId }) => {
             const baseQuantity = utilParseQuantity(value);
             updatedItem.base_quantity = baseQuantity;
             
-            if (item.unit_type === 'unid') {
-              // Lógica específica para unidade "unid"
-              // Total Pedido = (Quantidade * 2) * Porcionamento
-              const percentage = (updatedItem.adjustment_percentage || 0) / 100;
-              const newQuantity = (baseQuantity * 2) * percentage;
-              updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+            if (isCarneCategory) {
+              // Lógica específica para categoria carne
+              if (item.unit_type === 'unid') {
+                // Para unidade "unid": Total = (Quantidade * 2) * Porcentagem
+                const percentage = (updatedItem.adjustment_percentage || 0) / 100;
+                const newQuantity = (baseQuantity * 2) * percentage;
+                updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+              } else {
+                // Para outras unidades em carne: Total = Quantidade * (1 + Porcentagem/100)
+                const percentage = updatedItem.adjustment_percentage || 0;
+                const newQuantity = baseQuantity * (1 + (percentage / 100));
+                updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+              }
             } else {
               // Lógica padrão para outras categorias
               const percentage = updatedItem.adjustment_percentage || 0;
@@ -843,13 +850,20 @@ const MobileOrdersPage = ({ customerId }) => {
             const percentage = utilParseQuantity(value);
             updatedItem.adjustment_percentage = percentage;
             
-            if (item.unit_type === 'unid') {
-              // Lógica específica para unidade "unid"
-              // Total Pedido = (Quantidade * 2) * Porcionamento
-              const percentageDecimal = percentage / 100;
-              const baseQuantity = updatedItem.base_quantity || 0;
-              const newQuantity = (baseQuantity * 2) * percentageDecimal;
-              updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+            if (isCarneCategory) {
+              // Lógica específica para categoria carne
+              if (item.unit_type === 'unid') {
+                // Para unidade "unid": Total = (Quantidade * 2) * Porcentagem
+                const percentageDecimal = percentage / 100;
+                const baseQuantity = updatedItem.base_quantity || 0;
+                const newQuantity = (baseQuantity * 2) * percentageDecimal;
+                updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+              } else {
+                // Para outras unidades em carne: Total = Quantidade * (1 + Porcentagem/100)
+                const baseQuantity = updatedItem.base_quantity || 0;
+                const newQuantity = baseQuantity * (1 + (percentage / 100));
+                updatedItem.quantity = Math.round(newQuantity * 100) / 100;
+              }
             } else {
               // Lógica padrão para outras categorias
               const baseQuantity = updatedItem.base_quantity || 0;
@@ -1049,12 +1063,12 @@ const MobileOrdersPage = ({ customerId }) => {
         
         // Para cada categoria
         orderedCategories.forEach(({ name: categoryName, data: categoryData }) => {
-          const hasUnidItems = categoryData.items.some(item => item.unit_type === 'unid');
+          const isCarneCategory = categoryName.toLowerCase().includes('carne');
           
           inputString += `--- CATEGORIA: ${categoryName} ---\n`;
           outputString += `--- CATEGORIA: ${categoryName} ---\n`;
           
-          if (hasUnidItems) {
+          if (isCarneCategory) {
             inputString += "Item | Quantidade | Unidade | Porcionamento | Total Pedido | Subtotal | Observações\n";
             outputString += "Item | Quantidade | Unidade | Porcionamento | Total Pedido | Subtotal | Observações\n";
           } else {
@@ -1073,7 +1087,7 @@ const MobileOrdersPage = ({ customerId }) => {
             
             const itemHeader = `${item.recipe_name}\n${unitPrice}/${item.unit_type}`;
             
-            if (item.unit_type === 'unid') {
+            if (isCarneCategory) {
               inputString += `${itemHeader} | ${baseQty} | ${unitType} | ${adjustmentPct}% | ${totalQty} ${item.unit_type} | ${subtotal} | ${notes}\n`;
               outputString += `${itemHeader} | ${baseQty} | ${unitType} | ${adjustmentPct}% | ${totalQty} ${item.unit_type} | ${subtotal} | ${notes}\n`;
             } else {
