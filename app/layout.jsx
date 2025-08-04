@@ -19,7 +19,7 @@ import {
   Clipboard,
   Settings
 } from "lucide-react";
-import { Button } from "@/components/ui/button.jsx";
+import { Button } from "@/components/ui/button";
 import SidebarNav from "@/components/shared/navigation";
 import { Toaster } from "@/components/ui/toaster";
 import { SpeedInsights } from "@vercel/speed-insights/next";

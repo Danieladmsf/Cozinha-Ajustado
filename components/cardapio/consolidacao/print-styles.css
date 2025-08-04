@@ -1,0 +1,253 @@
+/* Estilos específicos para impressão - Folha A4 */
+
+@media print {
+  /* Configurações gerais da página */
+  @page {
+    size: A4;
+    margin: 2cm;
+  }
+  
+  /* Ocultar TUDO primeiro */
+  * {
+    visibility: hidden !important;
+  }
+  
+  /* Mostrar apenas o conteúdo de impressão */
+  .print\\:break-after-page,
+  .print\\:break-after-page * {
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  /* Ocultar menu lateral, navegação e outros elementos da UI */
+  nav,
+  aside,
+  .sidebar,
+  .navigation,
+  .nav,
+  .menu,
+  header,
+  footer,
+  .print\\:hidden,
+  /* Elementos específicos que podem aparecer */
+  [role="navigation"],
+  [class*="sidebar"],
+  [class*="menu"],
+  [class*="nav"],
+  [class*="header"],
+  [class*="toolbar"],
+  [class*="controls"],
+  /* Barras de rolagem */
+  ::-webkit-scrollbar,
+  /* Botões e controles */
+  button:not(.print-show),
+  input:not(.print-show),
+  select:not(.print-show),
+  /* Elementos com classes comuns de UI */
+  .flex.justify-between,
+  .fixed,
+  .sticky {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Ocultar barras de rolagem */
+  body {
+    overflow: hidden !important;
+  }
+  
+  /* Resetar margens e padding do body */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Garantir que apenas o conteúdo da impressão seja visível */
+  .consolidacao-container {
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Ocultar tudo exceto o conteúdo de impressão */
+  body > *:not(.print-content) {
+    display: none !important;
+  }
+  
+  /* Mostrar apenas divs que contêm conteúdo de impressão */
+  .print\\:break-after-page {
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  /* Resetar estilos do container principal */
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+  
+  /* Quebra de página após cada cliente */
+  .print\\:break-after-page {
+    break-after: page;
+    page-break-after: always;
+  }
+  
+  /* Altura mínima da página */
+  .print\\:min-h-screen {
+    min-height: 100vh;
+  }
+  
+  /* Padding para impressão */
+  .print\\:p-8 {
+    padding: 2rem;
+  }
+  
+  /* Espaçamentos para impressão */
+  .print\\:mb-12 {
+    margin-bottom: 3rem;
+  }
+  
+  .print\\:pb-6 {
+    padding-bottom: 1.5rem;
+  }
+  
+  .print\\:space-y-8 > * + * {
+    margin-top: 2rem;
+  }
+  
+  .print\\:space-y-10 > * + * {
+    margin-top: 2.5rem;
+  }
+  
+  .print\\:space-y-3 > * + * {
+    margin-top: 0.75rem;
+  }
+  
+  .print\\:mb-6 {
+    margin-bottom: 1.5rem;
+  }
+  
+  .print\\:mb-10 {
+    margin-bottom: 2.5rem;
+  }
+  
+  .print\\:pl-6 {
+    padding-left: 1.5rem;
+  }
+  
+  .print\\:gap-6 {
+    gap: 1.5rem;
+  }
+  
+  /* Tamanhos de texto para impressão */
+  .print\\:text-3xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  
+  .print\\:text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  
+  .print\\:text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  
+  .print\\:text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  
+  /* Larguras mínimas para impressão */
+  .print\\:min-w-\\[80px\\] {
+    min-width: 80px;
+  }
+  
+  /* Mostrar apenas na impressão */
+  .print\\:block {
+    display: block !important;
+  }
+  
+  /* Ocultar na tela */
+  .hidden {
+    display: none;
+  }
+  
+  /* Evitar quebras indesejadas */
+  .print\\:avoid-break-inside {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  /* Header do cliente */
+  .print-header {
+    border-bottom: 2px solid #374151;
+    padding-bottom: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  /* Título da categoria */
+  .print-category-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #374151;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Item do pedido */
+  .print-order-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .print-quantity {
+    font-weight: 600;
+    color: #1d4ed8;
+    min-width: 80px;
+  }
+  
+  .print-recipe-name {
+    color: #374151;
+    flex: 1;
+  }
+  
+  /* Footer */
+  .print-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #d1d5db;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+}
+
+/* Estilos gerais que também se aplicam à impressão */
+body {
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Garantir que o conteúdo seja legível */
+.consolidacao-container {
+  background: white;
+}
+
+.customer-sheet {
+  background: white;
+  color: black;
+}
