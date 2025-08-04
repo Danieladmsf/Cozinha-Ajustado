@@ -7,7 +7,11 @@ import { DecimalInput } from "@/components/ui/decimal-input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, AlertTriangle, Loader2, CheckCircle } from "lucide-react";
-import { formattedQuantity as utilFormattedQuantity } from "@/components/utils/orderUtils";
+import { 
+  formattedQuantity as utilFormattedQuantity,
+  formatCurrency as utilFormatCurrency 
+} from "@/components/utils/orderUtils";
+import { formatUnitTypeForDisplay } from "@/lib/unitTypeUtils";
 
 const WasteTab = ({
   wasteLoading,
@@ -115,6 +119,7 @@ const WasteTab = ({
                       <th className="text-center p-2 text-xs font-medium text-amber-700">Pedido</th>
                       <th className="text-center p-2 text-xs font-medium text-amber-700">Sobra Interna</th>
                       <th className="text-center p-2 text-xs font-medium text-amber-700">Cliente Devolveu</th>
+                      <th className="text-center p-2 text-xs font-medium text-amber-700">Valor Devolução</th>
                       <th className="text-left p-2 text-xs font-medium text-amber-700">Observações</th>
                     </tr>
                   </thead>
@@ -127,7 +132,7 @@ const WasteTab = ({
                             <div>
                               <p className="font-medium text-amber-900 text-xs">{item.recipe_name}</p>
                               <p className="text-xs text-amber-600">
-                                Pedido: {utilFormattedQuantity(item.ordered_quantity)} {item.ordered_unit_type}
+                                {utilFormatCurrency(item.unit_price || 0)}/{item.ordered_unit_type}
                               </p>
                             </div>
                           </td>
@@ -149,13 +154,9 @@ const WasteTab = ({
                                 placeholder="0"
                                 disabled={!isEditMode}
                               />
-                              <select
-                                value="kg"
-                                disabled
-                                className="text-xs h-8 w-12 border border-amber-300 rounded focus:border-amber-500 bg-gray-50"
-                              >
-                                <option value="kg">Kg</option>
-                              </select>
+                              <div className="text-xs h-8 w-12 flex items-center justify-center font-medium text-gray-700">
+                                {formatUnitTypeForDisplay(item.ordered_unit_type || 'kg')}
+                              </div>
                             </div>
                           </td>
                           <td className="p-2">
@@ -171,13 +172,17 @@ const WasteTab = ({
                                 placeholder="0"
                                 disabled={!isEditMode}
                               />
-                              <select
-                                value="kg"
-                                disabled
-                                className="text-xs h-8 w-12 border border-amber-300 rounded focus:border-amber-500 bg-gray-50"
-                              >
-                                <option value="kg">Kg</option>
-                              </select>
+                              <div className="text-xs h-8 w-12 flex items-center justify-center font-medium text-gray-700">
+                                {formatUnitTypeForDisplay(item.ordered_unit_type || 'kg')}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-2 text-center">
+                            <div className="text-xs font-medium text-red-600">
+                              {(item.client_returned_quantity || 0) > 0 && (item.unit_price || 0) > 0
+                                ? utilFormatCurrency((item.client_returned_quantity || 0) * (item.unit_price || 0))
+                                : '-'
+                              }
                             </div>
                           </td>
                           <td className="p-2">

@@ -51,6 +51,7 @@ import {
 } from "@/components/utils/orderUtils";
 
 import { useCategoryDisplay } from "@/hooks/shared/useCategoryDisplay";
+import { getRecipeUnitType } from "@/lib/unitTypeUtils";
 
 // Utilitário para cálculos de depreciação
 import { 
@@ -235,7 +236,9 @@ const MobileOrdersPage = ({ customerId }) => {
                   client_returned_quantity: 0,
                   notes: "",
                   ordered_quantity: 0,
-                  ordered_unit_type: "kg"
+                  ordered_unit_type: getRecipeUnitType(recipe),
+                  unit_price: 0,
+                  total_price: 0
                 };
                 
                 // Buscar informações do pedido para este item
@@ -250,7 +253,9 @@ const MobileOrdersPage = ({ customerId }) => {
                   
                   if (orderItem) {
                     wasteItem.ordered_quantity = orderItem.quantity || 0;
-                    wasteItem.ordered_unit_type = orderItem.unit_type || "kg";
+                    wasteItem.ordered_unit_type = orderItem.unit_type || getRecipeUnitType(recipe);
+                    wasteItem.unit_price = orderItem.unit_price || 0;
+                    wasteItem.total_price = orderItem.total_price || 0;
                   }
                 }
                 
@@ -334,35 +339,7 @@ const MobileOrdersPage = ({ customerId }) => {
             if (shouldInclude) {
               const recipe = recipes.find(r => r.id === item.recipe_id && r.active !== false);
               if (recipe) {
-                // Buscar container_type na estrutura correta
-                console.log(`🔍 [DEBUG-RECEIVING] Buscando container_type para receita: ${recipe.name}`);
-                console.log(`🔍 [DEBUG-RECEIVING] Recipe completa:`, recipe);
-                
-                let containerType = null;
-                if (recipe.preparations && recipe.preparations.length > 0) {
-                  const lastPrep = recipe.preparations[recipe.preparations.length - 1];
-                  console.log(`🔍 [DEBUG-RECEIVING] Última preparation:`, lastPrep);
-                  if (lastPrep.assembly_config?.container_type) {
-                    containerType = lastPrep.assembly_config.container_type.toLowerCase();
-                    console.log(`🔍 [DEBUG-RECEIVING] Container_type encontrado em assembly_config: ${containerType}`);
-                  }
-                }
-                
-                // Se não encontrou, verificar se tem direto na receita
-                if (!containerType) {
-                  if (recipe.container_type) {
-                    containerType = recipe.container_type.toLowerCase();
-                    console.log(`🔍 [DEBUG-RECEIVING] Container_type encontrado direto na receita: ${containerType}`);
-                  }
-                }
-                
-                // Default final se nada for encontrado
-                if (!containerType) {
-                  containerType = "cuba";
-                  console.log(`🔍 [DEBUG-RECEIVING] Usando container_type padrão: ${containerType}`);
-                }
-                
-                console.log(`🔍 [DEBUG-RECEIVING] Container_type final: ${containerType}`);
+                const containerType = getRecipeUnitType(recipe);
 
                 const receivingItem = {
                   unique_id: `${item.recipe_id}_${uniqueCounter++}`,
@@ -765,36 +742,7 @@ const MobileOrdersPage = ({ customerId }) => {
             const recipe = recipes.find(r => r.id === item.recipe_id && r.active !== false);
             
             if (recipe) {
-
-              // Buscar container_type na estrutura correta
-              console.log(`🔍 [DEBUG] Buscando container_type para receita: ${recipe.name}`);
-              console.log(`🔍 [DEBUG] Recipe completa:`, recipe);
-              
-              let containerType = null;
-              if (recipe.preparations && recipe.preparations.length > 0) {
-                const lastPrep = recipe.preparations[recipe.preparations.length - 1];
-                console.log(`🔍 [DEBUG] Última preparation:`, lastPrep);
-                if (lastPrep.assembly_config?.container_type) {
-                  containerType = lastPrep.assembly_config.container_type.toLowerCase();
-                  console.log(`🔍 [DEBUG] Container_type encontrado em assembly_config: ${containerType}`);
-                }
-              }
-              
-              // Se não encontrou, verificar se tem direto na receita
-              if (!containerType) {
-                if (recipe.container_type) {
-                  containerType = recipe.container_type.toLowerCase();
-                  console.log(`🔍 [DEBUG] Container_type encontrado direto na receita: ${containerType}`);
-                }
-              }
-              
-              // Default final se nada for encontrado
-              if (!containerType) {
-                containerType = "cuba";
-                console.log(`🔍 [DEBUG] Usando container_type padrão: ${containerType}`);
-              }
-              
-              console.log(`🔍 [DEBUG] Container_type final: ${containerType}`);
+              const containerType = getRecipeUnitType(recipe);
               
               // Definir preço baseado no container_type
               let unitPrice = 0;
@@ -828,7 +776,6 @@ const MobileOrdersPage = ({ customerId }) => {
                 adjustment_percentage: 0
               };
               
-              console.log(`🔍 [DEBUG] Item criado com unit_type: ${newItem.unit_type} para receita: ${recipe.name}`);
               
               items.push(newItem);
             }
@@ -847,7 +794,6 @@ const MobileOrdersPage = ({ customerId }) => {
       const newItems = prev.items.map(item => {
         if (item.unique_id === uniqueId) {
           const updatedItem = { ...item };
-          console.log(`🔍 [DEBUG-UPDATE] Atualizando item ${item.recipe_name} - unit_type atual: ${item.unit_type}`);
 
           // Verificar se é categoria de carne
           const isCarneCategory = item.category && item.category.toLowerCase().includes('carne');
@@ -897,7 +843,6 @@ const MobileOrdersPage = ({ customerId }) => {
           } else {
             updatedItem[field] = value;
           }
-          console.log(`🔍 [DEBUG-UPDATE] Item ${updatedItem.recipe_name} após update - unit_type: ${updatedItem.unit_type}`);
           return updatedItem;
         }
         return item;
@@ -968,11 +913,9 @@ const MobileOrdersPage = ({ customerId }) => {
     // Se existe pedido salvo para este dia, usar ele
     if (existingOrders[selectedDay] && orderItems.length > 0) {
       const existingOrder = existingOrders[selectedDay];
-      console.log(`🔍 [DEBUG-EXISTING] Carregando pedido existente:`, existingOrder);
       
       // Atualizar preços dos itens existentes com valores atuais das receitas
       const updatedItems = existingOrder.items.map(existingItem => {
-        console.log(`🔍 [DEBUG-EXISTING] Item existente: ${existingItem.recipe_name} - unit_type: ${existingItem.unit_type}`);
         // Encontrar item correspondente nos orderItems atualizados (com preços novos)
         const currentItem = orderItems.find(oi => oi.unique_id === existingItem.unique_id || oi.recipe_id === existingItem.recipe_id);
         if (currentItem) {
@@ -983,7 +926,6 @@ const MobileOrdersPage = ({ customerId }) => {
             unit_type: currentItem.unit_type, // ATUALIZAR unit_type com valor atual da receita
             total_price: (existingItem.quantity || 0) * (currentItem.unit_price || 0)
           };
-          console.log(`🔍 [DEBUG-MIGRATION] Item ${existingItem.recipe_name}: ${existingItem.unit_type} → ${currentItem.unit_type}`);
           return updatedItem;
         }
         return existingItem;

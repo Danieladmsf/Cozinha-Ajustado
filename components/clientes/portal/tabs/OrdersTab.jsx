@@ -207,7 +207,6 @@ const OrdersTab = ({
                           </td>
                           <td className="p-2">
                             <div className="text-center text-xs font-medium text-blue-700">
-                              {console.log(`🔍 [DEBUG-DISPLAY] Exibindo unit_type: ${item.unit_type} para item: ${item.recipe_name}`)}
                               {item.unit_type.charAt(0).toUpperCase() + item.unit_type.slice(1)}
                             </div>
                           </td>
