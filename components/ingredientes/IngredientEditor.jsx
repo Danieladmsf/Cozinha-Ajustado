@@ -268,7 +268,7 @@ export default function IngredientEditor() {
       
       if (!ingredient) {
         setError("Ingrediente não encontrado. Redirecionando para criação de novo ingrediente.");
-        router.push('/ingredienteditor?id=new');
+        router.push('/ingredientes/editor?id=new');
         resetFormForNewIngredient();
         return;
       }
@@ -429,8 +429,25 @@ export default function IngredientEditor() {
         taco_variations: formData.taco_variations,
       };
 
+      let result;
+      if (isEditing && currentIngredientId) {
+        // Atualizar ingrediente existente
+        result = await Ingredient.update(currentIngredientId, ingredientDataToSave);
+        toast({
+          title: "Ingrediente atualizado",
+          description: `O ingrediente "${formData.name}" foi atualizado com sucesso.`
+        });
+      } else {
+        // Criar novo ingrediente
+        result = await Ingredient.create(ingredientDataToSave);
+        toast({
+          title: "Ingrediente criado",
+          description: `O ingrediente "${formData.name}" foi criado com sucesso.`
+        });
+      }
 
-      // Lógica de salvamento removida
+      // Redirecionar para a lista de ingredientes
+      router.push('/ingredientes');
 
     } catch (err) {
       console.error("Erro ao salvar:", err);
@@ -444,7 +461,7 @@ export default function IngredientEditor() {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto mb-4"></div>
           <p className="mt-2 text-gray-600">
             {isEditing ? 'Carregando ingrediente...' : 'Carregando dados...'}
           </p>
@@ -466,7 +483,7 @@ export default function IngredientEditor() {
           <div className="flex items-center mb-4">
             <Button 
               variant="outline" 
-              onClick={() => router.push('/ingredients')}
+              onClick={() => router.push('/ingredientes')}
               className="mr-4"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -489,21 +506,21 @@ export default function IngredientEditor() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* Debug Card - apenas se em edição */}
           {isEditing && (
-            <Card className="mb-6 bg-blue-50 border-blue-200">
+            <Card className="mb-6 bg-gray-50 border-gray-300">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm text-blue-800 flex items-center gap-2">
+                <CardTitle className="text-sm text-gray-800 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
                   Debug - Dados Carregados
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-xs text-blue-700 pt-0">
+              <CardContent className="text-xs text-gray-700 pt-0">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <div><strong>Nome:</strong> "{formData.name}"</div>
                   <div><strong>Categoria:</strong> "{formData.category}"</div>
                   <div><strong>Fornecedor:</strong> "{formData.main_supplier}"</div>
                   <div><strong>Preço:</strong> "R$ {formData.current_price}"</div>
                 </div>
-                <div className="mt-3 p-2 bg-blue-100 rounded text-xs">
+                <div className="mt-3 p-2 bg-gray-100 rounded text-xs">
                   <strong>Esperado para Muçarela (Exemplo):</strong><br/>
                   Fornecedor: "NOVA MEGA G ATACADISTA DE ALIMENTOS SA", Categoria: "Laticínios", Preço: "34.9"
                 </div>
@@ -904,7 +921,7 @@ export default function IngredientEditor() {
                                 <div className="text-sm text-gray-500">
                                   Variação: {variation.variation_name} | Perda: {variation.loss_percentage}%
                                 </div>
-                                {variation.is_base && <Badge variant="success" className="mt-1">Base</Badge>}
+                                {variation.is_base && <Badge variant="outline" className="mt-1 text-gray-700">Base</Badge>}
                               </div>
                               <Button
                                 type="button"
@@ -961,7 +978,7 @@ export default function IngredientEditor() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push('/ingredients')}
+                onClick={() => router.push('/ingredientes')}
                 className="w-full sm:w-auto"
               >
                 Cancelar
@@ -969,7 +986,7 @@ export default function IngredientEditor() {
               <Button
                 type="submit"
                 disabled={saving || loading}
-                className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+                className="bg-gray-800 hover:bg-gray-900 w-full sm:w-auto"
               >
                 {saving ? "Salvando..." : (isEditing ? "Atualizar Ingrediente" : "Criar Ingrediente")}
               </Button>

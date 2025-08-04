@@ -100,9 +100,34 @@ const createEntity = (collectionName) => {
 
     // Delete document
     delete: async (id) => {
-      const docRef = doc(db, collectionName, id);
-      await deleteDoc(docRef);
-      return { id, deleted: true };
+      try {
+        console.log(`[${collectionName}] Tentando deletar documento ID:`, id);
+        const docRef = doc(db, collectionName, id);
+        
+        // Verificar se o documento existe antes de deletar
+        const docSnapshot = await getDoc(docRef);
+        if (!docSnapshot.exists()) {
+          console.warn(`[${collectionName}] Documento ${id} já foi excluído anteriormente`);
+          // Retornar sucesso se já foi excluído (idempotente)
+          return { id, deleted: true, alreadyDeleted: true };
+        }
+        
+        console.log(`[${collectionName}] Documento encontrado, procedendo com exclusão:`, docSnapshot.data());
+        await deleteDoc(docRef);
+        
+        // Verificar se realmente foi deletado
+        const verifyDoc = await getDoc(docRef);
+        if (verifyDoc.exists()) {
+          console.error(`[${collectionName}] ERRO: Documento ainda existe após exclusão!`);
+          throw new Error(`Document was not deleted successfully`);
+        }
+        
+        console.log(`[${collectionName}] ✅ Documento deletado e verificado com sucesso:`, id);
+        return { id, deleted: true };
+      } catch (error) {
+        console.error(`[${collectionName}] Erro ao deletar documento:`, error);
+        throw new Error(`Failed to delete document ${id} from ${collectionName}: ${error.message}`);
+      }
     },
 
     // Query with filters

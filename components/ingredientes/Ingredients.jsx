@@ -32,9 +32,13 @@ import {
   TrendingUp,
   Upload,
   BarChart3,
-  Store
+  Store,
+  DollarSign,
+  Check,
+  X
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/components/ui/use-toast";
 import { createPageUrl } from "@/utils";
 import { useRouter } from "next/navigation";
 import BrandsManager from "@/components/ingredientes/BrandsManager";
@@ -54,6 +58,8 @@ export default function Ingredients() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [supplierFilter, setSupplierFilter] = useState("all");
+  const [editingPrice, setEditingPrice] = useState(null);
+  const [tempPrice, setTempPrice] = useState("");
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -69,6 +75,7 @@ export default function Ingredients() {
 
   const loadIngredients = async () => {
     try {
+      console.log('🔄 Iniciando loadIngredients...');
       setLoading(true);
       setError(null);
 
@@ -78,14 +85,20 @@ export default function Ingredients() {
       );
       
       const loadPromise = Ingredient.list().catch(error => {
-        console.error('[Ingredients] Error loading from database:', error);
+        console.error('Erro ao carregar do banco:', error);
+        // Error loading from database
         return []; // Return empty array on error
       });
 
       const allIngredients = await Promise.race([loadPromise, timeoutPromise]);
+      console.log('📊 Ingredientes carregados do Firebase:', allIngredients.length);
+      console.log('🔍 IDs dos primeiros 5 ingredientes:', allIngredients.slice(0, 5).map(ing => ({ id: ing.id, name: ing.name })));
+      
+      // Filtrar ingredientes que realmente existem (têm ID válido)
+      const validIngredients = allIngredients.filter(ing => ing && ing.id);
 
       // Processar ingredientes
-      const processedIngredients = (allIngredients || []).map(ingredient => ({
+      const processedIngredients = (validIngredients || []).map(ingredient => ({
         ...ingredient,
         displayName: ingredient.name,
         displayPrice: ingredient.current_price,
@@ -95,8 +108,11 @@ export default function Ingredients() {
 
       // Filtrar ingredientes ativos
       const activeIngredients = processedIngredients.filter(ing => ing.active !== false);
+      console.log('✅ Ingredientes ativos filtrados:', activeIngredients.length);
 
       setIngredients(activeIngredients);
+      console.log('🎯 Estado ingredients atualizado com:', activeIngredients.length, 'ingredientes');
+      
       setStats({
         total: processedIngredients.length,
         active: activeIngredients.length,
@@ -110,25 +126,151 @@ export default function Ingredients() {
       
 
     } catch (err) {
-      console.error('[Ingredients] Critical error loading ingredients:', err);
+      console.error('❌ Erro crítico em loadIngredients:', err);
+      // Critical error loading ingredients
       setError('Erro ao carregar ingredientes: ' + err.message);
       // Set empty state on error
       setIngredients([]);
       setStats({ total: 0, active: 0, traditional: 0, commercial: 0 });
     } finally {
       setLoading(false);
+      console.log('🏁 loadIngredients finalizado');
     }
   };
 
   const handleDelete = async (ingredient) => {
+    console.log('Tentando excluir ingrediente:', ingredient);
+    
+    // Verificar se o ingrediente tem ID válido
+    if (!ingredient || !ingredient.id) {
+      console.error('Ingrediente sem ID válido:', ingredient);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Ingrediente não possui ID válido para exclusão."
+      });
+      return;
+    }
+    
     if (window.confirm(`Tem certeza que deseja excluir o ingrediente "${ingredient.name}"?`)) {
       try {
-        await Ingredient.delete(ingredient.id);
-        await loadIngredients();
+        console.log('Confirmado - excluindo ingrediente ID:', ingredient.id);
+        const result = await Ingredient.delete(ingredient.id);
+        console.log('Resultado da exclusão:', result);
+        
+        // Remover o ingrediente da lista local imediatamente
+        setIngredients(prevIngredients => {
+          const updatedIngredients = prevIngredients.filter(ing => ing.id !== ingredient.id);
+          console.log('🚀 Removido da lista local. Ingredientes restantes:', updatedIngredients.length);
+          return updatedIngredients;
+        });
+        
+        // Também atualizar as estatísticas
+        setStats(prevStats => ({
+          ...prevStats,
+          total: Math.max(0, prevStats.total - 1),
+          active: Math.max(0, prevStats.active - 1),
+          traditional: ingredient.ingredient_type === 'traditional' || ingredient.ingredient_type === 'both' 
+            ? Math.max(0, prevStats.traditional - 1) : prevStats.traditional,
+          commercial: ingredient.ingredient_type === 'commercial' || ingredient.ingredient_type === 'both'
+            ? Math.max(0, prevStats.commercial - 1) : prevStats.commercial
+        }));
+        
+        // Mostrar mensagem de sucesso adequada
+        const message = result.alreadyDeleted 
+          ? "Ingrediente já havia sido excluído e foi removido da lista" 
+          : "Ingrediente excluído com sucesso";
+        
+        toast({
+          title: "Ingrediente removido",
+          description: `${ingredient.name}: ${message}`
+        });
+        
+        // Ainda recarregar do servidor para garantir sincronização (com pequeno delay)
+        setTimeout(async () => {
+          console.log('📡 Recarregando lista do servidor após exclusão...');
+          
+          // Verificar especificamente se o ingrediente excluído ainda existe
+          try {
+            const checkIngredient = await Ingredient.get(ingredient.id);
+            if (checkIngredient) {
+              console.error('❌ PROBLEMA: Ingrediente ainda existe no Firebase:', checkIngredient);
+            } else {
+              console.log('✅ Confirmado: Ingrediente não existe mais no Firebase');
+            }
+          } catch (err) {
+            console.log('✅ Confirmado: Ingrediente não encontrado (esperado):', err.message);
+          }
+          
+          loadIngredients();
+        }, 1000);
       } catch (err) {
+        console.error('Erro ao excluir ingrediente:', err);
         setError('Erro ao excluir ingrediente: ' + err.message);
+        toast({
+          variant: "destructive",
+          title: "Erro ao excluir",
+          description: err.message
+        });
       }
     }
+  };
+
+  const handlePriceEdit = (ingredient) => {
+    setEditingPrice(ingredient.id);
+    setTempPrice(ingredient.current_price?.toString() || "0");
+  };
+
+  const handlePriceSave = async (ingredient) => {
+    if (!tempPrice || isNaN(parseFloat(tempPrice))) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Preço deve ser um número válido."
+      });
+      return;
+    }
+
+    try {
+      const newPrice = parseFloat(tempPrice);
+      console.log(`Atualizando preço do ingrediente ${ingredient.name}: ${ingredient.current_price} → ${newPrice}`);
+      
+      // Atualizar no Firebase
+      await Ingredient.update(ingredient.id, {
+        current_price: newPrice,
+        last_update: new Date().toISOString().split('T')[0]
+      });
+
+      // Atualizar na lista local
+      setIngredients(prevIngredients => 
+        prevIngredients.map(ing => 
+          ing.id === ingredient.id 
+            ? { ...ing, current_price: newPrice, displayPrice: newPrice }
+            : ing
+        )
+      );
+
+      setEditingPrice(null);
+      setTempPrice("");
+
+      toast({
+        title: "Preço atualizado",
+        description: `${ingredient.name}: R$ ${newPrice.toFixed(2).replace('.', ',')}`
+      });
+
+    } catch (err) {
+      console.error('Erro ao atualizar preço:', err);
+      toast({
+        variant: "destructive",
+        title: "Erro ao atualizar preço",
+        description: err.message
+      });
+    }
+  };
+
+  const handlePriceCancel = () => {
+    setEditingPrice(null);
+    setTempPrice("");
   };
 
   // Filtros
@@ -136,9 +278,9 @@ export default function Ingredients() {
   const uniqueSuppliers = [...new Set(ingredients.map(ing => ing.main_supplier).filter(Boolean))];
 
   const filteredIngredients = ingredients.filter(ingredient => {
-    const matchesSearch = ingredient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         ingredient.displaySupplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         ingredient.displayBrand.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (ingredient.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (ingredient.displaySupplier?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (ingredient.displayBrand?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === "all" || ingredient.category === categoryFilter;
     const matchesSupplier = supplierFilter === "all" || ingredient.main_supplier === supplierFilter;
 
@@ -157,12 +299,12 @@ export default function Ingredients() {
   if (error) {
     return (
       <div className="p-8">
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-red-800 font-medium">Erro ao carregar ingredientes</div>
-          <div className="text-red-700 text-sm mt-1">{error}</div>
+        <div className="bg-gray-50 border border-gray-300 rounded-md p-4">
+          <div className="text-gray-800 font-medium">Erro ao carregar ingredientes</div>
+          <div className="text-gray-700 text-sm mt-1">{error}</div>
           <button
             onClick={loadIngredients}
-            className="mt-3 px-4 py-2 bg-red-100 text-red-800 text-sm rounded hover:bg-red-200"
+            className="mt-3 px-4 py-2 bg-gray-200 text-gray-800 text-sm rounded hover:bg-gray-300"
           >
             Tentar novamente
           </button>
@@ -216,7 +358,7 @@ export default function Ingredients() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-gray-500">Total</CardTitle>
-                <Package className="h-4 w-4 text-blue-500" />
+                <Package className="h-4 w-4 text-gray-600" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.total}</div>
@@ -226,7 +368,7 @@ export default function Ingredients() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-gray-500">Ativos</CardTitle>
-                <TrendingUp className="h-4 w-4 text-green-500" />
+                <TrendingUp className="h-4 w-4 text-gray-600" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.active}</div>
@@ -236,7 +378,7 @@ export default function Ingredients() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-gray-500">Para Receitas</CardTitle>
-                <Package className="h-4 w-4 text-purple-500" />
+                <Package className="h-4 w-4 text-gray-600" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.traditional}</div>
@@ -246,7 +388,7 @@ export default function Ingredients() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-gray-500">Comerciais</CardTitle>
-                <Store className="h-4 w-4 text-orange-500" />
+                <Store className="h-4 w-4 text-gray-600" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.commercial}</div>
@@ -321,14 +463,14 @@ export default function Ingredients() {
                   </thead>
                   <tbody>
                     {filteredIngredients.map((ingredient, index) => (
-                      <tr key={ingredient.id || `ingredient-${index}`} className="border-b hover:bg-gray-50">
+                      <tr key={ingredient.id || `ingredient-${index}`} className="border-b hover:bg-gray-50 group">
                         <td className="p-4">
                           <div>
                             <div className="font-medium">{ingredient.name}</div>
                             {ingredient.taco_variations && ingredient.taco_variations.length > 0 && (
                               <Badge
                                 variant="outline"
-                                className="mt-1 bg-green-50 text-green-700 border-green-200"
+                                className="mt-1 bg-gray-100 text-gray-700 border-gray-300"
                               >
                                 {ingredient.taco_variations.length} TACO
                               </Badge>
@@ -339,7 +481,52 @@ export default function Ingredients() {
                         <td className="p-4">{ingredient.category || 'N/A'}</td>
                         <td className="p-4">{ingredient.displayBrand}</td>
                         <td className="p-4">
-                          R$ {ingredient.displayPrice?.toFixed(2).replace('.', ',') || '0,00'}
+                          {editingPrice === ingredient.id ? (
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={tempPrice}
+                                onChange={(e) => setTempPrice(e.target.value)}
+                                className="w-20 h-8 text-sm"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handlePriceSave(ingredient);
+                                  if (e.key === 'Escape') handlePriceCancel();
+                                }}
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0"
+                                onClick={() => handlePriceSave(ingredient)}
+                              >
+                                <Check className="h-4 w-4 text-green-600" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0"
+                                onClick={handlePriceCancel}
+                              >
+                                <X className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <span>R$ {ingredient.displayPrice?.toFixed(2).replace('.', ',') || '0,00'}</span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => handlePriceEdit(ingredient)}
+                                title="Editar preço"
+                              >
+                                <DollarSign className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          )}
                         </td>
                         <td className="p-4">{ingredient.displaySupplier}</td>
                         <td className="p-4">
@@ -348,7 +535,7 @@ export default function Ingredients() {
                             'N/A'}
                         </td>
                         <td className="p-4">
-                          <Badge variant={ingredient.active ? "success" : "secondary"}>
+                          <Badge variant="outline" className="text-gray-700">
                             {ingredient.active ? "Ativo" : "Inativo"}
                           </Badge>
                         </td>
@@ -361,14 +548,25 @@ export default function Ingredients() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                               <DropdownMenuItem
-                                onClick={() => router.push(`/ingredienteditor?id=${ingredient.id}`)}
+                                onClick={() => router.push(`/ingredientes/editor?id=${ingredient.id}`)}
                               >
                                 <Edit className="mr-2 h-4 w-4" />
                                 Editar
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleDelete(ingredient)}
-                                className="text-red-600"
+                                onClick={() => handlePriceEdit(ingredient)}
+                              >
+                                <DollarSign className="mr-2 h-4 w-4" />
+                                Atualizar Preço
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  console.log('Botão excluir clicado para:', ingredient);
+                                  handleDelete(ingredient);
+                                }}
+                                className="text-gray-700"
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Excluir
