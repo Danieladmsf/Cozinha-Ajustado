@@ -16,43 +16,23 @@ export class CategoryLogic {
   }
 
   /**
-   * Aplica condição global para o campo Quantidade
-   * Condição: se Unidade = "Unid." então usar "Refeições Esperadas", senão usar valor informado
-   * @param {Object} item - Item do pedido
-   * @param {number} mealsExpected - Refeições esperadas
-   * @param {number} inputValue - Valor informado pelo usuário
-   * @returns {number} Quantidade calculada
-   */
-  static calculateQuantity(item, mealsExpected, inputValue) {
-    const unitType = (item.unit_type || '').toLowerCase();
-    
-    // Condição global: se unidade é "unid" usar refeições esperadas
-    if (unitType === 'unid' || unitType === 'unid.' || unitType === 'unidade') {
-      return mealsExpected || 0;
-    }
-    
-    // Caso contrário, usar valor informado
-    return parseQuantity(inputValue) || 0;
-  }
-
-  /**
    * Calcula o Total Pedido para categoria carne
-   * Condição: se "Porcionamento" <> "" então ((Quantidade*2)*"Porcionamento") senão Quantidade
+   * REGRA:
+   * - Se Porcionamento vazio/zero: Total Pedido = Quantidade
+   * - Se Porcionamento preenchido: Total Pedido = (Quantidade * 2) * Porcionamento
    * @param {number} baseQuantity - Quantidade base
    * @param {number} adjustmentPercentage - Porcentagem de ajuste (porcionamento)
    * @returns {number} Total pedido calculado
    */
   static calculateCarneTotal(baseQuantity, adjustmentPercentage) {
     const quantity = baseQuantity || 0;
-    const percentage = parseQuantity(adjustmentPercentage);
+    const percentage = parseQuantity(adjustmentPercentage) || 0;
     
-    // Se tem porcionamento, aplicar fórmula: (Quantidade * 2) * Porcionamento
-    if (percentage !== null && percentage !== undefined && percentage !== 0) {
-      return (quantity * 2) * (percentage / 100);
+    if (percentage === 0) {
+      return quantity;
     }
     
-    // Senão, usar quantidade base
-    return quantity;
+    return (quantity * 2) * (percentage / 100);
   }
 
   /**
@@ -66,13 +46,15 @@ export class CategoryLogic {
   static calculateItemValues(item, field, value, mealsExpected) {
     const updatedItem = { ...item };
     const isCarneCategory = this.isCarneCategory(item.category);
+    const unitType = (item.unit_type || '').toLowerCase();
+    const isUnidType = unitType === 'unid' || unitType === 'unid.' || unitType === 'unidade';
 
     // Aplicar mudança no campo específico
     if (field === 'base_quantity') {
       const inputValue = parseQuantity(value);
       
-      // Aplicar condição global para quantidade
-      updatedItem.base_quantity = this.calculateQuantity(item, mealsExpected, inputValue);
+      // Sempre usar o valor digitado pelo usuário (permite edição total)
+      updatedItem.base_quantity = inputValue;
       
     } else if (field === 'adjustment_percentage') {
       updatedItem.adjustment_percentage = parseQuantity(value) || 0;
