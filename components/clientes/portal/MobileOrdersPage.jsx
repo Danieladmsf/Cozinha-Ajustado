@@ -49,6 +49,7 @@ import {
   formatCurrency as utilFormatCurrency, 
   formatWeight as utilFormatWeight 
 } from "@/components/utils/orderUtils";
+import { CategoryLogic } from "@/components/utils/categoryLogic";
 
 import { useCategoryDisplay } from "@/hooks/shared/useCategoryDisplay";
 import { getRecipeUnitType } from "@/lib/unitTypeUtils";
@@ -761,20 +762,24 @@ const MobileOrdersPage = ({ customerId }) => {
                 }
               }
               
-              const newItem = {
+              // Criar item base
+              const baseItem = {
                 unique_id: `${item.recipe_id}_${uniqueCounter++}`,
                 recipe_id: item.recipe_id,
                 recipe_name: recipe.name,
                 category: recipe.category || categoryId,
                 unit_type: containerType,
-                base_quantity: 0, // Quantidade original sem %
-                quantity: 0, // Quantidade total com % aplicado
+                base_quantity: 0,
+                quantity: 0,
                 unit_price: unitPrice,
                 total_price: 0,
                 notes: "",
                 cuba_weight: utilParseQuantity(recipe.cuba_weight) || 0,
                 adjustment_percentage: 0
               };
+              
+              // Aplicar lógica de categoria na inicialização
+              const newItem = CategoryLogic.calculateItemValues(baseItem, 'base_quantity', 0, mealsExpected);
               
               
               items.push(newItem);
@@ -785,74 +790,41 @@ const MobileOrdersPage = ({ customerId }) => {
     });
     
     return items;
-  }, [weeklyMenus, recipes, customer, selectedDay]);
+  }, [weeklyMenus, recipes, customer, selectedDay, mealsExpected]);
 
   const updateOrderItem = useCallback((uniqueId, field, value) => {
     setCurrentOrder(prev => {
       if (!prev?.items) return prev;
-
       const newItems = prev.items.map(item => {
         if (item.unique_id === uniqueId) {
-          const updatedItem = { ...item };
-
-          // Verificar se é categoria de carne
-          const isCarneCategory = item.category && item.category.toLowerCase().includes('carne');
-          
-          if (field === 'base_quantity') {
-            const baseQuantity = utilParseQuantity(value);
-            updatedItem.base_quantity = baseQuantity;
-            
-            if (isCarneCategory) {
-              // Lógica unificada para categoria carne
-              // Quantidade base: SEMPRE usar valor informado diretamente para categoria carne
-              const quantidadeBase = baseQuantity;
-              
-              // Total Pedido: Sempre (Quantidade * 2) * (Porcentagem/100)
-              const percentage = (updatedItem.adjustment_percentage || 0) / 100;
-              const newQuantity = (quantidadeBase * 2) * percentage;
-              updatedItem.quantity = Math.round(newQuantity * 100) / 100;
-            } else {
-              // Lógica padrão para outras categorias
-              const percentage = updatedItem.adjustment_percentage || 0;
-              const newQuantity = baseQuantity * (1 + (percentage / 100));
-              updatedItem.quantity = Math.round(newQuantity * 100) / 100;
-            }
-            
-            updatedItem.total_price = updatedItem.quantity * (updatedItem.unit_price || 0);
-          } else if (field === 'adjustment_percentage') {
-            const percentage = utilParseQuantity(value);
-            updatedItem.adjustment_percentage = percentage;
-            
-            if (isCarneCategory) {
-              // Lógica unificada para categoria carne
-              // Quantidade base: SEMPRE usar valor informado diretamente para categoria carne
-              const quantidadeBase = updatedItem.base_quantity || 0;
-              
-              // Total Pedido: Sempre (Quantidade * 2) * (Porcentagem/100)
-              const percentageDecimal = percentage / 100;
-              const newQuantity = (quantidadeBase * 2) * percentageDecimal;
-              updatedItem.quantity = Math.round(newQuantity * 100) / 100;
-            } else {
-              // Lógica padrão para outras categorias
-              const baseQuantity = updatedItem.base_quantity || 0;
-              const newQuantity = baseQuantity * (1 + (percentage / 100));
-              updatedItem.quantity = Math.round(newQuantity * 100) / 100;
-            }
-            
-            updatedItem.total_price = updatedItem.quantity * (updatedItem.unit_price || 0);
-          } else {
-            updatedItem[field] = value;
-          }
-          return updatedItem;
+          // Usar lógica centralizada para calcular valores
+          return CategoryLogic.calculateItemValues(item, field, value, mealsExpected);
         }
         return item;
       });
-
+      
       return { ...prev, items: newItems };
     });
   }, [mealsExpected]);
 
-  // Categoria carne agora sempre usa valor informado diretamente - não precisa recalcular por mealsExpected
+  // Recalcular itens quando mealsExpected mudar
+  useEffect(() => {
+    if (currentOrder?.items && mealsExpected) {
+      const updatedItems = currentOrder.items.map(item => {
+        // Recalcular apenas itens que dependem de refeições esperadas (unidade = unid)
+        const unitType = (item.unit_type || '').toLowerCase();
+        if (unitType === 'unid' || unitType === 'unid.' || unitType === 'unidade') {
+          return CategoryLogic.calculateItemValues(item, 'base_quantity', item.base_quantity, mealsExpected);
+        }
+        return item;
+      });
+      
+      setCurrentOrder(prev => ({
+        ...prev,
+        items: updatedItems
+      }));
+    }
+  }, [mealsExpected]);
 
   // Carregar dados de sobras automaticamente para cálculo de descontos
   useEffect(() => {
@@ -1032,37 +1004,25 @@ const MobileOrdersPage = ({ customerId }) => {
         
         // Para cada categoria
         orderedCategories.forEach(({ name: categoryName, data: categoryData }) => {
-          const isCarneCategory = categoryName.toLowerCase().includes('carne');
+          const isCarneCategory = CategoryLogic.isCarneCategory(categoryName);
           
           inputString += `--- CATEGORIA: ${categoryName} ---\n`;
           outputString += `--- CATEGORIA: ${categoryName} ---\n`;
           
-          if (isCarneCategory) {
-            inputString += "Item | Quantidade | Unidade | Porcionamento | Total Pedido | Subtotal | Observações\n";
-            outputString += "Item | Quantidade | Unidade | Porcionamento | Total Pedido | Subtotal | Observações\n";
-          } else {
-            inputString += "Item | Quantidade | Unidade | Subtotal | Observações\n";
-            outputString += "Item | Quantidade | Unidade | Subtotal | Observações\n";
-          }
+          const header = CategoryLogic.getExportHeader(isCarneCategory);
+          inputString += header + "\n";
+          outputString += header + "\n";
           
           categoryData.items.forEach(item => {
-            const unitType = item.unit_type?.charAt(0).toUpperCase() + item.unit_type?.slice(1) || '';
-            const unitPrice = utilFormatCurrency(item.unit_price || 0);
-            const baseQty = utilFormattedQuantity(item.base_quantity || 0);
-            const totalQty = utilFormattedQuantity(item.quantity || 0);
-            const subtotal = utilFormatCurrency(item.total_price || 0);
-            const notes = item.notes || '';
-            const adjustmentPct = item.adjustment_percentage || 0;
+            const formattedRow = CategoryLogic.formatExportRow(
+              item, 
+              isCarneCategory, 
+              utilFormatCurrency, 
+              utilFormattedQuantity
+            );
             
-            const itemHeader = `${item.recipe_name}\n${unitPrice}/${item.unit_type}`;
-            
-            if (isCarneCategory) {
-              inputString += `${itemHeader} | ${baseQty} | ${unitType} | ${adjustmentPct}% | ${totalQty} ${item.unit_type} | ${subtotal} | ${notes}\n`;
-              outputString += `${itemHeader} | ${baseQty} | ${unitType} | ${adjustmentPct}% | ${totalQty} ${item.unit_type} | ${subtotal} | ${notes}\n`;
-            } else {
-              inputString += `${itemHeader} | ${baseQty} | ${unitType} | ${subtotal} | ${notes}\n`;
-              outputString += `${itemHeader} | ${baseQty} | ${unitType} | ${subtotal} | ${notes}\n`;
-            }
+            inputString += formattedRow + "\n";
+            outputString += formattedRow + "\n";
           });
           
           inputString += "\n";

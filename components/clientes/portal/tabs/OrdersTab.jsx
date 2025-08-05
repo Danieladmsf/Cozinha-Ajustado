@@ -12,6 +12,7 @@ import {
   formattedQuantity as utilFormattedQuantity, 
   formatCurrency as utilFormatCurrency 
 } from "@/components/utils/orderUtils";
+import { CategoryLogic } from "@/components/utils/categoryLogic";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 
 const OrdersTab = ({
@@ -138,8 +139,9 @@ const OrdersTab = ({
       {orderedCategories.map(({ name: categoryName, data: categoryData }) => {
         const { headerStyle } = generateCategoryStyles(categoryData.categoryInfo.color);
         
-        // Verificar se é categoria carne para mostrar colunas especiais
-        const isCarneCategory = categoryName.toLowerCase().includes('carne');
+        // Obter configuração das colunas baseada na categoria
+        const columnConfig = CategoryLogic.getCategoryColumnConfig(categoryName);
+        const tableHeaders = CategoryLogic.getTableHeaders(columnConfig.isCarneCategory);
         
         return (
           <div key={categoryName} className="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden hover:shadow-md transition-all duration-300">
@@ -160,17 +162,11 @@ const OrdersTab = ({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-blue-100 bg-blue-50">
-                      <th className="text-left p-2 text-xs font-medium text-blue-700 w-1/4">Item</th>
-                      <th className="text-center p-2 text-xs font-medium text-blue-700 w-16">Quantidade</th>
-                      <th className="text-center p-2 text-xs font-medium text-blue-700 w-16">Unidade</th>
-                      {isCarneCategory && (
-                        <>
-                          <th className="text-center p-2 text-xs font-medium text-blue-700 w-16">Porcionamento</th>
-                          <th className="text-center p-2 text-xs font-medium text-blue-700 w-16">Total Pedido</th>
-                        </>
-                      )}
-                      <th className="text-center p-2 text-xs font-medium text-blue-700 w-20">Subtotal</th>
-                      <th className="text-left p-2 text-xs font-medium text-blue-700 w-1/4">Observações</th>
+                      {tableHeaders.map((header) => (
+                        <th key={header.key} className={header.className}>
+                          {header.label}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
@@ -199,6 +195,7 @@ const OrdersTab = ({
                                   updateOrderItem(item.unique_id, 'base_quantity', e.target.value);
                                 }
                               }}
+                              placeholder={item.unit_type && (item.unit_type.toLowerCase() === 'unid' || item.unit_type.toLowerCase() === 'unid.') ? 'Auto (Refeições)' : '0'}
                               onKeyDown={(e) => handleKeyDown(e, baseInputId)}
                               className="text-center text-xs h-8 w-16 border-blue-300 focus:border-blue-500 mx-auto"
                               placeholder="0"
@@ -210,30 +207,30 @@ const OrdersTab = ({
                               {item.unit_type.charAt(0).toUpperCase() + item.unit_type.slice(1)}
                             </div>
                           </td>
-                          {isCarneCategory && (
-                            <>
-                              <td className="p-2 text-center">
-                                <DecimalInput
-                                  ref={(ref) => registerInput(percentInputId, ref)}
-                                  value={item.adjustment_percentage === 0 ? '' : item.adjustment_percentage || ''}
-                                  onChange={(e) => {
-                                    if (isEditMode) {
-                                      updateOrderItem(item.unique_id, 'adjustment_percentage', e.target.value);
-                                    }
-                                  }}
-                                  onKeyDown={(e) => handleKeyDown(e, percentInputId)}
-                                  className="text-center text-xs h-8 w-16 border-blue-300 focus:border-blue-500 mx-auto"
-                                  placeholder="0"
-                                  disabled={!isEditMode}
-                                />
-                                <div className="text-xs text-gray-500 mt-1">%</div>
-                              </td>
-                              <td className="p-2">
-                                <div className="text-center text-xs font-medium text-blue-700">
-                                  {utilFormattedQuantity(item.quantity)} {item.unit_type}
-                                </div>
-                              </td>
-                            </>
+                          {columnConfig.showPorcionamento && (
+                            <td className="p-2 text-center">
+                              <DecimalInput
+                                ref={(ref) => registerInput(percentInputId, ref)}
+                                value={item.adjustment_percentage === 0 ? '' : item.adjustment_percentage || ''}
+                                onChange={(e) => {
+                                  if (isEditMode) {
+                                    updateOrderItem(item.unique_id, 'adjustment_percentage', e.target.value);
+                                  }
+                                }}
+                                onKeyDown={(e) => handleKeyDown(e, percentInputId)}
+                                className="text-center text-xs h-8 w-16 border-blue-300 focus:border-blue-500 mx-auto"
+                                placeholder="0"
+                                disabled={!isEditMode}
+                              />
+                              <div className="text-xs text-gray-500 mt-1">%</div>
+                            </td>
+                          )}
+                          {columnConfig.showTotalPedido && (
+                            <td className="p-2">
+                              <div className="text-center text-xs font-medium text-blue-700">
+                                {utilFormattedQuantity(item.quantity)} {item.unit_type}
+                              </div>
+                            </td>
                           )}
                           <td className="p-2">
                             <div className="text-center text-xs font-medium text-blue-700">
