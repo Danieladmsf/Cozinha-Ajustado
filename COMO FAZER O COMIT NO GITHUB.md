@@ -11,7 +11,8 @@ git status
 ```
 
 ### 2. **Adicionar Arquivos**
-Adicione os arquivos que deseja enviar:
+
+
 ```bash
 # Para adicionar arquivos específicos
 git add caminho/do/arquivo.js

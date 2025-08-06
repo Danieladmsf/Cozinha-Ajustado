@@ -1150,28 +1150,46 @@ const MobileOrdersPage = ({ customerId }) => {
                 <p className="text-sm text-gray-600">{customer?.name}</p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-700">
-                Semana {weekNumber}/{year}
-              </p>
-              <p className="text-xs text-gray-500">
-                {format(weekStart, "dd/MM")} - {format(addDays(weekStart, 6), "dd/MM/yyyy")}
-              </p>
-            </div>
           </div>
 
           {/* Week Navigation */}
-          <div className="flex items-center justify-between mb-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentDate(addDays(currentDate, -7))}
-              className="flex items-center gap-2"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Semana Anterior
-            </Button>
-            <div className="flex gap-1">
+          <div className="space-y-3 mb-4">
+            {/* Navigation Buttons Row */}
+            <div className="flex items-center justify-between gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentDate(addDays(currentDate, -7))}
+                className="flex items-center gap-1 text-xs px-2 py-1 h-8 flex-shrink-0"
+              >
+                <ChevronLeft className="w-3 h-3" />
+                <span className="hidden sm:inline">Semana Anterior</span>
+                <span className="sm:hidden">Anterior</span>
+              </Button>
+              
+              <div className="text-center flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-700 truncate">
+                  Semana {weekNumber}/{year}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {format(weekStart, "dd/MM")} - {format(addDays(weekStart, 6), "dd/MM")}
+                </p>
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentDate(addDays(currentDate, 7))}
+                className="flex items-center gap-1 text-xs px-2 py-1 h-8 flex-shrink-0"
+              >
+                <span className="hidden sm:inline">Próxima Semana</span>
+                <span className="sm:hidden">Próxima</span>
+                <ChevronRight className="w-3 h-3" />
+              </Button>
+            </div>
+            
+            {/* Days Selector Row */}
+            <div className="flex gap-1 justify-center overflow-x-auto pb-1">
               {weekDays.map((day) => {
                 // Verificar se é realmente o dia atual (data exata, não apenas número do dia)
                 const today = new Date();
@@ -1185,13 +1203,13 @@ const MobileOrdersPage = ({ customerId }) => {
                     size="sm"
                     onClick={() => setSelectedDay(day.dayNumber)}
                     className={cn(
-                      "flex flex-col h-16 w-16 p-1 text-xs relative",
+                      "flex flex-col h-14 w-14 p-1 text-xs relative flex-shrink-0",
                       isSelected && "bg-blue-600 text-white",
                       isCurrentDay && !isSelected && "border-blue-400 border-2"
                     )}
                   >
-                    <span className="font-medium">{day.dayShort}</span>
-                    <span className="text-xs opacity-80">{day.dayDate}</span>
+                    <span className="font-medium text-[10px]">{day.dayShort}</span>
+                    <span className="text-[9px] opacity-80">{day.dayDate}</span>
                     {isCurrentDay && (
                       <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full ring-1 ring-white" />
                     )}
@@ -1199,35 +1217,27 @@ const MobileOrdersPage = ({ customerId }) => {
                 );
               })}
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentDate(addDays(currentDate, 7))}
-              className="flex items-center gap-2"
-            >
-              Próxima Semana
-              <ChevronRight className="w-4 h-4" />
-            </Button>
           </div>
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="orders" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-4 h-12">
+              <TabsTrigger value="orders" className="flex items-center gap-1 text-xs p-1">
                 <ShoppingCart className="w-4 h-4" />
-                Pedido
+                <span>Pedido</span>
               </TabsTrigger>
-              <TabsTrigger value="receive" className="flex items-center gap-2">
+              <TabsTrigger value="receive" className="flex items-center gap-1 text-xs p-1">
                 <Package className="w-4 h-4" />
-                Recebimento
+                <span className="hidden xs:inline">Recebimento</span>
+                <span className="xs:hidden">Receb.</span>
               </TabsTrigger>
-              <TabsTrigger value="waste" className="flex items-center gap-2">
+              <TabsTrigger value="waste" className="flex items-center gap-1 text-xs p-1">
                 <AlertTriangle className="w-4 h-4" />
-                Sobras
+                <span>Sobras</span>
               </TabsTrigger>
-              <TabsTrigger value="history" className="flex items-center gap-2">
+              <TabsTrigger value="history" className="flex items-center gap-1 text-xs p-1">
                 <CircleDollarSign className="w-4 h-4" />
-                Histórico
+                <span>Histórico</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
