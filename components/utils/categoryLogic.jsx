@@ -80,7 +80,47 @@ export class CategoryLogic {
     // Recalcular preço total
     updatedItem.total_price = updatedItem.quantity * (updatedItem.unit_price || 0);
 
+    // ✅ CORREÇÃO: Calcular peso total preservando campos de peso da receita
+    updatedItem.total_weight = this.calculateItemTotalWeight(updatedItem);
+
     return updatedItem;
+  }
+
+  /**
+   * Calcula o peso total de um item baseado na quantidade e tipo de unidade
+   * @param {Object} item - Item do pedido
+   * @returns {number} Peso total em kg
+   */
+  static calculateItemTotalWeight(item) {
+    if (!item) return 0;
+    
+    // ✅ CORREÇÃO: Usar base_quantity como fallback quando quantity for zero
+    let quantity = parseQuantity(item.quantity) || 0;
+    if (quantity === 0 && item.base_quantity) {
+      quantity = parseQuantity(item.base_quantity) || 0;
+    }
+    
+    const unitType = (item.unit_type || '').toLowerCase();
+    const cubaWeight = parseQuantity(item.cuba_weight) || 0;
+    const yieldWeight = parseQuantity(item.yield_weight) || 0;
+    
+    let totalWeight = 0;
+    
+    if (unitType === 'cuba' || unitType === 'cuba-g') {
+      // Para cuba, usar cuba_weight. Se zerado, tentar yield_weight como fallback
+      totalWeight = cubaWeight > 0 ? cubaWeight * quantity : yieldWeight * quantity;
+    } else if (unitType === 'kg') {
+      // Para kg, a quantidade já é o peso
+      totalWeight = quantity;
+    } else if (unitType === 'unid' || unitType === 'unid.' || unitType === 'unidade') {
+      // Para unidades, usar cuba_weight. Se zerado, tentar yield_weight como fallback
+      totalWeight = cubaWeight > 0 ? cubaWeight * quantity : yieldWeight * quantity;
+    } else {
+      // Tipo de unidade não reconhecido
+      totalWeight = 0;
+    }
+    
+    return totalWeight;
   }
 
   /**
@@ -117,6 +157,7 @@ export class CategoryLogic {
 
     const endHeaders = [
       { key: 'subtotal', label: 'Subtotal', className: 'text-center p-2 text-xs font-medium text-blue-700 w-20' },
+      { key: 'peso_total', label: 'Peso Total', className: 'text-center p-2 text-xs font-medium text-blue-700 w-20' },
       { key: 'notes', label: 'Observações', className: 'text-left p-2 text-xs font-medium text-blue-700 w-1/4' }
     ];
 
@@ -133,12 +174,14 @@ export class CategoryLogic {
    * @param {boolean} isCarneCategory - Se é categoria carne
    * @param {Function} formatCurrency - Função para formatar moeda
    * @param {Function} formattedQuantity - Função para formatar quantidade
+   * @param {Function} formatWeight - Função para formatar peso
    * @returns {string} Linha formatada
    */
-  static formatExportRow(item, isCarneCategory, formatCurrency, formattedQuantity) {
+  static formatExportRow(item, isCarneCategory, formatCurrency, formattedQuantity, formatWeight) {
     const baseQty = formattedQuantity(item.base_quantity || 0);
     const unitType = (item.unit_type || '').charAt(0).toUpperCase() + (item.unit_type || '').slice(1);
     const subtotal = formatCurrency(item.total_price || 0);
+    const pesoTotal = formatWeight ? formatWeight(item.total_weight || 0) : '0 kg';
     const notes = item.notes || '';
     const unitPrice = formatCurrency(item.unit_price || 0);
     const itemHeader = `${item.recipe_name}\n${unitPrice}/${item.unit_type}`;
@@ -147,9 +190,9 @@ export class CategoryLogic {
       const adjustmentPct = formattedQuantity(item.adjustment_percentage || 0);
       const totalQty = formattedQuantity(item.quantity || 0);
       
-      return `${itemHeader} | ${baseQty} | ${unitType} | ${adjustmentPct}% | ${totalQty} ${item.unit_type} | ${subtotal} | ${notes}`;
+      return `${itemHeader} | ${baseQty} | ${unitType} | ${adjustmentPct}% | ${totalQty} ${item.unit_type} | ${subtotal} | ${pesoTotal} | ${notes}`;
     } else {
-      return `${itemHeader} | ${baseQty} | ${unitType} | ${subtotal} | ${notes}`;
+      return `${itemHeader} | ${baseQty} | ${unitType} | ${subtotal} | ${pesoTotal} | ${notes}`;
     }
   }
 
@@ -160,9 +203,9 @@ export class CategoryLogic {
    */
   static getExportHeader(isCarneCategory) {
     if (isCarneCategory) {
-      return "Item | Quantidade | Unidade | Porcionamento | Total Pedido | Subtotal | Observações";
+      return "Item | Quantidade | Unidade | Porcionamento | Total Pedido | Subtotal | Peso Total | Observações";
     } else {
-      return "Item | Quantidade | Unidade | Subtotal | Observações";
+      return "Item | Quantidade | Unidade | Subtotal | Peso Total | Observações";
     }
   }
 }

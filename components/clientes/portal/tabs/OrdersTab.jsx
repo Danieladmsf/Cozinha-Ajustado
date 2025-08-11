@@ -10,7 +10,8 @@ import { Utensils, CheckCircle } from "lucide-react";
 import { 
   parseQuantity as utilParseQuantity, 
   formattedQuantity as utilFormattedQuantity, 
-  formatCurrency as utilFormatCurrency 
+  formatCurrency as utilFormatCurrency,
+  formatWeight as utilFormatWeight
 } from "@/components/utils/orderUtils";
 import { CategoryLogic } from "@/components/utils/categoryLogic";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
@@ -235,6 +236,18 @@ const OrdersTab = ({
                           <td className="p-2">
                             <div className="text-center text-xs font-medium text-blue-700">
                               {utilFormatCurrency(item.total_price)}
+                            </div>
+                          </td>
+                          <td className="p-2">
+                            <div className="text-center text-xs font-medium text-green-700">
+                              {(() => {
+                                // CORREÇÃO: Calcular peso dinamicamente em vez de usar total_weight zerado
+                                const calculatedWeight = CategoryLogic.calculateItemTotalWeight(item);
+                                const formattedWeight = utilFormatWeight(calculatedWeight);
+                                
+                                
+                                return formattedWeight;
+                              })()}
                             </div>
                           </td>
                           <td className="p-2">

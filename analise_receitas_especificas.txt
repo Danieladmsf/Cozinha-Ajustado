@@ -1,0 +1,796 @@
+ANÁLISE DE RECEITAS ESPECÍFICAS
+=====================================
+
+RECEITA ID: ISQBi666SGiKYPXQVJGL
+Nome: Fraldinha ao Molho de Queijo
+Categoria: Carnes
+Ativa: true
+Tipo de Container: Não definido
+
+--- DADOS DE PESO ---
+cuba_weight: undefined
+yield_weight: 1000
+total_weight: undefined
+portion_weight_calculated: undefined
+
+--- DADOS DE CUSTO ---
+cost_per_kg_raw: undefined
+cost_per_kg_yield: undefined
+cuba_cost: undefined
+portion_cost: undefined
+
+--- ESTRUTURA COMPLETA (JSON) ---
+{
+  "total_weight": 0,
+  "ingredients": [],
+  "createdAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1753929507,
+    "nanoseconds": 185000000
+  },
+  "active": true,
+  "updatedAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1753929507,
+    "nanoseconds": 185000000
+  },
+  "category": "Carnes",
+  "name": "Fraldinha ao Molho de Queijo",
+  "prep_time": 30,
+  "yield_weight": 1000
+}
+
+================================================================================
+
+RECEITA ID: CTXA8iQis1Ibt4Ffr7Op
+Nome: Macarrão ao Sugo
+Categoria: Acompanhamento
+Ativa: true
+Tipo de Container: Não definido
+
+--- DADOS DE PESO ---
+cuba_weight: undefined
+yield_weight: 2.6300000000000003
+total_weight: 1.6300000000000001
+portion_weight_calculated: undefined
+
+--- DADOS DE CUSTO ---
+cost_per_kg_raw: 11.952576687116562
+cost_per_kg_yield: 7.407870722433458
+cuba_cost: undefined
+portion_cost: undefined
+
+--- PREPARAÇÕES ---
+Preparação 1: 1º Etapa: Cocção
+  Total Raw Weight: 1.6300000000000001
+  Total Yield Weight: 2.6300000000000003
+  Yield Percentage: 161.34969325153375
+Preparação 2: 2º Etapa: Porcionamento
+  Total Raw Weight: undefined
+  Total Yield Weight: undefined
+  Yield Percentage: undefined
+
+--- ESTRUTURA COMPLETA (JSON) ---
+{
+  "name": "Macarrão ao Sugo",
+  "active": true,
+  "createdAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1753929457,
+    "nanoseconds": 669000000
+  },
+  "total_weight": 1.6300000000000001,
+  "preparations": [
+    {
+      "ingredients": [
+        {
+          "commercial_name": "MACARRAO RENATA PENNE TRICOLORI",
+          "min_stock": 0,
+          "current_price": "13,8",
+          "supplier_id": "684b68bdb60fe3a1a47cd5f6",
+          "supplier_code": 20558,
+          "weight_clean": "",
+          "base_price": 13.8,
+          "created_date": "2025-06-13T10:53:50.974000",
+          "weight_thawed": "",
+          "is_sample": false,
+          "updated_date": "2025-06-13T10:53:50.974000",
+          "ingredient_id": "684c033ece1a5c4bb28d644b",
+          "notes": "Valor R$ 62,10 / 4,5kg (9 unidades de 500g)",
+          "current_stock": 0,
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Penne",
+          "unit": "kg",
+          "weight_cooked": "2,000",
+          "created_at": {
+            "seconds": 1752598819,
+            "nanoseconds": 230000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 230000000,
+            "seconds": 1752598819
+          },
+          "last_update": "2025-05-02",
+          "weight_frozen": "",
+          "main_supplier": "SUPERMERCADO CANESIN LTDA",
+          "brand": null,
+          "taco_id": null,
+          "weight_pre_cooking": "1",
+          "brand_id": null,
+          "weight_raw": "",
+          "ingredient_type": "both",
+          "id": "684c033ece1a5c4bb28d644b_1754915438781",
+          "taco_variations": [],
+          "category": "Cereais e derivados",
+          "weight_portioned": "",
+          "active": true,
+          "created_by_id": "67db369d572adaa9519c9645"
+        },
+        {
+          "brand_id": null,
+          "taco_id": null,
+          "updated_date": "2025-06-13T10:53:32.741000",
+          "category": "Temperos e condimentos",
+          "ingredient_type": "both",
+          "current_price": "13,41",
+          "last_update": "2025-04-01",
+          "name": "Extrato de tomate",
+          "weight_portioned": "",
+          "weight_cooked": "0,2",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "supplier_id": null,
+          "created_at": {
+            "seconds": 1752598804,
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 652000000
+          },
+          "weight_pre_cooking": "0,2",
+          "created_by": "admsfempresas@gmail.com",
+          "weight_thawed": "",
+          "current_stock": 0,
+          "weight_frozen": "",
+          "brand": null,
+          "commercial_name": "Extrato de tomate",
+          "active": true,
+          "ingredient_id": "684bfe2b60647d247b5533be",
+          "supplier_code": 10120,
+          "notes": "Criado via importação de nomes em massa | Valor R$ 74,94 / 10,2kg (6 unidades de 1,7kg) | Valor R$ 175,36 / 13,075 kg",
+          "is_sample": false,
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:11.104000",
+          "min_stock": 0,
+          "updated_at": {
+            "nanoseconds": 652000000,
+            "seconds": 1752598804,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_raw": "",
+          "id": "684bfe2b60647d247b5533be_1754915450725",
+          "taco_variations": [],
+          "base_price": 0,
+          "weight_clean": "",
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI"
+        },
+        {
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 925000000,
+            "seconds": 1754533420
+          },
+          "base_price": 0,
+          "created_date": {
+            "nanoseconds": 900000000,
+            "seconds": 1749810741,
+            "type": "firestore/timestamp/1.0"
+          },
+          "id": "4wXlt4hx0SLjG2tf5FsB_1754915460493",
+          "weight_thawed": "",
+          "weight_cooked": "0,1",
+          "current_price": "3,5",
+          "current_stock": 0,
+          "main_supplier": null,
+          "created_by": "admsfempresas@gmail.com",
+          "supplier_id": null,
+          "weight_frozen": "",
+          "taco_id": null,
+          "notes": "Criado via importação de nomes em massa",
+          "is_sample": false,
+          "min_stock": 0,
+          "last_update": "2025-08-07",
+          "taco_variations": [],
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Outros",
+          "weight_pre_cooking": "0,1",
+          "weight_clean": "",
+          "weight_portioned": "",
+          "updated_date": {
+            "seconds": 1749810741,
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 900000000
+          },
+          "ingredient_id": "4wXlt4hx0SLjG2tf5FsB",
+          "supplier_code": null,
+          "name": "Molho de tomate",
+          "active": true,
+          "commercial_name": "Molho de tomate",
+          "brand": null,
+          "brand_id": null,
+          "unit": "kg",
+          "ingredient_type": "both",
+          "weight_raw": ""
+        },
+        {
+          "weight_frozen": "",
+          "weight_raw": "",
+          "is_sample": false,
+          "taco_id": null,
+          "created_date": {
+            "nanoseconds": 390000000,
+            "seconds": 1749810749,
+            "type": "firestore/timestamp/1.0"
+          },
+          "supplier_id": null,
+          "updated_date": {
+            "nanoseconds": 57000000,
+            "seconds": 1749811930,
+            "type": "firestore/timestamp/1.0"
+          },
+          "current_price": "1,69",
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "active": true,
+          "last_update": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749168000,
+            "nanoseconds": 0
+          },
+          "ingredient_type": "both",
+          "taco_variations": [],
+          "supplier_code": "2680",
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "brand_id": null,
+          "weight_cooked": "0,03",
+          "name": "Sal",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "weight_thawed": "",
+          "weight_pre_cooking": "0,03",
+          "weight_clean": "",
+          "category": "Temperos e condimentos",
+          "base_price": 0,
+          "unit": "kg",
+          "min_stock": 0,
+          "brand": null,
+          "created_by": "admsfempresas@gmail.com",
+          "id": "JOB097eUBEaZARZHGT9b_1754915466181",
+          "commercial_name": "Sal"
+        },
+        {
+          "created_date": "2025-06-13T10:32:19.836000",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 281,92 / 30kg (2 baldes de 15kg) | Valor R$ 93,60 / 6kg (24 unidades de 250g)",
+          "taco_variations": [],
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "brand_id": null,
+          "weight_frozen": "",
+          "ingredient_type": "both",
+          "category": "Gorduras e óleos",
+          "weight_pre_cooking": "0,1",
+          "weight_raw": "",
+          "created_at": {
+            "seconds": 1752598810,
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 254000000
+          },
+          "current_price": "15,6",
+          "supplier_id": null,
+          "id": "684bfe33891c8dfdffa1746a_1754915469893",
+          "weight_thawed": "",
+          "brand": null,
+          "base_price": 0,
+          "taco_id": null,
+          "active": true,
+          "commercial_name": "Margarina",
+          "min_stock": 0,
+          "is_sample": false,
+          "last_update": "2025-03-27",
+          "name": "Margarina",
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752598810,
+            "nanoseconds": 254000000
+          },
+          "weight_portioned": "",
+          "weight_clean": "",
+          "updated_date": "2025-06-13T10:51:51.897000",
+          "unit": "kg",
+          "ingredient_id": "684bfe33891c8dfdffa1746a",
+          "created_by": "admsfempresas@gmail.com",
+          "current_stock": 0,
+          "weight_cooked": "0,1",
+          "supplier_code": 7084
+        },
+        {
+          "commercial_name": "Cebola Comum",
+          "brand": "",
+          "name": "Cebola",
+          "base_price": 5.2,
+          "supplier_code": "",
+          "taco_id": "",
+          "weight_pre_cooking": "0,2",
+          "ingredient_type": "traditional",
+          "brand_id": "",
+          "current_price": "5,2",
+          "main_supplier": "Sistema",
+          "weight_frozen": "",
+          "weight_portioned": "",
+          "taco_variations": [],
+          "supplier_id": "",
+          "unit": "kg",
+          "notes": "Ingrediente para Strogonoff de Frango",
+          "category_id": "",
+          "current_stock": 0,
+          "weight_thawed": "",
+          "weight_clean": "",
+          "weight_raw": "",
+          "weight_cooked": "0,2",
+          "category": "Geral",
+          "min_stock": 0,
+          "active": true,
+          "ingredient_id": "SNyG6G84jM1WJdk6ZKFV",
+          "id": "SNyG6G84jM1WJdk6ZKFV_1754915477121",
+          "last_update": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 423000000,
+            "seconds": 1752791947
+          }
+        }
+      ],
+      "average_yield_prep": 116.66666666666667,
+      "title": "1º Etapa: Cocção",
+      "total_yield_weight_prep": 2.6300000000000003,
+      "id": "1754915420069",
+      "instructions": "",
+      "processes": [
+        "cooking"
+      ],
+      "total_raw_weight_prep": 1.6300000000000001,
+      "total_cost_prep": 19.482699999999998,
+      "sub_components": [],
+      "yield_percentage_prep": 161.34969325153375
+    },
+    {
+      "ingredients": [],
+      "average_yield_prep": 0,
+      "sub_components": [
+        {
+          "weight_portioned": "",
+          "input_total_cost": "19,482699999999998",
+          "total_cost": "",
+          "source_id": "1754915420069",
+          "assembly_weight_kg": "2,800",
+          "type": "preparation",
+          "yield_weight": "",
+          "input_yield_weight": "2,6300000000000003",
+          "id": "1754915420069_1754915540473",
+          "name": "1º Etapa: Cocção"
+        },
+        {
+          "total_cost": "",
+          "input_total_cost": "0",
+          "source_id": "ZYf5LR38EwGzpRkyHRpM",
+          "yield_weight": "",
+          "weight_portioned": "",
+          "type": "preparation",
+          "name": "Mussarela",
+          "input_yield_weight": "0",
+          "assembly_weight_kg": "1,250",
+          "id": "ZYf5LR38EwGzpRkyHRpM_1754915551064"
+        }
+      ],
+      "instructions": "",
+      "id": "1754915536800",
+      "total_raw_weight_prep": 0,
+      "total_yield_weight_prep": 0,
+      "processes": [
+        "portioning"
+      ],
+      "total_cost_prep": 0,
+      "title": "2º Etapa: Porcionamento",
+      "yield_percentage_prep": 0,
+      "assembly_config": {
+        "container_type": "cuba-g"
+      }
+    }
+  ],
+  "cost_per_kg_yield": 7.407870722433458,
+  "category": "Acompanhamento",
+  "cuba_cost": 0,
+  "ingredients": [],
+  "yield_weight": 2.6300000000000003,
+  "cost_per_kg_raw": 11.952576687116562,
+  "cuba_weight": 0,
+  "total_cost": 19.482699999999998,
+  "prep_time": 30,
+  "updatedAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1754915612,
+    "nanoseconds": 632000000
+  },
+  "name_complement": "",
+  "instructions": "",
+  "portion_cost": 0
+}
+
+================================================================================
+
+RECEITA ID: cykeRtfjfLhYExloxgSf
+Nome: S. Alface
+Categoria: Saladas
+Ativa: true
+Tipo de Container: cuba-g
+
+--- DADOS DE PESO ---
+cuba_weight: 1
+yield_weight: 0.9
+total_weight: 1
+portion_weight_calculated: 1
+
+--- DADOS DE CUSTO ---
+cost_per_kg_raw: 10
+cost_per_kg_yield: 11.11111111111111
+cuba_cost: 11.11111111111111
+portion_cost: 11.11111111111111
+
+--- PREPARAÇÕES ---
+Preparação 1: 1º Etapa: Limpeza
+  Total Raw Weight: 1
+  Total Yield Weight: 0.9
+  Yield Percentage: 90
+Preparação 2: 2º Etapa: Porcionamento
+  Total Raw Weight: 1
+  Total Yield Weight: 1
+  Yield Percentage: 100
+
+--- MÉTRICAS DE PREPARAÇÃO ---
+Métrica 1: 1º Etapa: Limpeza
+  Total Raw Weight: 1
+  Total Yield Weight: 0.9
+  Average Yield: 90%
+  Included in Total: true
+Métrica 2: 2º Etapa: Porcionamento
+  Total Raw Weight: 1
+  Total Yield Weight: 1
+  Average Yield: undefined%
+  Included in Total: false
+
+--- ESTRUTURA COMPLETA (JSON) ---
+{
+  "system_version": "3.0.0",
+  "cost_per_kg_raw": 10,
+  "ingredients": [],
+  "container_type": "cuba-g",
+  "last_calculated": "2025-08-09T15:31:19.233Z",
+  "preparations": [
+    {
+      "total_cost_prep": 10,
+      "title": "1º Etapa: Limpeza",
+      "processes": [
+        "cleaning"
+      ],
+      "id": "1754420594817",
+      "instructions": "",
+      "assembly_config": null,
+      "total_raw_weight_prep": 1,
+      "ingredients": [
+        {
+          "weight_cooked": 0,
+          "current_price": 10,
+          "id": "3YiPnX5H27XiXzvuvH1S_1754420600285",
+          "unit_price": 0,
+          "liquid_price_kg": 0,
+          "weight_raw": 1,
+          "category": "Verduras, hortaliças e derivados",
+          "weight_frozen": 0,
+          "unit": "kg",
+          "quantity": 0,
+          "weight_thawed": 0,
+          "weight_portioned": 0,
+          "notes": "Criado via importação de nomes em massa",
+          "raw_price_kg": 0,
+          "weight_clean": 0.9,
+          "weight_pre_cooking": 0,
+          "name": "Alface Crespa",
+          "brand": ""
+        }
+      ],
+      "total_yield_weight_prep": 0.9,
+      "yield_percentage_prep": 90,
+      "sub_components": []
+    },
+    {
+      "total_yield_weight_prep": 1,
+      "title": "2º Etapa: Porcionamento",
+      "assembly_config": {
+        "units_quantity": 1,
+        "total_weight": 0,
+        "notes": "",
+        "container_type": "cuba-g"
+      },
+      "total_cost_prep": 11.11111111111111,
+      "total_raw_weight_prep": 1,
+      "id": "1754420620068",
+      "yield_percentage_prep": 100,
+      "sub_components": [
+        {
+          "type": "preparation",
+          "name": "1º Etapa: Limpeza",
+          "input_yield_weight": 0.9,
+          "input_total_cost": 10,
+          "proportional_cost": 11.11111111111111,
+          "assembly_weight_kg": 1,
+          "source_id": "1754420594817",
+          "id": "1754420594817_1754420623576",
+          "total_cost": 11.11111111111111,
+          "notes": "",
+          "yield_weight": 0
+        }
+      ],
+      "ingredients": [],
+      "instructions": "",
+      "processes": [
+        "portioning"
+      ]
+    }
+  ],
+  "prep_time": 30,
+  "name_complement": "",
+  "category": "Saladas",
+  "id": "cykeRtfjfLhYExloxgSf",
+  "updatedAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1754753479,
+    "nanoseconds": 234000000
+  },
+  "cuba_weight": 1,
+  "has_ingredients": true,
+  "bulk_updated": true,
+  "preparation_metrics": [
+    {
+      "yieldPercentage": 90,
+      "totalYieldWeight": 0.9,
+      "hasIngredients": true,
+      "averageYield": 90,
+      "includedInTotal": true,
+      "hasSubComponents": false,
+      "preparationTitle": "1º Etapa: Limpeza",
+      "preparationIndex": 0,
+      "totalCost": 10,
+      "isFinalizationOnly": false,
+      "totalRawWeight": 1
+    },
+    {
+      "preparationIndex": 1,
+      "yieldPercentage": 100,
+      "totalRawWeight": 1,
+      "preparationTitle": "2º Etapa: Porcionamento",
+      "averageYield": 0,
+      "includedInTotal": false,
+      "isFinalizationOnly": true,
+      "totalYieldWeight": 1,
+      "hasSubComponents": true,
+      "totalCost": 11.11111111111111,
+      "hasIngredients": false
+    }
+  ],
+  "last_updated": "2025-08-08T17:39:08.209Z",
+  "weight_field_name": "Peso da Cuba G",
+  "cost_per_kg_yield": 11.11111111111111,
+  "createdAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1753929551,
+    "nanoseconds": 120000000
+  },
+  "total_cost": 10,
+  "instructions": "",
+  "name": "S. Alface",
+  "cuba_cost": 11.11111111111111,
+  "has_assembly": true,
+  "active": true,
+  "portion_weight_calculated": 1,
+  "total_weight": 1,
+  "is_valid": true,
+  "portion_cost": 11.11111111111111,
+  "yield_weight": 0.9,
+  "yield_percentage": 90,
+  "cost_field_name": "Custo da Cuba G"
+}
+
+================================================================================
+
+RECEITA ID: 1V17emgm6ISIARdQTuFb
+Nome: S. Cenoura Ralada
+Categoria: Saladas
+Ativa: true
+Tipo de Container: cuba-g
+
+--- DADOS DE PESO ---
+cuba_weight: 0.9
+yield_weight: 0.9
+total_weight: 1
+portion_weight_calculated: 0.9
+
+--- DADOS DE CUSTO ---
+cost_per_kg_raw: 2.99
+cost_per_kg_yield: 3.3222222222222224
+cuba_cost: 2.99
+portion_cost: 2.99
+
+--- PREPARAÇÕES ---
+Preparação 1: 1º Etapa: Limpeza
+  Total Raw Weight: 1
+  Total Yield Weight: 0.9
+  Yield Percentage: 90
+Preparação 2: 2º Etapa: Porcionamento
+  Total Raw Weight: 0.9
+  Total Yield Weight: 0.9
+  Yield Percentage: 100
+
+--- MÉTRICAS DE PREPARAÇÃO ---
+Métrica 1: 1º Etapa: Limpeza
+  Total Raw Weight: 1
+  Total Yield Weight: 0.9
+  Average Yield: 90%
+  Included in Total: true
+Métrica 2: 2º Etapa: Porcionamento
+  Total Raw Weight: 0.9
+  Total Yield Weight: 0.9
+  Average Yield: undefined%
+  Included in Total: false
+
+--- ESTRUTURA COMPLETA (JSON) ---
+{
+  "bulk_updated": true,
+  "total_cost": 2.99,
+  "cuba_cost": 2.99,
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1,
+      "yieldPercentage": 90,
+      "hasSubComponents": false,
+      "totalCost": 2.99,
+      "preparationIndex": 0,
+      "totalYieldWeight": 0.9,
+      "hasIngredients": true,
+      "includedInTotal": true,
+      "averageYield": 90,
+      "isFinalizationOnly": false,
+      "preparationTitle": "1º Etapa: Limpeza"
+    },
+    {
+      "hasSubComponents": true,
+      "yieldPercentage": 100,
+      "preparationIndex": 1,
+      "preparationTitle": "2º Etapa: Porcionamento",
+      "averageYield": 0,
+      "isFinalizationOnly": true,
+      "totalYieldWeight": 0.9,
+      "hasIngredients": false,
+      "includedInTotal": false,
+      "totalCost": 2.99,
+      "totalRawWeight": 0.9
+    }
+  ],
+  "category": "Saladas",
+  "active": true,
+  "last_calculated": "2025-08-08T17:38:48.852Z",
+  "portion_weight_calculated": 0.9,
+  "ingredients": [],
+  "portion_cost": 2.99,
+  "container_type": "cuba-g",
+  "cost_field_name": "Custo da Cuba G",
+  "total_weight": 1,
+  "weight_field_name": "Peso da Cuba G",
+  "yield_weight": 0.9,
+  "cost_per_kg_yield": 3.3222222222222224,
+  "updatedAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1754646417,
+    "nanoseconds": 514000000
+  },
+  "has_assembly": true,
+  "has_ingredients": true,
+  "cost_per_kg_raw": 2.99,
+  "createdAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1753929553,
+    "nanoseconds": 955000000
+  },
+  "instructions": "",
+  "last_updated": "2025-08-08T17:38:48.853Z",
+  "is_valid": true,
+  "preparations": [
+    {
+      "instructions": "",
+      "id": "1754645751331",
+      "sub_components": [],
+      "total_cost_prep": 2.99,
+      "total_yield_weight_prep": 0.9,
+      "total_raw_weight_prep": 1,
+      "processes": [
+        "cleaning"
+      ],
+      "title": "1º Etapa: Limpeza",
+      "yield_percentage_prep": 90,
+      "ingredients": [
+        {
+          "brand": "",
+          "quantity": 0,
+          "weight_portioned": 0,
+          "current_price": 2.99,
+          "name": "Cenoura",
+          "liquid_price_kg": 0,
+          "unit": "kg",
+          "weight_raw": 1,
+          "unit_price": 0,
+          "weight_cooked": 0,
+          "id": "684bfe25891c8dfdffa1742f_1754645757959",
+          "weight_pre_cooking": 0,
+          "notes": "Criado via importação de nomes em massa | Valor R$ 35,42 / 10,12 kg | Valor R$ 12,95 / 4,33 kg",
+          "weight_thawed": 0,
+          "raw_price_kg": 0,
+          "category": "Verduras e hortaliças",
+          "weight_clean": 0.9,
+          "weight_frozen": 0
+        }
+      ],
+      "assembly_config": null
+    },
+    {
+      "id": "1754645793319",
+      "ingredients": [],
+      "title": "2º Etapa: Porcionamento",
+      "sub_components": [
+        {
+          "total_cost": 2.99,
+          "notes": "",
+          "yield_weight": 0,
+          "source_id": "1754645751331",
+          "name": "1º Etapa: Limpeza",
+          "input_total_cost": 2.99,
+          "type": "preparation",
+          "id": "1754645751331_1754645797931",
+          "proportional_cost": 2.99,
+          "input_yield_weight": 0.9,
+          "assembly_weight_kg": 0.9
+        }
+      ],
+      "instructions": "",
+      "yield_percentage_prep": 100,
+      "processes": [
+        "portioning"
+      ],
+      "total_yield_weight_prep": 0.9,
+      "total_raw_weight_prep": 0.9,
+      "total_cost_prep": 0,
+      "assembly_config": {
+        "container_type": "cuba-g",
+        "units_quantity": 1,
+        "total_weight": 0,
+        "notes": ""
+      }
+    }
+  ],
+  "yield_percentage": 90,
+  "name": "S. Cenoura Ralada",
+  "cuba_weight": 0.9,
+  "name_complement": "",
+  "prep_time": 30,
+  "system_version": "3.0.0"
+}
+
+================================================================================
+

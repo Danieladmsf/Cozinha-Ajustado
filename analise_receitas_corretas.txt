@@ -1,0 +1,235 @@
+ANÁLISE DAS RECEITAS CORRETAS DO PORTAL
+==========================================
+
+RECEITA: Arroz Branco
+ID: 6LMdPkdkXIgkEk8EoVEK
+Categoria: Padrão
+Ativa: true
+Tipo de Container: cuba-g
+
+--- DADOS DE PESO ---
+cuba_weight: 3.5
+yield_weight: 2.79
+total_weight: 1.2900000000000003
+portion_weight_calculated: 3.5
+
+--- DADOS DE CUSTO ---
+cost_per_kg_raw: 8.511860465116277
+cost_per_kg_yield: 3.9355913978494623
+cuba_cost: 13.774569892473117
+portion_cost: 13.774569892473117
+
+--- DIAGNÓSTICO DO PROBLEMA DE PESO ---
+✅ cuba_weight OK: 3.5 kg
+✅ container_type OK: cuba-g
+✅ yield_weight OK: 2.79 kg
+
+--- SIMULAÇÃO DO CÁLCULO DE PESO ---
+Para 1 cuba-g: 3.5 kg
+✅ RESULTADO: Peso calculado = 3.5 kg
+
+================================================================================
+
+RECEITA: Feijão
+ID: d70RrYGBStmdiMBodr9t
+Categoria: Padrão
+Ativa: true
+Tipo de Container: cuba-g
+
+--- DADOS DE PESO ---
+cuba_weight: 4.8
+yield_weight: 2.6079999999999997
+total_weight: 1.108
+portion_weight_calculated: 4.8
+
+--- DADOS DE CUSTO ---
+cost_per_kg_raw: 6.961281588447653
+cost_per_kg_yield: 2.957476993865031
+cuba_cost: 14.195889570552149
+portion_cost: 0
+
+--- DIAGNÓSTICO DO PROBLEMA DE PESO ---
+✅ cuba_weight OK: 4.8 kg
+✅ container_type OK: cuba-g
+✅ yield_weight OK: 2.6079999999999997 kg
+
+--- SIMULAÇÃO DO CÁLCULO DE PESO ---
+Para 1 cuba-g: 4.8 kg
+✅ RESULTADO: Peso calculado = 4.8 kg
+
+================================================================================
+
+RECEITA: R. Milho e Ervilha
+ID: GySgqrujDEoUCKbKeo78
+Categoria: Refogado
+Ativa: true
+Tipo de Container: cuba-g
+
+--- DADOS DE PESO ---
+cuba_weight: 1.2200000000000002
+yield_weight: 1.2200000000000002
+total_weight: 1.2200000000000002
+portion_weight_calculated: 2.8
+
+--- DADOS DE CUSTO ---
+cost_per_kg_raw: 14.407622950819674
+cost_per_kg_yield: 14.407622950819674
+cuba_cost: 17.577300000000005
+portion_cost: 17.577300000000005
+
+--- DIAGNÓSTICO DO PROBLEMA DE PESO ---
+✅ cuba_weight OK: 1.2200000000000002 kg
+✅ container_type OK: cuba-g
+✅ yield_weight OK: 1.2200000000000002 kg
+
+--- SIMULAÇÃO DO CÁLCULO DE PESO ---
+Para 1 cuba-g: 1.2200000000000002 kg
+✅ RESULTADO: Peso calculado = 1.2200000000000002 kg
+
+================================================================================
+
+RECEITA: Filé de Frango com cheddar e bacon
+ID: KwFRktvJMW9kgmNvHHZ3
+Categoria: Carnes
+Ativa: true
+Tipo de Container: Unid.
+
+--- DADOS DE PESO ---
+cuba_weight: 0.09999999999999999
+yield_weight: 0.87
+total_weight: 1.1700000000000002
+portion_weight_calculated: 0.09999999999999999
+
+--- DADOS DE CUSTO ---
+cost_per_kg_raw: 18.86452991452991
+cost_per_kg_yield: 25.369540229885054
+cuba_cost: 2.536954022988505
+portion_cost: 1.955172413793103
+
+--- DIAGNÓSTICO DO PROBLEMA DE PESO ---
+✅ cuba_weight OK: 0.09999999999999999 kg
+✅ container_type OK: Unid.
+✅ yield_weight OK: 0.87 kg
+
+--- SIMULAÇÃO DO CÁLCULO DE PESO ---
+Para 1 unidade: 0.09999999999999999 kg
+✅ RESULTADO: Peso calculado = 0.09999999999999999 kg
+
+================================================================================
+
+RECEITA: Ovos fritos
+ID: Uw4eRCs21VUlu8icwJSc
+Categoria: Carnes
+Ativa: true
+Tipo de Container: Unid.
+
+--- DADOS DE PESO ---
+cuba_weight: 1
+yield_weight: 1
+total_weight: 1
+portion_weight_calculated: 1
+
+--- DADOS DE CUSTO ---
+cost_per_kg_raw: 0.67
+cost_per_kg_yield: 0.67
+cuba_cost: 0.67
+portion_cost: 0
+
+--- DIAGNÓSTICO DO PROBLEMA DE PESO ---
+✅ cuba_weight OK: 1 kg
+✅ container_type OK: Unid.
+✅ yield_weight OK: 1 kg
+
+--- SIMULAÇÃO DO CÁLCULO DE PESO ---
+Para 1 unidade: 1 kg
+✅ RESULTADO: Peso calculado = 1 kg
+
+================================================================================
+
+RECEITA: Macarrão ao Sugo
+ID: CTXA8iQis1Ibt4Ffr7Op
+Categoria: Acompanhamento
+Ativa: true
+Tipo de Container: Não definido
+
+--- DADOS DE PESO ---
+cuba_weight: 0
+yield_weight: 2.6300000000000003
+total_weight: 1.6300000000000001
+portion_weight_calculated: undefined
+
+--- DADOS DE CUSTO ---
+cost_per_kg_raw: 11.952576687116562
+cost_per_kg_yield: 7.407870722433458
+cuba_cost: 0
+portion_cost: 0
+
+--- DIAGNÓSTICO DO PROBLEMA DE PESO ---
+❌ PROBLEMA: cuba_weight está zerado
+❌ PROBLEMA: container_type não definido
+✅ yield_weight OK: 2.6300000000000003 kg
+
+--- SIMULAÇÃO DO CÁLCULO DE PESO ---
+❌ Tipo de unidade não reconhecido: 
+❌ RESULTADO: Peso calculado = 0 (problema identificado!)
+
+================================================================================
+
+RECEITA: S. Alface
+ID: cykeRtfjfLhYExloxgSf
+Categoria: Saladas
+Ativa: true
+Tipo de Container: cuba-g
+
+--- DADOS DE PESO ---
+cuba_weight: 1
+yield_weight: 0.9
+total_weight: 1
+portion_weight_calculated: 1
+
+--- DADOS DE CUSTO ---
+cost_per_kg_raw: 10
+cost_per_kg_yield: 11.11111111111111
+cuba_cost: 11.11111111111111
+portion_cost: 11.11111111111111
+
+--- DIAGNÓSTICO DO PROBLEMA DE PESO ---
+✅ cuba_weight OK: 1 kg
+✅ container_type OK: cuba-g
+✅ yield_weight OK: 0.9 kg
+
+--- SIMULAÇÃO DO CÁLCULO DE PESO ---
+Para 1 cuba-g: 1 kg
+✅ RESULTADO: Peso calculado = 1 kg
+
+================================================================================
+
+RECEITA: S. Cenoura Ralada
+ID: 1V17emgm6ISIARdQTuFb
+Categoria: Saladas
+Ativa: true
+Tipo de Container: cuba-g
+
+--- DADOS DE PESO ---
+cuba_weight: 0.9
+yield_weight: 0.9
+total_weight: 1
+portion_weight_calculated: 0.9
+
+--- DADOS DE CUSTO ---
+cost_per_kg_raw: 2.99
+cost_per_kg_yield: 3.3222222222222224
+cuba_cost: 2.99
+portion_cost: 2.99
+
+--- DIAGNÓSTICO DO PROBLEMA DE PESO ---
+✅ cuba_weight OK: 0.9 kg
+✅ container_type OK: cuba-g
+✅ yield_weight OK: 0.9 kg
+
+--- SIMULAÇÃO DO CÁLCULO DE PESO ---
+Para 1 cuba-g: 0.9 kg
+✅ RESULTADO: Peso calculado = 0.9 kg
+
+================================================================================
+

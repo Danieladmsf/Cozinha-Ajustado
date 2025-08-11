@@ -76,7 +76,7 @@ import { RefreshButton } from "@/components/ui/refresh-button";
 import PortalPricingSystem from "@/lib/portal-pricing";
 
 const MobileOrdersPage = ({ customerId }) => {
-  console.log('🚀 [PORTAL TEMP PRICING] MobileOrdersPage iniciado para cliente:', customerId);
+  // console.log('🚀 [PORTAL TEMP PRICING] MobileOrdersPage iniciado para cliente:', customerId);
   
   const { toast } = useToast();
   const { groupItemsByCategory, getOrderedCategories, generateCategoryStyles } = useCategoryDisplay();
@@ -702,7 +702,7 @@ const MobileOrdersPage = ({ customerId }) => {
     if (customerId) {
       loadInitialData();
     }
-  }, [customerId, weekNumber, year, toast]);
+  }, [customerId, weekNumber, year]);
 
   // Função para determinar qual dia selecionar baseado na semana
   const getInitialDay = useCallback(() => {
@@ -775,19 +775,12 @@ const MobileOrdersPage = ({ customerId }) => {
               // Definir preço baseado no container_type
               let unitPrice = 0;
               
-              console.log(`🌟 [PORTAL TEMP PRICING] ${recipe.name}:`, {
-                containerType,
-                cuba_cost: recipe.cuba_cost,
-                cost_per_kg_yield: recipe.cost_per_kg_yield,
-                portion_cost: recipe.portion_cost
-              });
-              
               // Usar sistema centralizado de preços
               unitPrice = PortalPricingSystem.recalculateItemUnitPrice(item, recipe, containerType);
               
-              console.log(`💰 [PORTAL TEMP PRICING] Preço final ${recipe.name}: R$ ${unitPrice.toFixed(2)} (base x1.9)`);
-              
               // Criar item base
+              const cubaWeightParsed = utilParseQuantity(recipe.cuba_weight) || 0;
+              
               const baseItem = {
                 unique_id: `${item.recipe_id}_${uniqueCounter++}`,
                 recipe_id: item.recipe_id,
@@ -799,7 +792,10 @@ const MobileOrdersPage = ({ customerId }) => {
                 unit_price: unitPrice,
                 total_price: 0,
                 notes: "",
-                cuba_weight: utilParseQuantity(recipe.cuba_weight) || 0,
+                // ✅ CORREÇÃO: Adicionar TODOS os dados de peso das receitas
+                cuba_weight: cubaWeightParsed,
+                yield_weight: utilParseQuantity(recipe.yield_weight) || 0,
+                total_weight: utilParseQuantity(recipe.total_weight) || 0,
                 adjustment_percentage: 0
               };
               
@@ -815,7 +811,7 @@ const MobileOrdersPage = ({ customerId }) => {
     });
     
     return items;
-  }, [weeklyMenus, recipes, customer, selectedDay, mealsExpected]);
+  }, [weeklyMenus, recipes, customer, selectedDay, mealsExpected, "v2"]); // Invalidar cache v2
 
   const updateOrderItem = useCallback((uniqueId, field, value) => {
     setCurrentOrder(prev => {
@@ -835,19 +831,27 @@ const MobileOrdersPage = ({ customerId }) => {
   // Recalcular itens quando mealsExpected mudar
   useEffect(() => {
     if (currentOrder?.items && mealsExpected) {
+      let hasChanges = false;
       const updatedItems = currentOrder.items.map(item => {
         // Recalcular apenas itens que dependem de refeições esperadas (unidade = unid)
         const unitType = (item.unit_type || '').toLowerCase();
         if (unitType === 'unid' || unitType === 'unid.' || unitType === 'unidade') {
-          return CategoryLogic.calculateItemValues(item, 'base_quantity', item.base_quantity, mealsExpected);
+          const recalculatedItem = CategoryLogic.calculateItemValues(item, 'base_quantity', item.base_quantity, mealsExpected);
+          if (JSON.stringify(recalculatedItem) !== JSON.stringify(item)) {
+            hasChanges = true;
+          }
+          return recalculatedItem;
         }
         return item;
       });
       
-      setCurrentOrder(prev => ({
-        ...prev,
-        items: updatedItems
-      }));
+      // Só atualizar se realmente houve mudanças para evitar loop infinito
+      if (hasChanges) {
+        setCurrentOrder(prev => ({
+          ...prev,
+          items: updatedItems
+        }));
+      }
     }
   }, [mealsExpected]);
 
@@ -856,14 +860,16 @@ const MobileOrdersPage = ({ customerId }) => {
     if (customer && weeklyMenus.length && recipes.length && hasInitializedDay) {
       loadWasteData();
     }
-  }, [customer, selectedDay, weeklyMenus, recipes, existingOrders, hasInitializedDay, loadWasteData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customer, selectedDay, weeklyMenus, recipes, existingOrders, hasInitializedDay]);
 
   // Carregar dados de recebimento automaticamente para cálculo de descontos
   useEffect(() => {
     if (customer && weeklyMenus.length && recipes.length && hasInitializedDay) {
       loadReceivingData();
     }
-  }, [customer, selectedDay, weeklyMenus, recipes, existingOrders, hasInitializedDay, loadReceivingData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customer, selectedDay, weeklyMenus, recipes, existingOrders, hasInitializedDay]);
 
   // Carregar dados de waste da semana quando a aba history for selecionada
   useEffect(() => {
@@ -924,11 +930,6 @@ const MobileOrdersPage = ({ customerId }) => {
             total_price: (existingItem.quantity || 0) * (currentItem.unit_price || 0)
           };
           
-          console.log(`🧾 [PORTAL TEMP PRICING TOTAL] ${existingItem.recipe_name}:`, {
-            quantity: existingItem.quantity,
-            unitPrice: currentItem.unit_price,
-            totalPrice: updatedItem.total_price
-          });
           
           return updatedItem;
         }
@@ -984,26 +985,16 @@ const MobileOrdersPage = ({ customerId }) => {
           total_price: (wasteItem.ordered_quantity || 0) * (currentOrderItem.unit_price || 0)
         };
         
-        console.log(`🔄 [WASTE HYDRATION] ${wasteItem.recipe_name}:`, {
-          oldUnitPrice: wasteItem.unit_price,
-          newUnitPrice: currentOrderItem.unit_price,
-          quantity: wasteItem.ordered_quantity,
-          newTotalPrice: updatedItem.total_price
-        });
+        // Log apenas para debug quando necessário
+        // console.log(`[WASTE] ${wasteItem.recipe_name}: preços atualizados`);
         
         return updatedItem;
       }
       return wasteItem;
     });
     
-    // Só atualizar se houve mudanças para evitar loops infinitos
-    const hasChanges = updatedWasteItems.some((updated, index) => 
-      updated.unit_price !== wasteItems[index].unit_price ||
-      updated.ordered_unit_type !== wasteItems[index].ordered_unit_type ||
-      updated.total_price !== wasteItems[index].total_price
-    );
-    
-    if (hasChanges) {
+    // Usar JSON.stringify para uma comparação mais robusta e evitar loops infinitos
+    if (JSON.stringify(updatedWasteItems) !== JSON.stringify(wasteItems)) {
       setWasteItems(updatedWasteItems);
     }
   }, [hasInitializedDay, wasteItems, orderItems]);
@@ -1028,26 +1019,16 @@ const MobileOrdersPage = ({ customerId }) => {
           total_price: (receivingItem.ordered_quantity || 0) * (currentOrderItem.unit_price || 0)
         };
         
-        console.log(`🔄 [RECEIVING HYDRATION] ${receivingItem.recipe_name}:`, {
-          oldUnitPrice: receivingItem.unit_price,
-          newUnitPrice: currentOrderItem.unit_price,
-          quantity: receivingItem.ordered_quantity,
-          newTotalPrice: updatedItem.total_price
-        });
+        // Log apenas para debug quando necessário
+        // console.log(`[RECEIVING] ${receivingItem.recipe_name}: preços atualizados`);
         
         return updatedItem;
       }
       return receivingItem;
     });
     
-    // Só atualizar se houve mudanças para evitar loops infinitos
-    const hasChanges = updatedReceivingItems.some((updated, index) => 
-      updated.unit_price !== receivingItems[index].unit_price ||
-      updated.ordered_unit_type !== receivingItems[index].ordered_unit_type ||
-      updated.total_price !== receivingItems[index].total_price
-    );
-    
-    if (hasChanges) {
+    // Usar JSON.stringify para uma comparação mais robusta e evitar loops infinitos
+    if (JSON.stringify(updatedReceivingItems) !== JSON.stringify(receivingItems)) {
       setReceivingItems(updatedReceivingItems);
     }
   }, [hasInitializedDay, receivingItems, orderItems]);
@@ -1108,11 +1089,8 @@ const MobileOrdersPage = ({ customerId }) => {
       }
     });
     
-    if (hasAnyChanges) {
-      console.log('🔄 [HISTORY HYDRATION] Atualizando pedidos da semana com preços sincronizados');
-      setHydratedOrders(updatedOrders);
-    } else if (Object.keys(hydratedOrders).length === 0) {
-      // Primeira vez - mesmo sem mudanças, inicializar hydratedOrders
+    // Usar JSON.stringify para uma comparação mais robusta e evitar loops infinitos
+    if (JSON.stringify(updatedOrders) !== JSON.stringify(hydratedOrders)) {
       setHydratedOrders(updatedOrders);
     }
   }, [hasInitializedDay, orderItems, existingOrders, hydratedOrders]);
@@ -1224,7 +1202,8 @@ const MobileOrdersPage = ({ customerId }) => {
               item, 
               isCarneCategory, 
               utilFormatCurrency, 
-              utilFormattedQuantity
+              utilFormattedQuantity,
+              utilFormatWeight
             );
             
             inputString += formattedRow + "\n";

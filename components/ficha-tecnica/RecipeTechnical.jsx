@@ -320,6 +320,11 @@ export default function RecipeTechnical() {
           }
         }
         
+        // FORÇAR RECÁLCULO IMEDIATO após salvamento bem-sucedido
+        setTimeout(() => {
+          recalculateRecipeMetrics();
+        }, 100);
+        
         // Atualizar lista de receitas na busca
         try {
           await refreshRecipes();
