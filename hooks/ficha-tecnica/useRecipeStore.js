@@ -86,6 +86,11 @@ export function useRecipeStore(selector) {
         cubaCost: `R$ ${metrics.cuba_cost?.toFixed(2) || '0.00'}`,
       };
     }, [state.metrics]),
+    
+    // Nova função para buscar preço atual de ingrediente
+    getIngredientCurrentPrice: useCallback((ingredientId) => {
+      return useRecipeZustandStore.getState().getIngredientCurrentPrice(ingredientId);
+    }, []),
   };
 
   return {

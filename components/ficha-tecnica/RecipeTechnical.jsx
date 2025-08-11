@@ -26,6 +26,9 @@ import {
   Edit
 } from "lucide-react";
 
+// Componente de refresh
+import { RefreshButton } from "@/components/ui/refresh-button";
+
 // Hooks customizados organizados
 import { 
   useRecipeState, 
@@ -37,6 +40,7 @@ import {
   useRecipeCategories
 } from "@/hooks/ficha-tecnica";
 import { useIngredientSearch } from "@/hooks/ficha-tecnica/useIngredientSearch";
+import useRecipeZustandStore from '@/lib/recipe-engine/RecipeStore.js';
 import { formatCurrency, formatWeight } from "@/lib/formatUtils";
 import { processTypes } from "@/lib/recipeConstants";
 import { 
@@ -437,6 +441,29 @@ export default function RecipeTechnical() {
       recalculateRecipeMetrics();
     }
   }, [preparationsData?.length, recipeData.name, recipeData.id]);
+
+  // ==== EFFECT PARA REFRESH AUTOMÁTICO DE INGREDIENTES ====
+  useEffect(() => {
+    // Refresh automático de ingredientes quando componente monta
+    const refreshIngredients = async () => {
+      try {
+        await useRecipeZustandStore.getState().refreshIngredientsIfNeeded();
+      } catch (error) {
+        console.error('Erro ao atualizar ingredientes:', error);
+      }
+    };
+
+    refreshIngredients();
+
+    // Refresh periódico a cada 30 segundos se a página estiver ativa
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        refreshIngredients();
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleOpenProcessModal = () => {
     openProcessCreatorModal(setIsProcessCreatorOpen, setSelectedProcesses);
@@ -1030,12 +1057,26 @@ export default function RecipeTechnical() {
         
         {/* Preço bruto */}
         <TableCell className="text-center px-4 py-2">
-          {formatCurrency(parseNumericValue(ingredient.current_price))}
+          {(() => {
+            // Buscar preço atual dinamicamente se ingrediente tem ingredient_id
+            const currentPrice = ingredient.ingredient_id 
+              ? useRecipeZustandStore.getState().getIngredientCurrentPrice(ingredient.ingredient_id)
+              : parseNumericValue(ingredient.current_price);
+            return formatCurrency(currentPrice);
+          })()}
         </TableCell>
         
         {/* Preço líquido - calculado */}
         <TableCell className="text-center px-4 py-2">
-          {formatCurrency(parseNumericValue(ingredient.current_price))}
+          {(() => {
+            // Buscar preço atual dinamicamente
+            const brutPrice = ingredient.ingredient_id 
+              ? useRecipeZustandStore.getState().getIngredientCurrentPrice(ingredient.ingredient_id)
+              : parseNumericValue(ingredient.current_price);
+            const yieldPercent = calculateYield();
+            const liquidPrice = yieldPercent > 0 ? brutPrice / (yieldPercent / 100) : brutPrice;
+            return formatCurrency(liquidPrice);
+          })()}
         </TableCell>
         
         {/* Campos de descongelamento */}
@@ -1329,19 +1370,25 @@ export default function RecipeTechnical() {
         {/* Card de Cabeçalho */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
           <div className="space-y-4">
-            <div>
-              <div className="flex items-center gap-2 text-blue-600 mb-1">
-                <ClipboardList className="h-5 w-5" />
-                <h1 className="text-xl font-semibold">Ficha Técnica</h1>
-                {isDirty && (
-                  <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">
-                    Não salvo
-                  </span>
-                )}
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-blue-600 mb-1">
+                  <ClipboardList className="h-5 w-5" />
+                  <h1 className="text-xl font-semibold">Ficha Técnica</h1>
+                  {isDirty && (
+                    <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">
+                      Não salvo
+                    </span>
+                  )}
+                </div>
+                <p className="text-gray-500 text-sm">
+                  Crie e estruture suas receitas com detalhes profissionais
+                </p>
               </div>
-              <p className="text-gray-500 text-sm">
-                Crie e estruture suas receitas com detalhes profissionais
-              </p>
+              <RefreshButton 
+                text="Atualizar Página"
+                className="shrink-0"
+              />
             </div>
 
             {/* Barra de Busca */}

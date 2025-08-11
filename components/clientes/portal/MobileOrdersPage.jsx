@@ -69,7 +69,15 @@ import ReceivingTab from "./tabs/ReceivingTab";
 import WasteTab from "./tabs/WasteTab";
 import HistoryTab from "./tabs/HistoryTab";
 
+// Refresh Button
+import { RefreshButton } from "@/components/ui/refresh-button";
+
+// Sistema centralizado de preços temporário
+import PortalPricingSystem from "@/lib/portal-pricing";
+
 const MobileOrdersPage = ({ customerId }) => {
+  console.log('🚀 [PORTAL TEMP PRICING] MobileOrdersPage iniciado para cliente:', customerId);
+  
   const { toast } = useToast();
   const { groupItemsByCategory, getOrderedCategories, generateCategoryStyles } = useCategoryDisplay();
   
@@ -80,6 +88,7 @@ const MobileOrdersPage = ({ customerId }) => {
   const [weeklyMenus, setWeeklyMenus] = useState([]);
   const [currentOrder, setCurrentOrder] = useState(null);
   const [existingOrders, setExistingOrders] = useState({});
+  const [hydratedOrders, setHydratedOrders] = useState({}); // Pedidos com preços atualizados
   const [loading, setLoading] = useState(true);
   
   // UI States
@@ -255,8 +264,16 @@ const MobileOrdersPage = ({ customerId }) => {
                   if (orderItem) {
                     wasteItem.ordered_quantity = orderItem.quantity || 0;
                     wasteItem.ordered_unit_type = orderItem.unit_type || getRecipeUnitType(recipe);
-                    wasteItem.unit_price = orderItem.unit_price || 0;
-                    wasteItem.total_price = orderItem.total_price || 0;
+                    
+                    // Usar sistema centralizado para sincronizar preços com receita atual
+                    const syncedItem = PortalPricingSystem.syncItemPricing({
+                      ...wasteItem,
+                      quantity: wasteItem.ordered_quantity,
+                      unit_type: wasteItem.ordered_unit_type
+                    }, recipe);
+                    
+                    wasteItem.unit_price = syncedItem.unit_price;
+                    wasteItem.total_price = syncedItem.total_price;
                   }
                 }
                 
@@ -368,6 +385,16 @@ const MobileOrdersPage = ({ customerId }) => {
                     receivingItem.ordered_quantity = orderItem.quantity;
                     receivingItem.ordered_unit_type = orderItem.unit_type;
                     receivingItem.received_quantity = orderItem.quantity; // default para quantidade pedida
+                    
+                    // Usar sistema centralizado para sincronizar preços com receita atual
+                    const syncedItem = PortalPricingSystem.syncItemPricing({
+                      ...receivingItem,
+                      quantity: receivingItem.ordered_quantity,
+                      unit_type: receivingItem.ordered_unit_type
+                    }, recipe);
+                    
+                    receivingItem.unit_price = syncedItem.unit_price;
+                    receivingItem.total_price = syncedItem.total_price;
                   }
                 }
                 
@@ -747,20 +774,18 @@ const MobileOrdersPage = ({ customerId }) => {
               
               // Definir preço baseado no container_type
               let unitPrice = 0;
-              if (containerType === "cuba") {
-                unitPrice = recipe.cuba_cost || recipe.portion_cost || recipe.cost_per_kg_yield || 0;
-              } else if (containerType === "kg") {
-                unitPrice = recipe.cost_per_kg_yield || recipe.portion_cost || recipe.cuba_cost || 0;
-              } else {
-                // Para outros tipos, tentar campo específico (ex: "unid._cost")
-                const specificField = `${containerType}_cost`;
-                if (recipe[specificField] && typeof recipe[specificField] === 'number') {
-                  unitPrice = recipe[specificField];
-                } else {
-                  // Fallback para portion_cost, cuba_cost, ou cost_per_kg_yield
-                  unitPrice = recipe.portion_cost || recipe.cuba_cost || recipe.cost_per_kg_yield || 0;
-                }
-              }
+              
+              console.log(`🌟 [PORTAL TEMP PRICING] ${recipe.name}:`, {
+                containerType,
+                cuba_cost: recipe.cuba_cost,
+                cost_per_kg_yield: recipe.cost_per_kg_yield,
+                portion_cost: recipe.portion_cost
+              });
+              
+              // Usar sistema centralizado de preços
+              unitPrice = PortalPricingSystem.recalculateItemUnitPrice(item, recipe, containerType);
+              
+              console.log(`💰 [PORTAL TEMP PRICING] Preço final ${recipe.name}: R$ ${unitPrice.toFixed(2)} (base x1.9)`);
               
               // Criar item base
               const baseItem = {
@@ -898,6 +923,13 @@ const MobileOrdersPage = ({ customerId }) => {
             unit_type: currentItem.unit_type, // ATUALIZAR unit_type com valor atual da receita
             total_price: (existingItem.quantity || 0) * (currentItem.unit_price || 0)
           };
+          
+          console.log(`🧾 [PORTAL TEMP PRICING TOTAL] ${existingItem.recipe_name}:`, {
+            quantity: existingItem.quantity,
+            unitPrice: currentItem.unit_price,
+            totalPrice: updatedItem.total_price
+          });
+          
           return updatedItem;
         }
         return existingItem;
@@ -931,6 +963,159 @@ const MobileOrdersPage = ({ customerId }) => {
       setCurrentOrder(newOrder);
     }
   }, [hasInitializedDay, isEditMode, orderItems, customer, selectedDay, weekNumber, year, weekStart, existingOrders]);
+
+  // Sincronizar wasteItems com orderItems atualizados (mesma lógica dos pedidos)
+  useEffect(() => {
+    if (!hasInitializedDay || wasteItems.length === 0 || orderItems.length === 0) return;
+    
+    const updatedWasteItems = wasteItems.map(wasteItem => {
+      // Encontrar item correspondente nos orderItems atualizados (com preços novos)
+      const currentOrderItem = orderItems.find(oi => 
+        oi.unique_id === wasteItem.unique_id || 
+        oi.recipe_id === wasteItem.recipe_id
+      );
+      
+      if (currentOrderItem) {
+        // Manter quantities e notas do waste, mas atualizar preços e unit_type
+        const updatedItem = {
+          ...wasteItem,
+          unit_price: currentOrderItem.unit_price,
+          ordered_unit_type: currentOrderItem.unit_type,
+          total_price: (wasteItem.ordered_quantity || 0) * (currentOrderItem.unit_price || 0)
+        };
+        
+        console.log(`🔄 [WASTE HYDRATION] ${wasteItem.recipe_name}:`, {
+          oldUnitPrice: wasteItem.unit_price,
+          newUnitPrice: currentOrderItem.unit_price,
+          quantity: wasteItem.ordered_quantity,
+          newTotalPrice: updatedItem.total_price
+        });
+        
+        return updatedItem;
+      }
+      return wasteItem;
+    });
+    
+    // Só atualizar se houve mudanças para evitar loops infinitos
+    const hasChanges = updatedWasteItems.some((updated, index) => 
+      updated.unit_price !== wasteItems[index].unit_price ||
+      updated.ordered_unit_type !== wasteItems[index].ordered_unit_type ||
+      updated.total_price !== wasteItems[index].total_price
+    );
+    
+    if (hasChanges) {
+      setWasteItems(updatedWasteItems);
+    }
+  }, [hasInitializedDay, wasteItems, orderItems]);
+
+  // Sincronizar receivingItems com orderItems atualizados (mesma lógica dos pedidos)  
+  useEffect(() => {
+    if (!hasInitializedDay || receivingItems.length === 0 || orderItems.length === 0) return;
+    
+    const updatedReceivingItems = receivingItems.map(receivingItem => {
+      // Encontrar item correspondente nos orderItems atualizados (com preços novos)
+      const currentOrderItem = orderItems.find(oi => 
+        oi.unique_id === receivingItem.unique_id || 
+        oi.recipe_id === receivingItem.recipe_id
+      );
+      
+      if (currentOrderItem) {
+        // Manter quantities e status do receiving, mas atualizar preços e unit_type
+        const updatedItem = {
+          ...receivingItem,
+          unit_price: currentOrderItem.unit_price,
+          ordered_unit_type: currentOrderItem.unit_type,
+          total_price: (receivingItem.ordered_quantity || 0) * (currentOrderItem.unit_price || 0)
+        };
+        
+        console.log(`🔄 [RECEIVING HYDRATION] ${receivingItem.recipe_name}:`, {
+          oldUnitPrice: receivingItem.unit_price,
+          newUnitPrice: currentOrderItem.unit_price,
+          quantity: receivingItem.ordered_quantity,
+          newTotalPrice: updatedItem.total_price
+        });
+        
+        return updatedItem;
+      }
+      return receivingItem;
+    });
+    
+    // Só atualizar se houve mudanças para evitar loops infinitos
+    const hasChanges = updatedReceivingItems.some((updated, index) => 
+      updated.unit_price !== receivingItems[index].unit_price ||
+      updated.ordered_unit_type !== receivingItems[index].ordered_unit_type ||
+      updated.total_price !== receivingItems[index].total_price
+    );
+    
+    if (hasChanges) {
+      setReceivingItems(updatedReceivingItems);
+    }
+  }, [hasInitializedDay, receivingItems, orderItems]);
+
+  // Hidratar todos os pedidos da semana com preços atualizados (para HistoryTab)
+  useEffect(() => {
+    if (!hasInitializedDay || !orderItems || orderItems.length === 0 || Object.keys(existingOrders).length === 0) {
+      return;
+    }
+    
+    const updatedOrders = {};
+    let hasAnyChanges = false;
+    
+    Object.entries(existingOrders).forEach(([dayIndex, order]) => {
+      if (order && order.items) {
+        // Hidratar itens do pedido com preços atualizados
+        const hydratedItems = order.items.map(orderItem => {
+          // Encontrar item correspondente nos orderItems atualizados (com preços novos)
+          const currentMenuItem = orderItems.find(oi => 
+            oi.unique_id === orderItem.unique_id || 
+            oi.recipe_id === orderItem.recipe_id
+          );
+          
+          if (currentMenuItem) {
+            const updatedItem = {
+              ...orderItem,
+              unit_price: currentMenuItem.unit_price,
+              unit_type: currentMenuItem.unit_type,
+              total_price: (orderItem.quantity || 0) * (currentMenuItem.unit_price || 0)
+            };
+            
+            // Verificar se houve mudança
+            if (updatedItem.unit_price !== orderItem.unit_price || 
+                updatedItem.total_price !== orderItem.total_price ||
+                updatedItem.unit_type !== orderItem.unit_type) {
+              hasAnyChanges = true;
+            }
+            
+            return updatedItem;
+          }
+          return orderItem;
+        });
+        
+        // Recalcular total do pedido
+        const newTotalAmount = hydratedItems.reduce((sum, item) => sum + (item.total_price || 0), 0);
+        
+        updatedOrders[dayIndex] = {
+          ...order,
+          items: hydratedItems,
+          total_amount: newTotalAmount
+        };
+        
+        if (newTotalAmount !== (order.total_amount || 0)) {
+          hasAnyChanges = true;
+        }
+      } else {
+        updatedOrders[dayIndex] = order;
+      }
+    });
+    
+    if (hasAnyChanges) {
+      console.log('🔄 [HISTORY HYDRATION] Atualizando pedidos da semana com preços sincronizados');
+      setHydratedOrders(updatedOrders);
+    } else if (Object.keys(hydratedOrders).length === 0) {
+      // Primeira vez - mesmo sem mudanças, inicializar hydratedOrders
+      setHydratedOrders(updatedOrders);
+    }
+  }, [hasInitializedDay, orderItems, existingOrders, hydratedOrders]);
 
   // Calcular totais, depreciação por devoluções e descontos por não recebimento
   const orderTotals = useMemo(() => {
@@ -1171,6 +1356,11 @@ const MobileOrdersPage = ({ customerId }) => {
                 <p className="text-sm text-gray-600">{customer?.name}</p>
               </div>
             </div>
+            <RefreshButton 
+              text="Atualizar"
+              size="sm"
+              className="shrink-0"
+            />
           </div>
 
           {/* Week Navigation */}
@@ -1331,7 +1521,7 @@ const MobileOrdersPage = ({ customerId }) => {
 
         {activeTab === "history" && (
           <HistoryTab
-            existingOrders={existingOrders}
+            existingOrders={hydratedOrders}
             weekDays={weekDays}
             year={year}
             weekNumber={weekNumber}

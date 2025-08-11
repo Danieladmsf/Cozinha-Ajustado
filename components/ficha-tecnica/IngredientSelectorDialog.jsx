@@ -53,7 +53,7 @@ const IngredientSelectorDialog = React.memo(({
         weight_pre_cooking: '',
         weight_cooked: '',
         weight_portioned: '',
-        current_price: String(ingredient.current_price || '').replace('.', ',')
+        // Remover current_price fixo - será buscado dinamicamente
       };
 
       addIngredient(prepIndex, newIngredient);

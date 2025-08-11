@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Settings, RefreshCw } from "lucide-react";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import CardapioSemanal from './cardapio-semanal';
 import TabelaNutricional from './tabela-nutricional';
 import CardapioCliente from './cardapio-cliente';
@@ -32,6 +33,10 @@ export default function MenuMainPage() {
           </div>
           
           <div className="flex items-center gap-3">
+            <RefreshButton 
+              text="Atualizar Página"
+              size="sm"
+            />
             <Button 
               variant="outline"
               size="sm"
