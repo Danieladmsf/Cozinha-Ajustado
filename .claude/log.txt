@@ -1,0 +1,105 @@
+Problema Raiz
+
+  - getState() usa JSON.stringify() para clonar o estado
+  - Objetos com referências circulares ou muito grandes causam erro
+  - Isso trava toda a aplicação
+
+  📋 Plano de Correção Estrutural
+
+  Fase 1: Corrigir RecipeStore (Crítico)
+
+  1. Substituir JSON.stringify por deep clone eficiente
+    - Implementar função de clonagem que detecta referências circulares
+    - Usar structuredClone() quando disponível
+    - Fallback para lodash cloneDeep se necessário
+  2. Otimizar estrutura do estado
+    - Remover referências circulares desnecessárias
+    - Implementar estado imutável com Immer
+    - Usar IDs para referências ao invés de objetos completos
+
+  Fase 2: Corrigir useRecipeStore (Performance)
+
+  1. Eliminar comparação por JSON.stringify
+    - Usar shallow comparison com shallowEqual
+    - Implementar comparação seletiva apenas dos campos que mudaram
+    - Usar useMemo para dados computados
+  2. Implementar seletores
+    - Criar seletores específicos para cada parte do estado
+    - Evitar re-renders desnecessários
+    - Usar useCallback corretamente no top-level
+
+  Fase 3: Refatorar RecipeTechnical (Arquitetura)
+
+  1. Separar em componentes menores
+    - Cada modal em arquivo separado
+    - Usar React.memo para componentes puros
+    - Implementar context para estado compartilhado
+  2. Corrigir ciclo de vida
+    - Remover useEffect com dependências problemáticas
+    - Implementar debounce correto para recálculos
+    - Usar refs para valores que não devem causar re-render
+
+  Fase 4: Implementar Estado Reativo Eficiente
+
+  1. Zustand ao invés de Observer Pattern caseiro
+    - Store mais performático e testável
+    - Seletores nativos
+    - DevTools integrado
+  2. React Query para dados remotos
+    - Cache automático de receitas/ingredientes
+    - Sincronização em background
+    - Estados de loading/error padronizados
+
+  🛠️ Implementação Técnica
+
+  1. RecipeStore.getState() sem JSON.stringify
+
+  getState() {
+    return this.deepClone(this.state);
+  }
+
+  deepClone(obj, visited = new WeakSet()) {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (visited.has(obj)) return {}; // Evita referência circular
+
+    visited.add(obj);
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.deepClone(item, visited));
+    }
+
+    const cloned = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        cloned[key] = this.deepClone(obj[key], visited);
+      }
+    }
+
+    return cloned;
+  }
+
+  2. useRecipeStore com seletores
+
+  export function useRecipeStore(selector = (state) => state) {
+    const [selectedState, setSelectedState] = useState(() => selector(recipeStore.getState()));
+
+    useEffect(() => {
+      return recipeStore.subscribe('stateChange', (data) => {
+        const newSelected = selector(data.current);
+        setSelectedState(prev => {
+          if (shallowEqual(prev, newSelected)) return prev;
+          return newSelected;
+        });
+      });
+    }, [selector]);
+
+    return selectedState;
+  }
+
+  3. Componente otimizado
+
+  const RecipeTechnical = React.memo(() => {
+    const recipe = useRecipeStore(state => state.recipe);
+    const ui = useRecipeStore(state => state.ui);
+    // ... seletores específicos
+  })

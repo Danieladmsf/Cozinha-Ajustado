@@ -989,6 +989,27 @@ const MobileOrdersPage = ({ customerId }) => {
     }
 
     try {
+      // SINCRONIZAR UNIT_TYPES: Atualizar unit_type dos itens com dados atuais das receitas
+      const syncItemsWithCurrentRecipes = (items) => {
+        return items.map(item => {
+          const recipe = recipes.find(r => r.id === item.recipe_id);
+          if (recipe) {
+            const currentUnitType = getRecipeUnitType(recipe);
+            return {
+              ...item,
+              unit_type: currentUnitType // Sincronizar com ficha técnica atual
+            };
+          }
+          return item;
+        });
+      };
+
+      // Aplicar sincronização nos itens antes de salvar
+      const syncedOrder = {
+        ...currentOrder,
+        items: syncItemsWithCurrentRecipes(currentOrder.items || [])
+      };
+
       // Criar strings dos inputs e outputs da aba pedidos
       const createOrderStrings = () => {
         let inputString = "=== INPUTS DA ABA PEDIDOS ===\n\n";
@@ -998,8 +1019,8 @@ const MobileOrdersPage = ({ customerId }) => {
         inputString += `Refeições Esperadas: ${mealsExpected || 0}\n\n`;
         outputString += `Refeições Esperadas: ${mealsExpected || 0}\n\n`;
         
-        // Agrupar itens por categoria
-        const groupedItems = groupItemsByCategory(currentOrder.items || [], (item) => item.category);
+        // Agrupar itens por categoria (usar itens sincronizados)
+        const groupedItems = groupItemsByCategory(syncedOrder.items || [], (item) => item.category);
         const orderedCategories = getOrderedCategories(groupedItems);
         
         // Para cada categoria
@@ -1050,7 +1071,7 @@ const MobileOrdersPage = ({ customerId }) => {
       
 
       const orderData = {
-        ...currentOrder,
+        ...syncedOrder,
         total_meals_expected: mealsExpected,
         general_notes: generalNotes,
         total_items: orderTotals.totalItems,

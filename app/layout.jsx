@@ -17,7 +17,8 @@ import {
   TrendingUp,
   ShoppingCart,
   Clipboard,
-  Settings
+  Settings,
+  ClipboardList
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarNav from "@/components/shared/navigation";
@@ -48,6 +49,7 @@ export default function RootLayout({ children }) {
     { name: "Ficha Técnica", href: "/ficha-tecnica", icon: Clipboard },
     { name: "Análise de Receitas", href: "/analise-de-receitas", icon: TrendingUp },
     { name: "Cardápio", href: "/cardapio", icon: Utensils },
+    { name: "Programação", href: "/programacao", icon: ClipboardList },
     { name: "Pedidos", href: "/pedidos", icon: ShoppingCart },
     { name: "Ingredientes", href: "/ingredientes", icon: Package },
     { name: "Categorias", href: "/categorias", icon: Tag },

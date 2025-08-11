@@ -7,7 +7,6 @@ import { Settings, RefreshCw } from "lucide-react";
 import CardapioSemanal from './cardapio-semanal';
 import TabelaNutricional from './tabela-nutricional';
 import CardapioCliente from './cardapio-cliente';
-import ConsolidacaoPedidos from './consolidacao-pedidos';
 
 export default function MenuMainPage() {
   const [activeTab, setActiveTab] = useState("weekly");
@@ -46,7 +45,7 @@ export default function MenuMainPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="weekly">
               Cardápio Semanal
             </TabsTrigger>
@@ -55,9 +54,6 @@ export default function MenuMainPage() {
             </TabsTrigger>
             <TabsTrigger value="client">
               Cardápio por Cliente
-            </TabsTrigger>
-            <TabsTrigger value="consolidacao">
-              Consolidação de Pedidos
             </TabsTrigger>
           </TabsList>
 
@@ -71,10 +67,6 @@ export default function MenuMainPage() {
 
           <TabsContent value="client" className="mt-6">
             <CardapioCliente key={`client-${refreshKey}`} />
-          </TabsContent>
-
-          <TabsContent value="consolidacao" className="mt-6">
-            <ConsolidacaoPedidos key={`consolidacao-${refreshKey}`} />
           </TabsContent>
 
         </Tabs>

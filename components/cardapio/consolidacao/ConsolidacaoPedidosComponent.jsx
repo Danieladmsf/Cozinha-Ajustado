@@ -17,7 +17,8 @@ import {
   Filter,
   Search,
   Download,
-  Loader2
+  Loader2,
+  ChefHat
 } from "lucide-react";
 import { format, startOfWeek, addDays, getWeek, getYear } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -26,8 +27,10 @@ import { ptBR } from "date-fns/locale";
 import { Customer, Order, Recipe } from "@/app/api/entities";
 
 // Utils
-import { formattedQuantity, formatCurrency } from "@/components/utils/orderUtils";
+import { formattedQuantity } from "@/components/utils/orderUtils";
 import { useCategoryDisplay } from "@/hooks/shared/useCategoryDisplay";
+import { useOrderConsolidation } from "@/hooks/cardapio/useOrderConsolidation";
+import { convertQuantityForKitchen } from "@/lib/cubaConversionUtils";
 
 const ConsolidacaoPedidosComponent = () => {
   // Estados principais
@@ -44,6 +47,14 @@ const ConsolidacaoPedidosComponent = () => {
   // Filtros
   const [selectedCustomer, setSelectedCustomer] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [kitchenFormat, setKitchenFormat] = useState(() => {
+    // Carregar preferência salva do localStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('consolidacao-kitchen-format');
+      return saved === 'true';
+    }
+    return false;
+  });
   
   // Hooks
   const { groupItemsByCategory, getOrderedCategories, generateCategoryStyles } = useCategoryDisplay();
@@ -112,71 +123,32 @@ const ConsolidacaoPedidosComponent = () => {
     });
   }, [orders, selectedDay, selectedCustomer, searchTerm]);
 
-  // Agrupar pedidos por cliente
-  const ordersByCustomer = useMemo(() => {
-    const grouped = {};
-    
-    filteredOrders.forEach(order => {
-      if (!grouped[order.customer_id]) {
-        grouped[order.customer_id] = {
-          customer_id: order.customer_id,
-          customer_name: order.customer_name,
-          orders: [],
-          total_meals: 0,
-          total_amount: 0,
-          total_items: 0
-        };
-      }
-      
-      grouped[order.customer_id].orders.push(order);
-      grouped[order.customer_id].total_meals += order.total_meals_expected || 0;
-      // Usar original_amount se disponível, senão total_amount
-      const orderAmount = order.original_amount || order.total_amount || 0;
-      grouped[order.customer_id].total_amount += orderAmount;
-      grouped[order.customer_id].total_items += order.total_items || 0;
-      
-    });
-    
-    return Object.values(grouped);
-  }, [filteredOrders]);
+  // Hook de consolidação (deve vir depois de filteredOrders)
+  const { ordersByCustomer: consolidatedOrdersByCustomer, consolidateCustomerItems } = useOrderConsolidation(filteredOrders, recipes);
 
-  // Consolidar itens por categoria para um cliente
-  const consolidateCustomerItems = (customerOrders) => {
-    const consolidatedItems = {};
-    const itemsMap = new Map();
+  // Usar dados do hook de consolidação
+  const ordersByCustomer = consolidatedOrdersByCustomer;
+
+  // Função para alternar formato e salvar preferência
+  const toggleKitchenFormat = () => {
+    const newFormat = !kitchenFormat;
+    setKitchenFormat(newFormat);
     
-    customerOrders.forEach(order => {
-      if (order.items) {
-        order.items.forEach(item => {
-          const key = item.unique_id || `${item.recipe_id}_${item.recipe_name}`;
-          
-          if (itemsMap.has(key)) {
-            const existing = itemsMap.get(key);
-            existing.quantity += item.quantity || 0;
-            existing.total_price += item.total_price || 0;
-          } else {
-            const recipe = recipes.find(r => r.id === item.recipe_id);
-            itemsMap.set(key, {
-              ...item,
-              category: recipe?.category || item.category || 'Outros',
-              quantity: item.quantity || 0,
-              total_price: item.total_price || 0
-            });
-          }
-        });
-      }
-    });
-    
-    // Agrupar por categoria
-    itemsMap.forEach(item => {
-      const category = item.category;
-      if (!consolidatedItems[category]) {
-        consolidatedItems[category] = [];
-      }
-      consolidatedItems[category].push(item);
-    });
-    
-    return consolidatedItems;
+    // Salvar preferência no localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('consolidacao-kitchen-format', newFormat.toString());
+    }
+  };
+
+  // Função para formatar quantidade baseada no modo selecionado
+  const formatQuantityDisplay = (item) => {
+    if (kitchenFormat && item.unit_type?.toLowerCase() === 'cuba-g') {
+      const convertedQuantity = convertQuantityForKitchen(item.quantity, item.unit_type);
+      return `${convertedQuantity} –`;
+    } else {
+      // Formato padrão
+      return `${formattedQuantity(item.quantity)}${item.unit_type ? ` ${item.unit_type}` : ''} –`;
+    }
   };
 
   // Função de impressão
@@ -221,6 +193,16 @@ const ConsolidacaoPedidosComponent = () => {
             </div>
             
             <div className="flex items-center gap-3">
+              <Button
+                variant={kitchenFormat ? "default" : "outline"}
+                size="sm"
+                onClick={toggleKitchenFormat}
+                className="gap-2"
+              >
+                <ChefHat className="w-4 h-4" />
+                {kitchenFormat ? "Formato Padrão" : "Formato Cozinha"}
+              </Button>
+              
               <Button
                 variant="outline"
                 size="sm"
@@ -335,7 +317,7 @@ const ConsolidacaoPedidosComponent = () => {
       </Card>
 
       {/* Lista de pedidos consolidados */}
-      <div className="space-y-8 print:space-y-12">
+      <div className="space-y-4 print:space-y-12">
         {ordersByCustomer.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
@@ -354,53 +336,64 @@ const ConsolidacaoPedidosComponent = () => {
             const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
             
             return (
-              <div 
+              <Card 
                 key={customerData.customer_id} 
                 className="print:break-after-page print:min-h-screen print:p-8"
               >
-                {/* Header do cliente - formato A4 */}
-                <div className="mb-8 print:mb-12">
-                  <div className="text-center border-b-2 border-gray-300 pb-4 print:pb-6">
-                    <h1 className="text-2xl print:text-3xl font-bold text-gray-900 mb-2">
-                      Cardápio dia {selectedDayInfo?.fullDate} - {customerData.customer_name}
-                    </h1>
-                    <div className="flex justify-center gap-6 text-sm print:text-base text-gray-600">
-                      <span>Refeições: {customerData.total_meals}</span>
-                      <span>Total: {formatCurrency(customerData.total_amount || 0)}</span>
-                      {/* Debug: Mostrar valor raw */}
-                      <span className="text-xs text-red-500">(Debug: {customerData.total_amount})</span>
+                <CardContent className="p-4 print:p-8">
+                {/* Header do cliente - compacto */}
+                <div className="mb-3 print:mb-12">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-2 print:pb-6">
+                    <div className="flex-1">
+                      <h1 className="text-lg print:text-3xl font-bold text-gray-900">
+                        {customerData.customer_name}
+                      </h1>
+                      <p className="text-sm text-gray-600">
+                        {selectedDayInfo?.fullDate} • {customerData.total_meals} refeições
+                      </p>
                     </div>
+                    {kitchenFormat && (
+                      <div className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-md inline-block mt-1 sm:mt-0 print:hidden">
+                        <ChefHat className="w-3 h-3 inline mr-1" />
+                        Formato Cozinha
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Itens por categoria */}
-                <div className="space-y-6 print:space-y-8">
+                <div className="space-y-3 print:space-y-8">
                   {Object.keys(consolidatedItems).length === 0 ? (
                     <p className="text-center text-gray-500 py-8">
                       Nenhum item no pedido deste cliente.
                     </p>
                   ) : (
                     Object.entries(consolidatedItems).map(([categoryName, items]) => (
-                      <div key={categoryName} className="mb-8 print:mb-10">
+                      <div key={categoryName} className="mb-3 print:mb-10">
                         {/* Título da categoria */}
-                        <div className="mb-4 print:mb-6">
-                          <h2 className="text-xl print:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-2">
+                        <div className="mb-2 print:mb-6">
+                          <h2 className="text-lg print:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-1">
                             {categoryName}
                           </h2>
                         </div>
                         
                         {/* Lista de itens */}
-                        <div className="space-y-2 print:space-y-3 pl-4 print:pl-6">
+                        <div className="space-y-1 print:space-y-3 pl-3 print:pl-6">
                           {items.map((item, index) => (
                             <div 
                               key={`${item.unique_id || item.recipe_id}_${index}`}
-                              className="flex items-start gap-4 print:gap-6 text-base print:text-lg"
+                              className="flex items-start gap-3 print:gap-6 text-sm print:text-lg"
                             >
-                              <span className="font-semibold text-blue-700 min-w-[60px] print:min-w-[80px]">
-                                {formattedQuantity(item.quantity)}{item.unit_type ? ` ${item.unit_type}` : ''} -
+                              <span className="font-semibold text-blue-700 min-w-[50px] print:min-w-[80px] text-sm">
+                                {formatQuantityDisplay(item)}
                               </span>
                               <span className="text-gray-800 flex-1">
                                 {item.recipe_name}
+                                {item.notes && item.notes.trim() && (
+                                  <span className="text-gray-600 italic">
+                                    {' '}({item.notes.trim()})
+                                  </span>
+                                )}
                               </span>
                             </div>
                           ))}
@@ -414,7 +407,8 @@ const ConsolidacaoPedidosComponent = () => {
                 <div className="hidden print:block mt-12 pt-6 border-t border-gray-300 text-center text-sm text-gray-600">
                   <p>Cozinha Afeto - Gerado em {format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
                 </div>
-              </div>
+                </CardContent>
+              </Card>
             );
           })
         )}
