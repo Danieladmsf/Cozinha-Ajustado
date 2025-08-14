@@ -1,0 +1,54 @@
+# CodeRabbit Configuration
+# Docs: https://docs.coderabbit.ai/reference/configuration/
+
+# Review settings
+reviews:
+  profile: chill  # Options: chill, assertive
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: true
+  review_status: true
+  collapse_ellipsis: true
+  auto_review:
+    enabled: true
+    drafts: false
+
+# Chat settings  
+chat:
+  auto_reply: true
+
+# Knowledge base
+knowledge_base:
+  learnings:
+    enabled: true
+  
+# Path-based settings
+path_instructions:
+  - path: "**/*.js"
+    instructions: "Focus on ES6+ best practices, async/await usage, and performance"
+  - path: "**/*.jsx"
+    instructions: "Review React component patterns, hooks usage, and accessibility"
+  - path: "**/*.ts"
+    instructions: "Emphasize TypeScript type safety and interface definitions"
+  - path: "**/*.tsx"
+    instructions: "Check React TypeScript patterns and prop type definitions"
+  - path: "**/package.json"
+    instructions: "Review dependency versions and security vulnerabilities"
+  - path: "**/*.md"
+    instructions: "Check documentation clarity and completeness"
+
+# Language-specific settings
+language:
+  javascript:
+    level: expert
+  typescript:  
+    level: expert
+  react:
+    level: expert
+
+# Tools integration
+tools:
+  eslint:
+    enabled: true
+  prettier:
+    enabled: true
