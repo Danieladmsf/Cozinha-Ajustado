@@ -88,7 +88,6 @@ export default function ClientMenuComponent() {
         description: `Cardápio${customerId !== 'all' ? ' personalizado' : ''} enviado para impressão.`,
       });
     } catch (error) {
-      console.error('Erro ao imprimir cardápio:', error);
       toast({
         title: "Erro",
         description: "Erro ao gerar impressão do cardápio.",
@@ -108,9 +107,9 @@ export default function ClientMenuComponent() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100">
-      <div className="container mx-auto px-4 py-6">
-        <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="container mx-auto px-6 py-8">
+        <div className="space-y-8">
           {/* Header Section */}
           <SectionContainer 
             variant="gradient"
@@ -138,7 +137,7 @@ export default function ClientMenuComponent() {
             title="Seleção de Cliente"
             subtitle="Escolha o cliente para visualizar o cardápio personalizado"
             variant="elevated"
-            className="border-purple-200"
+            className="border-blue-200 bg-white/80 backdrop-blur-sm"
             icon={Printer}
           >
             <Section>
@@ -162,6 +161,7 @@ export default function ClientMenuComponent() {
               `Cardápio personalizado para ${selectedCustomer?.name || 'cliente selecionado'}`
             }
             variant="gradient"
+            className="bg-white/60 backdrop-blur-sm border border-white/30"
           >
             <Section>
               <div className="p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/30">

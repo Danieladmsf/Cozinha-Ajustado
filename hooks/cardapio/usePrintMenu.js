@@ -45,9 +45,15 @@ export const usePrintMenu = () => {
 
   const getPrintStyles = useCallback(() => {
     return `
+      @page {
+        size: A4 landscape;
+        margin: 8mm;
+      }
+      
       @media print {
         body { margin: 0; padding: 0; }
         .no-print { display: none !important; }
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       }
       
       * {
@@ -56,141 +62,148 @@ export const usePrintMenu = () => {
       
       body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        line-height: 1.4;
+        line-height: 1.2;
         color: #333;
         background: white;
-        padding: 20px;
+        padding: 8px;
+        font-size: 11px;
       }
       
       .print-header {
         text-align: center;
-        margin-bottom: 30px;
-        border-bottom: 2px solid #2563eb;
-        padding-bottom: 20px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #2563eb;
+        padding-bottom: 8px;
       }
       
       .print-header h1 {
-        margin: 0 0 10px 0;
-        font-size: 28px;
+        margin: 0 0 4px 0;
+        font-size: 18px;
         color: #1f2937;
+        font-weight: bold;
       }
       
       .week-info {
-        font-size: 16px;
+        font-size: 12px;
         color: #6b7280;
-        margin-bottom: 10px;
+        margin-bottom: 4px;
       }
       
       .customer-info {
-        font-size: 18px;
+        font-size: 13px;
         font-weight: 600;
         color: #2563eb;
-        margin-top: 10px;
+        margin-top: 4px;
       }
       
       .print-grid {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        gap: 20px;
-        margin-bottom: 30px;
+        gap: 8px;
+        margin-bottom: 8px;
       }
       
       .print-day-column {
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
         overflow: hidden;
         background: white;
+        height: fit-content;
       }
       
       .print-day-header {
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        background: #3b82f6;
         color: white;
-        padding: 12px;
+        padding: 6px 4px;
         text-align: center;
       }
       
       .print-day-header h2 {
         margin: 0;
-        font-size: 16px;
+        font-size: 12px;
         font-weight: 600;
       }
       
       .day-date {
-        font-size: 12px;
+        font-size: 9px;
         opacity: 0.9;
-        margin-top: 4px;
+        margin-top: 2px;
       }
       
       .print-day-content {
-        padding: 15px;
+        padding: 6px;
       }
       
       .print-category {
-        margin-bottom: 20px;
+        margin-bottom: 8px;
       }
       
       .category-title {
-        font-size: 14px;
+        font-size: 10px;
         font-weight: 600;
-        padding: 8px 12px;
-        border-radius: 4px;
-        margin: 0 0 8px 0;
+        padding: 3px 6px;
+        border-radius: 2px;
+        margin: 0 0 4px 0;
         color: #374151;
+        border-left: 2px solid;
       }
       
       .category-items {
-        padding-left: 8px;
+        padding-left: 4px;
       }
       
       .menu-item {
-        margin-bottom: 6px;
-        font-size: 13px;
-        line-height: 1.3;
+        margin-bottom: 2px;
+        font-size: 9px;
+        line-height: 1.2;
       }
       
       .recipe-name {
         font-weight: 500;
         color: #1f2937;
+        display: block;
       }
       
       .client-tags {
-        margin-top: 3px;
-        font-size: 11px;
+        margin-top: 1px;
+        font-size: 8px;
+        line-height: 1.1;
       }
       
       .client-tag {
-        display: inline-block;
-        background: #f3f4f6;
+        display: inline;
+        background: none;
         color: #6b7280;
-        padding: 2px 6px;
-        border-radius: 3px;
-        margin-right: 4px;
-        margin-bottom: 2px;
+        padding: 0;
+        margin-right: 6px;
+      }
+      
+      .client-tag:after {
+        content: ' ';
       }
       
       .print-footer {
         display: flex;
         justify-content: space-between;
-        font-size: 12px;
+        font-size: 8px;
         color: #6b7280;
         border-top: 1px solid #e5e7eb;
-        padding-top: 15px;
-        margin-top: 30px;
-      }
-      
-      @page {
-        size: A4 landscape;
-        margin: 15mm;
+        padding-top: 4px;
+        margin-top: 8px;
       }
       
       @media print {
         .print-grid {
           grid-template-columns: repeat(5, 1fr);
-          gap: 15px;
+          gap: 6px;
           page-break-inside: avoid;
         }
         
         .print-day-column {
+          break-inside: avoid;
+        }
+        
+        .print-category {
           break-inside: avoid;
         }
       }
