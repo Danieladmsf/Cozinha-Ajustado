@@ -38,6 +38,18 @@ const OrdersTab = ({
 }) => {
   const { registerInput, handleKeyDown } = useKeyboardNavigation();
   
+  // Função para formatar peso baseado na unidade
+  const formatWeightByUnit = (item) => {
+    const pesoFinal = item.total_weight || item.calculated_total_weight || (item.recipe_cuba_weight * (item.quantity || item.base_quantity || 0)) || 0;
+    const unitType = (item.unit_type || '').toLowerCase();
+    
+    if (unitType === 'unid' || unitType === 'unid.' || unitType === 'unidade') {
+      return `${utilFormattedQuantity(item.quantity || item.base_quantity || 0)} Unid.`;
+    }
+    
+    return utilFormatWeight(pesoFinal);
+  };
+  
 
   if (!currentOrder?.items || currentOrder.items.length === 0) {
     return (
@@ -240,14 +252,7 @@ const OrdersTab = ({
                           </td>
                           <td className="p-2">
                             <div className="text-center text-xs font-medium text-green-700">
-                              {(() => {
-                                // CORREÇÃO: Calcular peso dinamicamente em vez de usar total_weight zerado
-                                const calculatedWeight = CategoryLogic.calculateItemTotalWeight(item);
-                                const formattedWeight = utilFormatWeight(calculatedWeight);
-                                
-                                
-                                return formattedWeight;
-                              })()}
+                              {formatWeightByUnit(item)}
                             </div>
                           </td>
                           <td className="p-2">
@@ -304,16 +309,22 @@ const OrdersTab = ({
       {/* Resumo do Pedido */}
       <Card className="border-blue-200">
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div className="text-center">
               <p className="text-sm font-medium text-blue-700">Refeições Esperadas</p>
               <p className="text-2xl font-bold text-blue-900">{mealsExpected || 0}</p>
             </div>
-            <div>
-              <p className="text-sm font-medium text-blue-700">Total de Itens</p>
-              <p className="text-2xl font-bold text-blue-900">{utilFormattedQuantity(orderTotals.totalItems)}</p>
+            <div className="text-center">
+              <p className="text-sm font-medium text-blue-700">Total de Peso</p>
+              <p className="text-2xl font-bold text-blue-900">{utilFormatWeight(orderTotals.totalWeight || 0)}</p>
             </div>
-            <div className="text-right">
+            <div className="text-center">
+              <p className="text-sm font-medium text-blue-700">Valor por Refeição</p>
+              <p className="text-2xl font-bold text-blue-900">
+                {mealsExpected > 0 ? utilFormatCurrency(orderTotals.totalAmount / mealsExpected) : 'R$ 0,00'}
+              </p>
+            </div>
+            <div className="text-center">
               <p className="text-sm font-medium text-blue-700">
                 {(orderTotals.depreciationAmount > 0 || orderTotals.nonReceivedDiscountAmount > 0) ? 'Valor Original' : 'Valor Total'}
               </p>

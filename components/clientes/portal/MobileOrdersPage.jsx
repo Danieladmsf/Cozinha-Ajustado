@@ -47,12 +47,14 @@ import {
   parseQuantity as utilParseQuantity, 
   formattedQuantity as utilFormattedQuantity, 
   formatCurrency as utilFormatCurrency, 
-  formatWeight as utilFormatWeight 
+  formatWeight as utilFormatWeight,
+  sumCurrency as utilSumCurrency 
 } from "@/components/utils/orderUtils";
 import { CategoryLogic } from "@/components/utils/categoryLogic";
 
 import { useCategoryDisplay } from "@/hooks/shared/useCategoryDisplay";
 import { getRecipeUnitType } from "@/lib/unitTypeUtils";
+
 
 // Utilitário para cálculos de depreciação
 import { 
@@ -74,15 +76,18 @@ import { RefreshButton } from "@/components/ui/refresh-button";
 
 // Sistema centralizado de preços temporário
 import PortalPricingSystem from "@/lib/portal-pricing";
+import { PortalDataSync } from "@/lib/portal-data-sync";
+import { calculateTotalWeight } from "@/lib/weightCalculator";
 
 const MobileOrdersPage = ({ customerId }) => {
-  // console.log('🚀 [PORTAL TEMP PRICING] MobileOrdersPage iniciado para cliente:', customerId);
   
   const { toast } = useToast();
   const { groupItemsByCategory, getOrderedCategories, generateCategoryStyles } = useCategoryDisplay();
   
   // Estados principais
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(() => {
+    return new Date();
+  });
   const [customer, setCustomer] = useState(null);
   const [recipes, setRecipes] = useState([]);
   const [weeklyMenus, setWeeklyMenus] = useState([]);
@@ -178,7 +183,8 @@ const MobileOrdersPage = ({ customerId }) => {
       // Se existe pedido para o dia atual, carregar ele
       const currentDayOrder = ordersByDay[selectedDay];
       if (currentDayOrder) {
-        setCurrentOrder(currentDayOrder);
+        // NÃO setar currentOrder aqui - deixar para o useEffect de sincronização
+        // que vai aplicar PortalDataSync nos itens
         setMealsExpected(currentDayOrder.total_meals_expected || 0);
         setGeneralNotes(currentDayOrder.general_notes || "");
         setIsEditMode(false);
@@ -647,9 +653,10 @@ const MobileOrdersPage = ({ customerId }) => {
       
       setWeeklyWasteData(wasteDataByDay);
     } catch (error) {
-      console.error('Erro ao carregar dados de sobra da semana:', error);
     }
   }, [customer, weekNumber, year]);
+
+
 
 
   // Carregamento inicial
@@ -770,13 +777,11 @@ const MobileOrdersPage = ({ customerId }) => {
             const recipe = recipes.find(r => r.id === item.recipe_id && r.active !== false);
             
             if (recipe) {
+              
               const containerType = getRecipeUnitType(recipe);
               
-              // Definir preço baseado no container_type
-              let unitPrice = 0;
-              
               // Usar sistema centralizado de preços
-              unitPrice = PortalPricingSystem.recalculateItemUnitPrice(item, recipe, containerType);
+              const unitPrice = PortalPricingSystem.recalculateItemUnitPrice(item, recipe, containerType);
               
               // Criar item base
               const cubaWeightParsed = utilParseQuantity(recipe.cuba_weight) || 0;
@@ -792,16 +797,22 @@ const MobileOrdersPage = ({ customerId }) => {
                 unit_price: unitPrice,
                 total_price: 0,
                 notes: "",
-                // ✅ CORREÇÃO: Adicionar TODOS os dados de peso das receitas
+                // Adicionar dados de peso das receitas
                 cuba_weight: cubaWeightParsed,
                 yield_weight: utilParseQuantity(recipe.yield_weight) || 0,
                 total_weight: utilParseQuantity(recipe.total_weight) || 0,
                 adjustment_percentage: 0
               };
               
-              // Aplicar lógica de categoria na inicialização
-              const newItem = CategoryLogic.calculateItemValues(baseItem, 'base_quantity', 0, mealsExpected);
+
               
+              // 🔥 USAR PortalDataSync para sincronização completa
+              const syncedItem = PortalDataSync.syncItemSafely(baseItem, recipe);
+              
+              // Aplicar lógica de categoria após sincronização
+              const newItem = CategoryLogic.calculateItemValues(syncedItem, 'base_quantity', 0, mealsExpected);
+              
+
               
               items.push(newItem);
             }
@@ -888,7 +899,7 @@ const MobileOrdersPage = ({ customerId }) => {
       // Verificar se existe pedido salvo para este dia
       const existingOrder = existingOrders[selectedDay];
       if (existingOrder) {
-        setCurrentOrder(existingOrder);
+        // NÃO setar currentOrder aqui - deixar para o useEffect de sincronização
         setMealsExpected(existingOrder.total_meals_expected || 0);
         setGeneralNotes(existingOrder.general_notes || "");
         setIsEditMode(false); // Se existe pedido salvo, não está em modo de edição
@@ -917,21 +928,14 @@ const MobileOrdersPage = ({ customerId }) => {
     if (existingOrders[selectedDay] && orderItems.length > 0) {
       const existingOrder = existingOrders[selectedDay];
       
-      // Atualizar preços dos itens existentes com valores atuais das receitas
+      // SINCRONIZAR ITENS EXISTENTES com receitas atuais usando PortalDataSync
       const updatedItems = existingOrder.items.map(existingItem => {
-        // Encontrar item correspondente nos orderItems atualizados (com preços novos)
-        const currentItem = orderItems.find(oi => oi.unique_id === existingItem.unique_id || oi.recipe_id === existingItem.recipe_id);
-        if (currentItem) {
-          // Manter quantidades e notas do pedido salvo, mas atualizar preços E unit_type
-          const updatedItem = {
-            ...existingItem,
-            unit_price: currentItem.unit_price,
-            unit_type: currentItem.unit_type, // ATUALIZAR unit_type com valor atual da receita
-            total_price: (existingItem.quantity || 0) * (currentItem.unit_price || 0)
-          };
-          
-          
-          return updatedItem;
+        // Encontrar receita correspondente
+        const recipe = recipes.find(r => r.id === existingItem.recipe_id);
+        if (recipe) {
+          // Aplicar PortalDataSync completo para incluir pesos
+          const syncedItem = PortalDataSync.syncItemSafely(existingItem, recipe);
+          return syncedItem;
         }
         return existingItem;
       });
@@ -978,17 +982,12 @@ const MobileOrdersPage = ({ customerId }) => {
       
       if (currentOrderItem) {
         // Manter quantities e notas do waste, mas atualizar preços e unit_type
-        const updatedItem = {
+        return {
           ...wasteItem,
           unit_price: currentOrderItem.unit_price,
           ordered_unit_type: currentOrderItem.unit_type,
           total_price: (wasteItem.ordered_quantity || 0) * (currentOrderItem.unit_price || 0)
         };
-        
-        // Log apenas para debug quando necessário
-        // console.log(`[WASTE] ${wasteItem.recipe_name}: preços atualizados`);
-        
-        return updatedItem;
       }
       return wasteItem;
     });
@@ -1012,17 +1011,12 @@ const MobileOrdersPage = ({ customerId }) => {
       
       if (currentOrderItem) {
         // Manter quantities e status do receiving, mas atualizar preços e unit_type
-        const updatedItem = {
+        return {
           ...receivingItem,
           unit_price: currentOrderItem.unit_price,
           ordered_unit_type: currentOrderItem.unit_type,
           total_price: (receivingItem.ordered_quantity || 0) * (currentOrderItem.unit_price || 0)
         };
-        
-        // Log apenas para debug quando necessário
-        // console.log(`[RECEIVING] ${receivingItem.recipe_name}: preços atualizados`);
-        
-        return updatedItem;
       }
       return receivingItem;
     });
@@ -1073,7 +1067,12 @@ const MobileOrdersPage = ({ customerId }) => {
         });
         
         // Recalcular total do pedido
-        const newTotalAmount = hydratedItems.reduce((sum, item) => sum + (item.total_price || 0), 0);
+        const newTotalAmount = utilSumCurrency(hydratedItems.map(item => item.total_price || 0));
+        
+        // Debug apenas para mudanças significativas
+        if (process.env.NODE_ENV === 'development' && Math.abs(newTotalAmount - (order.total_amount || 0)) > 1) {
+          console.log('🔄 [Hidratação]:', order.total_amount, '->', newTotalAmount);
+        }
         
         updatedOrders[dayIndex] = {
           ...order,
@@ -1093,7 +1092,7 @@ const MobileOrdersPage = ({ customerId }) => {
     if (JSON.stringify(updatedOrders) !== JSON.stringify(hydratedOrders)) {
       setHydratedOrders(updatedOrders);
     }
-  }, [hasInitializedDay, orderItems, existingOrders, hydratedOrders]);
+  }, [hasInitializedDay, orderItems, existingOrders]);
 
   // Calcular totais, depreciação por devoluções e descontos por não recebimento
   const orderTotals = useMemo(() => {
@@ -1110,7 +1109,15 @@ const MobileOrdersPage = ({ customerId }) => {
       const itemQuantity = item.quantity || item.base_quantity || 0;
       return sum + itemQuantity;
     }, 0);
-    const totalAmount = currentOrder.items.reduce((sum, item) => sum + (item.total_price || 0), 0);
+    const totalAmount = utilSumCurrency(currentOrder.items.map(item => item.total_price || 0));
+    
+    // Debug simplificado
+    if (process.env.NODE_ENV === 'development' && totalAmount > 500) {
+      console.log('💼 [Pedido Total]:', totalAmount, 'com', currentOrder.items.length, 'itens');
+    }
+    
+    // Usar calculadora centralizada de peso
+    const totalWeight = calculateTotalWeight(currentOrder.items);
     
     // Calcular depreciação baseada nos itens devolvidos (wasteItems)
     const depreciationData = calculateTotalDepreciation(wasteItems || [], currentOrder.items || []);
@@ -1128,6 +1135,7 @@ const MobileOrdersPage = ({ customerId }) => {
     return { 
       totalItems, 
       totalAmount,
+      totalWeight,
       depreciation: depreciationData,
       nonReceivedDiscounts: nonReceivedDiscountsData,
       finalAmount: finalOrderValue.finalTotal,
@@ -1173,65 +1181,7 @@ const MobileOrdersPage = ({ customerId }) => {
         items: syncItemsWithCurrentRecipes(currentOrder.items || [])
       };
 
-      // Criar strings dos inputs e outputs da aba pedidos
-      const createOrderStrings = () => {
-        let inputString = "=== INPUTS DA ABA PEDIDOS ===\n\n";
-        let outputString = "=== OUTPUTS DA ABA PEDIDOS ===\n\n";
-        
-        // Header das refeições esperadas
-        inputString += `Refeições Esperadas: ${mealsExpected || 0}\n\n`;
-        outputString += `Refeições Esperadas: ${mealsExpected || 0}\n\n`;
-        
-        // Agrupar itens por categoria (usar itens sincronizados)
-        const groupedItems = groupItemsByCategory(syncedOrder.items || [], (item) => item.category);
-        const orderedCategories = getOrderedCategories(groupedItems);
-        
-        // Para cada categoria
-        orderedCategories.forEach(({ name: categoryName, data: categoryData }) => {
-          const isCarneCategory = CategoryLogic.isCarneCategory(categoryName);
-          
-          inputString += `--- CATEGORIA: ${categoryName} ---\n`;
-          outputString += `--- CATEGORIA: ${categoryName} ---\n`;
-          
-          const header = CategoryLogic.getExportHeader(isCarneCategory);
-          inputString += header + "\n";
-          outputString += header + "\n";
-          
-          categoryData.items.forEach(item => {
-            const formattedRow = CategoryLogic.formatExportRow(
-              item, 
-              isCarneCategory, 
-              utilFormatCurrency, 
-              utilFormattedQuantity,
-              utilFormatWeight
-            );
-            
-            inputString += formattedRow + "\n";
-            outputString += formattedRow + "\n";
-          });
-          
-          inputString += "\n";
-          outputString += "\n";
-        });
-        
-        // Totais
-        const totalItemsStr = utilFormattedQuantity(orderTotals.totalItems);
-        const totalAmountStr = utilFormatCurrency(orderTotals.totalAmount);
-        
-        inputString += `--- RESUMO DO PEDIDO ---\n`;
-        inputString += `Total de Itens: ${totalItemsStr}\n`;
-        inputString += `Valor Total: ${totalAmountStr}\n`;
-        inputString += `Observações Gerais: ${generalNotes || ''}\n`;
-        
-        outputString += `--- RESUMO DO PEDIDO ---\n`;
-        outputString += `Total de Itens: ${totalItemsStr}\n`;
-        outputString += `Valor Total: ${totalAmountStr}\n`;
-        outputString += `Observações Gerais: ${generalNotes || ''}\n`;
-        
-        return { inputString, outputString };
-      };
-      
-      const { inputString, outputString } = createOrderStrings();
+
       
 
       const orderData = {
@@ -1242,19 +1192,7 @@ const MobileOrdersPage = ({ customerId }) => {
         total_amount: orderTotals.totalAmount,
         final_amount: orderTotals.finalAmount,
         original_amount: orderTotals.originalAmount,
-        depreciation_amount: orderTotals.depreciationAmount,
-        // Adicionar as strings dos inputs e outputs
-        order_inputs_string: inputString,
-        order_outputs_string: outputString,
-        form_data_snapshot: {
-          timestamp: new Date().toISOString(),
-          customer_name: customer.name,
-          day_of_week: selectedDay,
-          week_number: weekNumber,
-          year: year,
-          inputs: inputString,
-          outputs: outputString
-        }
+        depreciation_amount: orderTotals.depreciationAmount
       };
 
       if (existingOrders[selectedDay]) {
@@ -1506,6 +1444,7 @@ const MobileOrdersPage = ({ customerId }) => {
             weekNumber={weekNumber}
             customer={customer}
             existingWasteData={weeklyWasteData}
+            recipes={recipes}
           />
         )}
       </div>
@@ -1532,7 +1471,7 @@ const MobileOrdersPage = ({ customerId }) => {
                 )}
               </div>
               <div className="text-sm text-gray-600">
-                <span className="font-medium">Itens:</span> {utilFormattedQuantity(orderTotals.totalItems)}
+                <span className="font-medium">Peso:</span> {utilFormatWeight(orderTotals.totalWeight || 0)}
               </div>
             </div>
             {(isEditMode || showSuccessEffect) ? (
@@ -1543,7 +1482,7 @@ const MobileOrdersPage = ({ customerId }) => {
                     ? 'bg-green-600 hover:bg-green-700 scale-105 shadow-lg' 
                     : 'bg-blue-600 hover:bg-blue-700'
                 }`}
-                disabled={orderTotals.totalItems === 0 || showSuccessEffect || !mealsExpected || mealsExpected <= 0}
+                disabled={orderTotals.totalAmount === 0 || showSuccessEffect || !mealsExpected || mealsExpected <= 0}
               >
                 {showSuccessEffect ? (
                   <>
@@ -1561,7 +1500,7 @@ const MobileOrdersPage = ({ customerId }) => {
               <Button 
                 onClick={enableEditMode}
                 className="w-full bg-amber-600 hover:bg-amber-700 text-white"
-                disabled={orderTotals.totalItems === 0}
+                disabled={orderTotals.totalAmount === 0}
               >
                 <Send className="w-4 h-4 mr-2" />
                 Editar Pedido

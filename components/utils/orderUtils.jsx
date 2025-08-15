@@ -62,10 +62,31 @@ export function normalizeOrderItems(items) {
  * @returns {string} O valor formatado como moeda.
  */
 export function formatCurrency(value) {
+  const numericValue = parseQuantity(value);
+  // Arredondar para 2 casas decimais para evitar problemas de precisão
+  const roundedValue = Math.round(numericValue * 100) / 100;
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
-  }).format(parseQuantity(value)); // Garante que o valor é numérico
+  }).format(roundedValue);
+}
+
+/**
+ * Soma valores monetários com precisão, evitando erros de ponto flutuante
+ * @param {Array<number>} values - Array de valores para somar
+ * @returns {number} Soma precisa arredondada para 2 casas decimais
+ */
+export function sumCurrency(values) {
+  const sum = values.reduce((acc, val) => {
+    const numericVal = parseQuantity(val);
+    return acc + numericVal;
+  }, 0);
+  // Arredondar para 2 casas decimais para evitar problemas de precisão
+  const rounded = Math.round(sum * 100) / 100;
+  
+  // Debug desabilitado para evitar spam nos logs
+  
+  return rounded;
 }
 
 /**
@@ -95,11 +116,18 @@ export function calculateItemTotalWeight(item, recipe) {
   
   const quantity = parseQuantity(item.quantity);
   
-  if (item.unit_type === 'cuba') {
-    const cubaWeightKg = parseQuantity(recipe.cuba_weight); // Assume que cuba_weight já está em kg na receita
-    return cubaWeightKg * quantity;
+  if (item.unit_type === 'cuba' || item.unit_type === 'cuba-g') {
+    // Prioriza cuba_weight, mas usa total_weight como fallback
+    const cubaWeightKg = parseQuantity(recipe.cuba_weight || recipe.total_weight);
+    const result = cubaWeightKg * quantity;
+    
+    return result;
   } else if (item.unit_type === 'kg') {
-    return quantity; // Quantidade já está em kg
+    return quantity;
+  } else if (item.unit_type === 'unid') {
+    const unitWeightKg = parseQuantity(recipe.unit_weight || 0);
+    return unitWeightKg * quantity;
   }
-  return 0; // Caso tipo de unidade não reconhecido
+  
+  return 0;
 }
