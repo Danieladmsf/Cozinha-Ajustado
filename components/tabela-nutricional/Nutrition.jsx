@@ -151,21 +151,12 @@ export default function Nutrition() {
       
       
     } catch (error) {
-      console.error("Erro ao carregar dados nutricionais:", error);
-      console.error("Detalhes do erro:", {
-        message: error.message,
-        code: error.code,
-        stack: error.stack
-      });
-      
       // Verificar se é erro de autenticação
       if (error.code === 'permission-denied' || error.message?.includes('permission-denied')) {
-        console.error("ERRO DE PERMISSÃO: Usuário não autenticado ou sem permissão para acessar as coleções NutritionFood/NutritionCategory");
       }
       
       // Verificar se é erro de rede
       if (error.code === 'unavailable' || error.message?.includes('unavailable')) {
-        console.error("ERRO DE REDE: Firebase não conseguiu conectar");
       }
       
     } finally {

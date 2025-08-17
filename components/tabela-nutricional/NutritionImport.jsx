@@ -138,7 +138,6 @@ export default function NutritionImport() {
             }
           } catch (err) {
             errors++;
-            console.error('[TACO] Erro ao corrigir ingrediente:', ingredient.name, err);
           }
         }
       }
@@ -159,7 +158,6 @@ export default function NutritionImport() {
       });
       
     } catch (err) {
-      console.error('[TACO] Erro na correção de IDs:', err);
       setResults(prev => [
         {
           name: "Erro na correção",
@@ -229,7 +227,6 @@ export default function NutritionImport() {
           }
         } catch (err) {
           errors++;
-          console.error('[TACO] Erro ao corrigir item:', food.name, err);
         }
       }
       
@@ -249,7 +246,6 @@ export default function NutritionImport() {
       });
       
     } catch (err) {
-      console.error('[TACO] Erro na correção de IDs TACO:', err);
       setResults(prev => [
         {
           name: "Erro na correção",
@@ -325,7 +321,6 @@ export default function NutritionImport() {
                     await new Promise(resolve => setTimeout(resolve, 100));
                     
                 } catch (error) {
-                    console.error('Erro ao atualizar nome:', error);
                     results.push({
                         name: item.name,
                         status: 'error',
@@ -482,10 +477,7 @@ export default function NutritionImport() {
                         await new Promise(resolve => setTimeout(resolve, 500));
 
                     } catch (error) {
-                        console.error('[TACO] Erro ao processar item:', {
-                            item: item.description || item.id,
-                            error: error.message
-                        });
+                        // Error processing TACO item
                         
                         results.push({
                             name: item.description || `ID ${item.id}`,
@@ -520,7 +512,6 @@ export default function NutritionImport() {
         });
         
     } catch (error) {
-        console.error("Erro ao processar arquivo:", error);
         setError(error.message);
         
         setResults([{

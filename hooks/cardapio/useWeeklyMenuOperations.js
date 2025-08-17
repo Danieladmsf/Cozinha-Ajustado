@@ -25,7 +25,6 @@ export const useWeeklyMenuOperations = () => {
 
       return newMenu;
     } catch (error) {
-      console.error('Erro ao criar menu semanal:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -53,7 +52,6 @@ export const useWeeklyMenuOperations = () => {
 
       return updatedMenu;
     } catch (error) {
-      console.error('Erro ao atualizar item:', error);
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o item do menu.",
@@ -97,7 +95,6 @@ export const useWeeklyMenuOperations = () => {
 
       return updatedMenu;
     } catch (error) {
-      console.error('Erro ao adicionar item:', error);
       throw error;
     }
   }, []);
@@ -120,7 +117,6 @@ export const useWeeklyMenuOperations = () => {
 
       return updatedMenu;
     } catch (error) {
-      console.error("Erro ao remover item:", error);
       throw error;
     }
   }, [toast]);
@@ -154,7 +150,6 @@ export const useWeeklyMenuOperations = () => {
 
       return await updateMenuItemFn(dayIndex, categoryId, itemIndex, { locations });
     } catch (error) {
-      console.error("Erro ao atualizar locais:", error);
       throw error;
     }
   }, []);

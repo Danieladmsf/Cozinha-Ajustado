@@ -119,7 +119,6 @@ export const useMenuNoteActions = (menuNotes, categories = [], recipes = []) => 
       cancelNoteOperation();
       return true;
     } catch (error) {
-      console.error("Erro ao salvar nota:", error);
       toast({
         variant: "destructive",
         title: "Erro",
@@ -154,7 +153,6 @@ export const useMenuNoteActions = (menuNotes, categories = [], recipes = []) => 
       
       return true;
     } catch (error) {
-      console.error("Erro ao excluir nota:", error);
       toast({
         variant: "destructive",
         title: "Erro",
@@ -180,7 +178,6 @@ export const useMenuNoteActions = (menuNotes, categories = [], recipes = []) => 
       
       return true;
     } catch (error) {
-      console.error("Erro ao alterar importância da nota:", error);
       toast({
         variant: "destructive",
         title: "Erro",

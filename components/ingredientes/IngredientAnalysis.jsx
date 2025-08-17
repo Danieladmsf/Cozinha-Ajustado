@@ -128,7 +128,6 @@ export default function IngredientAnalysis() {
             setDateRange({ start: dates[0], end: dates[dates.length - 1] });
           }
         } catch (error) {
-          console.error('Erro ao calcular período inteligente:', error);
         }
       }
 
@@ -151,7 +150,6 @@ export default function IngredientAnalysis() {
       )].filter(Boolean).sort().map(name => ({ value: name, label: name })));
 
     } catch (err) {
-      console.error("Erro ao carregar dados:", err);
       setError("Não foi possível carregar os dados para análise.");
       toast({
         variant: "destructive",
@@ -180,7 +178,6 @@ export default function IngredientAnalysis() {
         }
         return isInDateRange && supplierMatch && brandMatch;
       } catch (e) {
-        console.error("Erro ao processar filtros do histórico:", record.date, e);
         return false;
       }
     });

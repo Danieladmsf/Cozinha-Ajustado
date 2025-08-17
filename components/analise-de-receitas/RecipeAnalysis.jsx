@@ -404,7 +404,6 @@ export default function RecipeAnalysis() {
       setPriceHistory(historyData);
 
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
       toast({
         variant: "destructive",
         title: "Erro",
@@ -432,7 +431,6 @@ export default function RecipeAnalysis() {
       setSelectedRecipeDetails(recipeWithHistory);
       setActiveTab("cost_overview");
     } catch (error) {
-      console.error("Erro ao processar detalhes da receita:", error);
       toast({
         variant: "destructive",
         description: "Erro ao processar detalhes da receita"

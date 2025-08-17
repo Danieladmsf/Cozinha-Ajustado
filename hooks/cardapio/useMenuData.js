@@ -7,16 +7,86 @@ import { Customer } from "@/app/api/entities";
 import { APP_CONSTANTS } from "@/lib/constants";
 import { getWeekInfo } from "../shared/weekUtils";
 
-export const useMenuData = (currentDate) => {
-  const [categories, setCategories] = useState([]);
-  const [recipes, setRecipes] = useState([]);
-  const [weeklyMenu, setWeeklyMenu] = useState(null);
-  const [customers, setCustomers] = useState([]);
-  const [menuConfig, setMenuConfig] = useState(null);
-  const [loading, setLoading] = useState(true);
+// Cache global para dados estáticos
+let globalCache = {
+  categories: null,
+  recipes: null,
+  customers: null,
+  menuConfig: null,
+  lastLoaded: null
+};
 
-  const loadData = useCallback(async () => {
+// Cache para menus semanais
+let weeklyMenuCache = new Map();
+
+// Lista de listeners para sincronização entre instâncias
+let cacheListeners = new Set();
+
+// Função para notificar todos os listeners sobre mudanças no cache
+const notifyCacheUpdate = (type, data) => {
+  cacheListeners.forEach(listener => {
+    listener(type, data);
+  });
+};
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
+export const useMenuData = (currentDate) => {
+  const [categories, setCategories] = useState(globalCache.categories || []);
+  const [recipes, setRecipes] = useState(globalCache.recipes || []);
+  const [weeklyMenu, setWeeklyMenu] = useState(null);
+  const [customers, setCustomers] = useState(globalCache.customers || []);
+  const [menuConfig, setMenuConfig] = useState(globalCache.menuConfig || null);
+  const [loading, setLoading] = useState(!globalCache.categories);
+
+  // Listener para sincronização entre instâncias
+  useEffect(() => {
+    const listener = (type, data) => {
+      switch (type) {
+        case 'initialData':
+          setCategories(data.categories);
+          setRecipes(data.recipes);
+          setCustomers(data.customers);
+          setMenuConfig(data.menuConfig);
+          setLoading(false);
+          break;
+        case 'weeklyMenu':
+          if (data.weekKey === getWeekInfo(currentDate).weekKey) {
+            setWeeklyMenu(data.menu);
+          }
+          break;
+        case 'menuConfig':
+          setMenuConfig(data);
+          break;
+      }
+    };
+
+    cacheListeners.add(listener);
+    return () => {
+      cacheListeners.delete(listener);
+    };
+  }, [currentDate]);
+
+  // Verifica se cache é válido
+  const isCacheValid = () => {
+    return globalCache.lastLoaded && 
+           (Date.now() - globalCache.lastLoaded) < CACHE_DURATION &&
+           globalCache.categories;
+  };
+
+  // Carregamento inicial com cache inteligente
+  const loadInitialData = useCallback(async () => {
     try {
+      // Se cache é válido, usar dados do cache
+      if (isCacheValid()) {
+        setCategories(globalCache.categories);
+        setRecipes(globalCache.recipes);
+        setCustomers(globalCache.customers);
+        setMenuConfig(globalCache.menuConfig);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       
       const [categoriesData, recipesData, customersData, configData] = await Promise.all([
@@ -26,23 +96,33 @@ export const useMenuData = (currentDate) => {
         loadMenuConfig()
       ]);
 
+      // Atualizar estado e cache global
+      const newData = {
+        categories: categoriesData || [],
+        recipes: recipesData || [],
+        customers: customersData || [],
+        menuConfig: configData,
+        lastLoaded: Date.now()
+      };
 
-      // Log resumido apenas uma vez
-      if (process.env.NODE_ENV === 'development') {
-      }
+      globalCache = newData;
+      
+      setCategories(newData.categories);
+      setRecipes(newData.recipes);
+      setCustomers(newData.customers);
+      setMenuConfig(newData.menuConfig);
+      
+      // Notificar outras instâncias
+      notifyCacheUpdate('initialData', newData);
 
-      setCategories(categoriesData || []);
-      setRecipes(recipesData || []);
-      setCustomers(customersData || []);
-      setMenuConfig(configData);
-
-      await loadWeeklyMenu(currentDate);
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
+      // Error loading initial data
     } finally {
       setLoading(false);
     }
-  }, [currentDate]);
+  }, []);
+
+
 
   const loadMenuConfig = async () => {
     try {
@@ -105,7 +185,6 @@ export const useMenuData = (currentDate) => {
       }
       return null;
     } catch (error) {
-      console.error("Erro ao carregar configuração:", error);
       return null;
     }
   };
@@ -115,6 +194,13 @@ export const useMenuData = (currentDate) => {
       const mockUserId = APP_CONSTANTS.MOCK_USER_ID;
       const { weekStart, weekKey, weekNumber, year } = getWeekInfo(date);
 
+      // Verificar cache do menu semanal
+      const cachedMenu = weeklyMenuCache.get(weekKey);
+      if (cachedMenu && (Date.now() - cachedMenu.timestamp) < CACHE_DURATION) {
+        setWeeklyMenu(cachedMenu.data);
+        return;
+      }
+
       const menus = await WeeklyMenuEntity.query([
         { field: 'user_id', operator: '==', value: mockUserId },
         { field: 'week_key', operator: '==', value: weekKey }
@@ -122,12 +208,27 @@ export const useMenuData = (currentDate) => {
 
       if (menus && menus.length > 0) {
         const menu = menus[0];
+        // Salvar no cache
+        weeklyMenuCache.set(weekKey, {
+          data: menu,
+          timestamp: Date.now()
+        });
         setWeeklyMenu(menu);
+        
+        // Notificar outras instâncias
+        notifyCacheUpdate('weeklyMenu', { weekKey, menu });
       } else {
+        // Salvar null no cache também
+        weeklyMenuCache.set(weekKey, {
+          data: null,
+          timestamp: Date.now()
+        });
         setWeeklyMenu(null);
+        
+        // Notificar outras instâncias
+        notifyCacheUpdate('weeklyMenu', { weekKey, menu: null });
       }
     } catch (error) {
-      console.error("ERRO AO CARREGAR MENU SEMANAL:", error);
       setWeeklyMenu(null);
     }
   };
@@ -136,16 +237,26 @@ export const useMenuData = (currentDate) => {
     try {
       const configData = await loadMenuConfig();
       setMenuConfig(configData);
+      
+      // Notificar outras instâncias
+      notifyCacheUpdate('menuConfig', configData);
     } catch (error) {
-      console.error("Erro ao atualizar configuração:", error);
+      // Error updating config
     }
   }, []);
 
   const forceReloadFromDatabase = useCallback(async () => {
     try {
-      
-      // Limpar cache
+      // Limpar todos os caches
       localStorage.removeItem('menuConfig');
+      globalCache = {
+        categories: null,
+        recipes: null,
+        customers: null,
+        menuConfig: null,
+        lastLoaded: null
+      };
+      weeklyMenuCache.clear();
       
       const mockUserId = APP_CONSTANTS.MOCK_USER_ID;
       const configs = await MenuConfig.query([
@@ -160,19 +271,38 @@ export const useMenuData = (currentDate) => {
         localStorage.setItem('menuConfig', JSON.stringify(config));
         setMenuConfig(config);
         
+        // Notificar outras instâncias
+        notifyCacheUpdate('menuConfig', config);
+        
         return config;
       } else {
         return null;
       }
     } catch (error) {
-      console.error("Erro no recarregamento forçado:", error);
       return null;
     }
   }, []);
 
+  // Função para invalidar cache específico
+  const invalidateWeeklyMenuCache = useCallback((weekKey) => {
+    if (weekKey) {
+      weeklyMenuCache.delete(weekKey);
+    } else {
+      weeklyMenuCache.clear();
+    }
+  }, []);
+
+  // Carregamento inicial
   useEffect(() => {
-    loadData();
-  }, [currentDate]);
+    loadInitialData();
+  }, []);
+
+  // Carregar menu da semana quando data muda
+  useEffect(() => {
+    if (categories.length > 0) { // Só carrega menu se já tiver dados iniciais
+      loadWeeklyMenu(currentDate);
+    }
+  }, [currentDate, categories.length]);
 
   // Detectar mudanças no localStorage e recarregar config
   useEffect(() => {
@@ -195,8 +325,10 @@ export const useMenuData = (currentDate) => {
     loading,
     setWeeklyMenu,
     loadWeeklyMenu,
-    refreshData: loadData,
+    refreshData: loadInitialData,
     refreshMenuConfig,
-    forceReloadFromDatabase
+    forceReloadFromDatabase,
+    invalidateWeeklyMenuCache,
+    isCacheValid: isCacheValid()
   };
 };

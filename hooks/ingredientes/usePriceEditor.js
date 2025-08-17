@@ -103,14 +103,6 @@ export function usePriceEditor() {
 
       historyCreated = await PriceHistory.create(historyPayload);
       
-      console.log('✅ Histórico criado:', {
-        id: historyCreated.id,
-        ingredient: ingredient.name,
-        old_price: oldPrice,
-        new_price: newPrice,
-        supplier: ingredient.main_supplier,
-        brand: ingredient.brand
-      });
 
       // 2. Atualizar o ingrediente no Firebase
       await Ingredient.update(ingredient.id, {
@@ -137,23 +129,13 @@ export function usePriceEditor() {
       });
 
     } catch (err) {
-      console.error('❌ Erro na transação de atualização de preço:', err);
       
       // Rollback: tentar remover histórico se foi criado mas falha na atualização do ingrediente
       if (historyCreated) {
         try {
-          console.log('🔄 Tentando rollback do histórico...');
           await PriceHistory.delete(historyCreated.id);
-          console.log('✅ Rollback do histórico realizado com sucesso');
         } catch (rollbackError) {
-          console.error('❌ Erro no rollback do histórico:', rollbackError);
-          // Log para monitoramento - histórico órfão detectado
-          console.error('🚨 HISTÓRICO ÓRFÃO DETECTADO:', {
-            historyId: historyCreated.id,
-            ingredientId: ingredient.id,
-            ingredientName: ingredient.name,
-            timestamp: currentTimestamp
-          });
+          // Rollback failed - orphaned history record
         }
       }
 

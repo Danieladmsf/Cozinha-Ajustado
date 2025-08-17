@@ -35,7 +35,6 @@ export async function GET(request) {
       });
     }
   } catch (error) {
-    console.error('[API] Error in GET /api/recipes:', error);
     return Response.json({ 
       success: false, 
       error: error.message 
@@ -57,7 +56,6 @@ export async function POST(request) {
       data: savedRecipe 
     });
   } catch (error) {
-    console.error('[API] Error in POST /api/recipes:', error);
     return Response.json({ 
       success: false, 
       error: error.message 
@@ -89,7 +87,6 @@ export async function PUT(request) {
       data: updatedRecipe 
     });
   } catch (error) {
-    console.error('[API] Error in PUT /api/recipes:', error);
     return Response.json({ 
       success: false, 
       error: error.message 
@@ -119,7 +116,6 @@ export async function DELETE(request) {
       message: 'Recipe deleted successfully' 
     });
   } catch (error) {
-    console.error('[API] Error in DELETE /api/recipes:', error);
     return Response.json({ 
       success: false, 
       error: error.message 

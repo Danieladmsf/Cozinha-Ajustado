@@ -27,7 +27,6 @@ export const useRecipeAnalysisCalculations = () => {
 
       return totalCost;
     } catch (error) {
-      console.error("Erro ao calcular custo atual:", error);
       return 0;
     }
   }, []);
@@ -53,7 +52,6 @@ export const useRecipeAnalysisCalculations = () => {
 
       return totalCost;
     } catch (error) {
-      console.error("Erro ao calcular custo na data:", error);
       return 0;
     }
   }, []);
@@ -145,7 +143,6 @@ export const useRecipeAnalysisCalculations = () => {
         }
       };
     } catch (error) {
-      console.error("Erro ao calcular histórico de preços:", error);
       return {
         ...recipe,
         priceHistory: [],
@@ -203,7 +200,6 @@ export const useRecipeAnalysisCalculations = () => {
 
       return Array.from(contributions.values()).sort((a, b) => b.totalCost - a.totalCost);
     } catch (error) {
-      console.error("Erro ao calcular contribuições:", error);
       return [];
     }
   }, [calculateCurrentRecipeCost]);
@@ -236,7 +232,6 @@ export const useRecipeAnalysisCalculations = () => {
       
       return avgCost > 0 ? (volatility / avgCost) * 100 : 0;
     } catch (error) {
-      console.error("Erro ao calcular volatilidade:", error);
       return 0;
     }
   }, [calculateRecipeCostAtDate]);
@@ -267,7 +262,6 @@ export const useRecipeAnalysisCalculations = () => {
         percentage: percentageChange
       };
     } catch (error) {
-      console.error("Erro ao calcular tendência:", error);
       return { trend: 'stable', percentage: 0 };
     }
   }, []);
@@ -312,7 +306,6 @@ export const useRecipeAnalysisCalculations = () => {
         totalRecipes: statistics.length
       };
     } catch (error) {
-      console.error("Erro ao calcular estatísticas comparativas:", error);
       return {
         averages: { cost: 0, volatility: 0 },
         extremes: null,

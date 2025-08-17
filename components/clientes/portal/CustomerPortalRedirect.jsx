@@ -1,62 +1,28 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Customer } from '@/app/api/entities';
-import { Card, CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { useCustomerValidation } from '@/hooks/portal/useCustomerValidation';
+import { LoadingCard } from '@/components/common/LoadingCard';
 
 export default function CustomerPortalRedirect({ customerId }) {
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const { loading, validateAndLoadCustomer, redirectBasedOnRegistration } = useCustomerValidation();
 
   useEffect(() => {
-    checkCustomerAndRedirect();
-  }, [customerId]);
-
-  const checkCustomerAndRedirect = async () => {
-    try {
-      const customer = await Customer.get(customerId);
-      
-      if (!customer) {
-        // Cliente não encontrado - redirecionar para página de erro ou 404
-        router.push('/');
-        return;
+    const checkCustomerAndRedirect = async () => {
+      const customer = await validateAndLoadCustomer(customerId);
+      if (customer) {
+        redirectBasedOnRegistration(customer, customerId);
       }
+    };
 
-      // Verificar se o cliente ainda está pendente de cadastro
-      if (customer.pending_registration) {
-        // Redirecionar para página de cadastro
-        router.push(`/portal/${customerId}/cadastro`);
-      } else {
-        // Cliente já cadastrado - redirecionar para pedidos
-        router.push(`/portal/${customerId}/orders`);
-      }
-
-    } catch (error) {
-      // Em caso de erro, redirecionar para home
-      router.push('/');
-    } finally {
-      setLoading(false);
+    if (customerId) {
+      checkCustomerAndRedirect();
     }
-  };
+  }, [customerId, validateAndLoadCustomer, redirectBasedOnRegistration]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              Portal do Cliente
-            </h2>
-            <p className="text-gray-600">Verificando seu acesso...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <LoadingCard message="Verificando seu acesso..." />;
   }
 
-  // Enquanto redireciona, mostrar tela vazia
   return null;
 }

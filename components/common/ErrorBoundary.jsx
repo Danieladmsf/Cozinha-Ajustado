@@ -54,7 +54,7 @@ class ErrorBoundary extends React.Component {
             
             {this.props.showDetails && process.env.NODE_ENV === 'development' && (
               <Button 
-                onClick={() => console.error('ErrorBoundary Details:', this.state.error, this.state.errorInfo)}
+                onClick={() => {}}
                 variant="ghost"
                 size="sm"
                 className="text-red-600"

@@ -30,7 +30,6 @@ export async function GET(request) {
     return NextResponse.json(ingredients);
     
   } catch (error) {
-    console.error('[API] Error getting ingredients:', error);
     return NextResponse.json(
       { error: 'Failed to get ingredients', details: error.message },
       { status: 500 }
@@ -48,7 +47,6 @@ export async function POST(request) {
     return NextResponse.json(newIngredient, { status: 201 });
     
   } catch (error) {
-    console.error('[API] Error creating ingredient:', error);
     return NextResponse.json(
       { error: 'Failed to create ingredient', details: error.message },
       { status: 500 }
@@ -76,7 +74,6 @@ export async function PUT(request) {
     return NextResponse.json(updatedIngredient);
     
   } catch (error) {
-    console.error('[API] Error updating ingredient:', error);
     return NextResponse.json(
       { error: 'Failed to update ingredient', details: error.message },
       { status: 500 }

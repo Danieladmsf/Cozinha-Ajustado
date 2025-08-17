@@ -21,7 +21,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent } from "@/components/ui/card";
+// Card components removed to reduce card bloat
 import { Badge } from "@/components/ui/badge";
 import { 
   Settings, 
@@ -369,10 +369,10 @@ export default function MenuConfig({ categories, onConfigChange }) {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="layout" className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+            <TabsContent value="layout" className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 {/* Coluna 1: Ordem e Ativar/Desativar Categorias */}
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {/* Ordem das Categorias */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium flex items-center gap-2">
@@ -405,7 +405,7 @@ export default function MenuConfig({ categories, onConfigChange }) {
                                     <div
                                       ref={provided.innerRef}
                                       {...provided.draggableProps}
-                                      className="flex items-center gap-2 p-3 bg-white border rounded-md shadow-sm"
+                                      className="flex items-center gap-2 p-2 bg-white border rounded shadow-sm"
                                     >
                                       <div 
                                         {...provided.dragHandleProps}
@@ -448,7 +448,7 @@ export default function MenuConfig({ categories, onConfigChange }) {
                       {categories.map(category => (
                         <div 
                           key={category.id} 
-                          className={`flex items-center justify-between p-3 border rounded-md ${
+                          className={`flex items-center justify-between p-2 border rounded ${
                             activeCategories[category.id] ? 'bg-white' : 'bg-gray-50'
                           }`}
                         >
@@ -488,7 +488,7 @@ export default function MenuConfig({ categories, onConfigChange }) {
                     <ScrollArea className="h-[200px]">
                       <div className="space-y-2">
                         {categories.map(category => (
-                          <div key={category.id} className="flex items-center justify-between p-2 border rounded-md">
+                          <div key={category.id} className="flex items-center justify-between p-2 border rounded">
                             <div className="flex items-center">
                               <Switch
                                 checked={expandedCategories.includes(category.id)}
@@ -515,7 +515,7 @@ export default function MenuConfig({ categories, onConfigChange }) {
                     <ScrollArea className="h-[200px]">
                       <div className="space-y-2">
                         {categories.map(category => (
-                          <div key={category.id} className="flex items-center justify-between p-2 border rounded-md">
+                          <div key={category.id} className="flex items-center justify-between p-2 border rounded">
                             <Label>{category.name}</Label>
                             <Input
                               type="number"
@@ -534,7 +534,7 @@ export default function MenuConfig({ categories, onConfigChange }) {
               </div>
             </TabsContent>
 
-            <TabsContent value="colors" className="space-y-6">
+            <TabsContent value="colors" className="space-y-4">
               <div className="space-y-4">
                 <h3 className="text-sm font-medium flex items-center gap-2">
                   <Palette className="h-4 w-4" />
@@ -550,9 +550,8 @@ export default function MenuConfig({ categories, onConfigChange }) {
                     const categoryColor = categoryColors[category.id] || category.color || "#808080";
                     
                     return (
-                      <Card key={category.id}>
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-3">
+                      <div key={category.id} className="p-3 bg-white border rounded shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                               <div 
                                 className="w-4 h-4 rounded-full" 
@@ -564,16 +563,17 @@ export default function MenuConfig({ categories, onConfigChange }) {
                               {categoryColor}
                             </Badge>
                           </div>
-                          <ColorPalette onSelect={(color) => updateCategoryColor(category.id, color)} />
-                        </CardContent>
-                      </Card>
+                          <div className="mt-1">
+                            <ColorPalette onSelect={(color) => updateCategoryColor(category.id, color)} />
+                          </div>
+                      </div>
                     );
                   })}
                 </div>
               </div>
             </TabsContent>
 
-            <TabsContent value="days" className="space-y-6">
+            <TabsContent value="days" className="space-y-4">
               <div className="space-y-4">
                 <h3 className="text-sm font-medium flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
@@ -596,7 +596,7 @@ export default function MenuConfig({ categories, onConfigChange }) {
                     <button
                       key={day}
                       type="button"
-                      className={`p-4 rounded-md border flex flex-col items-center justify-center transition-colors ${
+                      className={`p-3 rounded border flex flex-col items-center justify-center transition-colors ${
                         availableDays.includes(day)
                           ? "bg-blue-50 border-blue-200 text-blue-700"
                           : "bg-gray-50 border-gray-200 text-gray-400"

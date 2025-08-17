@@ -154,7 +154,6 @@ export default function NutritionFoodEditor() {
         });
       }
     } catch (err) {
-      console.error("Erro ao carregar dados:", err);
       setError("Erro ao carregar dados. Por favor, tente novamente.");
     } finally {
       setLoading(false);
@@ -281,8 +280,6 @@ export default function NutritionFoodEditor() {
       router.push('/nutrition');
       
     } catch (err) {
-      console.error("Erro completo ao salvar:", err);
-      console.error("Response data:", err.response?.data);
       
       let errorMessage = "Erro desconhecido";
       if (err.response?.data?.message) {
@@ -314,7 +311,6 @@ export default function NutritionFoodEditor() {
         });
         router.push('/nutrition');
       } catch (err) {
-        console.error("Erro ao excluir alimento:", err);
         toast({
           title: "Erro",
           description: "Ocorreu um erro ao excluir o alimento",
@@ -366,7 +362,6 @@ export default function NutritionFoodEditor() {
         description: "Categoria criada com sucesso"
       });
     } catch (error) {
-      console.error("Erro ao criar categoria:", error);
       toast({
         title: "Erro",
         description: "Erro ao criar categoria",

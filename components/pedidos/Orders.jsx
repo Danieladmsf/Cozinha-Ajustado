@@ -92,7 +92,6 @@ const validateDate = (date, context = 'unknown') => {
     
     return dateObj;
   } catch (error) {
-    console.error(`[validateDate] Erro ao validar data no contexto: ${context}. Usando data atual como fallback.`, { originalDate: date, error });
     return new Date();
   }
 };
@@ -103,7 +102,6 @@ const safeFormatDate = (date, formatStr, context = 'unknown') => {
     const validDate = validateDate(date, formatStr, context); // Pass formatStr as second arg to validateDate
     return format(validDate, formatStr, { locale: ptBR }); // Adicionar locale para format
   } catch (error) {
-    console.error(`[safeFormatDate] Erro ao formatar data no contexto: ${context}`, { date, formatStr, error });
     return 'Data Inválida';
   }
 };
@@ -232,7 +230,6 @@ export default function Orders() {
       debugLog('[Orders] weekStart calculado', { currentDate: validCurrentDate, weekStart: result });
       return result;
     } catch (error) {
-      console.error('[Orders] Erro ao calcular weekStart:', error);
       return startOfWeek(new Date(), { weekStartsOn: 1 }); // Fallback para data atual
     }
   }, [currentDate]);
@@ -242,7 +239,6 @@ export default function Orders() {
       const validCurrentDate = validateDate(currentDate, 'weekNumber calculation');
       return getWeek(validCurrentDate, { weekStartsOn: 1 });
     } catch (error) {
-      console.error('[Orders] Erro ao calcular weekNumber:', error);
       return getWeek(new Date(), { weekStartsOn: 1 });
     }
   }, [currentDate]);
@@ -252,7 +248,6 @@ export default function Orders() {
       const validCurrentDate = validateDate(currentDate, 'year calculation');
       return getYear(validCurrentDate);
     } catch (error) {
-      console.error('[Orders] Erro ao calcular year:', error);
       return getYear(new Date());
     }
   }, [currentDate]);
@@ -262,7 +257,6 @@ export default function Orders() {
       const validCurrentDate = validateDate(currentDate, 'currentYear calculation');
       return getYear(validCurrentDate);
     } catch (error) {
-      console.error('[Orders] Erro ao calcular currentYear:', error);
       return getYear(new Date());
     }
   }, [currentDate]);
@@ -284,7 +278,6 @@ export default function Orders() {
       }
       return days;
     } catch (error) {
-      console.error('[Orders] Erro ao calcular weekDays:', error);
       // Fallback para dias da semana atual
       const now = new Date();
       const weekStartFallback = startOfWeek(now, { weekStartsOn: 1 });
@@ -342,7 +335,6 @@ export default function Orders() {
           const dateB = validateDate(b.date, `order ${b.id} sort`);
           return dateA.getTime() - dateB.getTime(); // Comparar timestamps
         } catch (error) {
-          console.error('[suggestionsMap] Erro ao ordenar pedidos:', error);
           return 0;
         }
       });
@@ -379,13 +371,11 @@ export default function Orders() {
             }
           });
         } catch (error) {
-          console.error(`[suggestionsMap] Erro ao processar itens do pedido ${order.id}:`, error);
         }
         
         return acc;
       }, {});
     } catch (error) {
-      console.error('[suggestionsMap] Erro geral ao calcular sugestões:', error);
       return {};
     }
   }, [allOrdersHistory, selectedCustomer, currentDay, currentDate]);
@@ -403,7 +393,6 @@ export default function Orders() {
         return prevCustomers;
       });
     } catch (error) {
-      console.error("Erro ao carregar clientes:", error);
       toast({ variant: "destructive", description: "Erro ao carregar lista de clientes." });
     }
   }, [toast]);
@@ -419,7 +408,6 @@ export default function Orders() {
         return prevRecipes;
       });
     } catch (error) {
-      console.error("Erro ao carregar receitas:", error);
       toast({ variant: "destructive", description: "Erro ao carregar receitas." });
     }
   }, [toast]);
@@ -443,7 +431,6 @@ export default function Orders() {
       });
       return weekOrdersData;
     } catch (error) {
-      console.error("Erro ao carregar pedidos:", error);
       toast({ variant: "destructive", description: "Erro ao carregar pedidos da semana." });
       return [];
     }
@@ -468,7 +455,6 @@ export default function Orders() {
       });
       return weekMenusData;
     } catch (error) {
-      console.error("Erro ao carregar cardápios:", error);
       toast({ variant: "destructive", description: "Erro ao carregar cardápios da semana." });
       return [];
     }
@@ -489,7 +475,6 @@ export default function Orders() {
       });
       return allOrdersData || []; // Garantir que seja sempre um array
     } catch (error) {
-      console.error("Erro ao carregar histórico de pedidos:", error);
       // Não mostrar toast aqui para não poluir UI em atualizações de background
       return [];
     }
@@ -509,7 +494,6 @@ export default function Orders() {
       });
       return wasteHistoryData;
     } catch (error) {
-      console.error("Erro ao carregar histórico de sobras:", error);
       // Não mostrar toast aqui
       return [];
     }
@@ -571,7 +555,6 @@ export default function Orders() {
       return Math.round(suggestedQuantity * 2) / 2;
 
     } catch (error) {
-      console.error(`Erro ao calcular sugestão para ${recipeName}:`, error);
       return null;
     }
   }, []); 
@@ -657,7 +640,6 @@ export default function Orders() {
       setIsDirty(false);
 
     } catch (error) {
-      console.error("Erro ao preparar pedido (nova):", error);
       toast({ variant: "destructive", description: "Erro ao preparar pedido." });
     } finally {
       setIsLoadingOrder(false);
@@ -704,7 +686,6 @@ export default function Orders() {
                 debugLog('[saveOrder] Pedido para deletar já não existia.', { id: saveDecision.orderIdToDelete });
                 setOrders(prevOrders => prevOrders.filter(o => o.id !== saveDecision.orderIdToDelete));
              } else {
-                console.error("Erro ao deletar pedido:", delError);
                 toast({ variant: "destructive", title: "Erro ao Remover Pedido", description: delError.message });
              }
           }
@@ -746,7 +727,6 @@ export default function Orders() {
       return savedOrderResponse;
 
     } catch (error) {
-      console.error("Erro ao processar/salvar pedido (nova):", error);
       if (error.response?.status === 404 && orderDataToSave.id && saveDecision?.action === 'update') { 
         toast({ variant: "destructive", title: "Pedido não encontrado", description: "O pedido que tentou atualizar pode ter sido excluído." });
         setCurrentOrder(prev => prev?.id === orderDataToSave.id ? null : prev);
@@ -783,7 +763,6 @@ export default function Orders() {
       dirtyOrderRef.current = null;
       cleanupEditingState();
     } catch (error) {
-      console.error('[changeWeek] Erro ao mudar semana:', error);
     }
   }, [isDirty, saveOrder, cleanupEditingState, currentDate]);
 
@@ -807,7 +786,6 @@ export default function Orders() {
       dirtyOrderRef.current = null;
       cleanupEditingState();
     } catch (error) {
-      console.error('[goToCurrentWeek] Erro ao ir para semana atual:', error);
     }
   }, [isDirty, saveOrder, cleanupEditingState]);
 
@@ -919,7 +897,6 @@ export default function Orders() {
       });
 
     } catch (error) {
-      console.error("Erro ao salvar sobras:", error);
       let errorMsg = "Erro ao salvar sobras.";
       if (error.response?.data?.detail) {
          errorMsg = `Erro ao salvar sobras: ${JSON.stringify(error.response.data.detail)}`;
@@ -952,7 +929,6 @@ export default function Orders() {
             end: endOfDay(parseISO(endDate)) 
           });
         } catch (e) {
-          console.error("Erro ao parsear data do pedido para relatório:", order.date, e);
           return false;
         }
       });
@@ -967,7 +943,6 @@ export default function Orders() {
             end: endOfDay(parseISO(endDate)) 
           });
         } catch (e) {
-          console.error("Erro ao parsear data da sobra para relatório:", waste.date, e);
           return false;
         }
       });
@@ -1016,7 +991,6 @@ export default function Orders() {
       setIsReportDialogOpen(false);
 
     } catch (err) {
-      console.error("Erro ao gerar relatório consolidado:", err);
       // err.message já deve conter a mensagem de erro tratada (seja do backend ou do throw new Error acima)
       toast({ variant: "destructive", title: "Erro ao Gerar Relatório", description: err.message });
     } finally {
@@ -1116,7 +1090,6 @@ export default function Orders() {
                        r.week_number === weekNum &&
                        r.year === yearNum;
               } catch (e) { 
-                console.error(`[loadWasteRecordsForContext] Erro ao validar data do registro ${r.id}:`, e);
                 return false; 
               }
 
@@ -1132,7 +1105,6 @@ export default function Orders() {
                   acc[r.day_of_week] = r;
                 }
               } catch (error) {
-                console.error(`[loadWasteRecordsForContext] Erro ao processar timestamp do registro ${r.id}:`, error);
               }
               return acc;
             }, {});
@@ -1145,14 +1117,12 @@ export default function Orders() {
         });
 
       } catch (error) {
-        console.error("Erro ao carregar sobras da semana (useEffect context):", error);
       }
     };
     loadWasteRecordsForContext();
   }, [currentDate, selectedCustomer, currentDay, allWasteHistory]); 
   
   const calculateTotalWeightForOrderItem = useCallback((item) => {
-    const recipe = recipes.find(r => r.id === item.recipe_id);
     return utilCalculateItemTotalWeight(item, recipe);
   }, [recipes]);
 

@@ -36,8 +36,7 @@ export default function MenuWeekSelector({ currentDate, onDateChange }) {
   };
 
   return (
-    <div className="bg-white shadow-sm rounded-lg p-4">
-      <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3">
         <Button
           variant="outline"
           size="icon"
@@ -79,7 +78,6 @@ export default function MenuWeekSelector({ currentDate, onDateChange }) {
         >
           <ChevronRight className="h-5 w-5" />
         </Button>
-      </div>
     </div>
   );
 }

@@ -71,7 +71,6 @@ export default function Dashboard() {
 
       // Load recipes with better error handling
       const recipesData = await Recipe.getAll().catch(error => {
-        console.error("[Dashboard] Error loading recipes:", error);
         return []; // Return empty array on error instead of throwing
       });
 
@@ -80,7 +79,6 @@ export default function Dashboard() {
       
       // Load ingredients with better error handling
       const ingredientsData = await Ingredient.getAll().catch(error => {
-        console.error("[Dashboard] Error loading ingredients:", error);
         return []; // Return empty array on error instead of throwing
       });
 
@@ -98,7 +96,6 @@ export default function Dashboard() {
       setRecipes(validatedRecipes);
       setIngredients(validatedIngredients);
     } catch (error) {
-      console.error("[Dashboard] Critical error loading data:", error);
       setError("Erro ao carregar dados. Por favor, recarregue a página.");
     } finally {
       setLoading(false);

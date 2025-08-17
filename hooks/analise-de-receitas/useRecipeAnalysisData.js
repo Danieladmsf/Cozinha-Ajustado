@@ -43,7 +43,6 @@ export const useRecipeAnalysisData = () => {
         priceHistory: priceHistoryData || []
       };
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar os dados de análise.",
@@ -68,7 +67,6 @@ export const useRecipeAnalysisData = () => {
         return priceDate >= start && priceDate <= end;
       }).sort((a, b) => new Date(a.date) - new Date(b.date));
     } catch (error) {
-      console.error("Erro ao buscar histórico de preços:", error);
       return [];
     }
   }, [priceHistory]);
@@ -79,7 +77,6 @@ export const useRecipeAnalysisData = () => {
       const ingredient = ingredients.find(ing => ing.id === ingredientId);
       return ingredient?.current_price || ingredient?.price || 0;
     } catch (error) {
-      console.error("Erro ao obter preço atual:", error);
       return 0;
     }
   }, [ingredients]);
@@ -104,7 +101,6 @@ export const useRecipeAnalysisData = () => {
       // Se não encontrar no histórico, usar preço atual
       return getCurrentIngredientPrice(ingredientId);
     } catch (error) {
-      console.error("Erro ao obter preço na data:", error);
       return getCurrentIngredientPrice(ingredientId);
     }
   }, [priceHistory, getCurrentIngredientPrice]);
@@ -122,7 +118,6 @@ export const useRecipeAnalysisData = () => {
       
       return recipe;
     } catch (error) {
-      console.error("Erro ao selecionar receita:", error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar os detalhes da receita.",
@@ -148,7 +143,6 @@ export const useRecipeAnalysisData = () => {
       setRecipes(activeRecipes);
       return activeRecipes;
     } catch (error) {
-      console.error("Erro ao recarregar receitas:", error);
       throw error;
     }
   }, []);
@@ -160,7 +154,6 @@ export const useRecipeAnalysisData = () => {
       setIngredients(activeIngredients);
       return activeIngredients;
     } catch (error) {
-      console.error("Erro ao recarregar ingredientes:", error);
       throw error;
     }
   }, []);
@@ -171,7 +164,6 @@ export const useRecipeAnalysisData = () => {
       setPriceHistory(priceHistoryData || []);
       return priceHistoryData;
     } catch (error) {
-      console.error("Erro ao recarregar histórico de preços:", error);
       throw error;
     }
   }, []);

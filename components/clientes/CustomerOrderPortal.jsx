@@ -1,79 +1,41 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Customer } from '@/app/api/entities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { Loader2, ShoppingCart, User, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, User } from 'lucide-react';
+import { useCustomerValidation } from '@/hooks/portal/useCustomerValidation';
+import { LoadingCard } from '@/components/common/LoadingCard';
 
 export default function CustomerOrderPortal() {
-  const [customer, setCustomer] = useState(null);
-  const [loading, setLoading] = useState(true);
   const params = useParams();
   const router = useRouter();
-  const { toast } = useToast();
+  const { loading, customer, validateAndLoadCustomer, redirectBasedOnRegistration } = useCustomerValidation();
 
   useEffect(() => {
-    loadCustomer();
-  }, [params.customerId]);
-
-  const loadCustomer = async () => {
-    try {
-      const customerData = await Customer.get(params.customerId);
-      
-      if (!customerData) {
-        toast({
-          title: "Cliente não encontrado",
-          description: "Este portal não é válido.",
-          variant: "destructive"
-        });
-        router.push('/');
-        return;
+    const loadCustomer = async () => {
+      const customerData = await validateAndLoadCustomer(params.customerId);
+      if (customerData?.pending_registration) {
+        redirectBasedOnRegistration(customerData, params.customerId);
       }
+    };
 
-      // Se ainda está pendente de cadastro, redirecionar
-      if (customerData.pending_registration) {
-        router.push(`/portal/${params.customerId}/cadastro`);
-        return;
-      }
-
-      setCustomer(customerData);
-    } catch (error) {
-      toast({
-        title: "Erro ao carregar dados",
-        description: "Não foi possível carregar os dados do cliente.",
-        variant: "destructive"
-      });
-      router.push('/');
-    } finally {
-      setLoading(false);
+    if (params.customerId) {
+      loadCustomer();
     }
-  };
+  }, [params.customerId, validateAndLoadCustomer, redirectBasedOnRegistration]);
 
   const handleBackToRegistration = () => {
     router.push(`/portal/${params.customerId}/cadastro`);
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              Portal do Cliente
-            </h2>
-            <p className="text-gray-600">Carregando portal...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <LoadingCard message="Carregando portal..." />;
   }
 
   if (!customer) {
-    return null; // Será redirecionado
+    return null;
   }
 
   return (

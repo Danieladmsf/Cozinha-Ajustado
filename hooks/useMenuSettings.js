@@ -42,7 +42,6 @@ export const useMenuSettings = () => {
 
       await loadConfig(categoriesData, categoryTreeData);
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
       setError(`Erro ao carregar dados: ${error.message}`);
     } finally {
       setLoading(false);
@@ -91,7 +90,6 @@ export const useMenuSettings = () => {
         await createDefaultConfig(categoryTreeData);
       }
     } catch (error) {
-      console.error("Erro ao carregar configurações:", error);
       setError("Não foi possível carregar as configurações do cardápio.");
     }
   };
@@ -118,7 +116,6 @@ export const useMenuSettings = () => {
       const newConfig = await MenuConfigEntity.create(defaultConfig);
       setConfigId(newConfig.id);
     } catch (error) {
-      console.error("Erro ao criar configuração padrão:", error);
       setError("Não foi possível criar a configuração padrão.");
     }
   };
@@ -165,7 +162,6 @@ export const useMenuSettings = () => {
       
       return true;
     } catch (error) {
-      console.error("Erro ao salvar:", error);
       setError("Não foi possível salvar as configurações.");
       return false;
     } finally {

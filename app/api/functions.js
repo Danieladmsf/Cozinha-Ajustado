@@ -45,7 +45,6 @@ export const generatePeriodReport = async (data) => {
     `;
     return { data: reportHtml, error: null };
   } catch (error) {
-    console.error('Error generating period report:', error);
     return { data: null, error: error.message };
   }
 };

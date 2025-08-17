@@ -11,7 +11,6 @@ export async function GET(request) {
     return NextResponse.json(categoryTypes);
     
   } catch (error) {
-    console.error('[API] Error getting CategoryTypes:', error);
     return NextResponse.json(
       { error: 'Failed to get category types', details: error.message },
       { status: 500 }
@@ -29,7 +28,6 @@ export async function POST(request) {
     return NextResponse.json(newType, { status: 201 });
     
   } catch (error) {
-    console.error('[API] Error creating category type:', error);
     return NextResponse.json(
       { error: 'Failed to create category type', details: error.message },
       { status: 500 }

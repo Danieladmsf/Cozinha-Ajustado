@@ -33,7 +33,6 @@ export default function PriceUpdateModal({
 }) {
   // Função para forçar fechamento do modal
   const forceClose = () => {
-    console.log('🔒 Forçando fechamento do modal...');
     setSaving(false);
     setLoading(false);
     setError(null);
@@ -64,7 +63,6 @@ export default function PriceUpdateModal({
   // Reset form when ingredient changes or modal opens
   useEffect(() => {
     if (ingredient && isOpen) {
-      console.log('🔄 Resetando formulário para ingrediente:', ingredient.name);
       setFormData({
         new_price: ingredient.current_price?.toString() || '',
         supplier: ingredient.main_supplier || '',
@@ -84,7 +82,6 @@ export default function PriceUpdateModal({
   // Reset estados quando modal fecha
   useEffect(() => {
     if (!isOpen) {
-      console.log('🔄 Modal fechado, resetando estados...');
       setError(null);
       setSaving(false);
       setLoading(false);
@@ -102,7 +99,6 @@ export default function PriceUpdateModal({
       setSuppliers(Array.isArray(suppliersData) ? suppliersData.filter(s => s.active) : []);
       setBrands(Array.isArray(brandsData) ? brandsData.filter(b => b.active) : []);
     } catch (err) {
-      console.error('Erro ao carregar dados dos dropdowns:', err);
     } finally {
       setLoading(false);
     }
@@ -257,16 +253,13 @@ export default function PriceUpdateModal({
       });
 
       // Garantir que o modal feche após salvar com sucesso
-      console.log('✅ Tentando fechar modal após sucesso...');
       
       // Aguardar um pequeno delay para o toast aparecer, depois fechar
       setTimeout(() => {
-        console.log('🔄 Fechando modal...');
         forceClose();
       }, 500);
 
     } catch (err) {
-      console.error('❌ Erro ao atualizar preço:', err);
       setError(`Erro ao salvar: ${err.message}`);
     } finally {
       setSaving(false);
@@ -467,11 +460,9 @@ export default function PriceUpdateModal({
             </Button>
             <Button
               onClick={async () => {
-                console.log('🔄 Botão salvar clicado...');
                 try {
                   await handleSave();
                 } catch (error) {
-                  console.error('❌ Erro no botão salvar:', error);
                 }
               }}
               disabled={saving || loading}

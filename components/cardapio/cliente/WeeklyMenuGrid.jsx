@@ -1,11 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package } from 'lucide-react';
 import { format, addDays, startOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { renderFormattedRecipeName } from '@/lib/textHelpers';
+import { useLocationSelection } from '@/hooks/cardapio/useLocationSelection';
 
 const dayNames = {
   1: "Segunda-feira",
@@ -22,68 +21,107 @@ export default function WeeklyMenuGrid({
   recipes,
   selectedCustomer,
   getFilteredItemsForClient,
-  getCategoryColor
+  getCategoryColor,
+  customers,
+  locations,
+  getAllClientIds
 }) {
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+  const locationSelection = useLocationSelection(getAllClientIds());
+
+  // Função para obter clientes desmarcados de uma receita
+  const getUncheckedClients = (item) => {
+    if (!item || !item.locations || !locations) return [];
+    
+    return locations.filter(location => {
+      const isSelected = locationSelection.isLocationSelected(item.locations, location.id);
+      return !isSelected; // Retorna apenas os NÃO selecionados
+    });
+  };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <div style={{ 
+      display: 'grid', 
+      gridTemplateColumns: 'repeat(5, 1fr)', 
+      gap: '12px',
+      minHeight: 'auto',
+      padding: '0',
+      width: '100%',
+      overflow: 'visible'
+    }}>
       {[1, 2, 3, 4, 5].map(day => {
         const dayDate = addDays(weekStart, day - 1);
         const dayItems = weeklyMenu?.menu_data[day] || {};
 
         return (
-          <Card key={day} className="overflow-hidden border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 bg-white">
-            <CardHeader className="bg-gradient-to-br from-blue-500 to-blue-600 py-5 text-center border-b border-blue-600/20">
-              <CardTitle className="space-y-1">
-                <div className="text-lg font-bold text-white">
-                  {dayNames[day]}
-                </div>
-                <div className="text-sm text-blue-100 font-medium">
-                  {format(dayDate, 'dd/MM', { locale: ptBR })}
-                </div>
-              </CardTitle>
-            </CardHeader>
+          <div key={day} style={{ 
+            border: '2px solid #000', 
+            padding: '8px',
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 'auto',
+            height: 'auto',
+            overflow: 'visible'
+          }}>
+            <div style={{
+              borderBottom: '1px solid #ccc',
+              paddingBottom: '5px',
+              marginBottom: '8px',
+              flexShrink: 0
+            }}>
+              <h2 style={{ fontSize: '14px', fontWeight: 'bold', margin: '0', textAlign: 'center' }}>{dayNames[day].toUpperCase().replace('-FEIRA', '')} - {format(dayDate, 'dd/MM/yyyy', { locale: ptBR })}</h2>
+            </div>
 
-            <CardContent className="p-5 min-h-[300px] bg-gradient-to-b from-white to-gray-50/30">
-              {activeCategories.map(category => {
+            <div style={{ flex: 1, overflow: 'visible' }}>
+              {activeCategories.map((category, categoryIndex) => {
                 const items = dayItems[category.id] || [];
                 const filteredItems = getFilteredItemsForClient(items, category.id, selectedCustomer?.id);
 
-                if (!filteredItems.length) return null;
-
                 return (
-                  <div 
-                    key={category.id} 
-                    className="mb-4 last:mb-0"
-                  >
-                    <div 
-                      className="text-sm font-bold px-4 py-3 rounded-lg mb-4 border-l-4 shadow-sm"
-                      style={{ 
-                        backgroundColor: `${getCategoryColor(category.id)}15`,
-                        borderLeftColor: getCategoryColor(category.id),
-                        color: getCategoryColor(category.id)
-                      }}
-                    >
-                      {category.name}
-                    </div>
+                  <div key={category.id} style={{ marginBottom: '8px' }}>
+                    <h3 style={{
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      margin: '0 0 4px 0',
+                      backgroundColor: '#f0f0f0',
+                      padding: '2px 4px',
+                      borderBottom: '1px solid #ccc'
+                    }}>{category.name}</h3>
 
-                    <div className="space-y-3">
-                      {filteredItems.map((item, idx) => {
-                        const recipe = recipes.find(r => r.id === item.recipe_id);
-                        if (!recipe) return null;
+                    <div>
+                      {filteredItems.length > 0 ? (
+                        <div>
+                          {filteredItems.map((item, idx) => {
+                            const recipe = recipes.find(r => r.id === item.recipe_id);
+                            if (!recipe) return null;
 
-                        return (
-                          <div 
-                            key={`${category.id}-${idx}`}
-                            className="px-4 py-3 text-sm rounded-lg hover:bg-white hover:shadow-md transition-all duration-200 border border-gray-100 bg-gray-50/50"
-                          >
-                            <span className="text-gray-800 font-medium leading-relaxed">
-                              {renderFormattedRecipeName(recipe.name)}
-                            </span>
-                          </div>
-                        );
-                      })}
+                            return (
+                              <div key={`${category.id}-${idx}`}>
+                                <div style={{
+                                  fontSize: '10px',
+                                  marginBottom: '2px',
+                                  lineHeight: '1.2'
+                                }}>
+                                  {renderFormattedRecipeName(recipe.name)}
+                                </div>
+                                {selectedCustomer?.id === 'all' && getUncheckedClients(item).length > 0 && (
+                                  <div style={{
+                                    fontSize: '8px',
+                                    color: '#d00',
+                                    textDecoration: 'line-through',
+                                    marginLeft: '2px',
+                                    lineHeight: '1.1'
+                                  }}>
+                                    {getUncheckedClients(item).map(client => client.name).join(', ')}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: '10px', color: '#999' }}>-</div>
+                      )}
                     </div>
                   </div>
                 );
@@ -95,19 +133,23 @@ export default function WeeklyMenuGrid({
                 const filteredItems = getFilteredItemsForClient(items, categoryId, selectedCustomer?.id);
                 return filteredItems.length > 0;
               }) && (
-                <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-                  <Package className="h-16 w-16 mb-4 text-gray-300" />
-                  <p className="text-sm text-center leading-relaxed font-medium">
+                <div style={{ 
+                  textAlign: 'center', 
+                  color: '#999', 
+                  fontSize: '10px',
+                  marginTop: '20px'
+                }}>
+                  <p>
                     {!selectedCustomer || selectedCustomer.id === 'all'
                       ? 'Nenhum item cadastrado'
                       : 'Sem itens para este cliente'
                     }
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">neste dia</p>
+                  <p>neste dia</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         );
       })}
     </div>

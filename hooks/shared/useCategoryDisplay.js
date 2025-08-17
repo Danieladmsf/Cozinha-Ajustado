@@ -22,7 +22,6 @@ export const useCategoryDisplay = () => {
       setCategories(categoriesData || []);
       setMenuConfig(configData);
     } catch (error) {
-      console.error('[useCategoryDisplay] Erro ao carregar dados de categorias:', error);
       setCategories([]);
       setMenuConfig(null);
     } finally {
@@ -42,7 +41,6 @@ export const useCategoryDisplay = () => {
       
       return configs && configs.length > 0 ? configs[0] : null;
     } catch (error) {
-      console.error('[useCategoryDisplay] Erro ao carregar configuração do menu:', error);
       return null;
     }
   };

@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "cozinha-afeto-project": {
+      "command": "node",
+      "args": ["--experimental-modules", "mcp-server.js"],
+      "env": {
+        "PROJECT_NAME": "Cozinha Afeto",
+        "PROJECT_TYPE": "nextjs-firebase",
+        "PROJECT_PATH": "/home/user/studio"
+      }
+    },
+    "cozinha-afeto-filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/studio"],
+      "env": {
+        "MCP_FILESYSTEM_ALLOWED_EXTENSIONS": ".js,.jsx,.json,.md,.css,.ts,.tsx",
+        "MCP_FILESYSTEM_IGNORE_PATTERNS": "node_modules,dist,build,.next"
+      }
+    }
+  }
+}

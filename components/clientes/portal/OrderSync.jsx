@@ -1,7 +1,8 @@
 import { Order } from "@/app/api/entities";
 import { 
   parseQuantity as utilParseQuantity, 
-  normalizeOrderItems as utilNormalizeOrderItems 
+  normalizeOrderItems as utilNormalizeOrderItems,
+  sumCurrency as utilSumCurrency 
 } from "@/components/utils/orderUtils";
 
 /**
@@ -46,7 +47,7 @@ export const convertClientOrderToKitchenFormat = (clientOrder, customer, recipes
     status: clientOrder.status || "pending",
     items: normalizedItems,
     total_items: normalizedItems.reduce((sum, item) => sum + item.quantity, 0),
-    total_amount: normalizedItems.reduce((sum, item) => sum + item.total_price, 0),
+    total_amount: utilSumCurrency(normalizedItems.map(item => item.total_price || 0)),
     total_meals_expected: parseInt(clientOrder.total_meals_expected) || 0,
     general_notes: clientOrder.general_notes || "",
     menu_id: menu?.id || clientOrder.menu_id,
@@ -87,7 +88,7 @@ export const applyClientPortalRules = (orderData, customer) => {
     status,
     items: limitedItems,
     total_items: limitedItems.reduce((sum, item) => sum + utilParseQuantity(item.quantity), 0),
-    total_amount: limitedItems.reduce((sum, item) => sum + item.total_price, 0),
+    total_amount: utilSumCurrency(limitedItems.map(item => item.total_price || 0)),
     client_notes: `Pedido via portal do cliente - ${new Date().toLocaleString()}`,
     compliance: {
       max_items_enforced: orderData.items?.length > maxItems,

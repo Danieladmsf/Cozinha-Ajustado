@@ -507,14 +507,8 @@ export default function ImportProgressView({
                       key={index}
                       className={cn(
                         "flex gap-2 py-1 px-2 rounded text-xs",
-                        log.type === 'error' && "bg-red-50 text-red-700",
-                        log.type === 'warning' && "bg-yellow-50 text-yellow-700",
-                        log.type === 'success' && "bg-green-50 text-green-700",
-                        log.type === 'info' && "bg-blue-50 text-blue-700"
                       )}
                     >
-                      <span className="text-gray-500 min-w-[60px]">{log.timestamp}</span>
-                      <span className="flex-1">{log.message}</span>
                     </div>
                   ))}
                   {logs.length === 0 && (

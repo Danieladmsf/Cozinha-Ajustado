@@ -18,12 +18,8 @@ export function useIngredients() {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const result = await fn();
-        if (attempt > 1) {
-          console.log(`✅ Sucesso na tentativa ${attempt}/${maxRetries}`);
-        }
         return result;
       } catch (error) {
-        console.error(`❌ Tentativa ${attempt}/${maxRetries} falhou:`, error.message);
         
         if (attempt === maxRetries) {
           throw error; // Última tentativa, propagar erro
@@ -31,7 +27,6 @@ export function useIngredients() {
         
         // Backoff exponencial: 1s, 2s, 4s...
         const delay = baseDelay * Math.pow(2, attempt - 1);
-        console.log(`⏳ Aguardando ${delay}ms antes da próxima tentativa...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
@@ -64,12 +59,10 @@ export function useIngredients() {
       try {
         allIngredients = await loadWithRetry();
       } catch (retryError) {
-        console.error('❌ Todas as tentativas de carregamento falharam:', retryError);
         
         // Fallback: tentar usar dados do localStorage se disponíveis
         const cachedIngredients = localStorage.getItem('ingredients_cache');
         if (cachedIngredients) {
-          console.log('📦 Usando dados em cache como fallback');
           try {
             const cached = JSON.parse(cachedIngredients);
             // Verificar se cache não está muito antigo (24 horas)
@@ -83,7 +76,6 @@ export function useIngredients() {
               throw new Error('Cache expirado ou inválido');
             }
           } catch (cacheError) {
-            console.error('❌ Erro ao usar cache:', cacheError);
             throw retryError; // Usar erro original
           }
         } else {
@@ -97,7 +89,6 @@ export function useIngredients() {
         : [];
 
       if (validIngredients.length === 0) {
-        console.warn('⚠️ Nenhum ingrediente válido encontrado');
         setError('Nenhum ingrediente encontrado. Verifique a conexão ou tente novamente.');
         setIngredients([]);
         setStats({ total: 0, active: 0, traditional: 0, commercial: 0 });
@@ -120,7 +111,6 @@ export function useIngredients() {
           localStorage.setItem('ingredients_cache', JSON.stringify(processedIngredients));
           localStorage.setItem('ingredients_cache_timestamp', Date.now().toString());
         } catch (cacheError) {
-          console.warn('⚠️ Não foi possível cachear os dados:', cacheError);
         }
       }
 
@@ -137,14 +127,8 @@ export function useIngredients() {
         ).length
       });
 
-      console.log('✅ Ingredientes carregados com sucesso:', {
-        total: processedIngredients.length,
-        active: activeIngredients.length,
-        cached: !!error // indica se usou cache
-      });
 
     } catch (err) {
-      console.error('❌ Erro fatal ao carregar ingredientes:', err);
       setError('Erro ao carregar ingredientes: ' + err.message + '. Tente recarregar a página.');
       setIngredients([]);
       setStats({ total: 0, active: 0, traditional: 0, commercial: 0 });
@@ -195,7 +179,6 @@ export function useIngredients() {
         // Recarregar do servidor para garantir sincronização
         setTimeout(() => loadIngredients(), 1000);
       } catch (err) {
-        console.error('Erro ao excluir ingrediente:', err);
         setError('Erro ao excluir ingrediente: ' + err.message);
         toast({
           variant: "destructive",
@@ -222,11 +205,6 @@ export function useIngredients() {
       )
     );
     
-    console.log('✅ Estado local atualizado:', {
-      ingredientId,
-      newPrice,
-      lastUpdate: currentDate
-    });
   }, []);
 
   // Nova função para atualização completa do ingrediente
@@ -245,10 +223,6 @@ export function useIngredients() {
       )
     );
     
-    console.log('✅ Ingrediente atualizado completamente:', {
-      ingredientId,
-      updatedFields: Object.keys(updatedData)
-    });
   }, []);
 
   useEffect(() => {

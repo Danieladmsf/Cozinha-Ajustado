@@ -7,7 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Loader2, Settings } from 'lucide-react';
 import MenuHeader from '@/components/shared/MenuHeader';
 import NutritionCalculatorComponent from './NutritionCalculatorComponent';
-import SectionContainer, { Section } from '@/components/shared/SectionContainer';
+// SectionContainer removed to reduce card bloat
 import { nutrientConfig } from '@/components/shared/nutrientConfig';
 import { useMenuData } from '@/hooks/cardapio/useMenuData';
 import { UserNutrientConfig } from '@/app/api/entities';
@@ -63,7 +63,6 @@ export default function NutritionalTableComponent() {
         await createDefaultUserNutrientConfig();
       }
     } catch (error) {
-      console.error("Erro ao carregar configuração de nutrientes:", error);
       // Usar configuração padrão em caso de erro
       setSelectedNutrients(nutrientConfig.defaultSelected);
       setExpandedCategories(nutrientConfig.expandedCategories);
@@ -82,7 +81,6 @@ export default function NutritionalTableComponent() {
       const newConfig = await UserNutrientConfig.create(defaultConfig);
       setUserNutrientConfigId(newConfig.id);
     } catch (error) {
-      console.error("Erro ao criar configuração padrão de nutrientes:", error);
     }
   };
 
@@ -143,7 +141,6 @@ export default function NutritionalTableComponent() {
         description: "Suas preferências de nutrientes foram salvas com sucesso.",
       });
     } catch (error) {
-      console.error("Erro ao salvar configuração de nutrientes:", error);
       toast({
         title: "Erro",
         description: "Não foi possível salvar as configurações.",
@@ -263,10 +260,7 @@ export default function NutritionalTableComponent() {
       <div className="container mx-auto px-4 py-6">
         <div className="space-y-6">
           {/* Header Section */}
-          <SectionContainer 
-            variant="gradient"
-            className="border-0 shadow-lg"
-          >
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-lg p-4">
             <MenuHeader 
               currentDate={currentDate}
               onDateChange={handleDateChange}
@@ -282,28 +276,27 @@ export default function NutritionalTableComponent() {
                 </Button>
               }
             />
-          </SectionContainer>
+          </div>
 
           {/* Tabela Nutricional Section */}
-          <SectionContainer 
-            title="Análise Nutricional"
-            subtitle="Valores nutricionais detalhados do cardápio semanal"
-            variant="elevated"
-            className="border-green-200"
-            icon={Settings}
-          >
-            <Section>
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 overflow-hidden shadow-sm">
-                <NutritionCalculatorComponent 
-                  menu={weeklyMenu}
-                  currentDayIndex={currentDayIndex}
-                  selectedNutrients={selectedNutrients}
-                  expandedCategories={expandedCategories}
-                  onDayChange={setCurrentDayIndex}
-                />
+          <div className="bg-white rounded-lg shadow-sm border border-green-200 p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Settings className="h-5 w-5 text-green-600" />
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Análise Nutricional</h2>
+                <p className="text-sm text-gray-600">Valores nutricionais detalhados do cardápio semanal</p>
               </div>
-            </Section>
-          </SectionContainer>
+            </div>
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 overflow-hidden shadow-sm">
+              <NutritionCalculatorComponent 
+                menu={weeklyMenu}
+                currentDayIndex={currentDayIndex}
+                selectedNutrients={selectedNutrients}
+                expandedCategories={expandedCategories}
+                onDayChange={setCurrentDayIndex}
+              />
+            </div>
+          </div>
         </div>
       </div>
 

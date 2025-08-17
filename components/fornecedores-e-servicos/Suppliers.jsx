@@ -96,7 +96,6 @@ export default function Suppliers() {
       const data = await Supplier.list();
       setSuppliers(data);
     } catch (error) {
-      console.error("Erro ao carregar fornecedores:", error);
     }
   };
 
@@ -111,7 +110,6 @@ export default function Suppliers() {
         setSelectedCategoryType(types[0].value);
       }
     } catch (error) {
-      console.error("Erro ao carregar tipos de categorias:", error);
     }
   };
 
@@ -135,7 +133,6 @@ export default function Suppliers() {
       
       setCategoriesByType(categoriesByTypeObj);
     } catch (error) {
-      console.error("Erro ao carregar árvore de categorias:", error);
     }
   };
 
@@ -186,10 +183,8 @@ export default function Suppliers() {
           vendor_photo: result.file_url
         }));
       } else {
-        console.error("Erro no upload:", result.error);
       }
     } catch (error) {
-      console.error("Erro ao fazer upload da imagem:", error);
     }
   };
 
@@ -207,7 +202,6 @@ export default function Suppliers() {
         description: `Fornecedor ${!supplier.active ? 'ativado' : 'inativado'} com sucesso.`,
       });
     } catch (error) {
-      console.error("Erro ao alterar status do fornecedor:", error);
       toast({
         title: "Erro",
         description: "Erro ao alterar status do fornecedor. Tente novamente.",
@@ -230,7 +224,6 @@ export default function Suppliers() {
         description: "Fornecedor excluído com sucesso.",
       });
     } catch (error) {
-      console.error("Erro ao excluir fornecedor:", error);
       
       if (error.message?.includes("constraint") || error.status === 409) {
         toast({
@@ -294,7 +287,6 @@ export default function Suppliers() {
       setCnpj(""); // Limpar CNPJ
       resetCategorySelections();
     } catch (error) {
-      console.error("Erro ao salvar fornecedor:", error);
     }
   };
 

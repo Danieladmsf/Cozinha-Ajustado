@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
  * Página principal do portal - permite inserir ID do cliente manualmente
  */
 export default function PortalIndex() {
+  
   const router = useRouter();
   const [customerIdInput, setCustomerIdInput] = useState('');
   const [error, setError] = useState('');
@@ -21,8 +22,8 @@ export default function PortalIndex() {
     const customerIdFromUrl = urlParams.get('customerId') || urlParams.get('id');
     
     if (customerIdFromUrl) {
-      // Se temos um customerId, redirecionar para a página correta
       router.push(`/portal/${customerIdFromUrl}`);
+    } else {
     }
   }, [router]);
 
@@ -40,7 +41,6 @@ export default function PortalIndex() {
       return;
     }
 
-    // Redirecionar para a página do portal com o ID
     router.push(`/portal/${cleanId}`);
   };
 

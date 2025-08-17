@@ -68,7 +68,7 @@ export default function SobrasRegistroComponent() {
       // Recarregar dados após salvar
       await loadWeekData(sobrasInterface.currentDate);
     } catch (error) {
-      console.error('Erro ao salvar sobras:', error);
+      // Error saving leftovers data
     }
   };
 

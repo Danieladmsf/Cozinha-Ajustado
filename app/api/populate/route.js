@@ -193,7 +193,6 @@ export async function POST(request) {
     });
 
   } catch (error) {
-    console.error('[POPULATE] Erro crítico:', error);
     return NextResponse.json(
       { error: 'Failed to populate database', details: error.message },
       { status: 500 }

@@ -22,26 +22,22 @@ export default function ClientTabs({
   };
 
   return (
-    <div className="bg-white p-6">
+    <div className="p-3">
       <Tabs 
         value={selectedCustomer?.id || "all"} 
         onValueChange={handleValueChange}
         className="w-full"
       >
         <TabsList 
-          className="grid w-full bg-gray-100 p-1 h-auto rounded-lg" 
-          style={{ gridTemplateColumns: `repeat(${locations.length + 1}, minmax(0, 1fr))` }}
+          className="flex flex-col w-full bg-transparent p-0 h-auto gap-1" 
         >
           {/* Tab "Todos os Clientes" */}
           <TabsTrigger 
             value="all" 
-            className="flex items-center gap-2 px-4 py-3 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all"
+            className="flex items-center justify-start gap-2 px-3 py-2 text-xs font-medium data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 hover:bg-gray-50 rounded-md transition-all w-full"
           >
-            <div className="flex items-center gap-2 min-w-0">
-              <Users className="h-4 w-4 flex-shrink-0" />
-              <span className="hidden sm:inline truncate">Todos os Clientes</span>
-              <span className="sm:hidden">Todos</span>
-            </div>
+            <Users className="h-3 w-3 flex-shrink-0" />
+            <span className="truncate">Todos os Clientes</span>
           </TabsTrigger>
           
           {/* Tabs dos Clientes */}
@@ -49,23 +45,21 @@ export default function ClientTabs({
             <TabsTrigger 
               key={location.id} 
               value={location.id}
-              className="flex items-center gap-2 px-4 py-3 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md transition-all min-w-0"
+              className="flex items-center justify-start gap-2 px-3 py-2 text-xs font-medium data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 hover:bg-gray-50 rounded-md transition-all w-full"
             >
-              <div className="flex items-center gap-2 min-w-0">
-                {location.photo ? (
-                  <Avatar className="h-5 w-5 flex-shrink-0">
-                    <AvatarImage src={location.photo} alt={location.name} />
-                    <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                      {location.name?.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <Building2 className="h-4 w-4 flex-shrink-0 text-gray-600" />
-                )}
-                <span className="truncate" title={location.name}>
-                  {location.name}
-                </span>
-              </div>
+              {location.photo ? (
+                <Avatar className="h-4 w-4 flex-shrink-0">
+                  <AvatarImage src={location.photo} alt={location.name} />
+                  <AvatarFallback className="text-[10px] bg-blue-100 text-blue-600">
+                    {location.name?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              ) : (
+                <Building2 className="h-3 w-3 flex-shrink-0 text-gray-600" />
+              )}
+              <span className="truncate text-xs" title={location.name}>
+                {location.name}
+              </span>
             </TabsTrigger>
           ))}
         </TabsList>

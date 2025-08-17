@@ -257,7 +257,6 @@ export default function RecipeTechnical() {
         });
       }
     } catch (error) {
-      console.error('Erro ao carregar receita:', error);
       toast({
         title: "Erro ao carregar",
         description: error.message,
@@ -337,7 +336,6 @@ export default function RecipeTechnical() {
         }
       }
     } catch (error) {
-      console.error('Erro no handleSaveRecipe:', error);
       toast({
         title: "Erro inesperado",
         description: "Ocorreu um erro inesperado ao salvar a receita.",
@@ -429,7 +427,6 @@ export default function RecipeTechnical() {
         setIsDirty(true);
       }
     } catch (error) {
-      console.error('Erro ao recalcular métricas:', error);
     }
   }, [preparationsData, recipeData, setRecipeData, setPreparationsData, setIsDirty]);
 
@@ -454,7 +451,6 @@ export default function RecipeTechnical() {
       try {
         await useRecipeZustandStore.getState().refreshIngredientsIfNeeded();
       } catch (error) {
-        console.error('Erro ao atualizar ingredientes:', error);
       }
     };
 
@@ -540,7 +536,6 @@ export default function RecipeTechnical() {
       const targetPrep = newPreparations[prepIndex];
       
       if (!targetPrep) {
-        console.error(`Preparação não encontrada no índice ${prepIndex}`);
         return prev;
       }
       

@@ -75,7 +75,6 @@ export default function Ingredients() {
 
   const loadIngredients = async () => {
     try {
-      console.log('🔄 Iniciando loadIngredients...');
       setLoading(true);
       setError(null);
 
@@ -85,14 +84,11 @@ export default function Ingredients() {
       );
       
       const loadPromise = Ingredient.list().catch(error => {
-        console.error('Erro ao carregar do banco:', error);
         // Error loading from database
         return []; // Return empty array on error
       });
 
       const allIngredients = await Promise.race([loadPromise, timeoutPromise]);
-      console.log('📊 Ingredientes carregados do Firebase:', allIngredients.length);
-      console.log('🔍 IDs dos primeiros 5 ingredientes:', allIngredients.slice(0, 5).map(ing => ({ id: ing.id, name: ing.name })));
       
       // Filtrar ingredientes que realmente existem (têm ID válido)
       const validIngredients = allIngredients.filter(ing => ing && ing.id);
@@ -108,10 +104,8 @@ export default function Ingredients() {
 
       // Filtrar ingredientes ativos
       const activeIngredients = processedIngredients.filter(ing => ing.active !== false);
-      console.log('✅ Ingredientes ativos filtrados:', activeIngredients.length);
 
       setIngredients(activeIngredients);
-      console.log('🎯 Estado ingredients atualizado com:', activeIngredients.length, 'ingredientes');
       
       setStats({
         total: processedIngredients.length,
@@ -126,7 +120,6 @@ export default function Ingredients() {
       
 
     } catch (err) {
-      console.error('❌ Erro crítico em loadIngredients:', err);
       // Critical error loading ingredients
       setError('Erro ao carregar ingredientes: ' + err.message);
       // Set empty state on error
@@ -134,16 +127,13 @@ export default function Ingredients() {
       setStats({ total: 0, active: 0, traditional: 0, commercial: 0 });
     } finally {
       setLoading(false);
-      console.log('🏁 loadIngredients finalizado');
     }
   };
 
   const handleDelete = async (ingredient) => {
-    console.log('Tentando excluir ingrediente:', ingredient);
     
     // Verificar se o ingrediente tem ID válido
     if (!ingredient || !ingredient.id) {
-      console.error('Ingrediente sem ID válido:', ingredient);
       toast({
         variant: "destructive",
         title: "Erro",
@@ -154,14 +144,11 @@ export default function Ingredients() {
     
     if (window.confirm(`Tem certeza que deseja excluir o ingrediente "${ingredient.name}"?`)) {
       try {
-        console.log('Confirmado - excluindo ingrediente ID:', ingredient.id);
         const result = await Ingredient.delete(ingredient.id);
-        console.log('Resultado da exclusão:', result);
         
         // Remover o ingrediente da lista local imediatamente
         setIngredients(prevIngredients => {
           const updatedIngredients = prevIngredients.filter(ing => ing.id !== ingredient.id);
-          console.log('🚀 Removido da lista local. Ingredientes restantes:', updatedIngredients.length);
           return updatedIngredients;
         });
         
@@ -188,24 +175,19 @@ export default function Ingredients() {
         
         // Ainda recarregar do servidor para garantir sincronização (com pequeno delay)
         setTimeout(async () => {
-          console.log('📡 Recarregando lista do servidor após exclusão...');
           
           // Verificar especificamente se o ingrediente excluído ainda existe
           try {
             const checkIngredient = await Ingredient.get(ingredient.id);
             if (checkIngredient) {
-              console.error('❌ PROBLEMA: Ingrediente ainda existe no Firebase:', checkIngredient);
             } else {
-              console.log('✅ Confirmado: Ingrediente não existe mais no Firebase');
             }
           } catch (err) {
-            console.log('✅ Confirmado: Ingrediente não encontrado (esperado):', err.message);
           }
           
           loadIngredients();
         }, 1000);
       } catch (err) {
-        console.error('Erro ao excluir ingrediente:', err);
         setError('Erro ao excluir ingrediente: ' + err.message);
         toast({
           variant: "destructive",
@@ -233,7 +215,6 @@ export default function Ingredients() {
 
     try {
       const newPrice = parseFloat(tempPrice);
-      console.log(`Atualizando preço do ingrediente ${ingredient.name}: ${ingredient.current_price} → ${newPrice}`);
       
       // Atualizar no Firebase
       await Ingredient.update(ingredient.id, {
@@ -259,7 +240,6 @@ export default function Ingredients() {
       });
 
     } catch (err) {
-      console.error('Erro ao atualizar preço:', err);
       toast({
         variant: "destructive",
         title: "Erro ao atualizar preço",
@@ -563,7 +543,6 @@ export default function Ingredients() {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  console.log('Botão excluir clicado para:', ingredient);
                                   handleDelete(ingredient);
                                 }}
                                 className="text-gray-700"

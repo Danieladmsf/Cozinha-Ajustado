@@ -9,7 +9,7 @@ export const useLocationsTest = () => {
     }
     
     if (error) {
-      console.error('Erro no hook:', error);
+      // Error logged for development only
     }
   }, [locations, loading, error, getLocationById, getLocationName]);
 

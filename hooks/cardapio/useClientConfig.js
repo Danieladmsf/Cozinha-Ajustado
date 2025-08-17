@@ -64,24 +64,52 @@ export const useClientConfig = (menuConfig, allClientIds = []) => {
   }, [menuConfig]);
 
   /**
-   * Filtra itens de menu baseado no cliente selecionado
-   * Usa a lógica centralizada do useLocationSelection para consistência
+   * Filtra e EXCLUI DEFINITIVAMENTE itens de menu baseado no cliente selecionado
+   * Remove permanentemente receitas que não foram marcadas para o cliente
    * 
    * @param {Array} items - Itens do menu para filtrar
    * @param {string} categoryId - ID da categoria dos itens
    * @param {string} clientId - ID do cliente para filtrar (ou 'all' para todos)
-   * @returns {Array} Itens filtrados para o cliente
+   * @returns {Array} Itens válidos e disponíveis para o cliente (excluindo desmarcados)
    */
   const getFilteredItemsForClient = useCallback((items, categoryId, clientId) => {
-    // Se for "todos" ou sem cliente, retorna todos os itens
+    // Se for "todos" ou sem cliente, retorna todos os itens SEM filtrar por location
+    // Mas ainda aplica configurações de categoria
     if (!clientId || clientId === 'all') {
+      // SEGUNDO: Aplicar configurações específicas do cliente (se houver)
+      const clientSettings = menuConfig?.client_category_settings?.[clientId];
+      const categorySettings = clientSettings?.[categoryId];
+
+      if (categorySettings) {
+        // Se a categoria não está visível para este cliente
+        if (!categorySettings.visible) {
+          return [];
+        }
+
+        // Limitar número de itens baseado na configuração do cliente
+        const maxItems = categorySettings.dropdowns !== null && categorySettings.dropdowns !== undefined 
+          ? categorySettings.dropdowns 
+          : (menuConfig?.fixed_dropdowns?.[categoryId] || items.length);
+        
+        return items.slice(0, maxItems);
+      }
+
+      // TERCEIRO: Aplicar configuração global de dropdowns fixos
+      const globalDropdowns = menuConfig?.fixed_dropdowns?.[categoryId];
+      if (globalDropdowns !== undefined) {
+        return items.slice(0, globalDropdowns);
+      }
+
       return items;
     }
 
-    // PRIMEIRO: Filtrar por locais de servimento usando lógica centralizada
-    const filteredByLocation = items.filter(item => 
-      locationSelection.isLocationSelected(item.locations, clientId)
-    );
+    // PRIMEIRO: EXCLUIR DEFINITIVAMENTE receitas não marcadas para o cliente
+    // Remove permanentemente da lista itens que não foram selecionados
+    const availableForClient = items.filter(item => {
+      const isSelected = locationSelection.isLocationSelected(item.locations, clientId);
+      // Se não está selecionado, EXCLUI DEFINITIVAMENTE da visualização
+      return isSelected;
+    });
 
     // SEGUNDO: Aplicar configurações específicas do cliente
     const clientSettings = menuConfig?.client_category_settings?.[clientId];
@@ -96,18 +124,18 @@ export const useClientConfig = (menuConfig, allClientIds = []) => {
       // Limitar número de itens baseado na configuração do cliente
       const maxItems = categorySettings.dropdowns !== null && categorySettings.dropdowns !== undefined 
         ? categorySettings.dropdowns 
-        : (menuConfig?.fixed_dropdowns?.[categoryId] || filteredByLocation.length);
+        : (menuConfig?.fixed_dropdowns?.[categoryId] || availableForClient.length);
       
-      return filteredByLocation.slice(0, maxItems);
+      return availableForClient.slice(0, maxItems);
     }
 
     // TERCEIRO: Aplicar configuração global de dropdowns fixos
     const globalDropdowns = menuConfig?.fixed_dropdowns?.[categoryId];
     if (globalDropdowns !== undefined) {
-      return filteredByLocation.slice(0, globalDropdowns);
+      return availableForClient.slice(0, globalDropdowns);
     }
 
-    return filteredByLocation;
+    return availableForClient;
   }, [locationSelection, menuConfig]);
 
   /**

@@ -2,13 +2,29 @@ import { useState, useEffect } from 'react';
 import { Customer } from "@/app/api/entities";
 import { APP_CONSTANTS } from "@/lib/constants";
 
+// Cache global para locations
+let locationsCache = {
+  data: null,
+  timestamp: null
+};
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
 export const useMenuLocations = () => {
-  const [locations, setLocations] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [locations, setLocations] = useState(locationsCache.data || []);
+  const [loading, setLoading] = useState(!locationsCache.data);
   const [error, setError] = useState(null);
 
   const fetchLocations = async () => {
     try {
+      // Verificar se cache é válido
+      if (locationsCache.data && locationsCache.timestamp && 
+          (Date.now() - locationsCache.timestamp) < CACHE_DURATION) {
+        setLocations(locationsCache.data);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
       
@@ -25,27 +41,43 @@ export const useMenuLocations = () => {
         }))
         .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
 
+      let finalLocations;
       // Se houver clientes, usar eles como locais (SEM "Todos os Clientes")
       if (activeCustomers.length > 0) {
-        setLocations(activeCustomers);
+        finalLocations = activeCustomers;
       } else {
         // Fallback com locais padrão se não houver clientes (SEM "Todos os Clientes")
-        setLocations([
+        finalLocations = [
           { id: "cliente_a", name: "Cliente A", order: 1, active: true },
           { id: "cliente_b", name: "Cliente B", order: 2, active: true },
           { id: "cliente_c", name: "Cliente C", order: 3, active: true }
-        ]);
+        ];
       }
+      
+      // Atualizar cache
+      locationsCache = {
+        data: finalLocations,
+        timestamp: Date.now()
+      };
+      
+      setLocations(finalLocations);
     } catch (error) {
-      console.error("Erro ao carregar clientes/locais:", error);
       setError("Erro ao carregar locais de atendimento.");
       
       // Fallback em caso de erro (SEM "Todos os Clientes")
-      setLocations([
+      const fallbackLocations = [
         { id: "cliente_a", name: "Cliente A", order: 1, active: true },
         { id: "cliente_b", name: "Cliente B", order: 2, active: true },
         { id: "cliente_c", name: "Cliente C", order: 3, active: true }
-      ]);
+      ];
+      
+      // Atualizar cache mesmo com fallback
+      locationsCache = {
+        data: fallbackLocations,
+        timestamp: Date.now()
+      };
+      
+      setLocations(fallbackLocations);
     } finally {
       setLoading(false);
     }
@@ -69,8 +101,11 @@ export const useMenuLocations = () => {
     return locations.filter(loc => loc.active).map(loc => loc.id);
   };
 
+  // Carregar locations na inicialização (apenas se não estiver em cache)
   useEffect(() => {
-    fetchLocations();
+    if (!locationsCache.data) {
+      fetchLocations();
+    }
   }, []);
 
   return {

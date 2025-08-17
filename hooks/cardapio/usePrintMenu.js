@@ -2,9 +2,44 @@ import { useCallback } from 'react';
 import { format, addDays, startOfWeek, endOfWeek, getWeek, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { renderFormattedRecipeName } from '@/lib/textHelpers';
+import { useLocationSelection } from './useLocationSelection';
 
 export const usePrintMenu = () => {
   const getDayNames = () => ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+  
+  // Função para obter clientes desmarcados de uma receita
+  const getUncheckedClients = useCallback((item, locations, allClientIds) => {
+    if (!item || !item.locations || !locations || !allClientIds) return [];
+    
+    // Simular o comportamento do useLocationSelection
+    const isLocationSelected = (itemLocations, locationId) => {
+      // Estado inicial: array vazio = todos selecionados
+      if (!itemLocations || itemLocations.length === 0) {
+        return true;
+      }
+      
+      // Caso especial: marcador de "nenhum selecionado"
+      if (itemLocations.includes('__NONE_SELECTED__')) {
+        return false;
+      }
+      
+      // Verificar se contém todos os IDs válidos
+      const validIds = itemLocations.filter(id => allClientIds.includes(id));
+      
+      if (validIds.length === allClientIds.length) {
+        return true; // Todos selecionados
+      } else if (validIds.length === 0) {
+        return false; // Nenhum selecionado
+      } else {
+        return itemLocations.includes(locationId); // Seleção parcial
+      }
+    };
+    
+    return locations.filter(location => {
+      const isSelected = isLocationSelected(item.locations, location.id);
+      return !isSelected; // Retorna apenas os NÃO selecionados
+    });
+  }, []);
 
   const formatRecipeName = useCallback((name) => {
     if (!name) return '';
@@ -19,23 +54,7 @@ export const usePrintMenu = () => {
     return cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
   }, []);
 
-  const renderClientsForPrint = useCallback((locationIds, customers, locations) => {
-    if (!locationIds || locationIds.length === 0) return '';
-    
-    const clientNames = locationIds
-      .map(id => {
-        const customer = customers?.find(c => c.id === id);
-        const location = locations?.find(l => l.id === id);
-        return customer?.name || customer?.razao_social || location?.name || 'Cliente não encontrado';
-      })
-      .sort();
-    
-    return `
-      <div class="client-tags">
-        ${clientNames.map(name => `<span class="client-tag">${name}</span>`).join('')}
-      </div>
-    `;
-  }, []);
+
 
   const getCustomerName = useCallback((customerId, customers, locations) => {
     const customer = customers?.find(c => c.id === customerId);
@@ -47,13 +66,7 @@ export const usePrintMenu = () => {
     return `
       @page {
         size: A4 landscape;
-        margin: 8mm;
-      }
-      
-      @media print {
-        body { margin: 0; padding: 0; }
-        .no-print { display: none !important; }
-        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        margin: 15mm;
       }
       
       * {
@@ -61,154 +74,188 @@ export const usePrintMenu = () => {
       }
       
       body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        line-height: 1.2;
-        color: #333;
-        background: white;
-        padding: 8px;
         font-size: 11px;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
       }
       
-      .print-header {
+      .header {
         text-align: center;
-        margin-bottom: 12px;
-        border-bottom: 1px solid #2563eb;
-        padding-bottom: 8px;
+        margin-bottom: 15px;
+        flex-shrink: 0;
+        padding: 10px 0;
       }
       
-      .print-header h1 {
-        margin: 0 0 4px 0;
+      .header-line {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 10px;
+      }
+      
+      .title {
         font-size: 18px;
-        color: #1f2937;
         font-weight: bold;
       }
       
-      .week-info {
-        font-size: 12px;
-        color: #6b7280;
-        margin-bottom: 4px;
+      h2 {
+        font-size: 14px;
+        font-weight: bold;
+        margin: 0 0 5px 0;
+        text-align: center;
       }
       
-      .customer-info {
-        font-size: 13px;
+      h3 {
+        font-size: 12px;
         font-weight: 600;
-        color: #2563eb;
-        margin-top: 4px;
+        margin: 0 0 4px 0;
+        background-color: #f0f0f0;
+        padding: 2px 4px;
+        border-bottom: 1px solid #ccc;
       }
       
       .print-grid {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        gap: 8px;
-        margin-bottom: 8px;
+        gap: 12px;
+        flex: 1;
+        height: calc(100vh - 120px);
       }
       
-      .print-day-column {
-        border: 1px solid #d1d5db;
-        border-radius: 4px;
+      .print-day {
+        border: 2px solid #000;
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      
+      .day-header {
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5px;
+        margin-bottom: 8px;
+        flex-shrink: 0;
+      }
+      
+      .day-content {
+        flex: 1;
         overflow: hidden;
-        background: white;
-        height: fit-content;
       }
       
-      .print-day-header {
-        background: #3b82f6;
-        color: white;
-        padding: 6px 4px;
-        text-align: center;
-      }
-      
-      .print-day-header h2 {
-        margin: 0;
-        font-size: 12px;
-        font-weight: 600;
-      }
-      
-      .day-date {
-        font-size: 9px;
-        opacity: 0.9;
-        margin-top: 2px;
-      }
-      
-      .print-day-content {
-        padding: 6px;
-      }
-      
-      .print-category {
+      .category-section {
         margin-bottom: 8px;
-      }
-      
-      .category-title {
-        font-size: 10px;
-        font-weight: 600;
-        padding: 3px 6px;
-        border-radius: 2px;
-        margin: 0 0 4px 0;
-        color: #374151;
-        border-left: 2px solid;
-      }
-      
-      .category-items {
-        padding-left: 4px;
-      }
-      
-      .menu-item {
-        margin-bottom: 2px;
-        font-size: 9px;
-        line-height: 1.2;
       }
       
       .recipe-name {
-        font-weight: 500;
-        color: #1f2937;
-        display: block;
+        font-size: 10px;
+        margin-bottom: 2px;
+        line-height: 1.2;
       }
       
-      .client-tags {
-        margin-top: 1px;
+      .unchecked-clients {
         font-size: 8px;
+        color: #d00;
+        text-decoration: line-through;
+        margin-left: 2px;
         line-height: 1.1;
       }
       
-      .client-tag {
-        display: inline;
-        background: none;
-        color: #6b7280;
-        padding: 0;
-        margin-right: 6px;
+      .footer {
+        text-align: center;
+        margin-top: 15px;
+        flex-shrink: 0;
+        padding: 10px 0;
+        border-top: 1px solid #ddd;
       }
       
-      .client-tag:after {
-        content: ' ';
-      }
-      
-      .print-footer {
+      .generation-info {
         display: flex;
         justify-content: space-between;
-        font-size: 8px;
-        color: #6b7280;
-        border-top: 1px solid #e5e7eb;
-        padding-top: 4px;
-        margin-top: 8px;
+        align-items: center;
+        font-size: 9px;
+        max-width: 800px;
+        margin: 0 auto;
       }
       
-      @media print {
-        .print-grid {
-          grid-template-columns: repeat(5, 1fr);
-          gap: 6px;
-          page-break-inside: avoid;
-        }
-        
-        .print-day-column {
-          break-inside: avoid;
-        }
-        
-        .print-category {
-          break-inside: avoid;
-        }
+      .brand {
+        font-weight: 600;
+        color: #333;
+      }
+      
+      .week-number {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      
+      .date-range {
+        font-size: 12px;
+        color: #555;
+      }
+      
+      .client-info {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 8px;
       }
     `;
   }, []);
+
+  const calculateCategoryHeights = useCallback((weeklyMenu, categories, recipes, customers, locations, customerId) => {
+    if (!weeklyMenu || !categories) return {};
+
+    const dayNames = getDayNames();
+    const categoryHeights = {};
+
+    // Para cada categoria, calcular a altura necessária em cada dia
+    categories.forEach((category, categoryIndex) => {
+      let maxItemsInCategory = 0;
+      
+      dayNames.forEach((dayName, index) => {
+        const dayIndex = index + 1;
+        const dayItems = weeklyMenu?.menu_data?.[dayIndex] || {};
+        const categoryItems = dayItems[category.id] || [];
+        
+        // Filtrar por cliente se necessário
+        const filteredItems = customerId === 'all' 
+          ? categoryItems 
+          : categoryItems.filter(item => 
+              !item.locations || 
+              item.locations.length === 0 || 
+              item.locations.includes(customerId)
+            );
+
+        // Contar total de linhas necessárias (receitas + tags de clientes)
+        let totalLines = 0;
+        filteredItems.forEach(item => {
+          totalLines += 1; // linha da receita
+          if (customerId === 'all' && item.locations && item.locations.length > 0) {
+            // Estimar linhas de clientes (aprox 3 clientes por linha)
+            const clientLines = Math.ceil(item.locations.length / 3);
+            totalLines += clientLines;
+          }
+        });
+
+        maxItemsInCategory = Math.max(maxItemsInCategory, totalLines);
+      });
+
+      // Calcular altura: título (15px) + items (cada item ~8px) + padding
+      const titleHeight = 12;
+      const itemHeight = 6;
+      const padding = 5;
+      const calculatedHeight = titleHeight + (maxItemsInCategory * itemHeight) + padding;
+      
+      // Altura mínima de 25px, máxima de 80px
+      categoryHeights[categoryIndex] = Math.max(25, Math.min(80, calculatedHeight));
+    });
+
+    return categoryHeights;
+  }, [getDayNames]);
 
   const generatePrintableMenu = useCallback((weeklyMenu, categories, recipes, customers, locations, customerId, currentDate, getCategoryColor) => {
     if (!weeklyMenu) return '';
@@ -218,15 +265,21 @@ export const usePrintMenu = () => {
     const weekNumber = getWeek(currentDate, { weekStartsOn: 1 });
     const year = getYear(currentDate);
     
+    // Obter todos os IDs de clientes para a função de clientes desmarcados
+    const allClientIds = locations?.filter(loc => loc.active !== false).map(loc => loc.id) || [];
+    
+    // Calcular alturas das categorias
+    const categoryHeights = calculateCategoryHeights(weeklyMenu, categories, recipes, customers, locations, customerId);
+    
     // Cabeçalho
     let html = `
-      <div class="print-header">
-        <h1>Cardápio Semanal</h1>
-        <div class="week-info">
-          <span>Semana ${weekNumber}/${year}</span>
-          <span>${format(weekStart, 'dd/MM/yyyy', { locale: ptBR })} - ${format(weekEnd, 'dd/MM/yyyy', { locale: ptBR })}</span>
+      <div class="header">
+        <div class="header-line">
+          <span class="title">Cardápio Semanal</span>
+          <span class="week-number">Semana ${weekNumber}/${year}</span>
+          <span class="date-range">${format(weekStart, 'dd/MM/yyyy', { locale: ptBR })} - ${format(weekEnd, 'dd/MM/yyyy', { locale: ptBR })}</span>
         </div>
-        ${customerId !== 'all' ? `<div class="customer-info">Cliente: ${getCustomerName(customerId, customers, locations)}</div>` : ''}
+        ${customerId !== 'all' ? `<div class="client-info">Cliente: ${getCustomerName(customerId, customers, locations)}</div>` : ''}
       </div>
     `;
 
@@ -241,17 +294,16 @@ export const usePrintMenu = () => {
       const dayItems = weeklyMenu?.menu_data?.[dayIndex] || {};
       
       html += `
-        <div class="print-day-column">
-          <div class="print-day-header">
-            <h2>${dayName}</h2>
-            <div class="day-date">${format(dayDate, 'dd/MM', { locale: ptBR })}</div>
-          </div>
-          
-          <div class="print-day-content">
+      <div class="print-day">
+      <div class="day-header">
+      <h2>${dayName.toUpperCase()} - ${format(dayDate, 'dd/MM/yyyy', { locale: ptBR })}</h2>
+      </div>
+      
+      <div class="day-content">
       `;
       
-      // Categorias do dia
-      categories?.forEach(category => {
+      // Categorias do dia (TODAS as categorias para manter alinhamento)
+      categories?.forEach((category, categoryIndex) => {
         const categoryItems = dayItems[category.id] || [];
         
         // Filtrar por cliente se necessário
@@ -263,34 +315,38 @@ export const usePrintMenu = () => {
               item.locations.includes(customerId)
             );
         
+        // SEMPRE mostrar a categoria (mesmo vazia) para manter alinhamento
+        html += `
+          <div class="category-section">
+            <h3>${category.name}</h3>
+            <div>
+        `;
+        
         if (filteredItems.length > 0) {
-          const categoryColor = getCategoryColor ? getCategoryColor(category.id) : (category.color || '#f3f4f6');
-          
-          html += `
-            <div class="print-category">
-              <h3 class="category-title" style="background-color: ${categoryColor}15; border-left: 3px solid ${categoryColor};">
-                ${category.name}
-              </h3>
-              <div class="category-items">
-          `;
-          
           filteredItems.forEach(item => {
             const recipe = recipes?.find(r => r.id === item.recipe_id);
             if (recipe) {
+              // Obter clientes desmarcados apenas quando "Todos os Clientes" está selecionado
+              const uncheckedClients = customerId === 'all' ? getUncheckedClients(item, locations, allClientIds) : [];
+              
               html += `
-                <div class="menu-item">
-                  <span class="recipe-name">${renderFormattedRecipeName(recipe.name)}</span>
-                  ${customerId === 'all' ? renderClientsForPrint(item.locations, customers, locations) : ''}
+                <div>
+                  <div class="recipe-name">${renderFormattedRecipeName(recipe.name)}</div>
+                  ${uncheckedClients.length > 0 ? `
+                    <div class="unchecked-clients">${uncheckedClients.map(client => client.name).join(', ')}</div>
+                  ` : ''}
                 </div>
               `;
             }
           });
-          
-          html += `
-              </div>
-            </div>
-          `;
+        } else {
+          html += '<div>-</div>';
         }
+        
+        html += `
+            </div>
+          </div>
+        `;
       });
       
       html += `
@@ -303,14 +359,16 @@ export const usePrintMenu = () => {
     
     // Rodapé
     html += `
-      <div class="print-footer">
-        <div>Gerado em: ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</div>
-        <div>Cozinha & Afeto</div>
+      <div class="footer">
+        <div class="generation-info">
+          <span>Gerado em: ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</span>
+          <span class="brand">Cozinha & Afeto</span>
+        </div>
       </div>
     `;
     
     return html;
-  }, [getDayNames, getCustomerName, renderClientsForPrint]);
+  }, [getDayNames, getCustomerName, calculateCategoryHeights]);
 
   const handlePrintCardapio = useCallback((weeklyMenu, categories, recipes, customers, locations, customerId, currentDate, getCategoryColor) => {
     if (!weeklyMenu) {

@@ -11,7 +11,6 @@ export async function GET(request) {
     return NextResponse.json(userData || {});
     
   } catch (error) {
-    console.error('[API] Error getting user data:', error);
     return NextResponse.json(
       { error: 'Failed to get user data', details: error.message },
       { status: 500 }
@@ -29,7 +28,6 @@ export async function PUT(request) {
     return NextResponse.json(result);
     
   } catch (error) {
-    console.error('[API] Error updating user data:', error);
     return NextResponse.json(
       { error: 'Failed to update user data', details: error.message },
       { status: 500 }
@@ -59,7 +57,6 @@ export async function POST(request) {
     );
     
   } catch (error) {
-    console.error('[API] Error saving config:', error);
     return NextResponse.json(
       { error: 'Failed to save config', details: error.message },
       { status: 500 }

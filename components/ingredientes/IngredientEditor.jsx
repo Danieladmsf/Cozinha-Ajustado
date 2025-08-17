@@ -104,7 +104,6 @@ export default function IngredientEditor() {
       }));
       setSupplierOptions(supplierOptions);
     } catch (err) {
-      console.error("Erro ao carregar fornecedores:", err);
       toast({ variant: "destructive", title: "Erro", description: "Erro ao carregar fornecedores" });
     }
   };
@@ -124,7 +123,6 @@ export default function IngredientEditor() {
       }));
       setBrandOptions(brandOptions);
     } catch (err) {
-      console.error("Erro ao carregar marcas:", err);
     }
   };
 
@@ -133,7 +131,6 @@ export default function IngredientEditor() {
       const tacoData = await NutritionFood.list();
       setTacoFoods(Array.isArray(tacoData) ? tacoData.filter(f => f.active) : []);
     } catch (err) {
-      console.error("Erro ao carregar alimentos TACO:", err);
     }
   };
 
@@ -159,7 +156,6 @@ export default function IngredientEditor() {
       setCategories(allCategories);
       setCategoryOptions(allCategories.map(cat => ({ value: cat, label: cat })));
     } catch (err) {
-      console.error("Erro ao carregar categorias:", err);
     }
   };
 
@@ -313,7 +309,6 @@ export default function IngredientEditor() {
       setCurrentIngredientId(id);
 
     } catch (err) {
-      console.error('[IngredientEditor] Erro geral ao carregar ingrediente:', err);
       setError('Erro ao carregar ingrediente: ' + err.message);
       router.push('/ingredienteditor?id=new');
       resetFormForNewIngredient();
@@ -385,7 +380,6 @@ export default function IngredientEditor() {
           resetFormForNewIngredient();
         }
       } catch (error) {
-        console.error('[IngredientEditor] Erro ao carregar dados iniciais:', error);
         setError('Erro ao carregar dados iniciais: ' + error.message);
       } finally {
         setLoading(false);
@@ -450,7 +444,6 @@ export default function IngredientEditor() {
       router.push('/ingredientes');
 
     } catch (err) {
-      console.error("Erro ao salvar:", err);
       setError(err.message || "Erro desconhecido ao salvar.");
     } finally {
       setSaving(false);

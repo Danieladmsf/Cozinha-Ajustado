@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// Card components removed - not being used
 import {
   Popover,
   PopoverContent,
@@ -59,37 +59,37 @@ export default function CategoryMenuCard({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden hover:shadow-md transition-all duration-300">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all mb-4">
       <div 
-        className="py-4 px-6 relative border-b border-gray-100/50" 
+        className="py-2 px-3 border-b border-gray-200" 
         style={headerStyle}
       >
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             <div 
-              className="w-5 h-5 rounded-full mr-3 shadow-sm border-2 border-white/30 ring-2 ring-white/20" 
+              className="w-4 h-4 rounded-full mr-2 shadow-sm" 
               style={{ backgroundColor: categoryColor }}
             />
-            <h3 className="text-lg font-semibold text-gray-800">{category.name}</h3>
+            <h3 className="text-base font-semibold text-gray-800">{category.name}</h3>
           </div>
           
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={onToggleLocationVisibility}
-            className="text-gray-600 hover:bg-white/30 hover:text-gray-800 transition-all rounded-lg p-2"
+            className="text-gray-600 hover:bg-white/30 hover:text-gray-800 p-1"
           >
             {isLocationVisible ? (
-              <EyeOff className="h-4 w-4" />
+              <EyeOff className="h-3 w-3" />
             ) : (
-              <Eye className="h-4 w-4" />
+              <Eye className="h-3 w-3" />
             )}
           </Button>
         </div>
       </div>
       
-      <div className="p-6 bg-gradient-to-b from-white to-gray-50/30">
-        <div className="space-y-4">
+      <div className="p-3">
+        <div className="space-y-3">
           {items.map((item, itemIndex) => {
             const isOpen = menuInterface.isDropdownOpen(category.id, itemIndex);
             const currentSearchTerm = menuInterface.getSearchTerm(category.id, itemIndex);
@@ -98,9 +98,9 @@ export default function CategoryMenuCard({
             return (
               <div 
                 key={itemIndex} 
-                className="space-y-3 p-4 rounded-xl transition-all hover:bg-white/80 border border-gray-100/50 hover:border-gray-200 hover:shadow-sm"
+                className="space-y-2 p-2 rounded border border-gray-100 hover:border-gray-200 transition-all"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <Popover 
                     open={isOpen}
                     onOpenChange={(open) => handleOpenChange(itemIndex, open)}
@@ -110,7 +110,7 @@ export default function CategoryMenuCard({
                         variant="outline" 
                         role="combobox" 
                         aria-expanded={isOpen}
-                        className="w-full justify-between h-11 border-gray-200 hover:border-gray-300 bg-white"
+                        className="w-full justify-between h-9 border-gray-200 hover:border-gray-300 bg-white text-sm"
                       >
                         {item.recipe_id ? (
                           <span className="font-medium">
@@ -176,9 +176,9 @@ export default function CategoryMenuCard({
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        className="shrink-0 hover:bg-gray-100 h-11 w-11 rounded-lg"
+                        className="shrink-0 hover:bg-gray-100 h-9 w-9 rounded-lg"
                       >
-                        <MoreVertical className="h-4 w-4" />
+                        <MoreVertical className="h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
@@ -214,15 +214,15 @@ export default function CategoryMenuCard({
         </div>
 
         {items.length < 10 && (
-          <div className="mt-6 pt-4 border-t border-gray-200/50">
+          <div className="mt-3 pt-2 border-t border-gray-200">
             <Button 
               variant="outline" 
               size="sm" 
-              className="w-full border-dashed border-gray-300 hover:border-gray-400 h-12 rounded-xl"
+              className="w-full border-dashed border-gray-300 hover:border-gray-400 h-9 rounded-lg text-sm"
               style={buttonStyle}
               onClick={onAddMenuItem}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-3 w-3 mr-1" />
               Adicionar item
             </Button>
           </div>

@@ -30,11 +30,7 @@ export const useConsolidationFormatter = () => {
     // Converter usando sistema universal
     const conversionResult = CubaUniversalConverter.convert(quantity, unitType);
     
-    // Log para debug (pode ser removido em produção)
-    console.log('🔄 Conversão aplicada:', {
-      input: { quantity, unitType },
-      result: conversionResult
-    });
+    // Debug logging removed for production
 
     // Retornar display formatado
     return conversionResult.display || "";

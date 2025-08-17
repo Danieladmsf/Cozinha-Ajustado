@@ -85,7 +85,6 @@ export function useRecipeValidation() {
       
     } catch (error) {
       errors[fieldName] = 'Erro na validação do campo';
-      console.error(`Erro validando campo ${fieldName}:`, error);
     }
     
     setValidationErrors(errors);
@@ -153,7 +152,6 @@ export function useRecipeValidation() {
       };
       
     } catch (error) {
-      console.error('Erro na validação completa:', error);
       setValidationErrors({ 
         general: 'Erro interno de validação. Tente novamente.' 
       });

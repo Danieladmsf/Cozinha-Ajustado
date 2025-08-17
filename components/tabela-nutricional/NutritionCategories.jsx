@@ -63,7 +63,7 @@ export default function NutritionCategories() {
       const data = await NutritionCategory.list();
       setCategories(data);
     } catch (error) {
-      console.error("Erro ao carregar categorias:", error);
+      // Error loading nutrition categories
       toast({
         title: "Erro",
         description: "Não foi possível carregar as categorias.",
@@ -104,7 +104,7 @@ export default function NutritionCategories() {
         });
         fetchCategories();
       } catch (error) {
-        console.error("Erro ao excluir categoria:", error);
+        // Error deleting category
         toast({
           title: "Erro",
           description: "Não foi possível excluir a categoria. Ela pode estar sendo usada por algum alimento.",
@@ -152,7 +152,7 @@ export default function NutritionCategories() {
       setIsDialogOpen(false);
       fetchCategories();
     } catch (error) {
-      console.error("Erro ao salvar categoria:", error);
+      // Error saving category
       toast({
         title: "Erro",
         description: "Não foi possível salvar a categoria.",

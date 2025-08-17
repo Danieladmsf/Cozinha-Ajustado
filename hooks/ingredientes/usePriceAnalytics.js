@@ -19,7 +19,6 @@ export function usePriceAnalytics() {
       setPriceHistory(ingredientHistory);
       return ingredientHistory;
     } catch (error) {
-      console.error('Erro ao carregar histórico:', error);
       return [];
     } finally {
       setLoading(false);

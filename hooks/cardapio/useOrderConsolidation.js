@@ -12,7 +12,6 @@ export const useOrderConsolidation = (orders, recipes) => {
   const validateAmount = (amount) => {
     const numAmount = parseQuantity(amount);
     if (isNaN(numAmount) || numAmount < 0) {
-      console.warn('Valor monetário inválido detectado:', amount);
       return 0;
     }
     return numAmount;
@@ -26,7 +25,6 @@ export const useOrderConsolidation = (orders, recipes) => {
     
     orders.forEach(order => {
       if (!order.customer_id || !order.customer_name) {
-        console.warn('Pedido sem customer_id ou customer_name:', order);
         return;
       }
 

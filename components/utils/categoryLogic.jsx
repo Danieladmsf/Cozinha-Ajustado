@@ -49,6 +49,11 @@ export class CategoryLogic {
     const unitType = (item.unit_type || '').toLowerCase();
     const isUnidType = unitType === 'unid' || unitType === 'unid.' || unitType === 'unidade';
 
+    // ✅ PRESERVAR dados de peso da receita original antes de qualquer alteração
+    const originalCubaWeight = item.cuba_weight;
+    const originalTotalWeight = item.total_weight;
+    const originalYieldWeight = item.yield_weight;
+
     // Aplicar mudança no campo específico
     if (field === 'base_quantity') {
       const inputValue = parseQuantity(value);
@@ -64,6 +69,11 @@ export class CategoryLogic {
     } else {
       updatedItem[field] = value;
     }
+
+    // ✅ GARANTIR que os dados de peso da receita sejam preservados
+    if (originalCubaWeight !== undefined) updatedItem.cuba_weight = originalCubaWeight;
+    if (originalTotalWeight !== undefined) updatedItem.total_weight = originalTotalWeight;
+    if (originalYieldWeight !== undefined) updatedItem.yield_weight = originalYieldWeight;
 
     // Recalcular quantidade total baseado na categoria
     if (isCarneCategory) {
@@ -81,44 +91,60 @@ export class CategoryLogic {
     updatedItem.total_price = updatedItem.quantity * (updatedItem.unit_price || 0);
 
     // ✅ CORREÇÃO: Calcular peso total preservando campos de peso da receita
-    updatedItem.total_weight = this.calculateItemTotalWeight(updatedItem);
+    const calculatedWeight = this.calculateItemTotalWeight(updatedItem);
+    updatedItem.total_weight = calculatedWeight;
 
     return updatedItem;
   }
 
   /**
    * Calcula o peso total de um item baseado na quantidade e tipo de unidade
+   * NOVA VERSÃO: Preserva dados originais da receita
    * @param {Object} item - Item do pedido
    * @returns {number} Peso total em kg
    */
   static calculateItemTotalWeight(item) {
-    if (!item) return 0;
-    
-    // ✅ CORREÇÃO: Usar base_quantity como fallback quando quantity for zero
-    let quantity = parseQuantity(item.quantity) || 0;
-    if (quantity === 0 && item.base_quantity) {
-      quantity = parseQuantity(item.base_quantity) || 0;
+    if (!item) {
+      return 0;
     }
     
+    // Se já foi calculado pelo PortalDataSync, usar o valor preservado
+    if (item.calculated_total_weight !== undefined) {
+      return item.calculated_total_weight;
+    }
+    
+    let quantity = parseQuantity(item.quantity) || parseQuantity(item.base_quantity) || 0;
     const unitType = (item.unit_type || '').toLowerCase();
-    const cubaWeight = parseQuantity(item.cuba_weight) || 0;
-    const yieldWeight = parseQuantity(item.yield_weight) || 0;
+    
+    // PRIORIDADE: dados preservados da receita -> dados do item -> fallbacks
+    let cubaWeight = parseQuantity(item.recipe_cuba_weight) || 
+                     parseQuantity(item.cuba_weight) || 0;
+    
+    if (cubaWeight === 0) {
+      cubaWeight = parseQuantity(item.recipe_yield_weight) || 
+                   parseQuantity(item.yield_weight) || 0;
+    }
     
     let totalWeight = 0;
     
-    if (unitType === 'cuba' || unitType === 'cuba-g') {
-      // Para cuba, usar cuba_weight. Se zerado, tentar yield_weight como fallback
-      totalWeight = cubaWeight > 0 ? cubaWeight * quantity : yieldWeight * quantity;
-    } else if (unitType === 'kg') {
-      // Para kg, a quantidade já é o peso
-      totalWeight = quantity;
-    } else if (unitType === 'unid' || unitType === 'unid.' || unitType === 'unidade') {
-      // Para unidades, usar cuba_weight. Se zerado, tentar yield_weight como fallback
-      totalWeight = cubaWeight > 0 ? cubaWeight * quantity : yieldWeight * quantity;
+    // ✅ CORREÇÃO CRÍTICA: Se quantity é zero, usar peso original da receita para exibição
+    if (quantity === 0) {
+      // Usar total_weight original da receita ou cuba_weight como fallback
+      totalWeight = parseQuantity(item.recipe_total_weight) || 
+                   parseQuantity(item.total_weight) || 
+                   cubaWeight || 0;
     } else {
-      // Tipo de unidade não reconhecido
-      totalWeight = 0;
+      // Cálculo normal com quantity
+      if (unitType === 'cuba' || unitType === 'cuba-g') {
+        totalWeight = cubaWeight * quantity;
+      } else if (unitType === 'kg') {
+        totalWeight = quantity;
+      } else if (unitType === 'unid' || unitType === 'unid.' || unitType === 'unidade') {
+        totalWeight = cubaWeight * quantity;
+      }
     }
+    
+
     
     return totalWeight;
   }

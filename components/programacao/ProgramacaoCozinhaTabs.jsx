@@ -60,7 +60,7 @@ const ProgramacaoCozinhaTabs = () => {
   const [selectedDay, setSelectedDay] = useState(1);
   const [loading, setLoading] = useState(true);
   const [printing, setPrinting] = useState(false);
-  const [dataVersion, setDataVersion] = useState(0);
+  // Removido dataVersion desnecessário
   
   // Dados
   const [customers, setCustomers] = useState([]);
@@ -106,37 +106,97 @@ const ProgramacaoCozinhaTabs = () => {
     return days;
   }, [weekStart]);
 
-  // Função centralizada para carregar/atualizar todos os dados
-  const refreshAllData = async () => {
+  // Função para carregar dados iniciais (sem depender de weekNumber/year)
+  const loadInitialData = async () => {
     try {
       setLoading(true);
       
-      // Carregar clientes, receitas e pedidos em paralelo
-      const [customersData, recipesData, ordersData] = await Promise.all([
+      // Carregar apenas clientes e receitas (dados estáticos)
+      const [customersData, recipesData] = await Promise.all([
         Customer.list(),
-        Recipe.list(),
-        Order.query([
-          { field: 'week_number', operator: '==', value: weekNumber },
-          { field: 'year', operator: '==', value: year }
-        ])
+        Recipe.list()
       ]);
       
       setCustomers(customersData);
       setRecipes(recipesData);
-      setOrders(ordersData);
-      setDataVersion(prev => prev + 1); // Trigger para atualizar abas
       
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
+      console.error('Erro ao carregar dados iniciais:', error);
     } finally {
       setLoading(false);
     }
   };
+  
+  // Função separada para carregar pedidos de uma semana específica
+  const loadOrdersForWeek = async (weekNum, yearNum) => {
+    try {
+      const ordersData = await Order.query([
+        { field: 'week_number', operator: '==', value: weekNum },
+        { field: 'year', operator: '==', value: yearNum }
+      ]);
+      
+      setOrders(ordersData);
+      
+    } catch (error) {
+      console.error('Erro ao carregar pedidos:', error);
+      setOrders([]);
+    }
+  };
+  
+  // Função manual para atualizar todos os dados
+  const refreshAllData = async () => {
+    // Limpar cache para forçar recarregamento
+    setOrdersCache(new Map());
+    await loadInitialData();
+    await loadOrdersForWeek(weekNumber, year);
+  };
 
-  // Carregamento inicial de dados
+  // Cache de pedidos para evitar recarregamentos desnecessários
+  const [ordersCache, setOrdersCache] = useState(new Map());
+  
+  // Carregamento inicial apenas uma vez
   useEffect(() => {
-    refreshAllData();
-  }, [weekNumber, year]);
+    loadInitialData();
+  }, []);
+  
+  // Carregar pedidos com cache inteligente
+  useEffect(() => {
+    if (customers.length === 0 || recipes.length === 0) return;
+    
+    const cacheKey = `${weekNumber}-${year}`;
+    
+    // Verificar se já temos os pedidos no cache
+    if (ordersCache.has(cacheKey)) {
+      const cachedOrders = ordersCache.get(cacheKey);
+      if (JSON.stringify(orders) !== JSON.stringify(cachedOrders)) {
+        setOrders(cachedOrders);
+      }
+      return;
+    }
+    
+    // Carregar pedidos apenas se não estiverem no cache
+    const loadAndCache = async () => {
+      try {
+        const ordersData = await Order.query([
+          { field: 'week_number', operator: '==', value: weekNumber },
+          { field: 'year', operator: '==', value: year }
+        ]);
+        
+        setOrders(ordersData);
+        setOrdersCache(prev => {
+          const newCache = new Map(prev);
+          newCache.set(cacheKey, ordersData);
+          return newCache;
+        });
+        
+      } catch (error) {
+        console.error('Erro ao carregar pedidos:', error);
+        setOrders([]);
+      }
+    };
+    
+    loadAndCache();
+  }, [weekNumber, year, customers.length, recipes.length]);
 
   // Filtrar pedidos por dia e cliente
   const filteredOrders = useMemo(() => {
@@ -175,13 +235,1071 @@ const ProgramacaoCozinhaTabs = () => {
     }
   };
 
-  // Função de impressão
+  // Funções para extrair dados de cada aba - seguindo a lógica exata da UI
+  const getSaladaData = () => {
+    const dayOrders = orders.filter(order => order.day_of_week === selectedDay);
+    const saladaIngredientes = {};
+
+    dayOrders.forEach(order => {
+      order.items?.forEach(item => {
+        const recipe = recipes.find(r => r.id === item.recipe_id);
+        
+        if (recipe && recipe.category?.toLowerCase().includes('salada')) {
+          const recipeName = recipe.name;
+          const quantity = item.quantity;
+          const unitType = item.unit_type || recipe.unit_type;
+
+          // Usar o nome da receita diretamente (totalmente dinâmico)
+          if (!saladaIngredientes[recipeName]) {
+            saladaIngredientes[recipeName] = {};
+          }
+
+          // Inicializar cliente se não existir
+          const customerName = order.customer_name;
+          if (!saladaIngredientes[recipeName][customerName]) {
+            saladaIngredientes[recipeName][customerName] = {
+              quantity: 0,
+              unitType: unitType,
+              items: []
+            };
+          }
+
+          // Definir quantidade (dados já consolidados pelo hook principal)
+          saladaIngredientes[recipeName][customerName].quantity = quantity;
+          saladaIngredientes[recipeName][customerName].items.push({
+            recipeName,
+            quantity,
+            unitType,
+            notes: item.notes || '' // Capturar observações do item
+          });
+        }
+      });
+    });
+
+    return saladaIngredientes;
+  };
+
+  const getAcougueData = () => {
+    const dayOrders = orders.filter(order => order.day_of_week === selectedDay);
+    const acougueItems = {};
+
+    dayOrders.forEach(order => {
+      order.items?.forEach(item => {
+        const recipe = recipes.find(r => r.id === item.recipe_id);
+        
+        if (recipe && (recipe.category?.toLowerCase().includes('carne') || recipe.category?.toLowerCase().includes('açougue'))) {
+          const recipeName = recipe.name;
+          const quantity = item.quantity;
+          const unitType = item.unit_type || recipe.unit_type;
+
+          if (!acougueItems[recipeName]) {
+            acougueItems[recipeName] = {};
+          }
+
+          const customerName = order.customer_name;
+          if (!acougueItems[recipeName][customerName]) {
+            acougueItems[recipeName][customerName] = {
+              quantity: 0,
+              unitType: unitType,
+              items: []
+            };
+          }
+
+          acougueItems[recipeName][customerName].quantity = quantity;
+          acougueItems[recipeName][customerName].items.push({
+            recipeName,
+            quantity,
+            unitType,
+            notes: item.notes || ''
+          });
+        }
+      });
+    });
+
+    return acougueItems;
+  };
+
+  const getCozinhaData = () => {
+    const dayOrders = orders.filter(order => order.day_of_week === selectedDay);
+    const cozinhaItems = {};
+
+    dayOrders.forEach(order => {
+      order.items?.forEach(item => {
+        const recipe = recipes.find(r => r.id === item.recipe_id);
+        
+        if (recipe && !recipe.category?.toLowerCase().includes('salada') && 
+            !recipe.category?.toLowerCase().includes('carne') && 
+            !recipe.category?.toLowerCase().includes('açougue')) {
+          const recipeName = recipe.name;
+          const quantity = item.quantity;
+          const unitType = item.unit_type || recipe.unit_type;
+
+          if (!cozinhaItems[recipeName]) {
+            cozinhaItems[recipeName] = {};
+          }
+
+          const customerName = order.customer_name;
+          if (!cozinhaItems[recipeName][customerName]) {
+            cozinhaItems[recipeName][customerName] = {
+              quantity: 0,
+              unitType: unitType,
+              items: []
+            };
+          }
+
+          cozinhaItems[recipeName][customerName].quantity = quantity;
+          cozinhaItems[recipeName][customerName].items.push({
+            recipeName,
+            quantity,
+            unitType,
+            notes: item.notes || ''
+          });
+        }
+      });
+    });
+
+    return cozinhaItems;
+  };
+
+  const getEmbalagemData = () => {
+    // Aba Embalagem ainda não tem estrutura implementada na UI
+    // Retornar vazio para não gerar páginas desnecessárias
+    return [];
+  };
+
+  // Função de impressão completa
   const handlePrint = () => {
     setPrinting(true);
-    setTimeout(() => {
-      window.print();
-      setPrinting(false);
-    }, 100);
+    
+    // Extrair dados de todas as abas
+    const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
+    const porEmpresaData = ordersByCustomer;
+    const saladaData = getSaladaData();
+    const acougueData = getAcougueData();
+    const cozinhaData = getCozinhaData();
+    const embalagemData = getEmbalagemData();
+    
+    // Gerar HTML completo para impressão
+    const printContent = generateCompletePrintContent({
+      selectedDayInfo,
+      weekNumber,
+      year,
+      porEmpresaData,
+      saladaData,
+      acougueData,
+      cozinhaData,
+      embalagemData
+    });
+    
+    // Abrir janela de impressão
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+    
+    setPrinting(false);
+  };
+
+  // Função para gerar conteúdo completo de impressão
+  const generateCompletePrintContent = (data) => {
+    const { selectedDayInfo, weekNumber, year, porEmpresaData, saladaData, acougueData, cozinhaData, embalagemData } = data;
+    
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Programação de Produção - ${selectedDayInfo?.fullDate}</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            ${getPrintStyles()}
+          </style>
+        </head>
+        <body>
+          ${generatePorEmpresaSection(porEmpresaData, selectedDayInfo)}
+          ${generateSaladaSection(saladaData, selectedDayInfo)}
+          ${generateAcougueSection(acougueData, selectedDayInfo)}
+          ${generateCozinhaSection(cozinhaData, selectedDayInfo)}
+          ${generateEmbalagemSection(embalagemData, selectedDayInfo)}
+          ${getAutoFontSizeScript()}
+        </body>
+      </html>
+    `;
+  };
+
+  // Funções para gerar cada seção
+  const generatePorEmpresaSection = (data, dayInfo) => {
+    if (!data || data.length === 0) return '';
+    
+    return data.map((customerData, index) => {
+      // Usar a mesma lógica de consolidação da UI
+      const consolidatedItems = consolidateCustomerItems(customerData.orders);
+      
+      return `
+        <div class="print-page">
+          <div class="page-header">
+            <h1>Por Empresa</h1>
+            <div class="day-info">${dayInfo?.fullDate}</div>
+          </div>
+          
+          <div class="company-section">
+            <!-- Header do cliente igual à UI -->
+            <div class="client-header">
+              <h2>${customerData.customer_name}</h2>
+              <p class="meal-count">${dayInfo?.fullDate} • ${customerData.total_meals} refeições</p>
+            </div>
+            
+            <!-- Estrutura igual à UI: Object.entries(consolidatedItems) -->
+            ${Object.keys(consolidatedItems).length === 0 ? `
+              <p class="no-items">Nenhum item no pedido deste cliente.</p>
+            ` : Object.entries(consolidatedItems).map(([categoryName, items]) => `
+              <div class="category-section">
+                <!-- Título da categoria igual à UI -->
+                <div class="category-header">
+                  <h3 class="category-title">${categoryName}</h3>
+                </div>
+                
+                <!-- Lista de itens igual à UI -->
+                <div class="items-container">
+                  ${items.map((item, itemIndex) => `
+                    <div class="item-line" key="${item.unique_id || item.recipe_id}_${itemIndex}">
+                      <span class="quantity">${formatQuantityDisplay(item)}</span>
+                      <span class="recipe-name">
+                        ${item.recipe_name}${item.notes && item.notes.trim() ? ` <span class="notes">(${item.notes.trim()})</span>` : ''}
+                      </span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          
+          <div class="page-footer">
+            <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+  };
+
+  const generateSaladaSection = (data, dayInfo) => {
+    if (!data || Object.keys(data).length === 0) return '';
+    
+    return `
+      <div class="print-page">
+        <div class="page-header">
+          <h1>Salada</h1>
+          <div class="day-info">${dayInfo?.fullDate}</div>
+        </div>
+        
+        <div class="section-content">
+          <div class="recipe-sections">
+            ${Object.entries(data).map(([nomeReceita, clientes], index) => `
+              <div class="recipe-section">
+                <!-- Número e nome da receita igual à UI -->
+                <div class="recipe-header">
+                  <h2 class="recipe-title">${index + 1}. ${nomeReceita.toUpperCase()}</h2>
+                </div>
+                
+                <!-- Lista de clientes igual à UI -->
+                <div class="clients-list">
+                  ${Object.entries(clientes).map(([customerName, dataCustomer]) => {
+                    const hasNotes = dataCustomer.items.some(item => item.notes && item.notes.trim());
+                    return `
+                      <div class="client-line">
+                        <span class="customer-name">${customerName.toUpperCase()}</span>
+                        <span class="arrow">→</span>
+                        <span class="quantity">${formatQuantityForDisplay(dataCustomer.quantity, dataCustomer.unitType, globalKitchenFormat)}</span>
+                        ${hasNotes ? `
+                          <div class="notes-section">
+                            ${dataCustomer.items
+                              .filter(item => item.notes && item.notes.trim())
+                              .map(item => `<span class="note">(${item.notes.trim()})</span>`)
+                              .join('')
+                            }
+                          </div>
+                        ` : ''}
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="page-footer">
+          <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+        </div>
+      </div>
+    `;
+  };
+
+  const generateAcougueSection = (data, dayInfo) => {
+    if (!data || Object.keys(data).length === 0) return '';
+    
+    return `
+      <div class="print-page">
+        <div class="page-header">
+          <h1>Açougue</h1>
+          <div class="day-info">${dayInfo?.fullDate}</div>
+        </div>
+        
+        <div class="section-content">
+          <div class="recipe-sections">
+            ${Object.entries(data).map(([nomeReceita, clientes], index) => `
+              <div class="recipe-section">
+                <div class="recipe-header">
+                  <h2 class="recipe-title">${index + 1}. ${nomeReceita.toUpperCase()}</h2>
+                </div>
+                
+                <div class="clients-list">
+                  ${Object.entries(clientes).map(([customerName, dataCustomer]) => {
+                    const hasNotes = dataCustomer.items.some(item => item.notes && item.notes.trim());
+                    return `
+                      <div class="client-line">
+                        <span class="customer-name">${customerName.toUpperCase()}</span>
+                        <span class="arrow">→</span>
+                        <span class="quantity">${formatQuantityForDisplay(dataCustomer.quantity, dataCustomer.unitType, globalKitchenFormat)}</span>
+                        ${hasNotes ? `
+                          <div class="notes-section">
+                            ${dataCustomer.items
+                              .filter(item => item.notes && item.notes.trim())
+                              .map(item => `<span class="note">(${item.notes.trim()})</span>`)
+                              .join('')
+                            }
+                          </div>
+                        ` : ''}
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="page-footer">
+          <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+        </div>
+      </div>
+    `;
+  };
+
+  const generateCozinhaSection = (data, dayInfo) => {
+    if (!data || Object.keys(data).length === 0) return '';
+    
+    return `
+      <div class="print-page">
+        <div class="page-header">
+          <h1>Cozinha</h1>
+          <div class="day-info">${dayInfo?.fullDate}</div>
+        </div>
+        
+        <div class="section-content">
+          <div class="recipe-sections">
+            ${Object.entries(data).map(([nomeReceita, clientes], index) => `
+              <div class="recipe-section">
+                <div class="recipe-header">
+                  <h2 class="recipe-title">${index + 1}. ${nomeReceita.toUpperCase()}</h2>
+                </div>
+                
+                <div class="clients-list">
+                  ${Object.entries(clientes).map(([customerName, dataCustomer]) => {
+                    const hasNotes = dataCustomer.items.some(item => item.notes && item.notes.trim());
+                    return `
+                      <div class="client-line">
+                        <span class="customer-name">${customerName.toUpperCase()}</span>
+                        <span class="arrow">→</span>
+                        <span class="quantity">${formatQuantityForDisplay(dataCustomer.quantity, dataCustomer.unitType, globalKitchenFormat)}</span>
+                        ${hasNotes ? `
+                          <div class="notes-section">
+                            ${dataCustomer.items
+                              .filter(item => item.notes && item.notes.trim())
+                              .map(item => `<span class="note">(${item.notes.trim()})</span>`)
+                              .join('')
+                            }
+                          </div>
+                        ` : ''}
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="page-footer">
+          <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+        </div>
+      </div>
+    `;
+  };
+
+  const generateEmbalagemSection = (data, dayInfo) => {
+    // Aba Embalagem ainda não implementada na UI - não gerar página
+    // Quando a UI estiver pronta, esta função será atualizada
+    return '';
+  };
+
+  // Função para ajuste automático de fonte CORRIGIDA
+  const getAutoFontSizeScript = () => {
+    return `
+      <script>
+        function autoAdjustFontSize() {
+          console.log('=== AJUSTE ROBUSTO DE FONTE INICIADO ===');
+          console.log('Timestamp:', new Date().toLocaleTimeString());
+          console.log('Document ready state:', document.readyState);
+          
+          // Aguardar renderização completa
+          setTimeout(() => {
+            const pages = document.querySelectorAll('.print-page');
+            console.log('\nDETECCAO DE PAGINAS:');
+            console.log('- Paginas encontradas:', pages.length);
+            console.log('- Seletor usado: .print-page');
+            console.log('- Body dimensions:', document.body.offsetWidth + 'x' + document.body.offsetHeight);
+            
+            if (pages.length === 0) {
+              console.error('NENHUMA PAGINA ENCONTRADA!');
+              console.log('- Tentando seletores alternativos...');
+              const altPages = document.querySelectorAll('div, .page, .content');
+              console.log('- Elementos div encontrados:', altPages.length);
+              return;
+            }
+            
+            pages.forEach((page, pageIndex) => {
+              console.log('\n\n================================');
+              console.log('PAGINA ' + (pageIndex + 1) + ' - ANALISE DETALHADA');
+              console.log('================================');
+              
+              // Identificar tipo de página pelo título
+              const pageTitle = page.querySelector('.page-header h1');
+              const pageSubtitle = page.querySelector('.day-info');
+              const clientName = page.querySelector('h2');
+              
+              console.log('IDENTIFICACAO:');
+              console.log('- Titulo:', pageTitle ? pageTitle.textContent : 'Nao encontrado');
+              console.log('- Data:', pageSubtitle ? pageSubtitle.textContent : 'Nao encontrado');
+              console.log('- Cliente/Receita:', clientName ? clientName.textContent : 'Nao encontrado');
+              
+              // Detectar todos os seletores possíveis
+              const selectors = [
+                '.company-section',
+                '.section-content', 
+                '.recipe-sections',
+                '.items-container',
+                '.category-section',
+                '.clients-list'
+              ];
+              
+              console.log('\nBUSCA DE CONTEUDO:');
+              let content = null;
+              let usedSelector = null;
+              
+              for (let selector of selectors) {
+                const found = page.querySelector(selector);
+                console.log('- ' + selector + ':', found ? 'ENCONTRADO' : 'nao encontrado');
+                if (found && !content) {
+                  content = found;
+                  usedSelector = selector;
+                }
+              }
+              
+              if (!content) {
+                console.error('ERRO: Conteudo nao encontrado na pagina ' + (pageIndex + 1));
+                console.log('- Tentando fallback para primeiro elemento filho...');
+                content = page.children[1]; // Pular header
+                if (content) {
+                  console.log('- Fallback encontrado:', content.tagName + '.' + content.className);
+                  usedSelector = 'fallback';
+                } else {
+                  return;
+                }
+              }
+              
+              console.log('Conteudo selecionado:', usedSelector);
+              console.log('- Classe do elemento:', content.className);
+              console.log('- Tag:', content.tagName);
+              console.log('- Filhos diretos:', content.children.length);
+              
+              // Contar elementos antes do reset
+              const elementCounts = {
+                h1: content.querySelectorAll('h1').length,
+                h2: content.querySelectorAll('h2').length,
+                h3: content.querySelectorAll('h3').length,
+                quantity: content.querySelectorAll('.quantity').length,
+                customerName: content.querySelectorAll('.customer-name').length,
+                recipeName: content.querySelectorAll('.recipe-name').length,
+                itemLine: content.querySelectorAll('.item-line, .client-line').length,
+                notes: content.querySelectorAll('.notes, .note').length
+              };
+              
+              console.log('\nELEMENTOS ENCONTRADOS:');
+              Object.entries(elementCounts).forEach(([key, count]) => {
+                console.log('- ' + key + ':', count);
+              });
+              
+              // Reset completo de estilos
+              console.log('\nRESET DE ESTILOS:');
+              const allElements = page.querySelectorAll('*');
+              let resetCount = 0;
+              allElements.forEach(el => {
+                if (el.style) {
+                  if (el.style.fontSize) resetCount++;
+                  el.style.fontSize = null;
+                  el.style.lineHeight = null;
+                  el.style.margin = null;
+                  el.style.padding = null;
+                }
+              });
+              console.log('- Elementos com fontSize resetados:', resetCount);
+              
+              // Forçar reflow
+              const beforeReflow = performance.now();
+              page.offsetHeight;
+              const afterReflow = performance.now();
+              console.log('- Reflow executado em:', Math.round(afterReflow - beforeReflow) + 'ms');
+              
+              // Dimensões A4 reais (210mm x 297mm a 96dpi)
+              const PAGE_WIDTH = 794;  // 210mm em pixels
+              const PAGE_HEIGHT = 1123; // 297mm em pixels
+              const MARGIN = 57; // 15mm em pixels
+              
+              console.log('\nDIMENSOES E CALCULOS:');
+              console.log('- Dimensoes A4 teoricas:', PAGE_WIDTH + 'x' + PAGE_HEIGHT + 'px');
+              console.log('- Margem aplicada:', MARGIN + 'px (' + Math.round(MARGIN * 0.264583) + 'mm)');
+              
+              // Medir elementos reais da página
+              const pageRect = page.getBoundingClientRect();
+              console.log('- Dimensoes reais da pagina:', Math.round(pageRect.width) + 'x' + Math.round(pageRect.height) + 'px');
+              
+              // Calcular espaço real disponível
+              const header = page.querySelector('.page-header');
+              const footer = page.querySelector('.page-footer');
+              
+              let headerHeight = 0;
+              let footerHeight = 0;
+              
+              if (header) {
+                const headerRect = header.getBoundingClientRect();
+                headerHeight = headerRect.height;
+                console.log('- Header detectado:', Math.round(headerHeight) + 'px');
+                console.log('  > Texto header:', header.textContent.substring(0, 50) + '...');
+              } else {
+                console.log('- Header: Nao encontrado');
+              }
+              
+              if (footer) {
+                const footerRect = footer.getBoundingClientRect();
+                footerHeight = footerRect.height;
+                console.log('- Footer detectado:', Math.round(footerHeight) + 'px');
+                console.log('  > Texto footer:', footer.textContent.substring(0, 50) + '...');
+              } else {
+                console.log('- Footer: Nao encontrado');
+              }
+              
+              const availableHeight = PAGE_HEIGHT - headerHeight - footerHeight - (MARGIN * 2);
+              const availableWidth = PAGE_WIDTH - (MARGIN * 2);
+              
+              console.log('\nCALCULO DO ESPACO DISPONIVEL:');
+              console.log('- Formula: ' + PAGE_HEIGHT + ' - ' + Math.round(headerHeight) + ' - ' + Math.round(footerHeight) + ' - (' + MARGIN + ' * 2)');
+              console.log('- Largura disponivel:', availableWidth + 'px');
+              console.log('- Altura disponivel:', availableHeight + 'px');
+              console.log('- Proporcao utilizavel:', Math.round((availableHeight / PAGE_HEIGHT) * 100) + '%');
+              
+              // Medir conteúdo inicial
+              const initialContentHeight = content.scrollHeight;
+              const initialContentWidth = content.scrollWidth;
+              console.log('\nCONTEUDO INICIAL (sem ajustes):');
+              console.log('- Altura do conteudo:', initialContentHeight + 'px');
+              console.log('- Largura do conteudo:', initialContentWidth + 'px');
+              console.log('- Utilizacao inicial da altura:', Math.round((initialContentHeight / availableHeight) * 100) + '%');
+              
+              // Algoritmo agressivo de teste de fonte
+              let currentSize = 10; // Começar com tamanho razoável
+              let maxTestedSize = 10;
+              const MAX_FONT_SIZE = 48; // Permitir fontes bem grandes
+              const INCREMENT = 2; // Incrementos maiores
+              
+              console.log('\nPARAMETROS DO ALGORITMO:');
+              console.log('- Tamanho inicial:', currentSize + 'px');
+              console.log('- Tamanho máximo:', MAX_FONT_SIZE + 'px');
+              console.log('- Incremento:', INCREMENT + 'px');
+              console.log('- Range total:', (MAX_FONT_SIZE - currentSize) / INCREMENT, 'iteracoes');
+              
+              let testCount = 0;
+              
+              function measureContent(fontSize) {
+                testCount++;
+                const testStart = performance.now();
+                
+                // Aplicar tamanho base
+                content.style.fontSize = fontSize + 'px';
+                content.style.lineHeight = '1.4';
+                
+                // Contar e aplicar estilos com log detalhado
+                const ratio = fontSize / 12;
+                let appliedStyles = {
+                  h1: 0, h2: 0, h3: 0, quantity: 0, 
+                  customerName: 0, recipeName: 0, notes: 0, spacing: 0
+                };
+                
+                // Titulos h1 (pagina)
+                page.querySelectorAll('h1').forEach(h1 => {
+                  const newSize = Math.max(fontSize * 1.8, 20);
+                  h1.style.fontSize = newSize + 'px';
+                  appliedStyles.h1++;
+                });
+                
+                // Titulos h2 (cliente/receita)
+                content.querySelectorAll('h2').forEach(h2 => {
+                  const newSize = Math.max(fontSize * 1.5, 16);
+                  const newMargin = Math.max(fontSize * 0.5, 6);
+                  h2.style.fontSize = newSize + 'px';
+                  h2.style.marginBottom = newMargin + 'px';
+                  appliedStyles.h2++;
+                });
+                
+                // Titulos h3 (categoria)
+                content.querySelectorAll('h3').forEach(h3 => {
+                  const newSize = Math.max(fontSize * 1.2, 14);
+                  const newMargin = Math.max(fontSize * 0.4, 5);
+                  h3.style.fontSize = newSize + 'px';
+                  h3.style.marginBottom = newMargin + 'px';
+                  appliedStyles.h3++;
+                });
+                
+                // Quantidades
+                content.querySelectorAll('.quantity').forEach(qty => {
+                  const newSize = Math.max(fontSize * 1.1, 12);
+                  qty.style.fontSize = newSize + 'px';
+                  qty.style.fontWeight = 'bold';
+                  appliedStyles.quantity++;
+                });
+                
+                // Nomes de clientes
+                content.querySelectorAll('.customer-name').forEach(name => {
+                  const newSize = Math.max(fontSize, 10);
+                  name.style.fontSize = newSize + 'px';
+                  name.style.fontWeight = 'bold';
+                  appliedStyles.customerName++;
+                });
+                
+                // Textos normais
+                content.querySelectorAll('.recipe-name, .meal-count').forEach(text => {
+                  const newSize = Math.max(fontSize, 10);
+                  text.style.fontSize = newSize + 'px';
+                  appliedStyles.recipeName++;
+                });
+                
+                // Notas e observacoes
+                content.querySelectorAll('.notes, .note').forEach(note => {
+                  const newSize = Math.max(fontSize * 0.8, 8);
+                  note.style.fontSize = newSize + 'px';
+                  appliedStyles.notes++;
+                });
+                
+                // Ajustar margens
+                content.querySelectorAll('.item-line, .client-line').forEach(line => {
+                  const newMargin = Math.max(fontSize * 0.3, 3);
+                  line.style.marginBottom = newMargin + 'px';
+                  appliedStyles.spacing++;
+                });
+                
+                content.querySelectorAll('.category-section, .recipe-section').forEach(section => {
+                  const newMargin = Math.max(fontSize * 0.8, 8);
+                  section.style.marginBottom = newMargin + 'px';
+                  appliedStyles.spacing++;
+                });
+                
+                // Forcar reflow para medicao
+                content.offsetHeight;
+                
+                const contentHeight = content.scrollHeight;
+                const contentWidth = content.scrollWidth;
+                const testEnd = performance.now();
+                
+                const fits = contentHeight <= availableHeight && contentWidth <= availableWidth;
+                const utilization = Math.round((contentHeight / availableHeight) * 100);
+                
+                // Log detalhado do teste
+                console.log('\nTESTE #' + testCount + ' - ' + fontSize + 'px:');
+                console.log('- Estilos aplicados:', appliedStyles);
+                console.log('- Resultado: ' + contentWidth + 'x' + contentHeight + 'px');
+                console.log('- Utilizacao: ' + utilization + '%');
+                console.log('- Status: ' + (fits ? 'CABE' : 'EXCEDE'));
+                console.log('- Tempo: ' + Math.round(testEnd - testStart) + 'ms');
+                
+                return fits;
+              }
+              
+              // Encontrar o maior tamanho que cabe
+              console.log('\nBUSCA DO TAMANHO OTIMO:');
+              console.log('Iniciando busca linear de ' + currentSize + 'px até ' + MAX_FONT_SIZE + 'px...');
+              
+              const searchStart = performance.now();
+              let searchResults = [];
+              
+              // Primeiro, encontrar um tamanho que funciona
+              while (currentSize <= MAX_FONT_SIZE) {
+                const testResult = {
+                  fontSize: currentSize,
+                  fits: measureContent(currentSize),
+                  height: content.scrollHeight,
+                  width: content.scrollWidth
+                };
+                
+                searchResults.push(testResult);
+                
+                if (testResult.fits) {
+                  maxTestedSize = currentSize;
+                  currentSize += INCREMENT;
+                } else {
+                  console.log('Limite encontrado em ' + currentSize + 'px');
+                  break;
+                }
+              }
+              
+              const searchEnd = performance.now();
+              
+              console.log('\nRESUMO DA BUSCA:');
+              console.log('- Testes realizados:', testCount);
+              console.log('- Tempo total de busca:', Math.round(searchEnd - searchStart) + 'ms');
+              console.log('- Range testado:', searchResults[0]?.fontSize + 'px - ' + searchResults[searchResults.length - 1]?.fontSize + 'px');
+              console.log('- Tamanhos que couberam:', searchResults.filter(r => r.fits).length);
+              console.log('- Tamanho otimo encontrado:', maxTestedSize + 'px');
+              
+              // Aplicar o maior tamanho que funcionou
+              console.log('\nAPLICANDO TAMANHO FINAL...');
+              measureContent(maxTestedSize);
+              
+              // Medir resultado final com detalhes
+              const finalHeight = content.scrollHeight;
+              const finalWidth = content.scrollWidth;
+              const utilization = Math.round((finalHeight / availableHeight) * 100);
+              const improvement = maxTestedSize > 10 ? Math.round(((maxTestedSize - 10) / 10) * 100) : 0;
+              
+              console.log('\n================================');
+              console.log('RESULTADO FINAL PAGINA ' + (pageIndex + 1));
+              console.log('================================');
+              console.log('Fonte aplicada: ' + maxTestedSize + 'px');
+              console.log('Dimensoes finais: ' + finalWidth + 'x' + finalHeight + 'px');
+              console.log('Espaco disponivel: ' + availableWidth + 'x' + availableHeight + 'px');
+              console.log('Utilizacao da altura: ' + utilization + '%');
+              console.log('Melhoria vs 10px: +' + improvement + '%');
+              console.log('Status: ' + (finalHeight <= availableHeight ? 'SUCESSO' : 'OVERFLOW'));
+              
+              // Warnings e recomendações
+              if (utilization < 50) {
+                console.warn('BAIXA UTILIZACAO (' + utilization + '%) - Fonte poderia ser maior!');
+              } else if (utilization > 95) {
+                console.warn('UTILIZACAO ALTA (' + utilization + '%) - Risco de overflow!');
+              } else {
+                console.log('Utilizacao adequada (' + utilization + '%)');
+              }
+              
+              if (maxTestedSize === 10) {
+                console.warn('Fonte nao aumentou - Verificar conteudo ou dimensoes!');
+              }
+            });
+            
+            console.log('\n\n====================================');
+            console.log('AJUSTE DE TODAS AS PAGINAS CONCLUIDO');
+            console.log('====================================');
+            console.log('Total de paginas processadas:', pages.length);
+            console.log('Timestamp final:', new Date().toLocaleTimeString());
+            console.log('\n');
+            
+          }, 100); // Aguardar renderização
+        }
+        
+        // Executar múltiplas vezes
+        function runMultipleTimes() {
+          autoAdjustFontSize();
+          setTimeout(autoAdjustFontSize, 300);
+          setTimeout(autoAdjustFontSize, 700);
+          setTimeout(autoAdjustFontSize, 1200);
+        }
+        
+        // Event listeners robustos
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', runMultipleTimes);
+        }
+        
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+          runMultipleTimes();
+        }
+        
+        window.addEventListener('load', runMultipleTimes);
+        
+        window.addEventListener('beforeprint', () => {
+          console.log('Ajustando antes da impressao...');
+          autoAdjustFontSize();
+        });
+        
+      </script>
+    `;
+  };
+
+  // Estilos CSS para impressão
+  const getPrintStyles = () => {
+    return `
+      @page {
+        size: A4;
+        margin: 15mm;
+      }
+      
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      
+      body {
+        font-family: 'Arial', sans-serif;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #333;
+      }
+      
+      .print-page {
+        page-break-after: always;
+        height: 297mm; /* Altura A4 */
+        width: 210mm; /* Largura A4 */
+        display: flex;
+        flex-direction: column;
+        padding: 15mm;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+      
+      .print-page:last-child {
+        page-break-after: avoid;
+      }
+      
+      .page-header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 15px;
+      }
+      
+      .page-header h1 {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2563eb;
+        margin-bottom: 8px;
+      }
+      
+      .day-info {
+        font-size: 16px;
+        font-weight: 600;
+        color: #666;
+      }
+      
+      .company-section {
+        flex: 1;
+        margin-bottom: 20px;
+        overflow: auto;
+        min-height: 0;
+      }
+      
+      .section-content {
+        flex: 1;
+        margin-bottom: 20px;
+        overflow: auto;
+        min-height: 0;
+      }
+      
+      /* Header do cliente - igual à UI */
+      .client-header {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 10px;
+      }
+      
+      .client-header h2 {
+        font-size: 20px;
+        font-weight: bold;
+        color: #1f2937;
+        margin-bottom: 4px;
+      }
+      
+      .meal-count {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 0;
+      }
+      
+      .no-items {
+        text-align: center;
+        color: #6b7280;
+        padding: 40px 0;
+        font-style: italic;
+      }
+      
+      /* Seções de categoria - igual à UI */
+      .category-section {
+        margin-bottom: 20px;
+      }
+      
+      .category-header {
+        margin-bottom: 10px;
+      }
+      
+      .category-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #1f2937;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 4px;
+        margin: 0;
+      }
+      
+      .items-container {
+        padding-left: 15px;
+      }
+      
+      /* Estilos para as abas de receitas (Salada, Açougue, Cozinha) */
+      .recipe-sections {
+        padding: 10px 0;
+      }
+      
+      .recipe-section {
+        margin-bottom: 30px;
+      }
+      
+      .recipe-header {
+        margin-bottom: 15px;
+      }
+      
+      .recipe-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #1f2937;
+        margin: 0;
+      }
+      
+      .clients-list {
+        padding-left: 20px;
+      }
+      
+      .client-line {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      
+      .customer-name {
+        font-weight: bold;
+        color: #1f2937;
+        min-width: 120px;
+        text-align: left;
+      }
+      
+      .arrow {
+        color: #6b7280;
+        font-size: 14px;
+      }
+      
+      .notes-section {
+        margin-left: 10px;
+      }
+      
+      .note {
+        font-style: italic;
+        color: #6b7280;
+        font-size: 11px;
+        margin-right: 5px;
+      }
+      
+      .item-line {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 6px;
+        padding: 3px 0;
+      }
+      
+      .quantity {
+        font-weight: bold;
+        color: #2563eb;
+        min-width: 80px;
+        font-size: 12px;
+      }
+      
+      .recipe-name {
+        flex: 1;
+        color: #1f2937;
+      }
+      
+      .notes {
+        font-style: italic;
+        color: #6b7280;
+        font-size: 11px;
+      }
+      
+      .customers {
+        color: #6b7280;
+        font-size: 10px;
+        margin-left: 10px;
+        font-style: italic;
+      }
+      
+      .page-footer {
+        margin-top: auto;
+        text-align: center;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 15px;
+        font-size: 10px;
+        color: #9ca3af;
+      }
+      
+      /* Estilos específicos para cada seção */
+      .print-page:has(.page-header h1:contains("Por Empresa")) .page-header h1 {
+        color: #6366f1;
+      }
+      
+      .print-page:has(.page-header h1:contains("Salada")) .page-header h1 {
+        color: #059669;
+      }
+      
+      .print-page:has(.page-header h1:contains("Açougue")) .page-header h1 {
+        color: #dc2626;
+      }
+      
+      .print-page:has(.page-header h1:contains("Cozinha")) .page-header h1 {
+        color: #ea580c;
+      }
+      
+      .print-page:has(.page-header h1:contains("Embalagem")) .page-header h1 {
+        color: #2563eb;
+      }
+      
+      /* Otimizações para impressão */
+      @media print {
+        body {
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
+        }
+        
+        .print-page {
+          page-break-inside: avoid;
+        }
+        
+        .category-block {
+          page-break-inside: avoid;
+        }
+        
+        .item-line {
+          page-break-inside: avoid;
+        }
+      }
+    `;
   };
 
   // Navegação de semana
@@ -509,7 +1627,6 @@ const ProgramacaoCozinhaTabs = () => {
                   weekDays={weekDays}
                   orders={orders}
                   recipes={recipes}
-                  dataVersion={dataVersion}
                   globalKitchenFormat={globalKitchenFormat}
                   toggleGlobalKitchenFormat={toggleGlobalKitchenFormat}
                 />
@@ -524,7 +1641,6 @@ const ProgramacaoCozinhaTabs = () => {
                   weekDays={weekDays}
                   orders={orders}
                   recipes={recipes}
-                  dataVersion={dataVersion}
                   globalKitchenFormat={globalKitchenFormat}
                   toggleGlobalKitchenFormat={toggleGlobalKitchenFormat}
                 />
@@ -539,7 +1655,6 @@ const ProgramacaoCozinhaTabs = () => {
                   weekDays={weekDays}
                   orders={orders}
                   recipes={recipes}
-                  dataVersion={dataVersion}
                   globalKitchenFormat={globalKitchenFormat}
                   toggleGlobalKitchenFormat={toggleGlobalKitchenFormat}
                 />

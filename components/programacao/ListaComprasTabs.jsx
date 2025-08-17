@@ -73,7 +73,6 @@ const ListaComprasTabs = () => {
       setDataVersion(prev => prev + 1); // Trigger para atualizar componentes
       
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
     } finally {
       setLoading(false);
     }

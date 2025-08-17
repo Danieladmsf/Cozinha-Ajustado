@@ -120,7 +120,7 @@ export default function Recipes() {
       const history = await PriceHistory.list();
       setPriceHistory(history);
     } catch (error) {
-      console.error("Erro ao carregar histórico de preços:", error);
+      // Error loading price history
     }
   };
 
@@ -225,7 +225,6 @@ export default function Recipes() {
         previousTotal
       };
     } catch (error) {
-      console.error("Erro ao calcular variação:", error);
       return null;
     }
   };
@@ -235,7 +234,6 @@ export default function Recipes() {
       const recipesData = await retryWithDelay(() => Recipe.list());
       setRecipes(recipesData);
     } catch (error) {
-      console.error("Error loading recipes:", error);
       toast({
         title: "Erro",
         description: "Erro ao carregar receitas. Por favor, tente novamente em alguns instantes.",
@@ -249,7 +247,6 @@ export default function Recipes() {
       const ingredientsData = await retryWithDelay(() => Ingredient.list());
       setIngredients(ingredientsData);
     } catch (error) {
-      console.error("Error loading ingredients:", error);
       toast({
         title: "Erro",
         description: "Erro ao carregar ingredientes. Por favor, tente novamente em alguns instantes.",
@@ -261,7 +258,6 @@ export default function Recipes() {
   const loadCategories = async () => {
     try {
       const categoriesData = await retryWithDelay(() => Category.list()).catch(err => {
-        console.error("Erro ao carregar categorias:", err);
         return [];
       });
 
@@ -285,7 +281,6 @@ export default function Recipes() {
       setCategories(recipeCategories);
       
     } catch (error) {
-      console.error("Error loading categories:", error);
       toast({
         title: "Erro",
         description: "Erro ao carregar categorias. Por favor, tente novamente em alguns instantes.",
@@ -376,7 +371,6 @@ export default function Recipes() {
           description: `A receita "${recipe.name}" foi excluída com sucesso.`,
         });
       } catch (error) {
-        console.error("Erro ao excluir receita:", error);
         toast({
           title: "Erro ao excluir",
           description: `Erro ao excluir a receita "${recipe.name}": ${error.message}`,
@@ -394,14 +388,13 @@ export default function Recipes() {
       });
       loadRecipes();
     } catch (error) {
-      console.error("Erro ao atualizar status da receita:", error);
+      // Error updating recipe status
     }
   };
 
   const deleteCategory = async (categoryName) => {
     try {
       if (!categoryName) {
-        console.error("Nome de categoria inválido para exclusão");
         return;
       }
       
@@ -444,7 +437,7 @@ export default function Recipes() {
       
       await loadCategories();
     } catch (error) {
-      console.error("Erro ao excluir categoria:", error);
+      // Error deleting category
       
       toast({
         title: "Erro",
@@ -565,7 +558,7 @@ export default function Recipes() {
       setRecipeCategories(defaultCategories);
       
     } catch (error) {
-      console.error("Erro ao carregar categorias:", error);
+      // Error loading categories
       
       const defaultCategories = [
         { id: "entrada", name: "Entrada", label: "Entrada", value: "Entrada" },
@@ -673,7 +666,6 @@ export default function Recipes() {
       
       return `${day}/${month}/${year}`;
     } catch (e) {
-      console.error("Erro ao formatar data:", dateString, e);
       return dateString;
     }
   };
@@ -741,7 +733,6 @@ export default function Recipes() {
           description: "Receita salva com sucesso!"
         });
       } catch (error) {
-        console.error("Erro ao salvar receita:", error);
         toast({
           variant: "destructive",
           title: "Erro ao salvar",

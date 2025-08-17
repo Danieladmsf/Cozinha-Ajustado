@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import './print-styles.css';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// Card components removed to reduce card bloat
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -102,7 +102,6 @@ const ConsolidacaoPedidosComponent = () => {
         setOrders(ordersData);
         
       } catch (error) {
-        console.error("Erro ao carregar dados:", error);
       } finally {
         setLoading(false);
       }
@@ -179,14 +178,14 @@ const ConsolidacaoPedidosComponent = () => {
   return (
     <div className="space-y-6 consolidacao-container">
       {/* Header com navegação */}
-      <Card className="print:hidden">
-        <CardHeader>
+      <div className="bg-white rounded-lg shadow-sm border print:hidden">
+        <div className="p-4 border-b">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <CardTitle className="flex items-center gap-2 text-blue-800">
+              <h2 className="text-lg font-semibold flex items-center gap-2 text-blue-800">
                 <FileText className="w-5 h-5" />
                 Consolidação de Pedidos
-              </CardTitle>
+              </h2>
               <p className="text-gray-600 mt-1">
                 Visualize pedidos consolidados por cliente e categoria
               </p>
@@ -219,9 +218,9 @@ const ConsolidacaoPedidosComponent = () => {
               </Button>
             </div>
           </div>
-        </CardHeader>
+        </div>
         
-        <CardContent>
+        <div className="p-4">
           {/* Navegação de semana */}
           <div className="flex items-center justify-between mb-6">
             <Button
@@ -313,14 +312,13 @@ const ConsolidacaoPedidosComponent = () => {
               </Badge>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Lista de pedidos consolidados */}
       <div className="space-y-4 print:space-y-12">
         {ordersByCustomer.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
+          <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
               <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400" />
               <h3 className="font-semibold text-lg text-gray-700 mb-2">
                 Nenhum Pedido Encontrado
@@ -328,19 +326,17 @@ const ConsolidacaoPedidosComponent = () => {
               <p className="text-gray-500 text-sm">
                 Não há pedidos para o dia selecionado com os filtros aplicados.
               </p>
-            </CardContent>
-          </Card>
+          </div>
         ) : (
           ordersByCustomer.map((customerData) => {
             const consolidatedItems = consolidateCustomerItems(customerData.orders);
             const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
             
             return (
-              <Card 
+              <div 
                 key={customerData.customer_id} 
-                className="print:break-after-page print:min-h-screen print:p-8"
+                className="bg-white rounded-lg shadow-sm border p-4 print:p-8 print:break-after-page print:min-h-screen"
               >
-                <CardContent className="p-4 print:p-8">
                 {/* Header do cliente - compacto */}
                 <div className="mb-3 print:mb-12">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-2 print:pb-6">
@@ -407,8 +403,7 @@ const ConsolidacaoPedidosComponent = () => {
                 <div className="hidden print:block mt-12 pt-6 border-t border-gray-300 text-center text-sm text-gray-600">
                   <p>Cozinha Afeto - Gerado em {format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
                 </div>
-                </CardContent>
-              </Card>
+              </div>
             );
           })
         )}

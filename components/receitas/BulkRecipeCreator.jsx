@@ -52,7 +52,6 @@ export default function BulkRecipeCreator({ onSuccess }) {
       
       setSubcategories(recipeCategories);
     } catch (error) {
-      console.error("Erro ao carregar subcategorias:", error);
       toast({
         title: "Erro",
         description: "Erro ao carregar categorias de receitas.",

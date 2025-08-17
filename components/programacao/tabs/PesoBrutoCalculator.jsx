@@ -22,14 +22,7 @@ const PesoBrutoCalculator = ({
       const pesoPorcao = recipe.portion_weight_calculated;
       const rendimentoTotal = recipe.yield_weight;
       
-      // Debug: Log das receitas com dados ausentes
       if (!pesoBrutoTotal || !pesoPorcao || !rendimentoTotal) {
-        console.log(`[DEBUG] Receita "${recipe.name}" com dados incompletos:`, {
-          total_weight: pesoBrutoTotal,
-          portion_weight_calculated: pesoPorcao,
-          yield_weight: rendimentoTotal,
-          recipe_id: recipe.id
-        });
         return 0;
       }
       
@@ -39,18 +32,10 @@ const PesoBrutoCalculator = ({
       // Peso bruto necessário por porção
       const pesoBrutoPorPorcao = pesoBrutoTotal / numeroPorcoes;
       
-      // Debug: Log das receitas com cálculo bem-sucedido
-      console.log(`[DEBUG] Receita "${recipe.name}" calculada:`, {
-        peso_bruto_total: pesoBrutoTotal,
-        porcao: pesoPorcao,
-        rendimento: rendimentoTotal,
-        peso_por_porcao: pesoBrutoPorPorcao
-      });
       
       return pesoBrutoPorPorcao;
       
     } catch (error) {
-      console.error(`Erro ao calcular peso bruto para receita ${recipe.name}:`, error);
       return 0;
     }
   };

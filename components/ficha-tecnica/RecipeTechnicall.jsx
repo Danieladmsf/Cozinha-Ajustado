@@ -339,7 +339,6 @@ export default function RecipeTechnical() {
       setIsDirty(true); // Always mark as dirty if recalculation occurs after user input
 
     } catch (error) {
-      console.error('Error during recalculation:', error);
     }
   }, [parseNumericValue]); // Dependencies: only parseNumericValue
 
@@ -440,7 +439,6 @@ export default function RecipeTechnical() {
           await loadRecipe(id); // loadRecipe will now focus on fetching and setting recipe/preparations
         }
       } catch (error) {
-        console.error("Erro ao inicializar página:", error);
         setError("Falha ao carregar dados necessários.");
         toast({ variant: "destructive", title: "Erro de Inicialização", description: error.message });
         // If initial load fails, default to a new, empty recipe state
@@ -461,7 +459,6 @@ export default function RecipeTechnical() {
         const recipes = await Recipe.list();
         setAllRecipes(recipes);
       } catch (error) {
-        console.error("Erro ao carregar lista de receitas:", error);
         toast({
           title: "Erro",
           description: "Não foi possível carregar a lista de receitas para pesquisa.",
@@ -607,7 +604,6 @@ export default function RecipeTechnical() {
       setRecipes(recipesData.filter(rec => rec.active !== false));
 
     } catch (err) {
-      console.error("Erro ao carregar dados iniciais:", err);
       setError("Erro ao carregar dados. Por favor, recarregue a página.");
     } finally {
       // setLoading(false); // Handled by initializePage
@@ -619,7 +615,6 @@ export default function RecipeTechnical() {
       const categoryData = await CategoryTree.list();
       setAllCategories(categoryData);
     } catch (error) {
-      console.error("Erro ao carregar categorias:", error);
       toast({
         variant: "destructive",
         title: "Erro",
@@ -643,7 +638,6 @@ export default function RecipeTechnical() {
         }
       }
     } catch (error) {
-      console.error("Erro ao carregar configurações do usuário:", error);
     }
   };
 
@@ -755,7 +749,6 @@ export default function RecipeTechnical() {
 
 
     } catch (error) {
-      console.error('[RecipeTechnical] Erro ao carregar receita:', error);
       toast({
         variant: "destructive",
         title: "Erro ao Carregar Receita",
@@ -785,7 +778,6 @@ export default function RecipeTechnical() {
 
       setShowConfigDialog(false);
     } catch (error) {
-      console.error("Erro ao salvar configurações:", error);
       toast({
         variant: "destructive",
         title: "Erro",
@@ -885,8 +877,6 @@ export default function RecipeTechnical() {
 
 
     } catch (err) {
-      console.error('Erro no salvamento:', err);
-      console.error('Dados da receita no momento do erro:', recipeData);
 
       let errorMessage = "Erro interno";
       
@@ -1382,7 +1372,6 @@ export default function RecipeTechnical() {
       });
 
     } catch (error) {
-      console.error("🍽️ [COPY] Erro ao copiar receita:", error);
       toast({
         title: "Erro ao copiar receita",
         description: error.message,
@@ -1485,7 +1474,6 @@ export default function RecipeTechnical() {
   const renderProcessTable = (prep, prepIndex) => {
 
     if (!prep || typeof prep !== 'object') {
-      console.error('Invalid prep in renderProcessTable:', prep);
       return <div>Erro: dados inválidos</div>;
     }
 
@@ -1621,7 +1609,6 @@ export default function RecipeTechnical() {
               ingredients.map((item, itemIndex) => {
 
                 if (!item || typeof item !== 'object') {
-                  console.error(`Invalid ingredient at ${itemIndex}:`, item);
                   return (
                     <tr key={itemIndex}>
                       <td colSpan={15} className="px-4 py-2 text-center text-red-500">
@@ -2162,7 +2149,6 @@ export default function RecipeTechnical() {
   const renderPreparationCards = () => {
 
     if (!Array.isArray(preparationsData)) {
-      console.error('Preparations is not an array:', preparationsData);
       setPreparationsData([]); // Fix it
       return (
         <div className="bg-blue-50 p-6 rounded-lg border border-blue-100 text-center">
@@ -2195,7 +2181,6 @@ export default function RecipeTechnical() {
 
       // Ensure prep has required structure
       if (!prep || typeof prep !== 'object') {
-        console.error(`Invalid prep at index ${prepIndex}:`, prep);
         return null;
       }
 
@@ -2544,7 +2529,6 @@ export default function RecipeTechnical() {
     setPreparationsData(prev => {
 
       if (!Array.isArray(prev)) {
-        console.error('Previous state is not an array:', prev);
         return [];
       }
 
@@ -2552,19 +2536,16 @@ export default function RecipeTechnical() {
       const targetPrep = newPreparations[prepIndex];
 
       if (!targetPrep) {
-        console.error(`No prep at index ${prepIndex}`);
         return prev;
       }
 
       if (!Array.isArray(targetPrep.ingredients)) {
-        console.error('Target prep ingredients is not an array:', targetPrep.ingredients);
         targetPrep.ingredients = []; // Attempt to fix
         return prev;
       }
 
       const itemToUpdate = targetPrep.ingredients[itemIndex];
       if (!itemToUpdate) {
-        console.error(`No item at index ${itemIndex} in prep ${prepIndex}`);
         return prev;
       }
 
@@ -2678,7 +2659,6 @@ export default function RecipeTechnical() {
           weight_cooked: String(processFormData.weight_cooked || '').replace('.', ','),
         };
       } else {
-        console.error("Não foi possível encontrar o ingrediente para aplicar detalhes:", { currentPrepIndexForDetail, currentItemIndexForDetail });
         toast({ variant: "destructive", title: "Erro interno", description: "Ingrediente não encontrado para atualização." })
       }
       // Recalculate metrics after detailed process application
@@ -2710,7 +2690,6 @@ export default function RecipeTechnical() {
       const targetPrep = newPreparations[prepIndex];
 
       if (!targetPrep) {
-        console.error(`Tentativa de adicionar a um preparo inexistente: índice ${prepIndex}`);
         return prev;
       }
 

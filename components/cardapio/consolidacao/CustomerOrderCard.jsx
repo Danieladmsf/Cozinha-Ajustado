@@ -113,7 +113,6 @@ const useOrderedCategories = (consolidatedItems, categories, menuHelpers, menuCo
       // Processar itens usando utilitário centralizado
       return processConsolidatedItems(consolidatedItems, categories, activeCategories);
     } catch (error) {
-      console.error('[CustomerOrderCard] Erro ao processar categorias:', error);
       return [];
     }
   }, [consolidatedItems, categories, menuHelpers, menuConfig]);

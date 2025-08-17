@@ -11,30 +11,19 @@
  */
 const extractIngredientsFromRecipe = (recipe, quantityNeeded) => {
   const ingredientes = [];
-  console.error(`🔥 FUNÇÃO EXECUTANDO: ${recipe.name} - ${new Date().toISOString()}`);
   
-  console.log(`[DEBUG] Processando receita: ${recipe.name}, quantidade necessária: ${quantityNeeded}`);
   
   // Verificar estrutura de preparations
   if (!recipe.preparations || !Array.isArray(recipe.preparations)) {
-    console.log(`[DEBUG] Receita ${recipe.name}: Sem preparations ou não é array`);
     return ingredientes;
   }
   
   recipe.preparations.forEach((preparation, prepIndex) => {
-    console.log(`[DEBUG] Preparation ${prepIndex} da receita ${recipe.name}:`, preparation.title || 'Sem título');
     
     if (preparation.ingredients && Array.isArray(preparation.ingredients)) {
       preparation.ingredients.forEach((ingredient, ingIndex) => {
         // FORÇAR VISUALIZAÇÃO DO OBJETO INGREDIENTE - Tentativa final
         if (ingredient.name && ingredient.name.includes('Maminha')) {
-          console.error('=== INGREDIENTE MAMINHA ESTRUTURA ===');
-          console.error('Keys:', Object.keys(ingredient));
-          console.error('Ingredient object:', ingredient);
-          console.error('Weight thawed:', ingredient.weight_thawed);
-          console.error('Weight clean:', ingredient.weight_clean);
-          console.error('Weight cooked:', ingredient.weight_cooked);
-          console.error('=====================================');
         }
         
         if (ingredient.name) {
@@ -61,11 +50,9 @@ const extractIngredientsFromRecipe = (recipe, quantityNeeded) => {
           
           // Se ainda não encontrou peso unitário, pular este ingrediente
           if (!unitWeight) {
-            console.log(`[DEBUG] ⚠️ Ingrediente ${ingredient.name} sem peso definido - pulando`);
             return; // Pular este ingrediente
           }
           
-          console.log(`[DEBUG] Peso unitário encontrado: ${unitWeight}kg para ${ingredient.name}`);
           
           // Total = peso unitário × quantas receitas (quantity é sempre 0 nas receitas, usar apenas unitWeight)
           ingredientWeight = unitWeight * quantityNeeded;
@@ -87,15 +74,12 @@ const extractIngredientsFromRecipe = (recipe, quantityNeeded) => {
             }
           });
           
-          console.log(`[DEBUG] Ingrediente processado: ${ingredient.name} = ${ingredientWeight}kg`);
         }
       });
     } else {
-      console.log(`[DEBUG] Preparation ${prepIndex}: Sem ingredients ou não é array`);
     }
   });
   
-  console.log(`[DEBUG] Total ingredientes extraídos da receita ${recipe.name}: ${ingredientes.length}`);
   return ingredientes;
 };
 
@@ -108,17 +92,14 @@ const extractIngredientsFromRecipe = (recipe, quantityNeeded) => {
 const calculateRecipeQuantities = (orders, recipes) => {
   const recipeQuantities = {};
   
-  console.log(`[DEBUG] Processando ${orders.length} pedidos para calcular quantidades de receitas`);
   
   orders.forEach((order, orderIndex) => {
-    console.log(`[DEBUG] Pedido ${orderIndex}: ${order.customer_name}, dia ${order.day_of_week}`);
     
     if (order.items && Array.isArray(order.items)) {
       order.items.forEach((item, itemIndex) => {
         if (item.recipe_id && item.quantity) {
           const recipe = recipes.find(r => r.id === item.recipe_id);
           if (recipe) {
-            console.log(`[DEBUG] Item ${itemIndex}: ${recipe.name} - ${item.quantity} porções pedidas`);
             
             // Calcular quantas receitas completas são necessárias
             const portionSize = recipe.portion_weight_calculated || recipe.cuba_weight || 0.06; // peso por porção
@@ -127,7 +108,6 @@ const calculateRecipeQuantities = (orders, recipes) => {
             
             const recipesNeeded = item.quantity / portionsPerRecipe;
             
-            console.log(`[DEBUG] Cálculo: ${item.quantity} porções ÷ ${portionsPerRecipe.toFixed(2)} porções/receita = ${recipesNeeded.toFixed(2)} receitas`);
             
             if (!recipeQuantities[item.recipe_id]) {
               recipeQuantities[item.recipe_id] = 0;
@@ -135,16 +115,13 @@ const calculateRecipeQuantities = (orders, recipes) => {
             
             recipeQuantities[item.recipe_id] += recipesNeeded;
             
-            console.log(`[DEBUG] Total acumulado para ${recipe.name}: ${recipeQuantities[item.recipe_id].toFixed(2)} receitas`);
           } else {
-            console.log(`[DEBUG] Receita não encontrada para item com recipe_id: ${item.recipe_id}`);
           }
         }
       });
     }
   });
   
-  console.log(`[DEBUG] Quantidades finais de receitas:`, recipeQuantities);
   return recipeQuantities;
 };
 
@@ -195,17 +172,13 @@ const consolidateDuplicateIngredients = (allIngredients) => {
  */
 export const consolidateIngredientsFromRecipes = (orders, recipes) => {
   try {
-    console.log(`[DEBUG] === INÍCIO CONSOLIDAÇÃO DE INGREDIENTES ===`);
-    console.log(`[DEBUG] Total pedidos: ${orders.length}, Total receitas: ${recipes.length}`);
     
     // 1. Calcular quantidades necessárias de cada receita
     const recipeQuantities = calculateRecipeQuantities(orders, recipes);
     const totalRecipesNeeded = Object.keys(recipeQuantities).length;
     
-    console.log(`[DEBUG] Total de receitas diferentes necessárias: ${totalRecipesNeeded}`);
     
     if (totalRecipesNeeded === 0) {
-      console.log(`[DEBUG] Nenhuma receita encontrada nos pedidos`);
       return [];
     }
     
@@ -215,19 +188,14 @@ export const consolidateIngredientsFromRecipes = (orders, recipes) => {
     Object.entries(recipeQuantities).forEach(([recipeId, quantity]) => {
       const recipe = recipes.find(r => r.id === recipeId);
       if (recipe && quantity > 0) {
-        console.log(`[DEBUG] Processando receita: ${recipe.name} (${quantity.toFixed(2)}x)`);
         const ingredients = extractIngredientsFromRecipe(recipe, quantity);
         allIngredients.push(...ingredients);
-        console.log(`[DEBUG] Ingredientes extraídos: ${ingredients.length}`);
       } else {
-        console.log(`[DEBUG] Receita não encontrada ou quantidade zero: ${recipeId}`);
       }
     });
     
-    console.log(`[DEBUG] Total ingredientes brutos extraídos: ${allIngredients.length}`);
     
     if (allIngredients.length === 0) {
-      console.log(`[DEBUG] Nenhum ingrediente encontrado nas receitas`);
       return [];
     }
     
@@ -238,17 +206,10 @@ export const consolidateIngredientsFromRecipes = (orders, recipes) => {
     consolidatedIngredients.sort((a, b) => a.name.localeCompare(b.name));
     
     // 5. Log de debug final
-    console.log(`[DEBUG] === RESULTADO FINAL ===`);
-    console.log(`[DEBUG] Ingredientes únicos consolidados: ${consolidatedIngredients.length}`);
-    consolidatedIngredients.forEach(ing => {
-      console.log(`[DEBUG] ${ing.name}: ${ing.totalWeight.toFixed(3)}kg (${ing.usedInRecipes} receitas)`);
-    });
     
     return consolidatedIngredients;
     
   } catch (error) {
-    console.error('Erro ao consolidar ingredientes:', error);
-    console.error('Stack trace:', error.stack);
     return [];
   }
 };

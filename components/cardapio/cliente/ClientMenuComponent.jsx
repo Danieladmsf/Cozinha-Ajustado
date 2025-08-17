@@ -11,6 +11,7 @@ import { useClientConfig } from '@/hooks/cardapio/useClientConfig';
 import { useMenuHelpers } from '@/hooks/cardapio/useMenuHelpers';
 import { usePrintMenu } from '@/hooks/cardapio/usePrintMenu';
 import { useMenuLocations } from '@/hooks/cardapio/useMenuLocations';
+import { useMenuInterface } from '@/hooks/cardapio/useMenuInterface';
 
 // Componentes UI separados
 import ClientTabs from './ClientTabs';
@@ -18,10 +19,10 @@ import WeeklyMenuGrid from './WeeklyMenuGrid';
 
 export default function ClientMenuComponent() {
   const { toast } = useToast();
+  const menuInterface = useMenuInterface();
 
   // Estados
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedCustomer, setSelectedCustomer] = useState({ id: "all", name: "Todos os Clientes" });
 
   // Hooks
   const {
@@ -30,9 +31,8 @@ export default function ClientMenuComponent() {
     weeklyMenu,
     customers,
     menuConfig,
-    loading,
-    loadWeeklyMenu
-  } = useMenuData(currentDate);
+    loading
+  } = useMenuData(menuInterface.currentDate);
 
   const { locations, loading: locationsLoading, getLocationById, getAllClientIds } = useMenuLocations();
   const { applyClientConfig, getFilteredItemsForClient } = useClientConfig(menuConfig, getAllClientIds());
@@ -40,11 +40,11 @@ export default function ClientMenuComponent() {
   const { handlePrintCardapio: printMenu } = usePrintMenu();
 
 
-  // Handler de navegação
+  // Handler de navegação - Otimizado para não recarregar tudo
   const handleDateChange = useCallback((newDate) => {
-    setCurrentDate(newDate);
-    loadWeeklyMenu(newDate);
-  }, [loadWeeklyMenu]);
+    // Atualiza apenas a data, o useEffect do useMenuData se encarrega de carregar o menu
+    menuInterface.setCurrentDate(newDate);
+  }, [menuInterface]);
 
   // Funções utilitárias
   const getActiveCategories = useMemo(() => {
@@ -74,12 +74,12 @@ export default function ClientMenuComponent() {
     try {
       printMenu(
         weeklyMenu,
-        categories,
+        getActiveCategories,
         recipes,
         customers,
         locations,
         customerId,
-        currentDate,
+        menuInterface.currentDate,
         getCategoryColor
       );
       
@@ -108,75 +108,83 @@ export default function ClientMenuComponent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <div className="container mx-auto px-6 py-8">
-        <div className="space-y-8">
-          {/* Header Section */}
-          <SectionContainer 
-            variant="gradient"
-            className="border-0 shadow-lg"
-          >
-            <MenuHeader 
-              currentDate={currentDate}
-              onDateChange={handleDateChange}
-              rightContent={
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePrintCardapio(selectedCustomer?.id || 'all')}
-                  className="gap-2 bg-white hover:bg-gray-50 border-gray-300"
-                >
-                  <Printer className="h-4 w-4" />
-                  Imprimir Cardápio
-                </Button>
-              }
+      <div className="flex">
+        {/* Sidebar Independente - Seleção de Clientes */}
+        <div className="w-52 flex-shrink-0 p-2">
+          <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-lg sticky top-6">
+            <div className="p-4 border-b border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">Seleção de Cliente</h3>
+              <p className="text-xs text-gray-600">Escolha o cliente para visualizar o cardápio</p>
+            </div>
+            <ClientTabs
+              selectedCustomer={selectedCustomer}
+              locations={locations}
+              customers={customers}
+              getLocationById={getLocationById}
+              onCustomerChange={setSelectedCustomer}
             />
-          </SectionContainer>
+          </div>
+        </div>
 
-          {/* Seleção de Clientes Section */}
-          <SectionContainer 
-            title="Seleção de Cliente"
-            subtitle="Escolha o cliente para visualizar o cardápio personalizado"
-            variant="elevated"
-            className="border-blue-200 bg-white/80 backdrop-blur-sm"
-            icon={Printer}
-          >
-            <Section>
-              <div className="bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 overflow-hidden">
-                <ClientTabs
-                  selectedCustomer={selectedCustomer}
-                  locations={locations}
-                  customers={customers}
-                  getLocationById={getLocationById}
-                  onCustomerChange={setSelectedCustomer}
-                />
+        {/* Main Content Area */}
+        <div className="flex-1">
+          <div className="container mx-auto px-3 py-6">
+            {/* Cardápio Semanal Card Simplificado */}
+            <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-lg">
+              {/* Header unificado com título, navegação e botão de impressão */}
+              <div className="p-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  {/* Título e subtítulo à esquerda */}
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-1">Cardápio Semanal</h2>
+                    <p className="text-sm text-gray-600">
+                      {selectedCustomer?.id === 'all' ? 
+                        'Visualização completa do cardápio' : 
+                        `Cardápio personalizado para ${selectedCustomer?.name || 'cliente selecionado'}`
+                      }
+                    </p>
+                  </div>
+                  
+                  {/* Navegação centralizada */}
+                  <div className="flex-1 flex justify-center">
+                    <MenuHeader 
+                      currentDate={menuInterface.currentDate}
+                      onDateChange={handleDateChange}
+                    />
+                  </div>
+                  
+                  {/* Botão de impressão à direita */}
+                  <div>
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePrintCardapio(selectedCustomer?.id || 'all')}
+                      className="gap-2 bg-white hover:bg-gray-50 border-gray-300"
+                    >
+                      <Printer className="h-4 w-4" />
+                      Imprimir Cardápio
+                    </Button>
+                  </div>
+                </div>
               </div>
-            </Section>
-          </SectionContainer>
-
-          {/* Cardápio Semanal Section */}
-          <SectionContainer 
-            title="Cardápio Semanal"
-            subtitle={selectedCustomer?.id === 'all' ? 
-              'Visualização completa do cardápio' : 
-              `Cardápio personalizado para ${selectedCustomer?.name || 'cliente selecionado'}`
-            }
-            variant="gradient"
-            className="bg-white/60 backdrop-blur-sm border border-white/30"
-          >
-            <Section>
-              <div className="p-4 bg-white/60 backdrop-blur-sm rounded-lg border border-gray-200/30">
+              
+              {/* Grid do cardápio */}
+              <div className="p-4">
                 <WeeklyMenuGrid
-                  currentDate={currentDate}
+                  currentDate={menuInterface.currentDate}
                   weeklyMenu={weeklyMenu}
                   activeCategories={getActiveCategories}
                   recipes={recipes}
                   selectedCustomer={selectedCustomer}
                   getFilteredItemsForClient={getFilteredItemsForClient}
                   getCategoryColor={getCategoryColor}
+                  customers={customers}
+                  locations={locations}
+                  getAllClientIds={getAllClientIds}
                 />
               </div>
-            </Section>
-          </SectionContainer>
+            </div>
+          </div>
         </div>
       </div>
     </div>

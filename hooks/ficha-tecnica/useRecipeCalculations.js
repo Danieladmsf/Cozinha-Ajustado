@@ -35,7 +35,6 @@ export function useRecipeCalculations() {
       const result = RecipeCalculator.calculateRecipeMetrics(preparationsData, recipeData);
       return result;
     } catch (error) {
-      console.error('[HOOK-CALC] Erro no cálculo:', error);
       return RecipeCalculator.getEmptyMetrics();
     }
   }, []);
@@ -48,7 +47,6 @@ export function useRecipeCalculations() {
     try {
       return updateRecipeMetrics(preparationsData, currentMetrics, recipeData);
     } catch (error) {
-      console.error('[HOOK-UPDATE] Erro na atualização:', error);
       return RecipeCalculator.getEmptyMetrics();
     }
   }, []);
@@ -177,7 +175,6 @@ export function useRecipeCalculations() {
         averageYield: metrics.averageYield
       };
     } catch (error) {
-      console.error('[HOOK-PREP] Erro no cálculo da preparação:', error);
       return {
         totalWeight: 0,
         yieldWeight: 0,
@@ -285,7 +282,6 @@ export function useRecipeCalculations() {
     try {
       return RecipeCalculator.generateDebugReport(preparations, recipeData);
     } catch (error) {
-      console.error('[HOOK-DEBUG] Erro ao gerar relatório:', error);
       return {
         timestamp: new Date().toISOString(),
         error: error.message,

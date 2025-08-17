@@ -33,7 +33,6 @@ export const UploadFile = async ({ file }) => {
       fileName: fileName
     };
   } catch (error) {
-    console.error('Erro no upload:', error);
     return {
       success: false,
       error: error.message

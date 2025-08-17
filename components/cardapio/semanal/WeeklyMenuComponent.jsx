@@ -71,9 +71,10 @@ export default function WeeklyMenuComponent() {
 
 
 
-  // Handlers e funções utilitárias
+  // Handlers e funções utilitárias - Otimizado para não recarregar tudo
   const handleDateChange = (newDate) => {
-    menuInterface.handleDateChange(newDate, loadWeeklyMenu);
+    // Atualiza apenas a data, o useEffect se encarrega de carregar o menu
+    menuInterface.setCurrentDate(newDate);
   };
 
   const getActiveCategories = () => menuHelpers.getActiveCategories(categories, menuConfig);
@@ -92,7 +93,6 @@ export default function WeeklyMenuComponent() {
       const updatedMenu = await menuOperations.updateMenuItem(currentMenu, dayIndex, categoryId, itemIndex, newItem);
       setWeeklyMenu(updatedMenu);
     } catch (error) {
-      console.error('Erro ao atualizar item:', error);
     }
   };
 
@@ -109,7 +109,6 @@ export default function WeeklyMenuComponent() {
         setWeeklyMenu(updatedMenu);
       }
     } catch (error) {
-      console.error('Erro ao adicionar item:', error);
     }
   };
 
@@ -120,7 +119,6 @@ export default function WeeklyMenuComponent() {
         setWeeklyMenu(updatedMenu);
       }
     } catch (error) {
-      console.error('Erro ao remover item:', error);
     }
   };
 
@@ -151,7 +149,6 @@ export default function WeeklyMenuComponent() {
       
       await handleMenuItemChange(dayIndex, categoryId, itemIndex, { locations: newLocations });
     } catch (error) {
-      console.error('Erro ao alterar localização:', error);
     }
   };
 
@@ -168,41 +165,34 @@ export default function WeeklyMenuComponent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="container mx-auto px-4 py-6">
-        <div className="flex gap-6">
+        <div className="flex gap-3">
           {/* Menu Principal */}
-          <div className="flex-1 space-y-6">
-            {/* Header Section */}
-            <SectionContainer 
-              variant="gradient"
-              className="border-0 shadow-lg"
-            >
+          <div className="flex-1 space-y-4">
+            {/* Seletor de Dias */}
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+              <div className="p-3 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">Navegação Semanal</h3>
+              </div>
+              <div className="p-3">
+                <WeekDaySelector
+                  currentDate={menuInterface.currentDate}
+                  currentDayIndex={menuInterface.currentDayIndex}
+                  availableDays={getAvailableDays()}
+                  onDayChange={menuInterface.setCurrentDayIndex}
+                />
+              </div>
+            </div>
+
+            {/* Setas de Navegação da Semana - Centralizadas */}
+            <div className="flex justify-center py-3">
               <MenuHeader 
                 currentDate={menuInterface.currentDate}
                 onDateChange={handleDateChange}
               />
-            </SectionContainer>
-            
-            {/* Seletor de Dias Section */}
-            <SectionContainer 
-              title="Navegação Semanal"
-              variant="elevated"
-              className="border-blue-200"
-            >
-              <WeekDaySelector
-                currentDate={menuInterface.currentDate}
-                currentDayIndex={menuInterface.currentDayIndex}
-                availableDays={getAvailableDays()}
-                onDayChange={menuInterface.setCurrentDayIndex}
-              />
-            </SectionContainer>
+            </div>
 
-            {/* Cards de Categorias Section */}
-            <SectionContainer 
-              title="Itens do Cardápio"
-              subtitle={`Configuração dos itens para ${['', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'][menuInterface.currentDayIndex] || 'dia selecionado'}`}
-              variant="gradient"
-            >
-              <div className="space-y-6">
+            {/* Cards de Categorias */}
+            <div className="space-y-4">
                 {getActiveCategories().map(category => {
                   if (!category) return null;
 
@@ -212,11 +202,8 @@ export default function WeeklyMenuComponent() {
                   const categoryColor = getCategoryColor(category.id);
 
                   return (
-                    <div 
+                    <CategoryMenuCard
                       key={category.id}
-                      className="p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200"
-                    >
-                      <CategoryMenuCard
                         category={category}
                         items={items}
                         categoryColor={categoryColor}
@@ -231,10 +218,11 @@ export default function WeeklyMenuComponent() {
                         noteActions={noteActions}
                         currentDayIndex={menuInterface.currentDayIndex}
                         renderLocationCheckboxes={(itemIndex, item) => (
-                          <div className="mt-3 p-3 bg-gray-50/50 rounded-lg border border-gray-200/30">
+                          <div className="mt-2 p-2 bg-white rounded border border-gray-200">
                             <LocationCheckboxGroup
                               locations={locations}
                               item={item}
+                              recipes={recipes}
                               locationSelection={locationSelection}
                               onLocationChange={(locationId, checked) => 
                                 handleLocationChange(menuInterface.currentDayIndex, category.id, itemIndex, locationId, checked)
@@ -245,36 +233,35 @@ export default function WeeklyMenuComponent() {
                           </div>
                         )}
                       />
-                    </div>
                   );
                 })}
-              </div>
-            </SectionContainer>
+            </div>
           </div>
           
           {/* Sidebar de Observações */}
-          <div className="w-80 flex-shrink-0">
+          <div className="w-72 flex-shrink-0">
             <div className="sticky top-6">
-              <SectionContainer 
-                title="Observações"
-                subtitle="Notas e lembretes do cardápio"
-                variant="elevated"
-                className="border-amber-200"
-              >
-                <MenuNotes
-                  notes={menuNotes.notes}
-                  currentDate={menuInterface.currentDate}
-                  currentDayIndex={menuInterface.currentDayIndex}
-                  onNotesChange={menuNotes.setNotes}
-                  onEdit={noteActions.startEditingNote}
-                  onDelete={noteActions.deleteNote}
-                  onToggleImportant={noteActions.toggleNoteImportance}
-                  categoryColors={categories?.reduce((acc, cat) => {
-                    acc[cat.id] = menuHelpers.getCategoryColor(cat.id, categories, menuConfig);
-                    return acc;
-                  }, {}) || {}}
-                />
-              </SectionContainer>
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                <div className="p-3 border-b border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900">Observações</h3>
+                  <p className="text-sm text-gray-600">Notas e lembretes do cardápio</p>
+                </div>
+                <div className="p-3">
+                  <MenuNotes
+                    notes={menuNotes.notes}
+                    currentDate={menuInterface.currentDate}
+                    currentDayIndex={menuInterface.currentDayIndex}
+                    onNotesChange={menuNotes.setNotes}
+                    onEdit={noteActions.startEditingNote}
+                    onDelete={noteActions.deleteNote}
+                    onToggleImportant={noteActions.toggleNoteImportance}
+                    categoryColors={categories?.reduce((acc, cat) => {
+                      acc[cat.id] = menuHelpers.getCategoryColor(cat.id, categories, menuConfig);
+                      return acc;
+                    }, {}) || {}}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -75,7 +75,6 @@ export default function Categories() {
       const data = await Category.list();
       setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Erro ao carregar categorias:", error);
       setError("Erro ao carregar categorias. Por favor, tente novamente.");
     } finally {
       setLoading(false);
@@ -87,7 +86,6 @@ export default function Categories() {
       const data = await CategoryTree.list();
       setCategoryTree(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Erro ao carregar árvore de categorias:", error);
       setError("Erro ao carregar estrutura de categorias. Por favor, tente novamente.");
     }
   };
@@ -110,7 +108,6 @@ export default function Categories() {
         setCategoryTypes([]);
       }
     } catch (error) {
-      console.error("Erro ao carregar tipos de categorias:", error);
       setCategoryTypes([]);
     }
   };
@@ -151,7 +148,6 @@ export default function Categories() {
       resetForm();
       await loadCategoryTree();
     } catch (error) {
-      console.error("Erro ao salvar categoria:", error);
       setError("Erro ao salvar categoria. Por favor, tente novamente.");
     }
   };
@@ -237,7 +233,6 @@ export default function Categories() {
       });
       await loadCategoryTree();
     } catch (error) {
-      console.error("Erro ao excluir categoria:", error);
       toast({
         title: "Erro",
         description: "Erro ao excluir categoria. Verifique se ela não está sendo usada.",
@@ -458,7 +453,6 @@ export default function Categories() {
         description: "Novo tipo de categoria criado com sucesso.",
       });
     } catch (error) {
-      console.error("Erro ao criar novo tipo de categoria:", error);
       setError("Erro ao criar novo tipo de categoria. Por favor, tente novamente.");
     }
   };
@@ -508,7 +502,6 @@ export default function Categories() {
         description: "Nome da categoria atualizado com sucesso.",
       });
     } catch (error) {
-      console.error("Erro ao atualizar categoria:", error);
       toast({
         title: "Erro",
         description: "Erro ao atualizar nome da categoria.",
@@ -1051,7 +1044,6 @@ export default function Categories() {
                               });
                             })
                             .catch(error => {
-                              console.error("Erro ao excluir categoria principal:", error);
                               toast({
                                 title: "Erro",
                                 description: "Erro ao excluir tipo de categoria.",

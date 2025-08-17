@@ -90,7 +90,6 @@ export default function BillManagement() {
       const data = await RecurringBill.list();
       setRecurringBills(data);
     } catch (error) {
-      console.error("Erro ao carregar contas recorrentes:", error);
       showErrorToast("Erro ao carregar contas recorrentes");
     } finally {
       setLoadingRecurring(false);
@@ -106,7 +105,6 @@ export default function BillManagement() {
       if (typeof dateValue === 'string') return parseISO(dateValue);
       return null;
     } catch (error) {
-      console.error("Erro ao converter data:", error);
       return null;
     }
   };
@@ -264,7 +262,6 @@ export default function BillManagement() {
       });
       
     } catch (error) {
-      console.error("Erro ao carregar contas mensais:", error);
       showErrorToast("Erro ao carregar contas para o mês selecionado");
     } finally {
       setLoadingMonthly(false);
@@ -289,7 +286,6 @@ export default function BillManagement() {
       setBillCategories(allCategories);
       
     } catch (error) {
-      console.error("Erro ao carregar categorias:", error);
       // Use default categories if there's an error
     }
   };
@@ -377,7 +373,6 @@ export default function BillManagement() {
       
       showToast("Sucesso", "Conta recorrente excluída");
     } catch (error) {
-      console.error("Erro ao excluir conta recorrente:", error);
       showErrorToast("Erro ao excluir conta recorrente");
     }
   };
@@ -438,7 +433,6 @@ export default function BillManagement() {
       
       showToast("Sucesso", "Conta excluída");
     } catch (error) {
-      console.error("Erro ao excluir conta:", error);
       showErrorToast("Erro ao excluir conta");
     }
   };
@@ -512,7 +506,6 @@ export default function BillManagement() {
       
       showToast("Sucesso", "Pagamento registrado com sucesso");
     } catch (error) {
-      console.error("Erro ao registrar pagamento:", error);
       showErrorToast("Erro ao registrar pagamento");
     }
 };
@@ -554,7 +547,6 @@ export default function BillManagement() {
         description: "Pagamento revertido com sucesso"
       });
     } catch (error) {
-      console.error("Erro ao reverter pagamento:", error);
       toast({
         title: "Erro",
         description: "Erro ao reverter pagamento",

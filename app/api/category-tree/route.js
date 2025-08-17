@@ -21,7 +21,6 @@ export async function GET(request) {
     return NextResponse.json(categories);
     
   } catch (error) {
-    console.error('[API] Error getting CategoryTree:', error);
     return NextResponse.json(
       { error: 'Failed to get categories', details: error.message },
       { status: 500 }
@@ -39,7 +38,6 @@ export async function POST(request) {
     return NextResponse.json(newCategory, { status: 201 });
     
   } catch (error) {
-    console.error('[API] Error creating category:', error);
     return NextResponse.json(
       { error: 'Failed to create category', details: error.message },
       { status: 500 }
@@ -67,7 +65,6 @@ export async function PUT(request) {
     return NextResponse.json(updatedCategory);
     
   } catch (error) {
-    console.error('[API] Error updating category:', error);
     return NextResponse.json(
       { error: 'Failed to update category', details: error.message },
       { status: 500 }
