@@ -299,6 +299,8 @@ export const useMenuData = (currentDate) => {
 
   // Carregar menu da semana quando data muda
   useEffect(() => {
+    setWeeklyMenu(null); // Limpa o menu antes de carregar um novo
+    invalidateWeeklyMenuCache(getWeekInfo(currentDate).weekKey); // Invalida o cache para a semana atual
     if (categories.length > 0) { // Só carrega menu se já tiver dados iniciais
       loadWeeklyMenu(currentDate);
     }

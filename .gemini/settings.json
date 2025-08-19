@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "cozinha-e-afeto-mcp": {
+      "command": "node",
+      "args": [
+        "mcp-server.js"
+      ],
+      "trust": true
+    }
+  }
+}

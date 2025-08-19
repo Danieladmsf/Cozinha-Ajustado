@@ -35,10 +35,7 @@ const HistoryTab = ({
         // Usar soma recalculada dos itens em vez do total_amount salvo
         const recalculatedTotal = order.items ? utilSumCurrency(order.items.map(item => item.total_price || 0)) : (order.total_amount || 0);
         
-        // Debug apenas para diferenças significativas
-        if (process.env.NODE_ENV === 'development' && Math.abs((order.total_amount || 0) - recalculatedTotal) > 5) {
-          console.log('📚 [Histórico]:', order.total_amount, '->', recalculatedTotal, '(dia', dayIndex, ')');
-        }
+
         
         originalTotalAmount += recalculatedTotal;
         totalItemsCount += order.total_items || 0;
@@ -56,10 +53,7 @@ const HistoryTab = ({
         
         // Usar calculadora centralizada de peso com itens sincronizados
         const dayWeight = calculateTotalWeight(syncedItems);
-        // Log apenas se peso for significativo
-        if (dayWeight > 50) {
-          console.log(`📊 [HISTÓRICO] Dia ${dayIndex}: ${dayWeight.toFixed(2)} kg`);
-        }
+
         totalWeight += dayWeight;
 
         // Calcular depreciação para este dia específico
@@ -290,10 +284,7 @@ const HistoryTab = ({
                             }) : [];
                             
                             const weight = calculateTotalWeight(syncedItems);
-                            // Debug apenas para day 1 (segunda-feira)
-                            if (dayIndex === 1) {
-                              console.log(`🔄 [HISTÓRICO-DISPLAY] Dia ${dayIndex}:`, weight, 'kg (CORRIGIDO)');
-                            }
+
                             return formatWeightDisplay(weight);
                           })()}</p>
                         </div>

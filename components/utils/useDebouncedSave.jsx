@@ -33,7 +33,7 @@ export function useDebouncedSave({ onSave, delay = 1500, debugLog }) {
 
     } catch (error) {
       // Log do erro e mantém dirty state para retry
-      logger.error('Erro ao salvar dados:', error);
+      console.error('Erro ao salvar dados:', error);
       
       // Notificar usuário se callback de debug disponível
       if (debugLog) {

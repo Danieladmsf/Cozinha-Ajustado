@@ -21,15 +21,12 @@ export default function LocationCheckboxGroup({
   
   // Log para TODAS as receitas na aba Cardápio
   if (currentRecipe && currentRecipe !== 'Sem receita') {
-    console.log(`🍽️ [ABA CARDÁPIO] ${currentRecipe}`);
     
     // Mostrar estado de cada checkbox
     locations.forEach(location => {
       const isChecked = locationSelection.isLocationSelected(item.locations, location.id);
       const status = isChecked ? '✅ MARCADO' : '❌ DESMARCADO';
-      console.log(`  ${status}: ${location.name} (${location.id})`);
     });
-    console.log('---');
   }
   if (!locations || locations.length === 0) {
     return (

@@ -23,7 +23,7 @@ export const useMenuInterface = () => {
     if (loadWeeklyMenuFn) {
       loadWeeklyMenuFn(newDate);
     }
-  }, []);
+  }, [setCurrentDate]);
 
   // Handlers de dropdowns
   const handleOpenChange = useCallback((categoryId, itemIndex, open) => {

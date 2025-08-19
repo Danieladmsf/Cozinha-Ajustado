@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import '../cardapio/consolidacao/print-styles.css';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,17 +25,19 @@ import {
   Utensils,
   RefreshCw
 } from "lucide-react";
-import { format, startOfWeek, addDays, getWeek, getYear } from "date-fns";
+import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-// Entities
-import { Customer, Order, Recipe } from "@/app/api/entities";
-
-// Utils
-import { formattedQuantity } from "@/components/utils/orderUtils";
-import { useCategoryDisplay } from "@/hooks/shared/useCategoryDisplay";
+// Hooks
+import { useProgramacaoData } from '@/hooks/programacao/useProgramacaoData';
 import { useOrderConsolidation } from "@/hooks/cardapio/useOrderConsolidation";
 import { convertQuantityForKitchen } from "@/lib/cubaConversionUtils";
+
+// Componentes das abas
+import SaladaTab from './tabs/SaladaTab';
+import AcougueTab from './tabs/AcougueTab';
+import CozinhaTab from './tabs/CozinhaTab';
+import EmbalagemTab from './tabs/EmbalagemTab';
 
 // Função utilitária centralizada para formatação de quantidade
 export const formatQuantityForDisplay = (quantity, unitType, useKitchenFormat) => {
@@ -48,24 +50,25 @@ export const formatQuantityForDisplay = (quantity, unitType, useKitchenFormat) =
   }
 };
 
-// Componentes das abas
-import SaladaTab from './tabs/SaladaTab';
-import AcougueTab from './tabs/AcougueTab';
-import CozinhaTab from './tabs/CozinhaTab';
-import EmbalagemTab from './tabs/EmbalagemTab';
-
 const ProgramacaoCozinhaTabs = () => {
+  const {
+    currentDate,
+    weekDays,
+    weekNumber,
+    year,
+    loading,
+    customers,
+    recipes,
+    orders,
+    navigateWeek,
+    loadOrdersForWeek,
+    refreshData
+  } = useProgramacaoData();
+
   // Estados principais
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [printing, setPrinting] = useState(false);
-  // Removido dataVersion desnecessário
-  
-  // Dados
-  const [customers, setCustomers] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [recipes, setRecipes] = useState([]);
+  const [activeTab, setActiveTab] = useState("por-empresa");
   
   // Filtros
   const [selectedCustomer, setSelectedCustomer] = useState("all");
@@ -73,130 +76,16 @@ const ProgramacaoCozinhaTabs = () => {
   
   // Estado centralizado do formato cozinha para todas as abas
   const [globalKitchenFormat, setGlobalKitchenFormat] = useState(() => {
-    // Carregar preferência salva do localStorage
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('programacao-global-kitchen-format');
       return saved === 'true';
     }
     return false;
   });
-  
-  // Hooks
-  const { groupItemsByCategory, getOrderedCategories, generateCategoryStyles } = useCategoryDisplay();
-  
-  // Calculados
-  const weekStart = useMemo(() => startOfWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
-  const weekNumber = useMemo(() => getWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
-  const year = useMemo(() => getYear(currentDate), [currentDate]);
-  
-  // Dias da semana
-  const weekDays = useMemo(() => {
-    const days = [];
-    for (let i = 0; i < 5; i++) {
-      const date = addDays(weekStart, i);
-      days.push({
-        date,
-        dayNumber: i + 1,
-        dayName: format(date, 'EEEE', { locale: ptBR }),
-        dayShort: format(date, 'EEE', { locale: ptBR }),
-        dayDate: format(date, 'dd/MM', { locale: ptBR }),
-        fullDate: format(date, 'dd/MM/yyyy', { locale: ptBR })
-      });
-    }
-    return days;
-  }, [weekStart]);
 
-  // Função para carregar dados iniciais (sem depender de weekNumber/year)
-  const loadInitialData = async () => {
-    try {
-      setLoading(true);
-      
-      // Carregar apenas clientes e receitas (dados estáticos)
-      const [customersData, recipesData] = await Promise.all([
-        Customer.list(),
-        Recipe.list()
-      ]);
-      
-      setCustomers(customersData);
-      setRecipes(recipesData);
-      
-    } catch (error) {
-      console.error('Erro ao carregar dados iniciais:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // Função separada para carregar pedidos de uma semana específica
-  const loadOrdersForWeek = async (weekNum, yearNum) => {
-    try {
-      const ordersData = await Order.query([
-        { field: 'week_number', operator: '==', value: weekNum },
-        { field: 'year', operator: '==', value: yearNum }
-      ]);
-      
-      setOrders(ordersData);
-      
-    } catch (error) {
-      console.error('Erro ao carregar pedidos:', error);
-      setOrders([]);
-    }
-  };
-  
-  // Função manual para atualizar todos os dados
-  const refreshAllData = async () => {
-    // Limpar cache para forçar recarregamento
-    setOrdersCache(new Map());
-    await loadInitialData();
-    await loadOrdersForWeek(weekNumber, year);
-  };
-
-  // Cache de pedidos para evitar recarregamentos desnecessários
-  const [ordersCache, setOrdersCache] = useState(new Map());
-  
-  // Carregamento inicial apenas uma vez
   useEffect(() => {
-    loadInitialData();
-  }, []);
-  
-  // Carregar pedidos com cache inteligente
-  useEffect(() => {
-    if (customers.length === 0 || recipes.length === 0) return;
-    
-    const cacheKey = `${weekNumber}-${year}`;
-    
-    // Verificar se já temos os pedidos no cache
-    if (ordersCache.has(cacheKey)) {
-      const cachedOrders = ordersCache.get(cacheKey);
-      if (JSON.stringify(orders) !== JSON.stringify(cachedOrders)) {
-        setOrders(cachedOrders);
-      }
-      return;
-    }
-    
-    // Carregar pedidos apenas se não estiverem no cache
-    const loadAndCache = async () => {
-      try {
-        const ordersData = await Order.query([
-          { field: 'week_number', operator: '==', value: weekNumber },
-          { field: 'year', operator: '==', value: year }
-        ]);
-        
-        setOrders(ordersData);
-        setOrdersCache(prev => {
-          const newCache = new Map(prev);
-          newCache.set(cacheKey, ordersData);
-          return newCache;
-        });
-        
-      } catch (error) {
-        console.error('Erro ao carregar pedidos:', error);
-        setOrders([]);
-      }
-    };
-    
-    loadAndCache();
-  }, [weekNumber, year, customers.length, recipes.length]);
+    loadOrdersForWeek(weekNumber, year);
+  }, [weekNumber, year, loadOrdersForWeek]);
 
   // Filtrar pedidos por dia e cliente
   const filteredOrders = useMemo(() => {
@@ -218,7 +107,6 @@ const ProgramacaoCozinhaTabs = () => {
     const newFormat = !globalKitchenFormat;
     setGlobalKitchenFormat(newFormat);
     
-    // Salvar preferência no localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem('programacao-global-kitchen-format', newFormat.toString());
     }
@@ -249,12 +137,10 @@ const ProgramacaoCozinhaTabs = () => {
           const quantity = item.quantity;
           const unitType = item.unit_type || recipe.unit_type;
 
-          // Usar o nome da receita diretamente (totalmente dinâmico)
           if (!saladaIngredientes[recipeName]) {
             saladaIngredientes[recipeName] = {};
           }
 
-          // Inicializar cliente se não existir
           const customerName = order.customer_name;
           if (!saladaIngredientes[recipeName][customerName]) {
             saladaIngredientes[recipeName][customerName] = {
@@ -264,13 +150,12 @@ const ProgramacaoCozinhaTabs = () => {
             };
           }
 
-          // Definir quantidade (dados já consolidados pelo hook principal)
           saladaIngredientes[recipeName][customerName].quantity = quantity;
           saladaIngredientes[recipeName][customerName].items.push({
             recipeName,
             quantity,
             unitType,
-            notes: item.notes || '' // Capturar observações do item
+            notes: item.notes || ''
           });
         }
       });
@@ -362,47 +247,45 @@ const ProgramacaoCozinhaTabs = () => {
   };
 
   const getEmbalagemData = () => {
-    // Aba Embalagem ainda não tem estrutura implementada na UI
-    // Retornar vazio para não gerar páginas desnecessárias
     return [];
   };
 
-  // Função de impressão completa
   const handlePrint = () => {
     setPrinting(true);
     
-    // Extrair dados de todas as abas
-    const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
-    const porEmpresaData = ordersByCustomer;
-    const saladaData = getSaladaData();
-    const acougueData = getAcougueData();
-    const cozinhaData = getCozinhaData();
-    const embalagemData = getEmbalagemData();
-    
-    // Gerar HTML completo para impressão
-    const printContent = generateCompletePrintContent({
-      selectedDayInfo,
-      weekNumber,
-      year,
-      porEmpresaData,
-      saladaData,
-      acougueData,
-      cozinhaData,
-      embalagemData
-    });
-    
-    // Abrir janela de impressão
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-    
-    setPrinting(false);
+    try {
+      const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
+      const porEmpresaData = ordersByCustomer;
+      const saladaData = getSaladaData();
+      const acougueData = getAcougueData();
+      const cozinhaData = getCozinhaData();
+      const embalagemData = getEmbalagemData();
+
+      const printContent = generateCompletePrintContent({
+        selectedDayInfo,
+        weekNumber,
+        year,
+        porEmpresaData,
+        saladaData,
+        acougueData,
+        cozinhaData,
+        embalagemData
+      });
+      
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+      
+    } catch (error) {
+      alert('Erro ao gerar impressão: ' + error.message);
+    } finally {
+      setPrinting(false);
+    }
   };
 
-  // Função para gerar conteúdo completo de impressão
   const generateCompletePrintContent = (data) => {
     const { selectedDayInfo, weekNumber, year, porEmpresaData, saladaData, acougueData, cozinhaData, embalagemData } = data;
     
@@ -410,7 +293,7 @@ const ProgramacaoCozinhaTabs = () => {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Programação de Produção - ${selectedDayInfo?.fullDate}</title>
+          <title>Programacao de Producao - ${selectedDayInfo?.fullDate}</title>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
@@ -429,12 +312,10 @@ const ProgramacaoCozinhaTabs = () => {
     `;
   };
 
-  // Funções para gerar cada seção
   const generatePorEmpresaSection = (data, dayInfo) => {
     if (!data || data.length === 0) return '';
     
     return data.map((customerData, index) => {
-      // Usar a mesma lógica de consolidação da UI
       const consolidatedItems = consolidateCustomerItems(customerData.orders);
       
       return `
@@ -445,23 +326,19 @@ const ProgramacaoCozinhaTabs = () => {
           </div>
           
           <div class="company-section">
-            <!-- Header do cliente igual à UI -->
             <div class="client-header">
               <h2>${customerData.customer_name}</h2>
-              <p class="meal-count">${dayInfo?.fullDate} • ${customerData.total_meals} refeições</p>
+              <p class="meal-count">${dayInfo?.fullDate} - ${customerData.total_meals} refeicoes</p>
             </div>
             
-            <!-- Estrutura igual à UI: Object.entries(consolidatedItems) -->
             ${Object.keys(consolidatedItems).length === 0 ? `
               <p class="no-items">Nenhum item no pedido deste cliente.</p>
             ` : Object.entries(consolidatedItems).map(([categoryName, items]) => `
               <div class="category-section">
-                <!-- Título da categoria igual à UI -->
                 <div class="category-header">
                   <h3 class="category-title">${categoryName}</h3>
                 </div>
                 
-                <!-- Lista de itens igual à UI -->
                 <div class="items-container">
                   ${items.map((item, itemIndex) => `
                     <div class="item-line" key="${item.unique_id || item.recipe_id}_${itemIndex}">
@@ -477,7 +354,8 @@ const ProgramacaoCozinhaTabs = () => {
           </div>
           
           <div class="page-footer">
-            <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+            <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}
+            </p>
           </div>
         </div>
       `;
@@ -498,12 +376,10 @@ const ProgramacaoCozinhaTabs = () => {
           <div class="recipe-sections">
             ${Object.entries(data).map(([nomeReceita, clientes], index) => `
               <div class="recipe-section">
-                <!-- Número e nome da receita igual à UI -->
                 <div class="recipe-header">
                   <h2 class="recipe-title">${index + 1}. ${nomeReceita.toUpperCase()}</h2>
                 </div>
                 
-                <!-- Lista de clientes igual à UI -->
                 <div class="clients-list">
                   ${Object.entries(clientes).map(([customerName, dataCustomer]) => {
                     const hasNotes = dataCustomer.items.some(item => item.notes && item.notes.trim());
@@ -531,7 +407,8 @@ const ProgramacaoCozinhaTabs = () => {
         </div>
         
         <div class="page-footer">
-          <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+          <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}
+          </p>
         </div>
       </div>
     `;
@@ -543,7 +420,7 @@ const ProgramacaoCozinhaTabs = () => {
     return `
       <div class="print-page">
         <div class="page-header">
-          <h1>Açougue</h1>
+          <h1>Acougue</h1>
           <div class="day-info">${dayInfo?.fullDate}</div>
         </div>
         
@@ -582,7 +459,8 @@ const ProgramacaoCozinhaTabs = () => {
         </div>
         
         <div class="page-footer">
-          <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+          <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}
+          </p>
         </div>
       </div>
     `;
@@ -633,59 +511,37 @@ const ProgramacaoCozinhaTabs = () => {
         </div>
         
         <div class="page-footer">
-          <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+          <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}
+          </p>
         </div>
       </div>
     `;
   };
 
   const generateEmbalagemSection = (data, dayInfo) => {
-    // Aba Embalagem ainda não implementada na UI - não gerar página
-    // Quando a UI estiver pronta, esta função será atualizada
     return '';
   };
 
-  // Função para ajuste automático de fonte CORRIGIDA
   const getAutoFontSizeScript = () => {
     return `
       <script>
         function autoAdjustFontSize() {
-          console.log('=== AJUSTE ROBUSTO DE FONTE INICIADO ===');
-          console.log('Timestamp:', new Date().toLocaleTimeString());
-          console.log('Document ready state:', document.readyState);
           
-          // Aguardar renderização completa
           setTimeout(() => {
             const pages = document.querySelectorAll('.print-page');
-            console.log('\nDETECCAO DE PAGINAS:');
-            console.log('- Paginas encontradas:', pages.length);
-            console.log('- Seletor usado: .print-page');
-            console.log('- Body dimensions:', document.body.offsetWidth + 'x' + document.body.offsetHeight);
             
             if (pages.length === 0) {
-              console.error('NENHUMA PAGINA ENCONTRADA!');
-              console.log('- Tentando seletores alternativos...');
               const altPages = document.querySelectorAll('div, .page, .content');
-              console.log('- Elementos div encontrados:', altPages.length);
               return;
             }
             
             pages.forEach((page, pageIndex) => {
-              console.log('\n\n================================');
-              console.log('PAGINA ' + (pageIndex + 1) + ' - ANALISE DETALHADA');
-              console.log('================================');
               
-              // Identificar tipo de página pelo título
               const pageTitle = page.querySelector('.page-header h1');
               const pageSubtitle = page.querySelector('.day-info');
               const clientName = page.querySelector('h2');
               
-              console.log('IDENTIFICACAO:');
-              console.log('- Titulo:', pageTitle ? pageTitle.textContent : 'Nao encontrado');
-              console.log('- Data:', pageSubtitle ? pageSubtitle.textContent : 'Nao encontrado');
-              console.log('- Cliente/Receita:', clientName ? clientName.textContent : 'Nao encontrado');
               
-              // Detectar todos os seletores possíveis
               const selectors = [
                 '.company-section',
                 '.section-content', 
@@ -695,13 +551,11 @@ const ProgramacaoCozinhaTabs = () => {
                 '.clients-list'
               ];
               
-              console.log('\nBUSCA DE CONTEUDO:');
               let content = null;
               let usedSelector = null;
               
               for (let selector of selectors) {
                 const found = page.querySelector(selector);
-                console.log('- ' + selector + ':', found ? 'ENCONTRADO' : 'nao encontrado');
                 if (found && !content) {
                   content = found;
                   usedSelector = selector;
@@ -709,23 +563,15 @@ const ProgramacaoCozinhaTabs = () => {
               }
               
               if (!content) {
-                console.error('ERRO: Conteudo nao encontrado na pagina ' + (pageIndex + 1));
-                console.log('- Tentando fallback para primeiro elemento filho...');
-                content = page.children[1]; // Pular header
+                content = page.children[1];
                 if (content) {
-                  console.log('- Fallback encontrado:', content.tagName + '.' + content.className);
                   usedSelector = 'fallback';
                 } else {
                   return;
                 }
               }
               
-              console.log('Conteudo selecionado:', usedSelector);
-              console.log('- Classe do elemento:', content.className);
-              console.log('- Tag:', content.tagName);
-              console.log('- Filhos diretos:', content.children.length);
               
-              // Contar elementos antes do reset
               const elementCounts = {
                 h1: content.querySelectorAll('h1').length,
                 h2: content.querySelectorAll('h2').length,
@@ -737,13 +583,9 @@ const ProgramacaoCozinhaTabs = () => {
                 notes: content.querySelectorAll('.notes, .note').length
               };
               
-              console.log('\nELEMENTOS ENCONTRADOS:');
               Object.entries(elementCounts).forEach(([key, count]) => {
-                console.log('- ' + key + ':', count);
               });
               
-              // Reset completo de estilos
-              console.log('\nRESET DE ESTILOS:');
               const allElements = page.querySelectorAll('*');
               let resetCount = 0;
               allElements.forEach(el => {
@@ -755,28 +597,17 @@ const ProgramacaoCozinhaTabs = () => {
                   el.style.padding = null;
                 }
               });
-              console.log('- Elementos com fontSize resetados:', resetCount);
               
-              // Forçar reflow
-              const beforeReflow = performance.now();
               page.offsetHeight;
               const afterReflow = performance.now();
-              console.log('- Reflow executado em:', Math.round(afterReflow - beforeReflow) + 'ms');
               
-              // Dimensões A4 reais (210mm x 297mm a 96dpi)
-              const PAGE_WIDTH = 794;  // 210mm em pixels
-              const PAGE_HEIGHT = 1123; // 297mm em pixels
-              const MARGIN = 57; // 15mm em pixels
+              const PAGE_WIDTH = 794;
+              const PAGE_HEIGHT = 1123;
+              const MARGIN = 57;
               
-              console.log('\nDIMENSOES E CALCULOS:');
-              console.log('- Dimensoes A4 teoricas:', PAGE_WIDTH + 'x' + PAGE_HEIGHT + 'px');
-              console.log('- Margem aplicada:', MARGIN + 'px (' + Math.round(MARGIN * 0.264583) + 'mm)');
               
-              // Medir elementos reais da página
               const pageRect = page.getBoundingClientRect();
-              console.log('- Dimensoes reais da pagina:', Math.round(pageRect.width) + 'x' + Math.round(pageRect.height) + 'px');
               
-              // Calcular espaço real disponível
               const header = page.querySelector('.page-header');
               const footer = page.querySelector('.page-footer');
               
@@ -786,49 +617,27 @@ const ProgramacaoCozinhaTabs = () => {
               if (header) {
                 const headerRect = header.getBoundingClientRect();
                 headerHeight = headerRect.height;
-                console.log('- Header detectado:', Math.round(headerHeight) + 'px');
-                console.log('  > Texto header:', header.textContent.substring(0, 50) + '...');
               } else {
-                console.log('- Header: Nao encontrado');
               }
               
               if (footer) {
                 const footerRect = footer.getBoundingClientRect();
                 footerHeight = footerRect.height;
-                console.log('- Footer detectado:', Math.round(footerHeight) + 'px');
-                console.log('  > Texto footer:', footer.textContent.substring(0, 50) + '...');
               } else {
-                console.log('- Footer: Nao encontrado');
               }
               
               const availableHeight = PAGE_HEIGHT - headerHeight - footerHeight - (MARGIN * 2);
               const availableWidth = PAGE_WIDTH - (MARGIN * 2);
               
-              console.log('\nCALCULO DO ESPACO DISPONIVEL:');
-              console.log('- Formula: ' + PAGE_HEIGHT + ' - ' + Math.round(headerHeight) + ' - ' + Math.round(footerHeight) + ' - (' + MARGIN + ' * 2)');
-              console.log('- Largura disponivel:', availableWidth + 'px');
-              console.log('- Altura disponivel:', availableHeight + 'px');
-              console.log('- Proporcao utilizavel:', Math.round((availableHeight / PAGE_HEIGHT) * 100) + '%');
               
-              // Medir conteúdo inicial
               const initialContentHeight = content.scrollHeight;
               const initialContentWidth = content.scrollWidth;
-              console.log('\nCONTEUDO INICIAL (sem ajustes):');
-              console.log('- Altura do conteudo:', initialContentHeight + 'px');
-              console.log('- Largura do conteudo:', initialContentWidth + 'px');
-              console.log('- Utilizacao inicial da altura:', Math.round((initialContentHeight / availableHeight) * 100) + '%');
               
-              // Algoritmo agressivo de teste de fonte
-              let currentSize = 10; // Começar com tamanho razoável
+              let currentSize = 10;
               let maxTestedSize = 10;
-              const MAX_FONT_SIZE = 48; // Permitir fontes bem grandes
-              const INCREMENT = 2; // Incrementos maiores
+              const MAX_FONT_SIZE = 48;
+              const INCREMENT = 2;
               
-              console.log('\nPARAMETROS DO ALGORITMO:');
-              console.log('- Tamanho inicial:', currentSize + 'px');
-              console.log('- Tamanho máximo:', MAX_FONT_SIZE + 'px');
-              console.log('- Incremento:', INCREMENT + 'px');
-              console.log('- Range total:', (MAX_FONT_SIZE - currentSize) / INCREMENT, 'iteracoes');
               
               let testCount = 0;
               
@@ -836,25 +645,21 @@ const ProgramacaoCozinhaTabs = () => {
                 testCount++;
                 const testStart = performance.now();
                 
-                // Aplicar tamanho base
                 content.style.fontSize = fontSize + 'px';
                 content.style.lineHeight = '1.4';
                 
-                // Contar e aplicar estilos com log detalhado
                 const ratio = fontSize / 12;
                 let appliedStyles = {
                   h1: 0, h2: 0, h3: 0, quantity: 0, 
                   customerName: 0, recipeName: 0, notes: 0, spacing: 0
                 };
                 
-                // Titulos h1 (pagina)
                 page.querySelectorAll('h1').forEach(h1 => {
                   const newSize = Math.max(fontSize * 1.8, 20);
                   h1.style.fontSize = newSize + 'px';
                   appliedStyles.h1++;
                 });
                 
-                // Titulos h2 (cliente/receita)
                 content.querySelectorAll('h2').forEach(h2 => {
                   const newSize = Math.max(fontSize * 1.5, 16);
                   const newMargin = Math.max(fontSize * 0.5, 6);
@@ -863,7 +668,6 @@ const ProgramacaoCozinhaTabs = () => {
                   appliedStyles.h2++;
                 });
                 
-                // Titulos h3 (categoria)
                 content.querySelectorAll('h3').forEach(h3 => {
                   const newSize = Math.max(fontSize * 1.2, 14);
                   const newMargin = Math.max(fontSize * 0.4, 5);
@@ -872,7 +676,6 @@ const ProgramacaoCozinhaTabs = () => {
                   appliedStyles.h3++;
                 });
                 
-                // Quantidades
                 content.querySelectorAll('.quantity').forEach(qty => {
                   const newSize = Math.max(fontSize * 1.1, 12);
                   qty.style.fontSize = newSize + 'px';
@@ -880,7 +683,6 @@ const ProgramacaoCozinhaTabs = () => {
                   appliedStyles.quantity++;
                 });
                 
-                // Nomes de clientes
                 content.querySelectorAll('.customer-name').forEach(name => {
                   const newSize = Math.max(fontSize, 10);
                   name.style.fontSize = newSize + 'px';
@@ -888,21 +690,18 @@ const ProgramacaoCozinhaTabs = () => {
                   appliedStyles.customerName++;
                 });
                 
-                // Textos normais
                 content.querySelectorAll('.recipe-name, .meal-count').forEach(text => {
                   const newSize = Math.max(fontSize, 10);
                   text.style.fontSize = newSize + 'px';
                   appliedStyles.recipeName++;
                 });
                 
-                // Notas e observacoes
                 content.querySelectorAll('.notes, .note').forEach(note => {
                   const newSize = Math.max(fontSize * 0.8, 8);
                   note.style.fontSize = newSize + 'px';
                   appliedStyles.notes++;
                 });
                 
-                // Ajustar margens
                 content.querySelectorAll('.item-line, .client-line').forEach(line => {
                   const newMargin = Math.max(fontSize * 0.3, 3);
                   line.style.marginBottom = newMargin + 'px';
@@ -915,7 +714,6 @@ const ProgramacaoCozinhaTabs = () => {
                   appliedStyles.spacing++;
                 });
                 
-                // Forcar reflow para medicao
                 content.offsetHeight;
                 
                 const contentHeight = content.scrollHeight;
@@ -925,25 +723,14 @@ const ProgramacaoCozinhaTabs = () => {
                 const fits = contentHeight <= availableHeight && contentWidth <= availableWidth;
                 const utilization = Math.round((contentHeight / availableHeight) * 100);
                 
-                // Log detalhado do teste
-                console.log('\nTESTE #' + testCount + ' - ' + fontSize + 'px:');
-                console.log('- Estilos aplicados:', appliedStyles);
-                console.log('- Resultado: ' + contentWidth + 'x' + contentHeight + 'px');
-                console.log('- Utilizacao: ' + utilization + '%');
-                console.log('- Status: ' + (fits ? 'CABE' : 'EXCEDE'));
-                console.log('- Tempo: ' + Math.round(testEnd - testStart) + 'ms');
                 
                 return fits;
               }
               
-              // Encontrar o maior tamanho que cabe
-              console.log('\nBUSCA DO TAMANHO OTIMO:');
-              console.log('Iniciando busca linear de ' + currentSize + 'px até ' + MAX_FONT_SIZE + 'px...');
               
               const searchStart = performance.now();
               let searchResults = [];
               
-              // Primeiro, encontrar um tamanho que funciona
               while (currentSize <= MAX_FONT_SIZE) {
                 const testResult = {
                   fontSize: currentSize,
@@ -958,65 +745,34 @@ const ProgramacaoCozinhaTabs = () => {
                   maxTestedSize = currentSize;
                   currentSize += INCREMENT;
                 } else {
-                  console.log('Limite encontrado em ' + currentSize + 'px');
                   break;
                 }
               }
               
               const searchEnd = performance.now();
               
-              console.log('\nRESUMO DA BUSCA:');
-              console.log('- Testes realizados:', testCount);
-              console.log('- Tempo total de busca:', Math.round(searchEnd - searchStart) + 'ms');
-              console.log('- Range testado:', searchResults[0]?.fontSize + 'px - ' + searchResults[searchResults.length - 1]?.fontSize + 'px');
-              console.log('- Tamanhos que couberam:', searchResults.filter(r => r.fits).length);
-              console.log('- Tamanho otimo encontrado:', maxTestedSize + 'px');
               
-              // Aplicar o maior tamanho que funcionou
-              console.log('\nAPLICANDO TAMANHO FINAL...');
               measureContent(maxTestedSize);
               
-              // Medir resultado final com detalhes
               const finalHeight = content.scrollHeight;
               const finalWidth = content.scrollWidth;
               const utilization = Math.round((finalHeight / availableHeight) * 100);
               const improvement = maxTestedSize > 10 ? Math.round(((maxTestedSize - 10) / 10) * 100) : 0;
               
-              console.log('\n================================');
-              console.log('RESULTADO FINAL PAGINA ' + (pageIndex + 1));
-              console.log('================================');
-              console.log('Fonte aplicada: ' + maxTestedSize + 'px');
-              console.log('Dimensoes finais: ' + finalWidth + 'x' + finalHeight + 'px');
-              console.log('Espaco disponivel: ' + availableWidth + 'x' + availableHeight + 'px');
-              console.log('Utilizacao da altura: ' + utilization + '%');
-              console.log('Melhoria vs 10px: +' + improvement + '%');
-              console.log('Status: ' + (finalHeight <= availableHeight ? 'SUCESSO' : 'OVERFLOW'));
               
-              // Warnings e recomendações
               if (utilization < 50) {
-                console.warn('BAIXA UTILIZACAO (' + utilization + '%) - Fonte poderia ser maior!');
               } else if (utilization > 95) {
-                console.warn('UTILIZACAO ALTA (' + utilization + '%) - Risco de overflow!');
               } else {
-                console.log('Utilizacao adequada (' + utilization + '%)');
               }
               
               if (maxTestedSize === 10) {
-                console.warn('Fonte nao aumentou - Verificar conteudo ou dimensoes!');
               }
             });
             
-            console.log('\n\n====================================');
-            console.log('AJUSTE DE TODAS AS PAGINAS CONCLUIDO');
-            console.log('====================================');
-            console.log('Total de paginas processadas:', pages.length);
-            console.log('Timestamp final:', new Date().toLocaleTimeString());
-            console.log('\n');
             
-          }, 100); // Aguardar renderização
+          }, 100);
         }
         
-        // Executar múltiplas vezes
         function runMultipleTimes() {
           autoAdjustFontSize();
           setTimeout(autoAdjustFontSize, 300);
@@ -1024,7 +780,6 @@ const ProgramacaoCozinhaTabs = () => {
           setTimeout(autoAdjustFontSize, 1200);
         }
         
-        // Event listeners robustos
         if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', runMultipleTimes);
         }
@@ -1036,7 +791,6 @@ const ProgramacaoCozinhaTabs = () => {
         window.addEventListener('load', runMultipleTimes);
         
         window.addEventListener('beforeprint', () => {
-          console.log('Ajustando antes da impressao...');
           autoAdjustFontSize();
         });
         
@@ -1044,7 +798,6 @@ const ProgramacaoCozinhaTabs = () => {
     `;
   };
 
-  // Estilos CSS para impressão
   const getPrintStyles = () => {
     return `
       @page {
@@ -1067,8 +820,8 @@ const ProgramacaoCozinhaTabs = () => {
       
       .print-page {
         page-break-after: always;
-        height: 297mm; /* Altura A4 */
-        width: 210mm; /* Largura A4 */
+        height: 297mm;
+        width: 210mm;
         display: flex;
         flex-direction: column;
         padding: 15mm;
@@ -1114,7 +867,6 @@ const ProgramacaoCozinhaTabs = () => {
         min-height: 0;
       }
       
-      /* Header do cliente - igual à UI */
       .client-header {
         margin-bottom: 20px;
         border-bottom: 1px solid #e5e7eb;
@@ -1141,7 +893,6 @@ const ProgramacaoCozinhaTabs = () => {
         font-style: italic;
       }
       
-      /* Seções de categoria - igual à UI */
       .category-section {
         margin-bottom: 20px;
       }
@@ -1163,7 +914,6 @@ const ProgramacaoCozinhaTabs = () => {
         padding-left: 15px;
       }
       
-      /* Estilos para as abas de receitas (Salada, Açougue, Cozinha) */
       .recipe-sections {
         padding: 10px 0;
       }
@@ -1259,7 +1009,6 @@ const ProgramacaoCozinhaTabs = () => {
         color: #9ca3af;
       }
       
-      /* Estilos específicos para cada seção */
       .print-page:has(.page-header h1:contains("Por Empresa")) .page-header h1 {
         color: #6366f1;
       }
@@ -1268,7 +1017,7 @@ const ProgramacaoCozinhaTabs = () => {
         color: #059669;
       }
       
-      .print-page:has(.page-header h1:contains("Açougue")) .page-header h1 {
+      .print-page:has(.page-header h1:contains("Acougue")) .page-header h1 {
         color: #dc2626;
       }
       
@@ -1280,7 +1029,6 @@ const ProgramacaoCozinhaTabs = () => {
         color: #2563eb;
       }
       
-      /* Otimizações para impressão */
       @media print {
         body {
           print-color-adjust: exact;
@@ -1302,17 +1050,12 @@ const ProgramacaoCozinhaTabs = () => {
     `;
   };
 
-  // Navegação de semana
-  const navigateWeek = (direction) => {
-    setCurrentDate(prev => addDays(prev, direction * 7));
-  };
-
-  if (loading) {
+  if (loading.initial) {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
           <Loader2 className="w-8 h-8 mx-auto mb-4 text-blue-500 animate-spin" />
-          <p className="text-gray-600">Carregando pedidos...</p>
+          <p className="text-gray-600">Carregando dados iniciais...</p>
         </div>
       </div>
     );
@@ -1320,109 +1063,110 @@ const ProgramacaoCozinhaTabs = () => {
 
   const ConsolidacaoContent = () => (
     <>
-      {/* Lista de pedidos consolidados */}
-      <div className="space-y-4 print:space-y-12">
-        {ordersByCustomer.length === 0 ? (
-          <Card className="border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50 to-slate-100">
-            <CardContent className="p-8 text-center">
-              <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-              <h3 className="font-semibold text-lg text-gray-700 mb-2">
-                Nenhum Pedido Encontrado
-              </h3>
-              <p className="text-gray-500 text-sm">
-                Não há pedidos para o dia selecionado com os filtros aplicados.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          ordersByCustomer.map((customerData) => {
-            const consolidatedItems = consolidateCustomerItems(customerData.orders);
-            const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
-            
-            return (
-              <Card 
-                key={customerData.customer_id} 
-                className="print:break-after-page print:min-h-screen print:p-8 border-2 border-slate-200 shadow-lg bg-gradient-to-br from-white to-slate-50 hover:shadow-xl transition-shadow duration-200"
-              >
-                <CardContent className="p-4 print:p-8">
-                {/* Header do cliente - compacto */}
-                <div className="mb-3 print:mb-12">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-2 print:pb-6">
-                    <div className="flex-1">
-                      <h1 className="text-lg print:text-3xl font-bold text-gray-900">
-                        {customerData.customer_name}
-                      </h1>
-                      <p className="text-sm text-gray-600">
-                        {selectedDayInfo?.fullDate} • {customerData.total_meals} refeições
-                      </p>
-                    </div>
-                    {globalKitchenFormat && (
-                      <div className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-md inline-block mt-1 sm:mt-0 print:hidden">
-                        <ChefHat className="w-3 h-3 inline mr-1" />
-                        Formato Cozinha
+      {loading.orders ? (
+        <div className="text-center py-12">
+          <Loader2 className="w-8 h-8 mx-auto mb-4 text-blue-500 animate-spin" />
+          <p className="text-gray-600">Carregando pedidos...</p>
+        </div>
+      ) : (
+        <div className="space-y-4 print:space-y-12">
+          {ordersByCustomer.length === 0 ? (
+            <Card className="border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50 to-slate-100">
+              <CardContent className="p-8 text-center">
+                <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <h3 className="font-semibold text-lg text-gray-700 mb-2">
+                  Nenhum Pedido Encontrado
+                </h3>
+                <p className="text-gray-500 text-sm">
+                  Não há pedidos para o dia selecionado com os filtros aplicados.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            ordersByCustomer.map((customerData) => {
+              const consolidatedItems = consolidateCustomerItems(customerData.orders);
+              const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
+              
+              return (
+                <Card 
+                  key={customerData.customer_id} 
+                  className="print:break-after-page print:min-h-screen print:p-8 border-2 border-slate-200 shadow-lg bg-gradient-to-br from-white to-slate-50 hover:shadow-xl transition-shadow duration-200"
+                >
+                  <CardContent className="p-4 print:p-8">
+                  <div className="mb-3 print:mb-12">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-2 print:pb-6">
+                      <div className="flex-1">
+                        <h1 className="text-lg print:text-3xl font-bold text-gray-900">
+                          {customerData.customer_name}
+                        </h1>
+                        <p className="text-sm text-gray-600">
+                          {selectedDayInfo?.fullDate} • {customerData.total_meals} refeições
+                        </p>
                       </div>
+                      {globalKitchenFormat && (
+                        <div className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-md inline-block mt-1 sm:mt-0 print:hidden">
+                          <ChefHat className="w-3 h-3 inline mr-1" />
+                          Formato Cozinha
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 print:space-y-8">
+                    {Object.keys(consolidatedItems).length === 0 ? (
+                      <p className="text-center text-gray-500 py-8">
+                        Nenhum item no pedido deste cliente.
+                      </p>
+                    ) : (
+                      Object.entries(consolidatedItems).map(([categoryName, items]) => (
+                        <div key={categoryName} className="mb-3 print:mb-10">
+                          <div className="mb-2 print:mb-6">
+                            <h2 className="text-lg print:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-1">
+                              {categoryName}
+                            </h2>
+                          </div>
+                          
+                          <div className="space-y-1 print:space-y-3 pl-3 print:pl-6">
+                            {items.map((item, index) => (
+                              <div 
+                                key={`${item.unique_id || item.recipe_id}_${index}`}
+                                className="flex items-start gap-3 print:gap-6 text-sm print:text-lg"
+                              >
+                                <span className="font-semibold text-blue-700 min-w-[50px] print:min-w-[80px] text-sm">
+                                  {formatQuantityDisplay(item)}
+                                </span>
+                                <span className="text-gray-800 flex-1">
+                                  {item.recipe_name}
+                                  {item.notes && item.notes.trim() && (
+                                    <span className="text-gray-600 italic">
+                                      {' '}({item.notes.trim()})
+                                    </span>
+                                  )}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))
                     )}
                   </div>
-                </div>
 
-                {/* Itens por categoria */}
-                <div className="space-y-3 print:space-y-8">
-                  {Object.keys(consolidatedItems).length === 0 ? (
-                    <p className="text-center text-gray-500 py-8">
-                      Nenhum item no pedido deste cliente.
+                  <div className="hidden print:block mt-12 pt-6 border-t border-gray-300 text-center text-sm text-gray-600">
+                    <p>Cozinha Afeto - Gerado em {format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                     </p>
-                  ) : (
-                    Object.entries(consolidatedItems).map(([categoryName, items]) => (
-                      <div key={categoryName} className="mb-3 print:mb-10">
-                        {/* Título da categoria */}
-                        <div className="mb-2 print:mb-6">
-                          <h2 className="text-lg print:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-1">
-                            {categoryName}
-                          </h2>
-                        </div>
-                        
-                        {/* Lista de itens */}
-                        <div className="space-y-1 print:space-y-3 pl-3 print:pl-6">
-                          {items.map((item, index) => (
-                            <div 
-                              key={`${item.unique_id || item.recipe_id}_${index}`}
-                              className="flex items-start gap-3 print:gap-6 text-sm print:text-lg"
-                            >
-                              <span className="font-semibold text-blue-700 min-w-[50px] print:min-w-[80px] text-sm">
-                                {formatQuantityDisplay(item)}
-                              </span>
-                              <span className="text-gray-800 flex-1">
-                                {item.recipe_name}
-                                {item.notes && item.notes.trim() && (
-                                  <span className="text-gray-600 italic">
-                                    {' '}({item.notes.trim()})
-                                  </span>
-                                )}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                {/* Footer para impressão */}
-                <div className="hidden print:block mt-12 pt-6 border-t border-gray-300 text-center text-sm text-gray-600">
-                  <p>Cozinha Afeto - Gerado em {format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
-                </div>
-                </CardContent>
-              </Card>
-            );
-          })
-        )}
-      </div>
+                  </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
+      )}
     </>
   );
 
   return (
     <div className="space-y-6 consolidacao-container">
-      {/* Header com navegação */}
       <Card className="print:hidden border-2 border-blue-200 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50">
         <CardHeader className="bg-gradient-to-r from-blue-100 to-indigo-100 border-b-2 border-blue-200">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -1440,11 +1184,11 @@ const ProgramacaoCozinhaTabs = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={refreshAllData}
-                disabled={loading}
+                onClick={refreshData}
+                disabled={loading.orders}
                 className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50"
               >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 ${loading.orders ? 'animate-spin' : ''}`} />
                 Atualizar Dados
               </Button>
               
@@ -1477,7 +1221,6 @@ const ProgramacaoCozinhaTabs = () => {
         </CardHeader>
         
         <CardContent className="bg-white">
-          {/* Navegação de semana */}
           <div className="flex items-center justify-between mb-6 p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-lg border border-slate-200">
             <Button
               variant="outline"
@@ -1494,7 +1237,7 @@ const ProgramacaoCozinhaTabs = () => {
                 Semana {weekNumber}/{year}
               </h3>
               <p className="text-sm text-blue-600">
-                {format(weekStart, "dd/MM")} - {format(addDays(weekStart, 6), "dd/MM/yyyy")}
+                {format(currentDate, "dd/MM")} - {format(addDays(currentDate, 4), "dd/MM/yyyy")}
               </p>
             </div>
             
@@ -1509,7 +1252,6 @@ const ProgramacaoCozinhaTabs = () => {
             </Button>
           </div>
 
-          {/* Seletor de dias */}
           <div className="flex justify-center gap-3 mb-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200">
             {weekDays.map((day) => (
               <Button
@@ -1517,7 +1259,7 @@ const ProgramacaoCozinhaTabs = () => {
                 variant={selectedDay === day.dayNumber ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedDay(day.dayNumber)}
-                className={`flex flex-col h-16 w-16 p-1 text-xs transition-all duration-200 ${
+                className={`flex flex-col h-16 w-16 p-1 text-xs transition-all duration-200 ${ 
                   selectedDay === day.dayNumber 
                     ? "bg-emerald-500 text-white border-emerald-600 shadow-lg transform scale-105" 
                     : "border-emerald-300 text-emerald-700 hover:bg-emerald-100 hover:scale-105"
@@ -1529,7 +1271,6 @@ const ProgramacaoCozinhaTabs = () => {
             ))}
           </div>
 
-          {/* Filtros */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
             <div>
               <label className="block text-sm font-medium text-purple-700 mb-2">
@@ -1573,9 +1314,8 @@ const ProgramacaoCozinhaTabs = () => {
             </div>
           </div>
 
-          {/* Abas das seções */}
           <div className="mt-6 p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border border-orange-200">
-            <Tabs defaultValue="por-empresa" className="w-full">
+            <Tabs defaultValue="por-empresa" className="w-full" onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-5 bg-white border-2 border-orange-200 p-2 rounded-lg">
                 <TabsTrigger 
                   value="por-empresa" 
@@ -1619,7 +1359,7 @@ const ProgramacaoCozinhaTabs = () => {
               </TabsContent>
 
               <TabsContent value="salada" className="mt-6">
-                <SaladaTab 
+                {activeTab === 'salada' && <SaladaTab 
                   currentDate={currentDate}
                   selectedDay={selectedDay}
                   weekNumber={weekNumber}
@@ -1629,11 +1369,11 @@ const ProgramacaoCozinhaTabs = () => {
                   recipes={recipes}
                   globalKitchenFormat={globalKitchenFormat}
                   toggleGlobalKitchenFormat={toggleGlobalKitchenFormat}
-                />
+                />}
               </TabsContent>
 
               <TabsContent value="acougue" className="mt-6">
-                <AcougueTab 
+                {activeTab === 'acougue' && <AcougueTab 
                   currentDate={currentDate}
                   selectedDay={selectedDay}
                   weekNumber={weekNumber}
@@ -1643,11 +1383,11 @@ const ProgramacaoCozinhaTabs = () => {
                   recipes={recipes}
                   globalKitchenFormat={globalKitchenFormat}
                   toggleGlobalKitchenFormat={toggleGlobalKitchenFormat}
-                />
+                />}
               </TabsContent>
 
               <TabsContent value="cozinha" className="mt-6">
-                <CozinhaTab 
+                {activeTab === 'cozinha' && <CozinhaTab 
                   currentDate={currentDate}
                   selectedDay={selectedDay}
                   weekNumber={weekNumber}
@@ -1657,14 +1397,14 @@ const ProgramacaoCozinhaTabs = () => {
                   recipes={recipes}
                   globalKitchenFormat={globalKitchenFormat}
                   toggleGlobalKitchenFormat={toggleGlobalKitchenFormat}
-                />
+                />}
               </TabsContent>
 
               <TabsContent value="embalagem" className="mt-6">
-                <EmbalagemTab 
+                {activeTab === 'embalagem' && <EmbalagemTab 
                   globalKitchenFormat={globalKitchenFormat}
                   toggleGlobalKitchenFormat={toggleGlobalKitchenFormat}
-                />
+                />}
               </TabsContent>
             </Tabs>
           </div>
@@ -1675,3 +1415,4 @@ const ProgramacaoCozinhaTabs = () => {
 };
 
 export default ProgramacaoCozinhaTabs;
+

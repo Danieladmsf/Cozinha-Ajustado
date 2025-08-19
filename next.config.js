@@ -8,7 +8,7 @@ const nextConfig = {
     esmExternals: false,
   },
   // Configurações para evitar problemas entre dev e prod
-  reactStrictMode: true,
+  reactStrictMode: process.env.NODE_ENV === 'production', // Desabilitado em dev para evitar duplicação
   eslint: {
     // Durante builds em produção, não falhar por warnings
     ignoreDuringBuilds: true,

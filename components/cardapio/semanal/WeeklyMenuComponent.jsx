@@ -104,7 +104,8 @@ export default function WeeklyMenuComponent() {
 
   const addMenuItem = async (dayIndex, categoryId) => {
     try {
-      const updatedMenu = await menuOperations.addMenuItem(weeklyMenu, dayIndex, categoryId, createWeeklyMenu, getActiveLocationIds);
+      const createMenuFn = () => menuOperations.createWeeklyMenu(menuInterface.currentDate);
+      const updatedMenu = await menuOperations.addMenuItem(weeklyMenu, dayIndex, categoryId, createMenuFn, getActiveLocationIds);
       if (updatedMenu) {
         setWeeklyMenu(updatedMenu);
       }
