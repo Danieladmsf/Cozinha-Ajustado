@@ -79,7 +79,7 @@ const HistoryTab = ({
       averageMealCost,
       hasReturns: totalDepreciation > 0
     };
-  }, [existingOrders, existingWasteData]);
+  }, [existingOrders, existingWasteData, recipes]);
 
   const getDayStatus = (dayIndex) => {
     const order = existingOrders[dayIndex];

@@ -142,7 +142,8 @@ const MobileOrdersPage = ({ customerId }) => {
         dayNumber: i + 1,
         dayName: format(date, 'EEEE', { locale: ptBR }),
         dayShort: format(date, 'EEE', { locale: ptBR }),
-        dayDate: format(date, 'dd/MM', { locale: ptBR })
+        dayDate: format(date, 'dd/MM', { locale: ptBR }),
+        fullDate: format(date, 'dd/MM/yyyy', { locale: ptBR })
       });
     }
     return days;
@@ -768,6 +769,38 @@ const MobileOrdersPage = ({ customerId }) => {
     }
   }, [loading, customer, recipes, weeklyMenus, hasInitializedDay]);
 
+  const orderItems = useMemo(() => {
+    if (!weeklyMenus.length || !recipes.length || !customer) {
+      return [];
+    }
+    const menu = weeklyMenus[0];
+    const menuData = menu?.menu_data?.[selectedDay];
+    
+    if (!menuData) {
+      return [];
+    }
+
+    const items = [];
+    Object.entries(menuData).forEach(([categoryId, categoryData]) => {
+      const itemsArray = Array.isArray(categoryData) ? categoryData : (categoryData?.items || []);
+      if (itemsArray.length > 0) {
+        itemsArray.forEach((item, index) => {
+          const itemLocations = item.locations || [];
+          const shouldInclude = itemLocations.length === 0 || itemLocations.includes(customer.id);
+          
+          if (shouldInclude) {
+            const recipe = recipes.find(r => r.id === item.recipe_id && r.active !== false);
+            if (recipe) {
+              items.push(PortalDataSync.syncItemSafely(item, recipe));
+            }
+          }
+        });
+      }
+    });
+
+    return items;
+  }, [weeklyMenus, recipes, customer, selectedDay]);
+
   // Carregar dados de sobras automaticamente para cálculo de descontos
   useEffect(() => {
     if (customer && weeklyMenus.length && recipes.length && hasInitializedDay) {
@@ -784,7 +817,7 @@ const MobileOrdersPage = ({ customerId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customer, selectedDay, weeklyMenus, recipes, existingOrders, hasInitializedDay, weekNumber, year]);
 
-  // Carregar dados de waste da semana quando a aba history for selecionada OU semana muda
+  // Carregar dados de waste da semana inteira para histórico
   useEffect(() => {
     if (activeTab === "history" && customer) {
       loadWeeklyWasteData();
@@ -1290,8 +1323,8 @@ const MobileOrdersPage = ({ customerId }) => {
       
       return () => clearTimeout(timeoutId);
     }
-  }, [mealsExpected, isEditMode, hasInitializedDay]); // Removido applyAutomaticSuggestions e currentOrder para evitar loops
-  
+  }, [mealsExpected, isEditMode, hasInitializedDay]);
+
   // Carregar pedidos existentes quando customer muda OU semana muda OU dia muda
   useEffect(() => {
     console.log('🔄 [loadExistingOrders-useEffect] Executando...');
