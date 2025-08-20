@@ -834,6 +834,13 @@ const MobileOrdersPage = ({ customerId }) => {
   const orderItems = useMemo(() => {
     console.log('🍽️ [orderItems] useMemo executado');
     console.log('🍽️ [orderItems] WeeklyMenus:', weeklyMenus.length, 'Recipes:', recipes.length, 'Dia selecionado:', selectedDay);
+    
+    // Log específico para debugging do dia 26/08
+    const currentDateStr = format(currentDate, 'dd/MM');
+    if (currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) { // Segunda-feira é 1, terça é 2
+      console.log('🔍 [DEBUG 26/08] Data atual:', currentDateStr, 'Dia selecionado:', selectedDay);
+      console.log('🔍 [DEBUG 26/08] Customer:', customer?.name, customer?.id);
+    }
 
     
     if (!weeklyMenus.length || !recipes.length || !customer) {
@@ -844,9 +851,26 @@ const MobileOrdersPage = ({ customerId }) => {
     const menu = weeklyMenus[0];
     const menuData = menu?.menu_data?.[selectedDay];
     
+    // Debug específico para o dia 26/08
+    if (currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) {
+      console.log('📅 [DEBUG 26/08] Menu completo:', menu);
+      console.log('📅 [DEBUG 26/08] MenuData para dia', selectedDay, ':', menuData);
+      if (menuData) {
+        console.log('📅 [DEBUG 26/08] Categorias encontradas:', Object.keys(menuData));
+        Object.keys(menuData).forEach(cat => {
+          if (cat.toLowerCase().includes('acompanhamento') || cat.toLowerCase().includes('acomp')) {
+            console.log('🥗 [DEBUG 26/08] Categoria acompanhamento RAW:', cat, menuData[cat]);
+          }
+        });
+      }
+    }
+    
     if (!menuData) {
-      console.log('❌ [orderItems] Nenhum menu para o dia', selectedDay);
-      return [];
+    console.log('❌ [orderItems] Nenhum menu para o dia', selectedDay);
+    if (currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) {
+    console.log('❌ [DEBUG 26/08] Menu_data completo:', menu?.menu_data);
+    }
+    return [];
     }
 
     const items = [];
@@ -859,10 +883,28 @@ const MobileOrdersPage = ({ customerId }) => {
     Object.entries(menuData).forEach(([categoryId, categoryData]) => {
       const itemsArray = Array.isArray(categoryData) ? categoryData : categoryData.items;
       
+      // Log específico para categoria acompanhamento no dia 26/08
+      if ((currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) && 
+          (categoryId.toLowerCase().includes('acompanhamento') || categoryId.toLowerCase().includes('acomp'))) {
+        console.log('🥗 [DEBUG 26/08] CATEGORIA ACOMPANHAMENTO encontrada:', categoryId);
+        console.log('🥗 [DEBUG 26/08] CategoryData:', categoryData);
+        console.log('🥗 [DEBUG 26/08] ItemsArray length:', itemsArray?.length);
+        console.log('🥗 [DEBUG 26/08] ItemsArray:', itemsArray);
+      }
+      
       if (itemsArray && Array.isArray(itemsArray)) {
         
         itemsArray.forEach((item, itemIndex) => {
           processedItems++;
+          
+          // Log específico para itens de acompanhamento no dia 26/08
+          if ((currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) && 
+              (categoryId.toLowerCase().includes('acompanhamento') || categoryId.toLowerCase().includes('acomp'))) {
+            console.log(`🥗 [DEBUG 26/08] Item ${itemIndex + 1} da categoria acompanhamento:`);
+            console.log(`🥗 [DEBUG 26/08]   - Recipe ID: ${item.recipe_id}`);
+            console.log(`🥗 [DEBUG 26/08]   - Locations: ${JSON.stringify(item.locations)}`);
+            console.log(`🥗 [DEBUG 26/08]   - Customer ID: ${customer.id}`);
+          }
           
           // Verificar localização do item
           const itemLocations = item.locations;
@@ -871,11 +913,29 @@ const MobileOrdersPage = ({ customerId }) => {
 
           if (!shouldInclude) {
             skippedItems++;
+            // Log para items de acompanhamento excluídos
+            if ((currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) && 
+                (categoryId.toLowerCase().includes('acompanhamento') || categoryId.toLowerCase().includes('acomp'))) {
+              console.log(`❌ [DEBUG 26/08] Item EXCLUÍDO (localização): Recipe ID ${item.recipe_id}`);
+              console.log(`❌ [DEBUG 26/08] Motivo: Customer ${customer.id} não está nas locations: ${JSON.stringify(item.locations)}`);
+            }
             return;
           }
           
           customerSpecificItems++;
           const recipe = recipes.find(r => r.id === item.recipe_id && r.active !== false);
+          
+          // Log para receita encontrada/não encontrada
+          if ((currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) && 
+              (categoryId.toLowerCase().includes('acompanhamento') || categoryId.toLowerCase().includes('acomp'))) {
+            if (recipe) {
+              console.log(`✅ [DEBUG 26/08] Receita ENCONTRADA: ${recipe.name} (ID: ${recipe.id})`);
+              console.log(`✅ [DEBUG 26/08] Categoria da receita: ${recipe.category}`);
+            } else {
+              console.log(`❌ [DEBUG 26/08] Receita NÃO ENCONTRADA: Recipe ID ${item.recipe_id}`);
+              console.log(`❌ [DEBUG 26/08] Receitas disponíveis:`, recipes.map(r => ({ id: r.id, name: r.name, active: r.active })));
+            }
+          }
           
           if (!recipe) {
             conflictsDetected.push({
@@ -927,7 +987,24 @@ const MobileOrdersPage = ({ customerId }) => {
       }
     });
     
-
+    // Log final para o dia 26/08
+    if (currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) {
+      console.log('📈 [DEBUG 26/08] RESUMO FINAL:');
+      console.log('📈 [DEBUG 26/08] Total de itens processados:', processedItems);
+      console.log('📈 [DEBUG 26/08] Itens incluídos no pedido:', items.length);
+      console.log('📈 [DEBUG 26/08] Itens excluídos:', skippedItems);
+      console.log('📈 [DEBUG 26/08] Itens específicos do cliente:', customerSpecificItems);
+      console.log('📈 [DEBUG 26/08] Conflitos detectados:', conflictsDetected);
+      
+      const acompanhamentoItems = items.filter(item => 
+        item.category?.toLowerCase().includes('acompanhamento') || 
+        item.category?.toLowerCase().includes('acomp')
+      );
+      console.log('🥗 [DEBUG 26/08] Itens de ACOMPANHAMENTO no resultado final:', acompanhamentoItems.length);
+      acompanhamentoItems.forEach((item, idx) => {
+        console.log(`🥗 [DEBUG 26/08] Acomp ${idx + 1}: ${item.recipe_name} (${item.recipe_id})`);
+      });
+    }
     
     console.log('✅ [orderItems] Itens processados:', items.length);
     return items;
@@ -1058,9 +1135,30 @@ const MobileOrdersPage = ({ customerId }) => {
         return existingItem;
       });
       
+      // ADICIONAR ITENS NOVOS do cardápio que não existiam no pedido salvo
+      const newItemsFromMenu = orderItems.filter(menuItem => {
+        // Verificar se este item do cardápio já existe no pedido salvo
+        const existsInSavedOrder = existingOrder.items.some(savedItem => 
+          savedItem.unique_id === menuItem.unique_id || 
+          savedItem.recipe_id === menuItem.recipe_id
+        );
+        return !existsInSavedOrder;
+      });
+      
+      // Log para debug
+      if (newItemsFromMenu.length > 0) {
+        console.log('🆕 [initializeOrder] Itens novos adicionados ao pedido:', newItemsFromMenu.length);
+        newItemsFromMenu.forEach(item => {
+          console.log(`🆕 [initializeOrder] Novo item: ${item.recipe_name} (${item.recipe_id})`);
+        });
+      }
+      
+      // Merge: itens atualizados + novos itens do cardápio
+      const allItems = [...updatedItems, ...newItemsFromMenu];
+      
       const updatedOrder = {
         ...existingOrder,
-        items: updatedItems
+        items: allItems
       };
       
       setCurrentOrder(updatedOrder);

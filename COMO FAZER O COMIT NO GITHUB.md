@@ -77,3 +77,10 @@ git config --global credential.helper store
 - [ ] Push com `origin main` especificado
 
 **TESTADO E APROVADO**: Funcionou com 78 arquivos e +14.560 linhas.
+
+## 📊 Histórico de Commits Recentes
+
+### 2025-08-20
+- ✅ **833b153**: `fix: otimiza performance e debugging do portal móvel` - Melhorias na página de pedidos móveis com otimização de performance e logs de debug detalhados (203 inserções, 44 remoções)
+- ✅ **cb478b4**: `1 of 1 error Next.js (14.2.31) is outdated` - Correção de versão do Next.js
+- ✅ **d59f8ff**: `no portal do cliente mesmo sem cardápio registrado ao navegar pela semana` - Melhoria na navegação semanal
