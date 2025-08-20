@@ -142,8 +142,7 @@ const MobileOrdersPage = ({ customerId }) => {
         dayNumber: i + 1,
         dayName: format(date, 'EEEE', { locale: ptBR }),
         dayShort: format(date, 'EEE', { locale: ptBR }),
-        dayDate: format(date, 'dd/MM', { locale: ptBR }),
-        fullDate: format(date, 'dd/MM/yyyy', { locale: ptBR })
+        dayDate: format(date, 'dd/MM', { locale: ptBR })
       });
     }
     return days;
@@ -276,7 +275,7 @@ const MobileOrdersPage = ({ customerId }) => {
                 // Buscar informações do pedido para este item
                 const existingOrder = existingOrders[selectedDay];
                 if (existingOrder?.items) {
-                  // Buscar o item correspondente usando unique_id primeiro, depois recipe_id
+                  // Buscar por unique_id primeiro (mais preciso)
                   let orderItem = existingOrder.items.find(oi => oi.unique_id === wasteItem.unique_id);
                   if (!orderItem) {
                     // Fallback: buscar por recipe_id (para compatibilidade com dados antigos)
@@ -285,7 +284,7 @@ const MobileOrdersPage = ({ customerId }) => {
                   
                   if (orderItem) {
                     wasteItem.ordered_quantity = orderItem.quantity || 0;
-                    wasteItem.ordered_unit_type = orderItem.unit_type;
+                    wasteItem.ordered_unit_type = orderItem.unit_type || getRecipeUnitType(recipe);
                     
                     // Usar sistema centralizado para sincronizar preços com receita atual
                     const syncedItem = PortalPricingSystem.syncItemPricing({
@@ -713,13 +712,20 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Carregamento de cardápios quando semana muda
   useEffect(() => {
+    console.log('🔄 [loadWeeklyMenus] useEffect executado');
+    console.log('📅 [NAVEGAÇÃO] Data atual:', format(currentDate, 'dd/MM/yyyy'));
+    console.log('📅 [NAVEGAÇÃO] Semana:', weekNumber, 'Ano:', year);
+    console.log('👤 [NAVEGAÇÃO] Cliente:', customer?.name || 'Não carregado');
+    
     const loadWeeklyMenus = async () => {
+      console.log('🔄 [loadWeeklyMenus] Iniciando carregamento...');
       if (!customerId || !customer) {
+        console.log('❌ [loadWeeklyMenus] Saindo - sem customerId ou customer');
         return;
       }
 
       // Limpar estado antes de carregar novo cardápio
-      setWeeklyMenus([]);
+      console.log('🧹 [loadWeeklyMenus] Limpando estado atual');
       setCurrentOrder(null);
       setExistingOrders({});
 
@@ -727,11 +733,47 @@ const MobileOrdersPage = ({ customerId }) => {
         const allMenus = await WeeklyMenu.list();
         
         const weekKey = `${year}-W${String(weekNumber).padStart(2, '0')}`;
+        console.log('🔍 [loadWeeklyMenus] Buscando cardápio com chave:', weekKey);
         const menusData = allMenus.filter(menu => menu.week_key === weekKey);
+        console.log('📋 [loadWeeklyMenus] Cardápios encontrados:', menusData.length);
 
         if (menusData.length > 0) {
+          const menu = menusData[0];
+          console.log('✅ [loadWeeklyMenus] Cardápio encontrado para semana', weekNumber, '/', year);
           setWeeklyMenus(menusData);
+          
+          // Analisar estrutura do cardápio
+          let totalRecipes = 0;
+          let daysWithMenu = 0;
+          let categoriesFound = new Set();
+          let customerSpecificItems = 0;
+          
+          if (menu.menu_data) {
+            Object.keys(menu.menu_data).forEach(dayKey => {
+              const dayData = menu.menu_data[dayKey];
+              if (dayData && Object.keys(dayData).length > 0) {
+                daysWithMenu++;
+                Object.values(dayData).forEach(categoryData => {
+                  const itemsArray = Array.isArray(categoryData) ? categoryData : categoryData.items;
+                  if (itemsArray && Array.isArray(itemsArray)) {
+                    itemsArray.forEach(item => {
+                      totalRecipes++;
+                      if (item.category) categoriesFound.add(item.category);
+                      
+                      const itemLocations = item.locations;
+                      const isForThisCustomer = !itemLocations || itemLocations.length === 0 || 
+                                               itemLocations.includes(customer.id);
+                      if (isForThisCustomer) customerSpecificItems++;
+                    });
+                  }
+                });
+              }
+            });
+          }
+          
         } else {
+          // Nenhum cardápio encontrado - resetar tudo
+          console.log('❌ [loadWeeklyMenus] Nenhum cardápio encontrado para semana', weekNumber, '/', year);
           setWeeklyMenus([]);
           setMealsExpected(0);
           setGeneralNotes("");
@@ -759,7 +801,23 @@ const MobileOrdersPage = ({ customerId }) => {
     };
 
     loadWeeklyMenus();
-  }, [customerId, currentDate, customer]);
+  }, [customerId, currentDate, customer]); // ✅ Usar currentDate diretamente para garantir recarregamento
+
+  // Função para determinar qual dia selecionar baseado na semana
+  // COMENTADO: Não força mais nenhum dia específico
+  // const getInitialDay = useCallback(() => {
+  //   const today = new Date();
+  //   const currentWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+  //   const viewingWeekStart = weekStart;
+  //   
+  //   const isCurrentWeek = format(currentWeekStart, 'yyyy-MM-dd') === format(viewingWeekStart, 'yyyy-MM-dd');
+  //   
+  //   if (isCurrentWeek) {
+  //     return getCurrentWeekDay();
+  //   } else {
+  //     return selectedDay; // Mantém o dia selecionado
+  //   }
+  // }, [weekStart, getCurrentWeekDay, selectedDay]);
 
   // Inicialização de dia - executa APENAS após dados iniciais carregarem
   useEffect(() => {
@@ -769,37 +827,153 @@ const MobileOrdersPage = ({ customerId }) => {
     }
   }, [loading, customer, recipes, weeklyMenus, hasInitializedDay]);
 
+  // Detectar mudança de semana e resetar para segunda-feira
+  // REMOVIDO: Agora o hook useNavigationSync gerencia isso
+
+  // Preparar itens do pedido baseado no cardápio
   const orderItems = useMemo(() => {
+    console.log('🍽️ [orderItems] useMemo executado');
+    console.log('🍽️ [orderItems] WeeklyMenus:', weeklyMenus.length, 'Recipes:', recipes.length, 'Dia selecionado:', selectedDay);
+
+    
     if (!weeklyMenus.length || !recipes.length || !customer) {
+      console.log('❌ [orderItems] Saindo - dados insuficientes');
       return [];
     }
+
     const menu = weeklyMenus[0];
     const menuData = menu?.menu_data?.[selectedDay];
     
     if (!menuData) {
+      console.log('❌ [orderItems] Nenhum menu para o dia', selectedDay);
       return [];
     }
 
     const items = [];
+    let uniqueCounter = 0;
+    let processedItems = 0;
+    let skippedItems = 0;
+    let customerSpecificItems = 0;
+    let conflictsDetected = [];
+
     Object.entries(menuData).forEach(([categoryId, categoryData]) => {
-      const itemsArray = Array.isArray(categoryData) ? categoryData : (categoryData?.items || []);
-      if (itemsArray.length > 0) {
-        itemsArray.forEach((item, index) => {
-          const itemLocations = item.locations || [];
-          const shouldInclude = itemLocations.length === 0 || itemLocations.includes(customer.id);
+      const itemsArray = Array.isArray(categoryData) ? categoryData : categoryData.items;
+      
+      if (itemsArray && Array.isArray(itemsArray)) {
+        
+        itemsArray.forEach((item, itemIndex) => {
+          processedItems++;
           
-          if (shouldInclude) {
-            const recipe = recipes.find(r => r.id === item.recipe_id && r.active !== false);
-            if (recipe) {
-              items.push(PortalDataSync.syncItemSafely(item, recipe));
-            }
+          // Verificar localização do item
+          const itemLocations = item.locations;
+          const shouldInclude = !itemLocations || itemLocations.length === 0 || 
+                               itemLocations.includes(customer.id);
+
+          if (!shouldInclude) {
+            skippedItems++;
+            return;
           }
+          
+          customerSpecificItems++;
+          const recipe = recipes.find(r => r.id === item.recipe_id && r.active !== false);
+          
+          if (!recipe) {
+            conflictsDetected.push({
+              type: 'RECIPE_NOT_FOUND',
+              recipeId: item.recipe_id,
+              categoryId,
+              itemIndex
+            });
+            return;
+          }
+          
+          // Detectar conflitos de categoria
+          if (recipe.category !== categoryId && recipe.category) {
+            conflictsDetected.push({
+              type: 'CATEGORY_MISMATCH',
+              recipeId: item.recipe_id,
+              recipeName: recipe.name,
+              menuCategory: categoryId,
+              recipeCategory: recipe.category
+            });
+          }
+          
+          const containerType = getRecipeUnitType(recipe);
+          const unitPrice = PortalPricingSystem.recalculateItemUnitPrice(item, recipe, containerType);
+          const cubaWeightParsed = utilParseQuantity(recipe.cuba_weight) || 0;
+          
+          const baseItem = {
+            unique_id: `${item.recipe_id}_${uniqueCounter++}`,
+            recipe_id: item.recipe_id,
+            recipe_name: recipe.name,
+            category: recipe.category || categoryId,
+            unit_type: containerType,
+            base_quantity: 0,
+            quantity: 0,
+            unit_price: unitPrice,
+            total_price: 0,
+            notes: "",
+            cuba_weight: cubaWeightParsed,
+            yield_weight: utilParseQuantity(recipe.yield_weight) || 0,
+            total_weight: utilParseQuantity(recipe.total_weight) || 0,
+            adjustment_percentage: 0
+          };
+          
+          const syncedItem = PortalDataSync.syncItemSafely(baseItem, recipe);
+          const newItem = CategoryLogic.calculateItemValues(syncedItem, 'base_quantity', 0, mealsExpected);
+          
+          items.push(newItem);
         });
       }
     });
+    
 
+    
+    console.log('✅ [orderItems] Itens processados:', items.length);
     return items;
-  }, [weeklyMenus, recipes, customer, selectedDay]);
+  }, [weeklyMenus, recipes, customer, selectedDay, weekNumber, year, mealsExpected]);
+
+  const updateOrderItem = useCallback((uniqueId, field, value) => {
+    setCurrentOrder(prev => {
+      if (!prev?.items) return prev;
+      const newItems = prev.items.map(item => {
+        if (item.unique_id === uniqueId) {
+          // Usar lógica centralizada para calcular valores
+          return CategoryLogic.calculateItemValues(item, field, value, mealsExpected);
+        }
+        return item;
+      });
+      
+      return { ...prev, items: newItems };
+    });
+  }, [mealsExpected]);
+
+  // Recalcular itens quando mealsExpected mudar
+  useEffect(() => {
+    if (currentOrder?.items && mealsExpected) {
+      let hasChanges = false;
+      const updatedItems = currentOrder.items.map(item => {
+        // Recalcular apenas itens que dependem de refeições esperadas (unidade = unid)
+        const unitType = (item.unit_type || '').toLowerCase();
+        if (unitType === 'unid' || unitType === 'unid.' || unitType === 'unidade') {
+          const recalculatedItem = CategoryLogic.calculateItemValues(item, 'base_quantity', item.base_quantity, mealsExpected);
+          if (JSON.stringify(recalculatedItem) !== JSON.stringify(item)) {
+            hasChanges = true;
+          }
+          return recalculatedItem;
+        }
+        return item;
+      });
+      
+      // Só atualizar se realmente houve mudanças para evitar loop infinito
+      if (hasChanges) {
+        setCurrentOrder(prev => ({
+          ...prev,
+          items: updatedItems
+        }));
+      }
+    }
+  }, [mealsExpected]);
 
   // Carregar dados de sobras automaticamente para cálculo de descontos
   useEffect(() => {
@@ -817,7 +991,7 @@ const MobileOrdersPage = ({ customerId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customer, selectedDay, weeklyMenus, recipes, existingOrders, hasInitializedDay, weekNumber, year]);
 
-  // Carregar dados de waste da semana inteira para histórico
+  // Carregar dados de waste da semana quando a aba history for selecionada OU semana muda
   useEffect(() => {
     if (activeTab === "history" && customer) {
       loadWeeklyWasteData();
@@ -837,15 +1011,6 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Inicializar pedido quando itens mudam
   useEffect(() => {
-    const menu = weeklyMenus[0];
-    const menuData = menu?.menu_data?.[selectedDay];
-    if (!menuData) {
-        console.log("❌ [initializeOrder] Nenhum menu para o dia, resetando pedido.");
-        setCurrentOrder(null);
-        setMealsExpected(0);
-        setGeneralNotes("");
-        return;
-    }
     const initKey = `${weekNumber}-${year}-${selectedDay}-${orderItems.length}`;
     console.log('📝 [initializeOrder] useEffect executado com initKey:', initKey);
     console.log('📝 [initializeOrder] hasInitializedDay:', hasInitializedDay);
@@ -1051,18 +1216,13 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Calcular totais, depreciação por devoluções e descontos por não recebimento
   const orderTotals = useMemo(() => {
-    console.log('📊 [orderTotals] useMemo executado');
-    console.log('📊 [orderTotals] currentOrder?.items:', currentOrder?.items);
-    if (!currentOrder?.items) {
-      console.log('📊 [orderTotals] Retornando totais zerados (currentOrder.items é nulo/vazio)');
-      return { 
-        totalItems: 0, 
-        totalAmount: 0, 
-        depreciation: null,
-        nonReceivedDiscounts: null,
-        finalAmount: 0
-      };
-    }
+    if (!currentOrder?.items) return { 
+      totalItems: 0, 
+      totalAmount: 0, 
+      depreciation: null,
+      nonReceivedDiscounts: null,
+      finalAmount: 0
+    };
     
     const totalItems = currentOrder.items.reduce((sum, item) => {
       // Use quantity if available, otherwise use base_quantity as fallback
@@ -1078,8 +1238,7 @@ const MobileOrdersPage = ({ customerId }) => {
     
     // Usar calculadora centralizada de peso
     const totalWeight = calculateTotalWeight(currentOrder.items);
-    console.log('⚖️ [Peso Total]:', totalWeight.toFixed(2), 'kg -', currentOrder.items.length, 'itens');
-
+    
     // Calcular depreciação baseada nos itens devolvidos (wasteItems)
     const depreciationData = calculateTotalDepreciation(wasteItems || [], currentOrder.items || []);
     
@@ -1323,8 +1482,8 @@ const MobileOrdersPage = ({ customerId }) => {
       
       return () => clearTimeout(timeoutId);
     }
-  }, [mealsExpected, isEditMode, hasInitializedDay]);
-
+  }, [mealsExpected, isEditMode, hasInitializedDay]); // Removido applyAutomaticSuggestions e currentOrder para evitar loops
+  
   // Carregar pedidos existentes quando customer muda OU semana muda OU dia muda
   useEffect(() => {
     console.log('🔄 [loadExistingOrders-useEffect] Executando...');
