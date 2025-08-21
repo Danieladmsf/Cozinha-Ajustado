@@ -74,8 +74,10 @@ export default function WeeklyMenuGrid({
 
             <div style={{ flex: 1, overflow: 'visible' }}>
               {activeCategories.map((category, categoryIndex) => {
-                const items = dayItems[category.id] || [];
-                const filteredItems = getFilteredItemsForClient(items, category.id, selectedCustomer?.id);
+                const items = dayItems[category.id] ? Object.values(dayItems[category.id]) : [];
+                const filteredItems = selectedCustomer?.id === 'all'
+                  ? items
+                  : getFilteredItemsForClient(items, category.id, selectedCustomer?.id);
 
                 return (
                   <div key={category.id} style={{ marginBottom: '8px' }}>

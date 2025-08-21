@@ -3,6 +3,7 @@
  */
 
 import { parseQuantity } from "./orderUtils";
+import { calculateItemWeight } from "@/lib/weightCalculator";
 
 export class CategoryLogic {
   
@@ -91,63 +92,13 @@ export class CategoryLogic {
     updatedItem.total_price = updatedItem.quantity * (updatedItem.unit_price || 0);
 
     // ✅ CORREÇÃO: Calcular peso total preservando campos de peso da receita
-    const calculatedWeight = this.calculateItemTotalWeight(updatedItem);
+    const calculatedWeight = calculateItemWeight(updatedItem);
     updatedItem.total_weight = calculatedWeight;
 
     return updatedItem;
   }
 
-  /**
-   * Calcula o peso total de um item baseado na quantidade e tipo de unidade
-   * NOVA VERSÃO: Preserva dados originais da receita
-   * @param {Object} item - Item do pedido
-   * @returns {number} Peso total em kg
-   */
-  static calculateItemTotalWeight(item) {
-    if (!item) {
-      return 0;
-    }
-    
-    // Se já foi calculado pelo PortalDataSync, usar o valor preservado
-    if (item.calculated_total_weight !== undefined) {
-      return item.calculated_total_weight;
-    }
-    
-    let quantity = parseQuantity(item.quantity) || parseQuantity(item.base_quantity) || 0;
-    const unitType = (item.unit_type || '').toLowerCase();
-    
-    // PRIORIDADE: dados preservados da receita -> dados do item -> fallbacks
-    let cubaWeight = parseQuantity(item.recipe_cuba_weight) || 
-                     parseQuantity(item.cuba_weight) || 0;
-    
-    if (cubaWeight === 0) {
-      cubaWeight = parseQuantity(item.recipe_yield_weight) || 
-                   parseQuantity(item.yield_weight) || 0;
-    }
-    
-    let totalWeight = 0;
-    
-    // ✅ CORREÇÃO CRÍTICA: Se quantity é zero, usar peso original da receita para exibição
-    if (quantity === 0) {
-      // Usar total_weight original da receita ou cuba_weight como fallback
-      totalWeight = parseQuantity(item.recipe_total_weight) || 
-                   parseQuantity(item.total_weight) || 
-                   cubaWeight || 0;
-    } else {
-      // Cálculo normal com quantity
-      if (unitType === 'cuba' || unitType === 'cuba-g') {
-        totalWeight = cubaWeight * quantity;
-      } else if (unitType === 'kg') {
-        totalWeight = quantity;
-      } else if (unitType === 'unid' || unitType === 'unid.' || unitType === 'unidade') {
-        totalWeight = cubaWeight * quantity;
-      }
-    }
-    
-
-    
-    return totalWeight;
-  }
+  
 
   /**
    * Verifica se deve mostrar colunas especiais para a categoria
@@ -172,12 +123,14 @@ export class CategoryLogic {
   static getTableHeaders(isCarneCategory) {
     const baseHeaders = [
       { key: 'item', label: 'Item', className: 'text-left p-2 text-xs font-medium text-blue-700 w-1/4' },
-      { key: 'quantity', label: 'Quantidade', className: 'text-center p-2 text-xs font-medium text-blue-700 w-16' },
+      { key: 'suggestion_quantity', label: 'Sugestão', className: 'text-center p-2 text-xs font-medium text-amber-600 w-24' },
+      { key: 'quantity', label: 'Quantidade', className: 'text-center p-2 text-xs font-medium text-blue-700 w-24' },
       { key: 'unit', label: 'Unidade', className: 'text-center p-2 text-xs font-medium text-blue-700 w-16' }
     ];
 
     const carneHeaders = [
-      { key: 'porcionamento', label: 'Porcionamento', className: 'text-center p-2 text-xs font-medium text-blue-700 w-16' },
+      { key: 'suggestion_porcionamento', label: 'Sugestão', className: 'text-center p-2 text-xs font-medium text-amber-600 w-24' },
+      { key: 'porcionamento', label: 'Porcionamento', className: 'text-center p-2 text-xs font-medium text-blue-700 w-24' },
       { key: 'total_pedido', label: 'Total Pedido', className: 'text-center p-2 text-xs font-medium text-blue-700 w-16' }
     ];
 

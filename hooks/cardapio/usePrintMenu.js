@@ -79,7 +79,6 @@ export const usePrintMenu = () => {
         margin: 0;
         padding: 0;
         width: 100%;
-        height: 100vh;
         display: flex;
         flex-direction: column;
       }
@@ -123,14 +122,13 @@ export const usePrintMenu = () => {
       .print-grid {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        gap: 12px;
+        gap: 8px;
         flex: 1;
-        height: calc(100vh - 120px);
       }
       
       .print-day {
         border: 2px solid #000;
-        padding: 8px;
+        padding: 4px;
         display: flex;
         flex-direction: column;
         height: 100%;
@@ -166,13 +164,7 @@ export const usePrintMenu = () => {
         line-height: 1.1;
       }
       
-      .footer {
-        text-align: center;
-        margin-top: 15px;
-        flex-shrink: 0;
-        padding: 10px 0;
-        border-top: 1px solid #ddd;
-      }
+      
       
       .generation-info {
         display: flex;
@@ -280,6 +272,10 @@ export const usePrintMenu = () => {
           <span class="date-range">${format(weekStart, 'dd/MM/yyyy', { locale: ptBR })} - ${format(weekEnd, 'dd/MM/yyyy', { locale: ptBR })}</span>
         </div>
         ${customerId !== 'all' ? `<div class="client-info">Cliente: ${getCustomerName(customerId, customers, locations)}</div>` : ''}
+        <div class="generation-info" style="margin-top: 5px;">
+          <span>Gerado em: ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</span>
+          <span class="brand">Cozinha & Afeto</span>
+        </div>
       </div>
     `;
 
@@ -357,15 +353,8 @@ export const usePrintMenu = () => {
     
     html += '</div>';
     
-    // Rodapé
-    html += `
-      <div class="footer">
-        <div class="generation-info">
-          <span>Gerado em: ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</span>
-          <span class="brand">Cozinha & Afeto</span>
-        </div>
-      </div>
-    `;
+    // Rodapé (moved to header)
+    html += ``;
     
     return html;
   }, [getDayNames, getCustomerName, calculateCategoryHeights]);
