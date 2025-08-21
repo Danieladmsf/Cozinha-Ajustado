@@ -1,8 +1,33 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react'; // Import useEffect
 
 export const useMenuInterface = () => {
+  // Key for localStorage
+  const LOCAL_STORAGE_DATE_KEY = 'menuCurrentDate';
+
+  // Initialize currentDate from localStorage or default to new Date()
+  const [currentDate, setCurrentDate] = useState(() => {
+    if (typeof window !== 'undefined') { // Check if window is defined (for Next.js SSR)
+      const storedDate = localStorage.getItem(LOCAL_STORAGE_DATE_KEY);
+      if (storedDate) {
+        try {
+          return new Date(storedDate);
+        } catch (error) {
+          console.error("Error parsing stored date from localStorage:", error);
+          return new Date(); // Fallback to current date on error
+        }
+      }
+    }
+    return new Date();
+  });
+
+  // Save currentDate to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(LOCAL_STORAGE_DATE_KEY, currentDate.toISOString());
+    }
+  }, [currentDate]);
+
   // Estados de navegação
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [currentDayIndex, setCurrentDayIndex] = useState(1);
 
   // Estados de dropdowns e buscas
