@@ -19,6 +19,9 @@ import {
   OrderWaste 
 } from "@/app/api/entities";
 
+// Sistema de Sugestões
+import { OrderSuggestionManager } from '@/lib/order-suggestions';
+
 // Componentes UI
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -167,10 +170,10 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Carregar pedidos existentes da semana
   const loadExistingOrders = useCallback(async () => {
-    console.log('📋 [loadExistingOrders] Executando...');
-    console.log('📅 [loadExistingOrders] Semana:', weekNumber, 'Ano:', year, 'Dia selecionado:', selectedDay);
+    //console.log('📋 [loadExistingOrders] Executando...');
+    //console.log('📅 [loadExistingOrders] Semana:', weekNumber, 'Ano:', year, 'Dia selecionado:', selectedDay);
     if (!customer) {
-      console.log('❌ [loadExistingOrders] Saindo - sem customer');
+      //console.log('❌ [loadExistingOrders] Saindo - sem customer');
       return;
     }
     
@@ -180,7 +183,7 @@ const MobileOrdersPage = ({ customerId }) => {
         { field: 'week_number', operator: '==', value: weekNumber },
         { field: 'year', operator: '==', value: year }
       ]);
-      console.log('📋 [loadExistingOrders] Pedidos encontrados:', orders.length);
+      //console.log('📋 [loadExistingOrders] Pedidos encontrados:', orders.length);
       
       // Organizar por dia da semana
       const ordersByDay = {};
@@ -189,7 +192,7 @@ const MobileOrdersPage = ({ customerId }) => {
       });
       
       setExistingOrders(ordersByDay);
-      console.log('📋 [loadExistingOrders] Pedidos organizados por dia:', Object.keys(ordersByDay));
+      //console.log('📋 [loadExistingOrders] Pedidos organizados por dia:', Object.keys(ordersByDay));
       
       // Definir mealsExpected baseado no pedido do dia atual
       const currentDayOrder = ordersByDay[selectedDay];
@@ -712,20 +715,20 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Carregamento de cardápios quando semana muda
   useEffect(() => {
-    console.log('🔄 [loadWeeklyMenus] useEffect executado');
-    console.log('📅 [NAVEGAÇÃO] Data atual:', format(currentDate, 'dd/MM/yyyy'));
-    console.log('📅 [NAVEGAÇÃO] Semana:', weekNumber, 'Ano:', year);
-    console.log('👤 [NAVEGAÇÃO] Cliente:', customer?.name || 'Não carregado');
+    //console.log('🔄 [loadWeeklyMenus] useEffect executado');
+    //console.log('📅 [NAVEGAÇÃO] Data atual:', format(currentDate, 'dd/MM/yyyy'));
+    //console.log('📅 [NAVEGAÇÃO] Semana:', weekNumber, 'Ano:', year);
+    //console.log('👤 [NAVEGAÇÃO] Cliente:', customer?.name || 'Não carregado');
     
     const loadWeeklyMenus = async () => {
-      console.log('🔄 [loadWeeklyMenus] Iniciando carregamento...');
+      //console.log('🔄 [loadWeeklyMenus] Iniciando carregamento...');
       if (!customerId || !customer) {
-        console.log('❌ [loadWeeklyMenus] Saindo - sem customerId ou customer');
+        //console.log('❌ [loadWeeklyMenus] Saindo - sem customerId ou customer');
         return;
       }
 
       // Limpar estado antes de carregar novo cardápio
-      console.log('🧹 [loadWeeklyMenus] Limpando estado atual');
+      //console.log('🧹 [loadWeeklyMenus] Limpando estado atual');
       setCurrentOrder(null);
       setExistingOrders({});
 
@@ -733,13 +736,13 @@ const MobileOrdersPage = ({ customerId }) => {
         const allMenus = await WeeklyMenu.list();
         
         const weekKey = `${year}-W${String(weekNumber).padStart(2, '0')}`;
-        console.log('🔍 [loadWeeklyMenus] Buscando cardápio com chave:', weekKey);
+        //console.log('🔍 [loadWeeklyMenus] Buscando cardápio com chave:', weekKey);
         const menusData = allMenus.filter(menu => menu.week_key === weekKey);
-        console.log('📋 [loadWeeklyMenus] Cardápios encontrados:', menusData.length);
+        //console.log('📋 [loadWeeklyMenus] Cardápios encontrados:', menusData.length);
 
         if (menusData.length > 0) {
           const menu = menusData[0];
-          console.log('✅ [loadWeeklyMenus] Cardápio encontrado para semana', weekNumber, '/', year);
+          //console.log('✅ [loadWeeklyMenus] Cardápio encontrado para semana', weekNumber, '/', year);
           setWeeklyMenus(menusData);
           
           // Analisar estrutura do cardápio
@@ -773,7 +776,7 @@ const MobileOrdersPage = ({ customerId }) => {
           
         } else {
           // Nenhum cardápio encontrado - resetar tudo
-          console.log('❌ [loadWeeklyMenus] Nenhum cardápio encontrado para semana', weekNumber, '/', year);
+          //console.log('❌ [loadWeeklyMenus] Nenhum cardápio encontrado para semana', weekNumber, '/', year);
           setWeeklyMenus([]);
           setMealsExpected(0);
           setGeneralNotes("");
@@ -832,19 +835,19 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Preparar itens do pedido baseado no cardápio
   const orderItems = useMemo(() => {
-    console.log('🍽️ [orderItems] useMemo executado');
-    console.log('🍽️ [orderItems] WeeklyMenus:', weeklyMenus.length, 'Recipes:', recipes.length, 'Dia selecionado:', selectedDay);
+    //console.log('🍽️ [orderItems] useMemo executado');
+    //console.log('🍽️ [orderItems] WeeklyMenus:', weeklyMenus.length, 'Recipes:', recipes.length, 'Dia selecionado:', selectedDay);
     
     // Log específico para debugging do dia 26/08
     const currentDateStr = format(currentDate, 'dd/MM');
     if (currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) { // Segunda-feira é 1, terça é 2
-      console.log('🔍 [DEBUG 26/08] Data atual:', currentDateStr, 'Dia selecionado:', selectedDay);
-      console.log('🔍 [DEBUG 26/08] Customer:', customer?.name, customer?.id);
+      //console.log('🔍 [DEBUG 26/08] Data atual:', currentDateStr, 'Dia selecionado:', selectedDay);
+      //console.log('🔍 [DEBUG 26/08] Customer:', customer?.name, customer?.id);
     }
 
     
     if (!weeklyMenus.length || !recipes.length || !customer) {
-      console.log('❌ [orderItems] Saindo - dados insuficientes');
+      //console.log('❌ [orderItems] Saindo - dados insuficientes');
       return [];
     }
 
@@ -853,22 +856,22 @@ const MobileOrdersPage = ({ customerId }) => {
     
     // Debug específico para o dia 26/08
     if (currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) {
-      console.log('📅 [DEBUG 26/08] Menu completo:', menu);
-      console.log('📅 [DEBUG 26/08] MenuData para dia', selectedDay, ':', menuData);
+      //console.log('📅 [DEBUG 26/08] Menu completo:', menu);
+      //console.log('📅 [DEBUG 26/08] MenuData para dia', selectedDay, ':', menuData);
       if (menuData) {
-        console.log('📅 [DEBUG 26/08] Categorias encontradas:', Object.keys(menuData));
+        //console.log('📅 [DEBUG 26/08] Categorias encontradas:', Object.keys(menuData));
         Object.keys(menuData).forEach(cat => {
           if (cat.toLowerCase().includes('acompanhamento') || cat.toLowerCase().includes('acomp')) {
-            console.log('🥗 [DEBUG 26/08] Categoria acompanhamento RAW:', cat, menuData[cat]);
+            //console.log('🥗 [DEBUG 26/08] Categoria acompanhamento RAW:', cat, menuData[cat]);
           }
         });
       }
     }
     
     if (!menuData) {
-    console.log('❌ [orderItems] Nenhum menu para o dia', selectedDay);
+    //console.log('❌ [orderItems] Nenhum menu para o dia', selectedDay);
     if (currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) {
-    console.log('❌ [DEBUG 26/08] Menu_data completo:', menu?.menu_data);
+    //console.log('❌ [DEBUG 26/08] Menu_data completo:', menu?.menu_data);
     }
     return [];
     }
@@ -886,10 +889,10 @@ const MobileOrdersPage = ({ customerId }) => {
       // Log específico para categoria acompanhamento no dia 26/08
       if ((currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) && 
           (categoryId.toLowerCase().includes('acompanhamento') || categoryId.toLowerCase().includes('acomp'))) {
-        console.log('🥗 [DEBUG 26/08] CATEGORIA ACOMPANHAMENTO encontrada:', categoryId);
-        console.log('🥗 [DEBUG 26/08] CategoryData:', categoryData);
-        console.log('🥗 [DEBUG 26/08] ItemsArray length:', itemsArray?.length);
-        console.log('🥗 [DEBUG 26/08] ItemsArray:', itemsArray);
+        //console.log('🥗 [DEBUG 26/08] CATEGORIA ACOMPANHAMENTO encontrada:', categoryId);
+        //console.log('🥗 [DEBUG 26/08] CategoryData:', categoryData);
+        //console.log('🥗 [DEBUG 26/08] ItemsArray length:', itemsArray?.length);
+        //console.log('🥗 [DEBUG 26/08] ItemsArray:', itemsArray);
       }
       
       if (itemsArray && Array.isArray(itemsArray)) {
@@ -900,10 +903,10 @@ const MobileOrdersPage = ({ customerId }) => {
           // Log específico para itens de acompanhamento no dia 26/08
           if ((currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) && 
               (categoryId.toLowerCase().includes('acompanhamento') || categoryId.toLowerCase().includes('acomp'))) {
-            console.log(`🥗 [DEBUG 26/08] Item ${itemIndex + 1} da categoria acompanhamento:`);
-            console.log(`🥗 [DEBUG 26/08]   - Recipe ID: ${item.recipe_id}`);
-            console.log(`🥗 [DEBUG 26/08]   - Locations: ${JSON.stringify(item.locations)}`);
-            console.log(`🥗 [DEBUG 26/08]   - Customer ID: ${customer.id}`);
+            //console.log(`🥗 [DEBUG 26/08] Item ${itemIndex + 1} da categoria acompanhamento:`);
+            //console.log(`🥗 [DEBUG 26/08]   - Recipe ID: ${item.recipe_id}`);
+            //console.log(`🥗 [DEBUG 26/08]   - Locations: ${JSON.stringify(item.locations)}`);
+            //console.log(`🥗 [DEBUG 26/08]   - Customer ID: ${customer.id}`);
           }
           
           // Verificar localização do item
@@ -916,8 +919,8 @@ const MobileOrdersPage = ({ customerId }) => {
             // Log para items de acompanhamento excluídos
             if ((currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) && 
                 (categoryId.toLowerCase().includes('acompanhamento') || categoryId.toLowerCase().includes('acomp'))) {
-              console.log(`❌ [DEBUG 26/08] Item EXCLUÍDO (localização): Recipe ID ${item.recipe_id}`);
-              console.log(`❌ [DEBUG 26/08] Motivo: Customer ${customer.id} não está nas locations: ${JSON.stringify(item.locations)}`);
+              //console.log(`❌ [DEBUG 26/08] Item EXCLUÍDO (localização): Recipe ID ${item.recipe_id}`);
+              //console.log(`❌ [DEBUG 26/08] Motivo: Customer ${customer.id} não está nas locations: ${JSON.stringify(item.locations)}`);
             }
             return;
           }
@@ -929,11 +932,11 @@ const MobileOrdersPage = ({ customerId }) => {
           if ((currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) && 
               (categoryId.toLowerCase().includes('acompanhamento') || categoryId.toLowerCase().includes('acomp'))) {
             if (recipe) {
-              console.log(`✅ [DEBUG 26/08] Receita ENCONTRADA: ${recipe.name} (ID: ${recipe.id})`);
-              console.log(`✅ [DEBUG 26/08] Categoria da receita: ${recipe.category}`);
+              //console.log(`✅ [DEBUG 26/08] Receita ENCONTRADA: ${recipe.name} (ID: ${recipe.id})`);
+              //console.log(`✅ [DEBUG 26/08] Categoria da receita: ${recipe.category}`);
             } else {
-              console.log(`❌ [DEBUG 26/08] Receita NÃO ENCONTRADA: Recipe ID ${item.recipe_id}`);
-              console.log(`❌ [DEBUG 26/08] Receitas disponíveis:`, recipes.map(r => ({ id: r.id, name: r.name, active: r.active })));
+              //console.log(`❌ [DEBUG 26/08] Receita NÃO ENCONTRADA: Recipe ID ${item.recipe_id}`);
+              //console.log(`❌ [DEBUG 26/08] Receitas disponíveis:`, recipes.map(r => ({ id: r.id, name: r.name, active: r.active })));
             }
           }
           
@@ -989,24 +992,24 @@ const MobileOrdersPage = ({ customerId }) => {
     
     // Log final para o dia 26/08
     if (currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) {
-      console.log('📈 [DEBUG 26/08] RESUMO FINAL:');
-      console.log('📈 [DEBUG 26/08] Total de itens processados:', processedItems);
-      console.log('📈 [DEBUG 26/08] Itens incluídos no pedido:', items.length);
-      console.log('📈 [DEBUG 26/08] Itens excluídos:', skippedItems);
-      console.log('📈 [DEBUG 26/08] Itens específicos do cliente:', customerSpecificItems);
-      console.log('📈 [DEBUG 26/08] Conflitos detectados:', conflictsDetected);
+      //console.log('📈 [DEBUG 26/08] RESUMO FINAL:');
+      //console.log('📈 [DEBUG 26/08] Total de itens processados:', processedItems);
+      //console.log('📈 [DEBUG 26/08] Itens incluídos no pedido:', items.length);
+      //console.log('📈 [DEBUG 26/08] Itens excluídos:', skippedItems);
+      //console.log('📈 [DEBUG 26/08] Itens específicos do cliente:', customerSpecificItems);
+      //console.log('📈 [DEBUG 26/08] Conflitos detectados:', conflictsDetected);
       
       const acompanhamentoItems = items.filter(item => 
         item.category?.toLowerCase().includes('acompanhamento') || 
         item.category?.toLowerCase().includes('acomp')
       );
-      console.log('🥗 [DEBUG 26/08] Itens de ACOMPANHAMENTO no resultado final:', acompanhamentoItems.length);
+      //console.log('🥗 [DEBUG 26/08] Itens de ACOMPANHAMENTO no resultado final:', acompanhamentoItems.length);
       acompanhamentoItems.forEach((item, idx) => {
-        console.log(`🥗 [DEBUG 26/08] Acomp ${idx + 1}: ${item.recipe_name} (${item.recipe_id})`);
+        //console.log(`🥗 [DEBUG 26/08] Acomp ${idx + 1}: ${item.recipe_name} (${item.recipe_id})`);
       });
     }
     
-    console.log('✅ [orderItems] Itens processados:', items.length);
+    //console.log('✅ [orderItems] Itens processados:', items.length);
     return items;
   }, [weeklyMenus, recipes, customer, selectedDay, weekNumber, year, mealsExpected]);
 
@@ -1089,13 +1092,13 @@ const MobileOrdersPage = ({ customerId }) => {
   // Inicializar pedido quando itens mudam
   useEffect(() => {
     const initKey = `${weekNumber}-${year}-${selectedDay}-${orderItems.length}`;
-    console.log('📝 [initializeOrder] useEffect executado com initKey:', initKey);
-    console.log('📝 [initializeOrder] hasInitializedDay:', hasInitializedDay);
-    console.log('📝 [initializeOrder] orderItems.length:', orderItems.length);
+    //console.log('📝 [initializeOrder] useEffect executado com initKey:', initKey);
+    //console.log('📝 [initializeOrder] hasInitializedDay:', hasInitializedDay);
+    //console.log('📝 [initializeOrder] orderItems.length:', orderItems.length);
     
     // Só executar após inicialização do dia
     if (!hasInitializedDay) {
-      console.log('❌ [initializeOrder] Saindo - dia não inicializado');
+      //console.log('❌ [initializeOrder] Saindo - dia não inicializado');
       return;
     }
     
@@ -1105,7 +1108,7 @@ const MobileOrdersPage = ({ customerId }) => {
     // Se existe pedido salvo para este dia, usar ele
     if (existingOrders[selectedDay] && orderItems.length > 0) {
       const existingOrder = existingOrders[selectedDay];
-      console.log('📝 [initializeOrder] Usando pedido existente para dia', selectedDay);
+      //console.log('📝 [initializeOrder] Usando pedido existente para dia', selectedDay);
       
       
       // SINCRONIZAR ITENS EXISTENTES com receitas atuais usando PortalDataSync
@@ -1147,9 +1150,9 @@ const MobileOrdersPage = ({ customerId }) => {
       
       // Log para debug
       if (newItemsFromMenu.length > 0) {
-        console.log('🆕 [initializeOrder] Itens novos adicionados ao pedido:', newItemsFromMenu.length);
+        //console.log('🆕 [initializeOrder] Itens novos adicionados ao pedido:', newItemsFromMenu.length);
         newItemsFromMenu.forEach(item => {
-          console.log(`🆕 [initializeOrder] Novo item: ${item.recipe_name} (${item.recipe_id})`);
+          //console.log(`🆕 [initializeOrder] Novo item: ${item.recipe_name} (${item.recipe_id})`);
         });
       }
       
@@ -1162,10 +1165,10 @@ const MobileOrdersPage = ({ customerId }) => {
       };
       
       setCurrentOrder(updatedOrder);
-      console.log('✅ [initializeOrder] Pedido existente carregado e atualizado');
+      //console.log('✅ [initializeOrder] Pedido existente carregado e atualizado');
 
     } else if (orderItems.length > 0 && (!currentOrder || currentOrder.day_of_week !== selectedDay)) {
-      console.log('🆕 [initializeOrder] Criando novo pedido para dia', selectedDay);
+      //console.log('🆕 [initializeOrder] Criando novo pedido para dia', selectedDay);
       
       // Criar novo pedido se não existe pedido salvo E (não existe currentOrder OU currentOrder é de outro dia)
       const newOrder = {
@@ -1180,10 +1183,10 @@ const MobileOrdersPage = ({ customerId }) => {
         items: orderItems
       };
       setCurrentOrder(newOrder);
-      console.log('✅ [initializeOrder] Novo pedido criado');
+      //console.log('✅ [initializeOrder] Novo pedido criado');
 
     } else {
-      console.log('🔄 [initializeOrder] Nenhuma ação necessária');
+      //console.log('🔄 [initializeOrder] Nenhuma ação necessária');
     }
   }, [hasInitializedDay, orderItems, selectedDay, weekNumber, year, existingOrders]);
 
@@ -1488,9 +1491,11 @@ const MobileOrdersPage = ({ customerId }) => {
    * Esta é a função principal que executa em background sem interface
    */
   const applyAutomaticSuggestions = useCallback(async (newMealsExpected) => {
+    //console.log('🤖 [applyAutomaticSuggestions] Iniciando com:', newMealsExpected, 'Processando:', isProcessingSuggestions);
+    
     // Proteção contra execuções múltiplas
     if (isProcessingSuggestions) {
-
+      //console.log('⏹️ [applyAutomaticSuggestions] Já processando, ignorando...');
       return;
     }
     
@@ -1503,17 +1508,17 @@ const MobileOrdersPage = ({ customerId }) => {
       return;
     }
     
-    // *** Limpar sugestões se refeições esperadas for 0 ou vazio ***
-    if (!newMealsExpected || newMealsExpected <= 0) {
-
+    // *** Limpar sugestões APENAS se refeições esperadas for explicitamente 0 ***
+    if (newMealsExpected === 0) {
+      //console.log('🗑️ [applyAutomaticSuggestions] Limpando sugestões (refeições = 0)');
       
       const clearedItems = currentOrder.items.map(item => {
-        return CategoryLogic.calculateItemValues(
-          { ...item, base_quantity: 0, adjustment_percentage: 0 },
-          'base_quantity',
-          0,
-          0
-        );
+        // Limpar sugestões mas manter valores existentes se usuário digitou
+        const { suggestion, ...itemWithoutSuggestion } = item;
+        return {
+          ...itemWithoutSuggestion,
+          total_meals_expected: 0
+        };
       });
       
       setCurrentOrder(prevOrder => ({
@@ -1522,6 +1527,13 @@ const MobileOrdersPage = ({ customerId }) => {
         total_meals_expected: 0
       }));
       
+      setIsProcessingSuggestions(false);
+      return;
+    }
+    
+    // *** Sair se valor for vazio/indefinido (aguardar usuário terminar de digitar) ***
+    if (!newMealsExpected || newMealsExpected < 0) {
+      //console.log('⏸️ [applyAutomaticSuggestions] Aguardando valor válido:', newMealsExpected);
       setIsProcessingSuggestions(false);
       return;
     }
@@ -1544,12 +1556,178 @@ const MobileOrdersPage = ({ customerId }) => {
 
     
     try {
-      // Gerar sugestões usando o sistema de gestão (APENAS COM HISTÓRICO REAL)
-      // Sistema de sugestões removido
+      // IMPLEMENTAÇÃO CUSTOMIZADA: Gerar sugestões SEM aplicar nos inputs
       
+      // 1. Carregar histórico
+      //console.log('🗺 [DEBUG] Carregando histórico para cliente:', customer.id);
+      const historicalOrders = await OrderSuggestionManager.loadHistoricalOrders(customer.id, 8);
+      //console.log('🗺 [DEBUG] Histórico carregado:', historicalOrders.length, 'pedidos');
+      
+      if (historicalOrders.length === 0) {
+        //console.log('⚠️ Sem histórico para gerar sugestões - CRIANDO SUGESTÕES DE TESTE');
+        
+        // 🧪 MODO DE TESTE: Criar sugestões artificiais para demonstrar a funcionalidade
+        const testSuggestions = currentOrder.items.map(originalItem => {
+          // Criar sugestões baseadas no tipo de unidade e nome da receita
+          let suggestedQuantity = 0;
+          
+          if (originalItem.unit_type?.toLowerCase().includes('cuba')) {
+            // Para cubas: simular ratio baseado no tipo de item
+            if (originalItem.recipe_name?.toLowerCase().includes('arroz')) {
+              suggestedQuantity = OrderSuggestionManager.roundToPracticalValue(newMealsExpected * 0.027, originalItem.unit_type); // ~4 cubas para 150
+            } else if (originalItem.recipe_name?.toLowerCase().includes('feijão')) {
+              suggestedQuantity = OrderSuggestionManager.roundToPracticalValue(newMealsExpected * 0.02, originalItem.unit_type); // ~3 cubas para 150
+            } else if (originalItem.recipe_name?.toLowerCase().includes('salada') || originalItem.recipe_name?.toLowerCase().includes('alface')) {
+              suggestedQuantity = OrderSuggestionManager.roundToPracticalValue(newMealsExpected * 0.02, originalItem.unit_type); // ~3 cubas para 150
+            } else if (originalItem.recipe_name?.toLowerCase().includes('tomate')) {
+              suggestedQuantity = OrderSuggestionManager.roundToPracticalValue(newMealsExpected * 0.007, originalItem.unit_type); // ~1 cuba para 150
+            }
+          } else if (originalItem.unit_type?.toLowerCase().includes('kg')) {
+            // Para kg: simular ratios diferentes
+            if (originalItem.recipe_name?.toLowerCase().includes('carne') || originalItem.recipe_name?.toLowerCase().includes('frango')) {
+              suggestedQuantity = OrderSuggestionManager.roundToPracticalValue(newMealsExpected * 0.08, originalItem.unit_type); // ~12kg para 150
+            } else if (originalItem.recipe_name?.toLowerCase().includes('soja')) {
+              suggestedQuantity = OrderSuggestionManager.roundToPracticalValue(newMealsExpected * 0.033, originalItem.unit_type); // ~5kg para 150  
+            } else {
+              suggestedQuantity = OrderSuggestionManager.roundToPracticalValue(newMealsExpected * 0.02, originalItem.unit_type); // ~3kg para 150
+            }
+          }
+          
+          //console.log(`🧪 [TESTE] ${originalItem.recipe_name}: ${newMealsExpected} refeições → ${suggestedQuantity} ${originalItem.unit_type}`);
+          
+          return {
+            ...originalItem,
+            suggestion: suggestedQuantity > 0 ? {
+              has_suggestion: true,
+              confidence: 0.8, // Alta confiança para teste
+              based_on_samples: 5, // Simular 5 amostras
+              recent_samples: 3,
+              suggested_base_quantity: suggestedQuantity,
+              suggested_adjustment_percentage: originalItem.category?.toLowerCase().includes('carne') ? 15 : 0,
+              meals_expected: newMealsExpected,
+              source: 'teste_sem_historico'
+            } : {
+              has_suggestion: false,
+              reason: 'teste_zero',
+              confidence: 0
+            }
+          };
+        });
+        
+        //console.log('🧪 [TESTE] Aplicando sugestões artificiais...');
+        setCurrentOrder(prevOrder => ({
+          ...prevOrder,
+          items: testSuggestions,
+          total_meals_expected: newMealsExpected
+        }));
+        
+        setIsProcessingSuggestions(false);
+        return;
+      }
+      
+      // 2. Analisar padrões de consumo
+      const consumptionPatterns = OrderSuggestionManager.analyzeConsumptionPatterns(historicalOrders);
+      
+      // 3. Gerar APENAS SUGESTÕES (sem aplicar valores)
+      const itemsWithSuggestions = currentOrder.items.map(originalItem => {
+        const recipeAnalysis = consumptionPatterns[originalItem.recipe_id];
+        
+        // Se não há dados históricos, manter item original
+        if (!recipeAnalysis || recipeAnalysis.statistics.confidence < 0.25) {
+          return {
+            ...originalItem,
+            suggestion: {
+              has_suggestion: false,
+              reason: recipeAnalysis ? 'baixa_confianca' : 'sem_historico',
+              confidence: recipeAnalysis?.statistics?.confidence || 0
+            }
+          };
+        }
+        
+        const stats = recipeAnalysis.statistics;
+        
+        // ✅ CALCULAR SUGESTÃO COM ARREDONDAMENTO CORRETO
+        let suggestedBaseQuantity = stats.avg_ratio_per_meal * newMealsExpected;
+        
+        // Fallback para média direta se ratio é muito baixo
+        if (suggestedBaseQuantity < 0.1 && stats.avg_base_quantity > 0) {
+          suggestedBaseQuantity = stats.avg_base_quantity;
+        }
+        
+        // 🔢 APLICAR ARREDONDAMENTO CORRETO
+        suggestedBaseQuantity = OrderSuggestionManager.roundToPracticalValue(suggestedBaseQuantity, originalItem.unit_type);
+        
+        const suggestedAdjustmentPercentage = originalItem.category && 
+          originalItem.category.toLowerCase().includes('carne') ? 
+          Math.round(stats.avg_adjustment_percentage) : 0;
+        
+        // Retornar item original + dados de sugestão
+        return {
+          ...originalItem, // 📋 PRESERVAR valores originais dos inputs
+          suggestion: {
+            has_suggestion: true,
+            confidence: stats.confidence,
+            based_on_samples: stats.total_samples,
+            recent_samples: stats.recent_samples,
+            suggested_base_quantity: suggestedBaseQuantity,
+            suggested_adjustment_percentage: suggestedAdjustmentPercentage,
+            meals_expected: newMealsExpected,
+            source: suggestedBaseQuantity > 0 ? 'customizado' : 'sem_sugestao'
+          }
+        };
+      });
+      
+      const result = {
+        success: true,
+        items: itemsWithSuggestions,
+        metadata: {
+          historical_orders: historicalOrders.length,
+          suggestions_applied: itemsWithSuggestions.filter(item => item.suggestion?.has_suggestion).length,
+          message: 'Sugestões geradas com arredondamento correto'
+        }
+      };
+      
+      
+      
+      if (result.success) {
+        // Os itens já vêm com sugestões anexadas e valores originais preservados
+        //console.log('🎆 Sugestões geradas com arredondamento correto!');
+        //console.log('📊 Total de sugestões:', result.metadata.suggestions_applied);
+        
+        // Debug: Mostrar TODAS as sugestões geradas
+        //console.log('📋 [DEBUG-SUGGESTIONS] Lista completa de sugestões:');
+        result.items.forEach((item, index) => {
+          if (item.suggestion?.has_suggestion) {
+            //console.log(`✅ [${index}] ${item.recipe_name}: ${item.suggestion.suggested_base_quantity} ${item.unit_type} (confiança: ${Math.round(item.suggestion.confidence * 100)}%)`);
+          } else {
+            //console.log(`❌ [${index}] ${item.recipe_name}: Sem sugestão (${item.suggestion?.reason || 'motivo desconhecido'})`);
+          }
+        });
+        
+        // Aplicar sugestões PRESERVANDO valores originais dos inputs
+                setCurrentOrder(prevOrder => {
+                    const newItems = prevOrder.items.map((item, index) => {
+                        const suggestedItem = result.items[index];
+                        return {
+                            ...item, // Keep the current item state (with user input)
+                            suggestion: suggestedItem.suggestion // Only update the suggestion
+                        };
+                    });
 
-      
-      // Sistema de sugestões desabilitado
+                    return {
+                        ...prevOrder,
+                        items: newItems,
+                        total_meals_expected: newMealsExpected
+                    };
+                });
+      } else {
+        //console.log('⚠️ Erro ao gerar sugestões:', result.error);
+        // Apenas atualizar refeições esperadas
+        setCurrentOrder(prevOrder => ({
+          ...prevOrder,
+          total_meals_expected: newMealsExpected
+        }));
+      }
       
       // Finalizar processamento
       setIsProcessingSuggestions(false);
@@ -1573,23 +1751,23 @@ const MobileOrdersPage = ({ customerId }) => {
     // 3. O sistema foi inicializado
     // 4. mealsExpected mudou (pode ser 0 para limpar ou >0 para sugerir)
     if (isEditMode && currentOrder?.items?.length > 0 && hasInitializedDay) {
-      // Debounce: esperar 1000ms após o usuário parar de digitar (aumentado para evitar spam)
+      // Debounce: esperar 300ms para resposta mais rápida
       const timeoutId = setTimeout(() => {
         applyAutomaticSuggestions(mealsExpected);
-      }, 1000);
+      }, 300);
       
       return () => clearTimeout(timeoutId);
     }
-  }, [mealsExpected, isEditMode, hasInitializedDay]); // Removido applyAutomaticSuggestions e currentOrder para evitar loops
+  }, [mealsExpected, isEditMode, hasInitializedDay, applyAutomaticSuggestions]); // Incluído applyAutomaticSuggestions para reagir a mudanças
   
   // Carregar pedidos existentes quando customer muda OU semana muda OU dia muda
   useEffect(() => {
-    console.log('🔄 [loadExistingOrders-useEffect] Executando...');
-    console.log('🔄 [loadExistingOrders-useEffect] Customer:', customer?.name, 'HasInitialized:', hasInitializedDay);
+    //console.log('🔄 [loadExistingOrders-useEffect] Executando...');
+    //console.log('🔄 [loadExistingOrders-useEffect] Customer:', customer?.name, 'HasInitialized:', hasInitializedDay);
     if (customer && hasInitializedDay) {
       loadExistingOrders();
     } else {
-      console.log('❌ [loadExistingOrders-useEffect] Condições não atendidas');
+      //console.log('❌ [loadExistingOrders-useEffect] Condições não atendidas');
     }
   }, [customer, hasInitializedDay, weekNumber, year, selectedDay, loadExistingOrders]);
 
@@ -1640,7 +1818,7 @@ const MobileOrdersPage = ({ customerId }) => {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                      console.log('◀️ [NAVEGAÇÃO] Botão Semana Anterior clicado');
+                      //console.log('◀️ [NAVEGAÇÃO] Botão Semana Anterior clicado');
                       setCurrentDate(addDays(currentDate, -7));
                     }}
                 className="flex items-center gap-1 text-xs px-2 py-1 h-8 flex-shrink-0"
@@ -1663,7 +1841,7 @@ const MobileOrdersPage = ({ customerId }) => {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                      console.log('▶️ [NAVEGAÇÃO] Botão Próxima Semana clicado');
+                      //console.log('▶️ [NAVEGAÇÃO] Botão Próxima Semana clicado');
                       setCurrentDate(addDays(currentDate, 7));
                     }}
                 className="flex items-center gap-1 text-xs px-2 py-1 h-8 flex-shrink-0"
@@ -1688,7 +1866,7 @@ const MobileOrdersPage = ({ customerId }) => {
                     variant={isSelected ? "default" : "outline"}
                     size="sm"
                     onClick={() => {
-                        console.log('🗓️ [NAVEGAÇÃO] Dia selecionado:', day.dayNumber, '(' + day.dayName + ')');
+                        //console.log('🗓️ [NAVEGAÇÃO] Dia selecionado:', day.dayNumber, '(' + day.dayName + ')');
                         setSelectedDay(day.dayNumber);
                       }}
                     className={cn(

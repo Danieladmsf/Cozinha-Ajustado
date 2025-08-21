@@ -38,6 +38,9 @@ const OrdersTab = ({
 }) => {
   const { registerInput, handleKeyDown } = useKeyboardNavigation();
   
+  // Debug: Verificar se os dados com sugestões estão chegando
+  
+  
   // Função para formatar peso baseado na unidade
   const formatWeightByUnit = (item) => {
     const pesoFinal = item.total_weight || item.calculated_total_weight || (item.recipe_cuba_weight * (item.quantity || item.base_quantity || 0)) || 0;
@@ -52,6 +55,7 @@ const OrdersTab = ({
   
 
   if (!currentOrder?.items || currentOrder.items.length === 0) {
+    //console.log('❌ [OrdersTab] Não há itens no currentOrder!');
     return (
       <Card>
         <CardContent className="p-8 text-center">
@@ -130,8 +134,10 @@ const OrdersTab = ({
                 value={mealsExpected === 0 ? '' : mealsExpected || ''}
                 onChange={(e) => {
                   if (isEditMode) {
-                    const parsedValue = utilParseQuantity(e.target.value);
-                    setMealsExpected(parsedValue);
+                    const rawValue = e.target.value;
+                    const parsedValue = utilParseQuantity(rawValue);
+                    //console.log('🍽️ [OrdersTab] Refeições alteradas:', rawValue, '->', parsedValue);
+                    setMealsExpected(parsedValue || 0); // Garantir que nunca seja null/undefined
                   }
                 }}
                 onKeyDown={(e) => handleKeyDown(e, 'meals-expected')}
@@ -177,7 +183,14 @@ const OrdersTab = ({
                     <tr className="border-b border-blue-100 bg-blue-50">
                       {tableHeaders.map((header) => (
                         <th key={header.key} className={header.className}>
-                          {header.label}
+                          {header.key === 'quantity' || header.key === 'porcionamento' ? (
+                            <div className="flex flex-col items-center">
+                              <div className="text-xs font-bold text-amber-600">Sugestão</div>
+                              <div>{header.label}</div>
+                            </div>
+                          ) : (
+                            header.label
+                          )}
                         </th>
                       ))}
                     </tr>
@@ -200,20 +213,57 @@ const OrdersTab = ({
                             </div>
                           </td>
                           <td className="p-2 text-center">
-                            <DecimalInput
-                              ref={(ref) => registerInput(baseInputId, ref)}
-                              value={item.base_quantity === 0 ? '' : item.base_quantity || ''}
-                              onChange={(e) => {
-                                if (isEditMode) {
-                                  updateOrderItem(item.unique_id, 'base_quantity', e.target.value);
+                            {item.suggestion?.has_suggestion && (
+                              <div className="text-xs font-bold text-amber-600 mb-1">Sugestão</div>
+                            )}
+                            <div className="relative flex items-center justify-center">
+                              {/* Sugestão à esquerda (Absoluta) */}
+                              {(() => {
+                                const shouldShow = item.suggestion?.has_suggestion;
+                                if (shouldShow) {
+                                  //console.log(`🟡 [BADGE-RENDER] Renderizando badge para ${item.recipe_name}!`);
                                 }
-                              }}
-                              placeholder={item.unit_type && (item.unit_type.toLowerCase() === 'unid' || item.unit_type.toLowerCase() === 'unid.') ? 'Auto (Refeições)' : '0'}
-                              onKeyDown={(e) => handleKeyDown(e, baseInputId)}
-                              className="text-center text-xs h-8 w-16 border-blue-300 focus:border-blue-500 mx-auto"
-                              placeholder="0"
-                              disabled={!isEditMode}
-                            />
+                                return shouldShow;
+                              })() && (
+                                <div className="absolute right-full mr-2 flex items-center text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200 whitespace-nowrap">
+                                  <span className="font-medium">
+                                    {(() => {
+                                      const originalValue = parseFloat(item.suggestion.suggested_base_quantity || 0);
+                                      const value = originalValue < 1 && originalValue > 0 ? originalValue.toFixed(1) : originalValue.toFixed(item.unit_type?.toLowerCase().includes('kg') ? 1 : 0);
+                                      return value;
+                                    })()}
+                                  </span>
+                                  <button
+                                    onClick={() => {
+                                      if (isEditMode && item.suggestion?.suggested_base_quantity) {
+                                        updateOrderItem(item.unique_id, 'base_quantity', item.suggestion.suggested_base_quantity);
+                                      }
+                                    }}
+                                    className="ml-1 text-amber-700 hover:text-amber-900 transition-colors"
+                                    title="Aplicar sugestão"
+                                    disabled={!isEditMode}
+                                  >
+                                    ✓
+                                  </button>
+                                </div>
+                              )}
+                              
+                              {/* Input principal */}
+                              <DecimalInput
+                                ref={(ref) => registerInput(baseInputId, ref)}
+                                value={item.base_quantity === 0 ? '' : item.base_quantity || ''}
+                                onChange={(e) => {
+                                  if (isEditMode) {
+                                    updateOrderItem(item.unique_id, 'base_quantity', e.target.value);
+                                  }
+                                }}
+                                placeholder={item.unit_type && (item.unit_type.toLowerCase() === 'unid' || item.unit_type.toLowerCase() === 'unid.') ? 'Auto (Refeições)' : '0'}
+                                onKeyDown={(e) => handleKeyDown(e, baseInputId)}
+                                className="text-center text-xs h-8 w-16 border-blue-300 focus:border-blue-500"
+                                placeholder="0"
+                                disabled={!isEditMode}
+                              />
+                            </div>
                           </td>
                           <td className="p-2">
                             <div className="text-center text-xs font-medium text-blue-700">
@@ -222,20 +272,51 @@ const OrdersTab = ({
                           </td>
                           {columnConfig.showPorcionamento && (
                             <td className="p-2 text-center">
-                              <DecimalInput
-                                ref={(ref) => registerInput(percentInputId, ref)}
-                                value={item.adjustment_percentage === 0 ? '' : item.adjustment_percentage || ''}
-                                onChange={(e) => {
-                                  if (isEditMode) {
-                                    updateOrderItem(item.unique_id, 'adjustment_percentage', e.target.value);
-                                  }
-                                }}
-                                onKeyDown={(e) => handleKeyDown(e, percentInputId)}
-                                className="text-center text-xs h-8 w-16 border-blue-300 focus:border-blue-500 mx-auto"
-                                placeholder="0"
-                                disabled={!isEditMode}
-                              />
-                              <div className="text-xs text-gray-500 mt-1">%</div>
+                              {item.suggestion?.has_suggestion && (
+                                <div className="text-xs font-bold text-amber-600 mb-1">Sugestão</div>
+                              )}
+                              <div className="relative flex items-center justify-center">
+                                {/* Sugestão à esquerda para porcionamento (Absoluta) */}
+                                {(() => {
+                                  return item.suggestion?.has_suggestion && item.suggestion.suggested_adjustment_percentage >= 0;
+                                })() && (
+                                  <div className="absolute right-full mr-2 flex items-center text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200 whitespace-nowrap">
+                                    <span className="font-medium">
+                                      {Math.round(item.suggestion.suggested_adjustment_percentage || 0)}
+                                    </span>
+                                    <button
+                                      onClick={() => {
+                                        if (isEditMode && item.suggestion?.suggested_adjustment_percentage) {
+                                          updateOrderItem(item.unique_id, 'adjustment_percentage', item.suggestion.suggested_adjustment_percentage);
+                                        }
+                                      }}
+                                      className="ml-1 text-amber-700 hover:text-amber-900 transition-colors"
+                                      title="Aplicar sugestão"
+                                      disabled={!isEditMode}
+                                    >
+                                      ✓
+                                    </button>
+                                  </div>
+                                )}
+                                
+                                {/* Input principal */}
+                                <div>
+                                  <DecimalInput
+                                    ref={(ref) => registerInput(percentInputId, ref)}
+                                    value={item.adjustment_percentage === 0 ? '' : item.adjustment_percentage || ''}
+                                    onChange={(e) => {
+                                      if (isEditMode) {
+                                        updateOrderItem(item.unique_id, 'adjustment_percentage', e.target.value);
+                                      }
+                                    }}
+                                    onKeyDown={(e) => handleKeyDown(e, percentInputId)}
+                                    className="text-center text-xs h-8 w-16 border-blue-300 focus:border-blue-500"
+                                    placeholder="0"
+                                    disabled={!isEditMode}
+                                  />
+                                  <div className="text-xs text-gray-500 mt-1">%</div>
+                                </div>
+                              </div>
                             </td>
                           )}
                           {columnConfig.showTotalPedido && (

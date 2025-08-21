@@ -35,7 +35,6 @@ export const useCustomerValidation = () => {
       setCustomer(customerData);
       return customerData;
     } catch (error) {
-      console.error('Erro ao validar cliente:', error);
       toast({
         title: "Erro ao carregar dados",
         description: "Não foi possível carregar os dados do cliente.",
