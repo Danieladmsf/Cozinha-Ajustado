@@ -7,20 +7,7 @@ import { RecipeCalculator } from '@/lib/recipeCalculator';
  */
 export function useRecipeInterface({ recipeData, preparationsData, updateRecipeData }) {
   
-  // Usar RecipeCalculator para cálculos quando dados mudarem
-  useEffect(() => {
-    if (preparationsData?.length > 0) {
-      try {
-        const metrics = RecipeCalculator.calculateRecipeMetrics(preparationsData, recipeData);
-        // Atualizar dados calculados
-        Object.keys(metrics).forEach(key => {
-          updateRecipeData(key, metrics[key]);
-        });
-      } catch (error) {
-        // Erro no cálculo automático
-      }
-    }
-  }, [preparationsData?.length]);
+  
   
   // Handlers de navegação
   const handleTabChange = useCallback((setActiveTab, newTab) => {

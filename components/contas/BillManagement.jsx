@@ -6,8 +6,20 @@ import { format, startOfMonth, endOfMonth, parseISO, isSameMonth, isPast, isToda
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
 
+// Debounce helper
+const debounce = (func, delay) => {
+  let timeout;
+  return (...args) => {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), delay);
+  };
+};
+
+import { PortalPricingSystem } from '@/lib/portal-pricing';
+
 // Entities
-import { RecurringBill } from "@/app/api/entities";
+import { RecurringBill, AppSettings } from "@/app/api/entities";
 import { BillPayment } from "@/app/api/entities";
 import { VariableBill } from "@/app/api/entities";
 import { CategoryTree } from "@/app/api/entities";
@@ -19,9 +31,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
+import { DecimalInput } from "@/components/ui/decimal-input";
 
 // Bill Components
 import BillsMonthPicker from "@/components/contas/BillsMonthPicker";
+import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import BillsList from "@/components/contas/BillsList";
 import RecurringBillDialog from "@/components/contas/RecurringBillDialog";
 import AddVariableBillDialog from "@/components/contas/AddVariableBillDialog";
@@ -51,6 +65,12 @@ export default function BillManagement() {
   const [loadingRecurring, setLoadingRecurring] = useState(true);
   const [loadingMonthly, setLoadingMonthly] = useState(true);
 
+  // App Settings
+  const [operationalCost, setOperationalCost] = useState(0);
+  const [profitMargin, setProfitMargin] = useState(0);
+  const [appSettingsId, setAppSettingsId] = useState(null);
+  const [loadingSettings, setLoadingSettings] = useState(true);
+
   // Dialogs
   const [isRecurringDialogOpen, setIsRecurringDialogOpen] = useState(false);
   const [isVariableBillDialogOpen, setIsVariableBillDialogOpen] = useState(false);
@@ -77,13 +97,72 @@ export default function BillManagement() {
   useEffect(() => {
     loadRecurringBills();
     loadCategoryData();
+    loadAppSettings(); // Load app settings on mount
   }, []);
 
   useEffect(() => {
     loadMonthlyBills();
   }, [currentMonth]);
 
+  const loadAppSettings = async () => {
+    try {
+      setLoadingSettings(true);
+      const docSnap = await AppSettings.getById('global'); // Assuming a single global settings document
+      if (docSnap) {
+        setAppSettingsId(docSnap.id);
+        setOperationalCost(docSnap.operational_cost_per_kg || 0);
+        setProfitMargin(docSnap.profit_margin || 0);
+        PortalPricingSystem.init(docSnap);
+      } else {
+        // Create a default settings document if it doesn't exist
+        const newSettings = await AppSettings.createWithId('global', {
+          operational_cost_per_kg: 0,
+          profit_margin: 0
+        });
+        setAppSettingsId(newSettings.id);
+        PortalPricingSystem.init(newSettings);
+      }
+    } catch (error) {
+      showErrorToast("Erro ao carregar configurações do aplicativo");
+    } finally {
+      setLoadingSettings(false);
+    }
+  };
+
+  // Save app settings with debounce
+  const saveAppSettings = async (cost, margin) => {
+    try {
+      if (appSettingsId) {
+        await AppSettings.update(appSettingsId, {
+          operational_cost_per_kg: cost,
+          profit_margin: margin
+        });
+        showToast("Sucesso", "Configurações salvas com sucesso!");
+      } else {
+        // This case should ideally not happen if loadAppSettings works correctly
+        showErrorToast("Erro: ID das configurações não encontrado para salvar.");
+      }
+    } catch (error) {
+      showErrorToast("Erro ao salvar configurações do aplicativo");
+    }
+  };
+
+  const debouncedSaveAppSettings = React.useCallback(
+    debounce(saveAppSettings, 1000), // Debounce por 1 segundo
+    [appSettingsId] // Recria a função se appSettingsId mudar
+  );
+
+  // Salvar configurações automaticamente ao mudar
+  useEffect(() => {
+    if (!loadingSettings) {
+      debouncedSaveAppSettings(operationalCost, profitMargin);
+    }
+  }, [operationalCost, profitMargin, loadingSettings, debouncedSaveAppSettings]);
+
   // Load recurring bills (templates)
+  // Load app settings
+  
+
   const loadRecurringBills = async () => {
     try {
       setLoadingRecurring(true);
@@ -570,6 +649,33 @@ export default function BillManagement() {
           <h1 className="text-2xl sm:text-3xl font-bold">Gestão de Contas</h1>
           <p className="text-gray-500">Controle suas contas a pagar</p>
         </div>
+
+        {/* App Settings Card */}
+        <Card className="w-full md:w-1/2 lg:w-1/3">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-gray-500">Configurações do Aplicativo</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Custo Operacional (por Kg)</label>
+              <DecimalInput
+                value={operationalCost}
+                onChange={(e) => setOperationalCost(parseFloat(e.target.value) || 0)}
+                placeholder="0.00"
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Margem de Lucro (%)</label>
+              <DecimalInput
+                value={profitMargin}
+                onChange={(e) => setProfitMargin(parseFloat(e.target.value) || 0)}
+                placeholder="0.00"
+                className="w-full"
+              />
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="hidden sm:flex items-center bg-gray-100 rounded-lg p-1">

@@ -50,7 +50,8 @@ const DecimalInput = React.forwardRef(({
     
     // Parse and send the numeric value
     if (onChange) {
-      onChange({ target: { value: inputValue } });
+      const numericValue = inputValue.replace(',', '.');
+      onChange({ target: { value: numericValue } });
     }
   };
 

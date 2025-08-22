@@ -66,12 +66,12 @@ export function useRecipeOperations() {
         const newIngredient = {
           id: String(Date.now()),
           name: ingredient.name,
-          weight_raw: 0,
-          weight_frozen: 0,
-          weight_thawed: 0,
-          weight_clean: 0,
-          weight_cooked: 0,
-          weight_portioned: 0,
+          weight_raw: '',
+          weight_frozen: '',
+          weight_thawed: '',
+          weight_clean: '',
+          weight_cooked: '',
+          weight_portioned: '',
           current_price: ingredient.current_price || 0,
           unit: ingredient.unit || 'kg',
           ...ingredient

@@ -23,9 +23,21 @@ export function parseQuantity(value) {
 export function formattedQuantity(quantity) {
   if (quantity === null || quantity === undefined || quantity === "") return "";
   const numValue = parseQuantity(String(quantity)); // Usa parseQuantity para garantir que é um número
-  if (Number.isInteger(numValue)) return String(numValue);
   if (isNaN(numValue)) return "";
-  return numValue.toFixed(1).replace('.', ',');
+
+  // Se for um inteiro, retorna como string de inteiro
+  if (Number.isInteger(numValue)) return String(numValue);
+
+  // Verifica o número de casas decimais
+  const decimalPlaces = (numValue.toString().split('.')[1] || '').length;
+
+  if (decimalPlaces === 1) {
+    return numValue.toFixed(1).replace('.', ',');
+  } else if (decimalPlaces >= 2) { // Para 2 ou mais casas, arredonda para 2
+    return numValue.toFixed(2).replace('.', ',');
+  } else { // Caso padrão, talvez para números como 0.0, 0.1, etc.
+    return numValue.toFixed(1).replace('.', ',');
+  }
 }
 
 /**

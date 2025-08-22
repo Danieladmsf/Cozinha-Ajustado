@@ -17,11 +17,16 @@ export function useRecipeConfig() {
 
   // Atualizar configuração
   const updateConfig = useCallback((key, value) => {
-    setConfig(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  }, []);
+    setConfig(prev => {
+      if (prev[key] === value) {
+        return prev; // Evitar re-render desnecessário
+      }
+      return {
+        ...prev,
+        [key]: value
+      };
+    });
+  }, [setConfig]);
 
   // Carregar tipos de categoria do banco via API
   const loadCategoryTypes = useCallback(async () => {
@@ -188,7 +193,7 @@ export function useRecipeConfig() {
         });
       }
 
-      return { success: true, recipe: result };
+      return { success: true, recipe: result, preparations: preparationsData };
       
     } catch (error) {
       toast({

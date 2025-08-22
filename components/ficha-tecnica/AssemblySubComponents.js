@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import RecipeCalculator from '@/lib/recipeCalculator';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -65,40 +66,47 @@ const AssemblySubComponents = ({
   const componentsWithCalculations = subComponents.map((sc, index) => {
     const componentWeightNumeric = parseNumericValue(sc.assembly_weight_kg) || 0;
     const percentage = totalAssemblyWeight > 0 ? (componentWeightNumeric / totalAssemblyWeight) * 100 : 0;
-
-    // Find source preparation or use external recipe data
+    
+    let proportionalCost = 0;
+    
     const sourcePrep = preparationsData.find(p => p.id === sc.source_id);
-    let inputYieldWeightNumeric = 0;
-    let inputTotalCostNumeric = 0;
 
     if (sourcePrep) {
-      inputYieldWeightNumeric = parseNumericValue(sourcePrep.total_yield_weight_prep);
-      inputTotalCostNumeric = parseNumericValue(sourcePrep.total_cost_prep);
-    } else {
-      // External recipe or fresh ingredient
-      inputYieldWeightNumeric = parseNumericValue(sc.input_yield_weight) || 0;
-      inputTotalCostNumeric = parseNumericValue(sc.input_total_cost) || 0;
-      
-      // Se for ingrediente fresco, calcular custo baseado no preço
-      if (sc.type === 'ingredient' && sc.current_price) {
-        inputTotalCostNumeric = componentWeightNumeric * parseNumericValue(sc.current_price);
-      }
-    }
+      // Recalcula as métricas da preparação dinamicamente para obter os valores mais recentes
+      const sourceMetrics = RecipeCalculator.calculatePreparationMetrics(sourcePrep, preparationsData);
+      let sourceYieldWeight = sourceMetrics.totalYieldWeight;
+      let sourceTotalCost = sourceMetrics.totalCost;
 
-    // Para porcionamento, o custo deve ser direto, não proporcional
-    // Só usar cálculo proporcional quando realmente estamos montando diferentes componentes
-    let proportionalCost;
-    
-    if (sc.type === 'preparation' && componentWeightNumeric >= inputYieldWeightNumeric) {
-      // Se estamos porcionando uma preparação e o peso é >= rendimento original,
-      // usar o custo total direto (não proporcional)
-      proportionalCost = inputTotalCostNumeric;
-    } else if (inputYieldWeightNumeric > 0 && componentWeightNumeric > 0) {
-      // Caso normal: cálculo proporcional
-      proportionalCost = (componentWeightNumeric / inputYieldWeightNumeric) * inputTotalCostNumeric;
-    } else {
-      // Fallback: custo direto
-      proportionalCost = inputTotalCostNumeric;
+      // PATCH: Se o custo da preparação for zero, verifique se é um ingrediente simples.
+      // Isso corrige o problema de ingredientes (ex: Mussarela) adicionados como "Etapas" sem custo.
+      if (sourceTotalCost === 0 && sourcePrep.ingredients?.length === 1 && (!sourcePrep.sub_components || sourcePrep.sub_components.length === 0)) {
+        const singleIngredient = sourcePrep.ingredients[0];
+        const unitPrice = RecipeCalculator.getUnitPrice(singleIngredient);
+        
+        if (unitPrice > 0) {
+          // Usa o preço do ingrediente para calcular o custo proporcional
+          proportionalCost = componentWeightNumeric * unitPrice;
+        }
+      } else {
+         if (sourceYieldWeight > 0) {
+          proportionalCost = (componentWeightNumeric / sourceYieldWeight) * sourceTotalCost;
+        } else {
+          proportionalCost = 0; // Evita divisão por zero e usa 0 se não houver rendimento
+        }
+      }
+    } else { // This 'else' block is for when sourcePrep is NOT found (i.e., it's not a preparation)
+      // External recipe or fresh ingredient
+      const inputYieldWeightNumeric = parseNumericValue(sc.input_yield_weight) || 0;
+      const inputTotalCostNumeric = parseNumericValue(sc.input_total_cost) || 0;
+
+      // Handle raw ingredients added directly to assembly
+      if (sc.type === 'ingredient' && sc.current_price) {
+        proportionalCost = componentWeightNumeric * parseNumericValue(sc.current_price);
+      } else if (inputYieldWeightNumeric > 0) {
+          proportionalCost = (componentWeightNumeric / inputYieldWeightNumeric) * inputTotalCostNumeric;
+      } else {
+          proportionalCost = inputTotalCostNumeric; // Fallback if no yield weight
+      }
     }
 
     return {

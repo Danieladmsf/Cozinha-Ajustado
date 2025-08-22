@@ -212,7 +212,7 @@ const OrdersTab = ({
                                 <span className="font-medium">
                                   {(() => {
                                     const originalValue = parseFloat(item.suggestion.suggested_base_quantity || 0);
-                                    const value = originalValue < 1 && originalValue > 0 ? originalValue.toFixed(1) : originalValue.toFixed(item.unit_type?.toLowerCase().includes('kg') ? 1 : 0);
+                                    const value = utilFormattedQuantity(originalValue);
                                     return value;
                                   })()}
                                 </span>

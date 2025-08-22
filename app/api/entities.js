@@ -87,6 +87,18 @@ const createEntity = (collectionName) => {
       return { id: docRef.id, ...docData };
     },
 
+    // Create new document with a specific ID
+    createWithId: async (id, data) => {
+      const docRef = doc(db, collectionName, id);
+      const docData = {
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      await setDoc(docRef, docData);
+      return { id, ...docData };
+    },
+
     // Update document
     update: async (id, data) => {
       const docRef = doc(db, collectionName, id);
@@ -179,6 +191,7 @@ export const Supplier = createEntity('Supplier');
 export const UserNutrientConfig = createEntity('UserNutrientConfig');
 export const VariableBill = createEntity('VariableBill');
 export const WeeklyMenu = createEntity('WeeklyMenu');
+export const AppSettings = createEntity('AppSettings');
 
 // User entity
 export const UserEntity = createEntity('User');

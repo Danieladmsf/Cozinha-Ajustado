@@ -20,6 +20,7 @@ import {
 } from "@/app/api/entities";
 
 // Sistema de Sugestões
+import { AppSettings } from "@/app/api/entities";
 import { OrderSuggestionManager } from '@/lib/order-suggestions';
 
 // Componentes UI
@@ -103,6 +104,8 @@ const MobileOrdersPage = ({ customerId }) => {
   const [existingOrders, setExistingOrders] = useState({});
   const [hydratedOrders, setHydratedOrders] = useState({}); // Pedidos com preços atualizados
   const [loading, setLoading] = useState(true);
+  const [appSettings, setAppSettings] = useState({ operational_cost_per_kg: 0, profit_margin: 0 });
+  const [pricingReady, setPricingReady] = useState(false);
   
   // UI States
   const [activeTab, setActiveTab] = useState("orders");
@@ -697,6 +700,19 @@ const MobileOrdersPage = ({ customerId }) => {
         const activeRecipes = recipesData.filter(r => r.active !== false);
         setRecipes(recipesData);
 
+        // Carregar AppSettings e inicializar PortalPricingSystem
+        const appSettingsDoc = await AppSettings.getById('global'); // Assuming 'global' ID
+        let newAppSettings = { operational_cost_per_kg: 0, profit_margin: 0 };
+        if (appSettingsDoc) {
+          newAppSettings = {
+            operational_cost_per_kg: appSettingsDoc.operational_cost_per_kg || 0,
+            profit_margin: appSettingsDoc.profit_margin || 0
+          };
+        }
+        setAppSettings(newAppSettings);
+        PortalPricingSystem.init(newAppSettings); // Initialize PortalPricingSystem
+        setPricingReady(true);
+
       } catch (error) {
         toast({ 
           variant: "destructive", 
@@ -834,7 +850,7 @@ const MobileOrdersPage = ({ customerId }) => {
   // REMOVIDO: Agora o hook useNavigationSync gerencia isso
 
   // Preparar itens do pedido baseado no cardápio
-  const orderItems = useMemo(() => {
+      const orderItems = useMemo(() => {
     //console.log('🍽️ [orderItems] useMemo executado');
     //console.log('🍽️ [orderItems] WeeklyMenus:', weeklyMenus.length, 'Recipes:', recipes.length, 'Dia selecionado:', selectedDay);
     
@@ -1011,7 +1027,7 @@ const MobileOrdersPage = ({ customerId }) => {
     
     //console.log('✅ [orderItems] Itens processados:', items.length);
     return items;
-  }, [weeklyMenus, recipes, customer, selectedDay, weekNumber, year, mealsExpected]);
+  }, [weeklyMenus, recipes, customer, selectedDay, weekNumber, year, mealsExpected, appSettings, pricingReady]);
 
   const updateOrderItem = useCallback((uniqueId, field, value) => {
     setCurrentOrder(prev => {
@@ -1126,12 +1142,14 @@ const MobileOrdersPage = ({ customerId }) => {
             ...currentMenuItem, // Base do menu atual (observações limpas)
             quantity: existingItem.quantity || 0,
             base_quantity: existingItem.base_quantity || 0,
-            adjustment_percentage: existingItem.adjustment_percentage || 0
+            adjustment_percentage: existingItem.adjustment_percentage || 0,
+            unit_price: currentMenuItem.unit_price // Explicitly pass the correct unit_price
             // NÃO preservar notes - usar sempre o notes limpo do currentMenuItem
           };
           
           // Recalcular valores com as quantidades do pedido salvo
-          return CategoryLogic.calculateItemValues(mergedItem, 'quantity', mergedItem.quantity, mealsExpected);
+          const finalItem = CategoryLogic.calculateItemValues(mergedItem, 'quantity', mergedItem.quantity, mealsExpected);
+          return finalItem;
         }
         
         // Fallback: item não existe no menu atual
@@ -1165,7 +1183,6 @@ const MobileOrdersPage = ({ customerId }) => {
       };
       
       setCurrentOrder(updatedOrder);
-      //console.log('✅ [initializeOrder] Pedido existente carregado e atualizado');
 
     } else if (orderItems.length > 0 && (!currentOrder || currentOrder.day_of_week !== selectedDay)) {
       //console.log('🆕 [initializeOrder] Criando novo pedido para dia', selectedDay);
@@ -1183,7 +1200,6 @@ const MobileOrdersPage = ({ customerId }) => {
         items: orderItems
       };
       setCurrentOrder(newOrder);
-      //console.log('✅ [initializeOrder] Novo pedido criado');
 
     } else {
       //console.log('🔄 [initializeOrder] Nenhuma ação necessária');
@@ -1915,7 +1931,7 @@ const MobileOrdersPage = ({ customerId }) => {
       <div className="p-4 space-y-4">
         {activeTab === "orders" && (
           <OrdersTab
-            key={`orders-${weekNumber}-${year}-${selectedDay}`} // ✅ Força re-render quando semana/dia muda
+            key={`orders-${weekNumber}-${year}-${selectedDay}-${currentOrder?.total_amount || 0}`} // ✅ Força re-render quando semana/dia/pedido muda
             currentOrder={currentOrder}
             orderItems={orderItems}
             orderTotals={orderTotals}
