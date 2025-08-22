@@ -384,7 +384,7 @@ const OrdersTab = ({
             <div className="text-center">
               <p className="text-sm font-medium text-blue-700">Valor por Refeição</p>
               <p className="text-2xl font-bold text-blue-900">
-                {mealsExpected > 0 ? utilFormatCurrency(orderTotals.totalAmount / mealsExpected) : 'R$ 0,00'}
+                {mealsExpected > 0 ? utilFormatCurrency(orderTotals.finalAmount / mealsExpected) : 'R$ 0,00'}
               </p>
             </div>
             <div className="text-center">

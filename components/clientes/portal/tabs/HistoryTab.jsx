@@ -177,7 +177,7 @@ const HistoryTab = ({
                 <p className="text-lg font-semibold text-gray-800">{utilFormatCurrency(weeklyTotals.finalTotalAmount)}</p>
                 {weeklyTotals.hasReturns && (
                   <p className="text-xs text-gray-500">
-                    Original: {utilFormatCurrency(weeklyTotals.originalTotalAmount)}
+                    Original: {utilFormatCurrency(weeklyTotals.originalTotalAmount)} | Devolução: -{utilFormatCurrency(weeklyTotals.totalDepreciation)}
                   </p>
                 )}
               </div>
@@ -187,47 +187,7 @@ const HistoryTab = ({
       </Card>
 
       {/* Resumo de devoluções se existirem */}
-      {weeklyTotals.hasReturns && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                  <Users className="w-5 h-5 text-gray-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Refeições Esperadas</p>
-                  <p className="text-lg font-semibold text-gray-800">{weeklyTotals.totalMeals}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Package className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Total de Itens</p>
-                  <p className="text-lg font-semibold text-gray-800">{weeklyTotals.totalItemsCount}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Valor Original</p>
-                  <p className="text-lg font-semibold text-gray-800">{utilFormatCurrency(weeklyTotals.originalTotalAmount)}</p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 pt-4 border-t border-orange-200">
-              <div className="flex justify-between items-center">
-                <span className="text-orange-700 font-medium">Devolução: -{utilFormatCurrency(weeklyTotals.totalDepreciation)}</span>
-                <span className="text-lg font-bold text-orange-800">Valor Final: {utilFormatCurrency(weeklyTotals.finalTotalAmount)}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      
 
       {/* Lista de pedidos por dia */}
       <div className="space-y-4">
