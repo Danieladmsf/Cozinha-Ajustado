@@ -50,6 +50,118 @@ export const formatQuantityForDisplay = (quantity, unitType, useKitchenFormat) =
   }
 };
 
+const ConsolidacaoContent = ({
+  loading,
+  ordersByCustomer,
+  consolidateCustomerItems,
+  weekDays,
+  selectedDay,
+  globalKitchenFormat,
+  formatQuantityDisplay,
+}) => (
+    <>
+      {loading.orders ? (
+        <div className="text-center py-12">
+          <Loader2 className="w-8 h-8 mx-auto mb-4 text-blue-500 animate-spin" />
+          <p className="text-gray-600">Carregando pedidos...</p>
+        </div>
+      ) : (
+        <div className="space-y-4 print:space-y-12">
+          {ordersByCustomer.length === 0 ? (
+            <Card className="border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50 to-slate-100">
+              <CardContent className="p-8 text-center">
+                <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <h3 className="font-semibold text-lg text-gray-700 mb-2">
+                  Nenhum Pedido Encontrado
+                </h3>
+                <p className="text-gray-500 text-sm">
+                  Não há pedidos para o dia selecionado com os filtros aplicados.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            ordersByCustomer.map((customerData) => {
+              const consolidatedItems = consolidateCustomerItems(customerData.orders);
+              const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
+              
+              return (
+                <Card 
+                  key={customerData.customer_id} 
+                  className="print:break-after-page print:min-h-screen print:p-8 border-2 border-slate-200 shadow-lg bg-gradient-to-br from-white to-slate-50 hover:shadow-xl transition-shadow duration-200"
+                >
+                  <CardContent className="p-4 print:p-8">
+                  <div className="mb-3 print:mb-12">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-2 print:pb-6">
+                      <div className="flex-1">
+                        <h1 className="text-lg print:text-3xl font-bold text-gray-900">
+                          {customerData.customer_name}
+                        </h1>
+                        <p className="text-sm text-gray-600">
+                          {selectedDayInfo?.fullDate} • {customerData.total_meals} refeições
+                        </p>
+                      </div>
+                      {globalKitchenFormat && (
+                        <div className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-md inline-block mt-1 sm:mt-0 print:hidden">
+                          <ChefHat className="w-3 h-3 inline mr-1" />
+                          Formato Cozinha
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 print:space-y-8">
+                    {Object.keys(consolidatedItems).length === 0 ? (
+                      <p className="text-center text-gray-500 py-8">
+                        Nenhum item no pedido deste cliente.
+                      </p>
+                    ) : (
+                      Object.entries(consolidatedItems).map(([categoryName, items]) => (
+                        <div key={categoryName} className="mb-3 print:mb-10">
+                          <div className="mb-2 print:mb-6">
+                            <h2 className="text-lg print:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-1">
+                              {categoryName}
+                            </h2>
+                          </div>
+                          
+                          <div className="space-y-1 print:space-y-3 pl-3 print:pl-6">
+                            {items.map((item, index) => (
+                              <div 
+                                key={`${item.unique_id || item.recipe_id}_${index}`}
+                                className="flex items-start gap-3 print:gap-6 text-sm print:text-lg"
+                              >
+                                <span className="font-semibold text-blue-700 min-w-[50px] print:min-w-[80px] text-sm">
+                                  {formatQuantityDisplay(item)}
+                                </span>
+                                <span className="text-gray-800 flex-1">
+                                  {item.recipe_name}
+                                  {item.notes && item.notes.trim() && (
+                                    <span className="text-gray-600 italic">
+                                      {' '}({item.notes.trim()})
+                                    </span>
+                                  )}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="hidden print:block mt-12 pt-6 border-t border-gray-300 text-center text-sm text-gray-600">
+                    <p>Cozinha Afeto - Gerado em {format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                    </p>
+                  </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
+      )}
+    </>
+);
+
 const ProgramacaoCozinhaTabs = () => {
   const {
     currentDate,
@@ -119,7 +231,7 @@ const ProgramacaoCozinhaTabs = () => {
       return `${convertedQuantity} –`;
     } else {
       // Formato padrão
-      return `${formattedQuantity(item.quantity)}${item.unit_type ? ` ${item.unit_type}` : ''} –`;
+      return `${(item.quantity ? String(item.quantity).replace('.', ',') : '')}${item.unit_type ? ` ${item.unit_type}` : ''} –`;
     }
   };
 
@@ -1061,110 +1173,6 @@ const ProgramacaoCozinhaTabs = () => {
     );
   }
 
-  const ConsolidacaoContent = () => (
-    <>
-      {loading.orders ? (
-        <div className="text-center py-12">
-          <Loader2 className="w-8 h-8 mx-auto mb-4 text-blue-500 animate-spin" />
-          <p className="text-gray-600">Carregando pedidos...</p>
-        </div>
-      ) : (
-        <div className="space-y-4 print:space-y-12">
-          {ordersByCustomer.length === 0 ? (
-            <Card className="border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50 to-slate-100">
-              <CardContent className="p-8 text-center">
-                <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="font-semibold text-lg text-gray-700 mb-2">
-                  Nenhum Pedido Encontrado
-                </h3>
-                <p className="text-gray-500 text-sm">
-                  Não há pedidos para o dia selecionado com os filtros aplicados.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            ordersByCustomer.map((customerData) => {
-              const consolidatedItems = consolidateCustomerItems(customerData.orders);
-              const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
-              
-              return (
-                <Card 
-                  key={customerData.customer_id} 
-                  className="print:break-after-page print:min-h-screen print:p-8 border-2 border-slate-200 shadow-lg bg-gradient-to-br from-white to-slate-50 hover:shadow-xl transition-shadow duration-200"
-                >
-                  <CardContent className="p-4 print:p-8">
-                  <div className="mb-3 print:mb-12">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-2 print:pb-6">
-                      <div className="flex-1">
-                        <h1 className="text-lg print:text-3xl font-bold text-gray-900">
-                          {customerData.customer_name}
-                        </h1>
-                        <p className="text-sm text-gray-600">
-                          {selectedDayInfo?.fullDate} • {customerData.total_meals} refeições
-                        </p>
-                      </div>
-                      {globalKitchenFormat && (
-                        <div className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-md inline-block mt-1 sm:mt-0 print:hidden">
-                          <ChefHat className="w-3 h-3 inline mr-1" />
-                          Formato Cozinha
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 print:space-y-8">
-                    {Object.keys(consolidatedItems).length === 0 ? (
-                      <p className="text-center text-gray-500 py-8">
-                        Nenhum item no pedido deste cliente.
-                      </p>
-                    ) : (
-                      Object.entries(consolidatedItems).map(([categoryName, items]) => (
-                        <div key={categoryName} className="mb-3 print:mb-10">
-                          <div className="mb-2 print:mb-6">
-                            <h2 className="text-lg print:text-2xl font-bold text-gray-800 border-b border-gray-200 pb-1">
-                              {categoryName}
-                            </h2>
-                          </div>
-                          
-                          <div className="space-y-1 print:space-y-3 pl-3 print:pl-6">
-                            {items.map((item, index) => (
-                              <div 
-                                key={`${item.unique_id || item.recipe_id}_${index}`}
-                                className="flex items-start gap-3 print:gap-6 text-sm print:text-lg"
-                              >
-                                <span className="font-semibold text-blue-700 min-w-[50px] print:min-w-[80px] text-sm">
-                                  {formatQuantityDisplay(item)}
-                                </span>
-                                <span className="text-gray-800 flex-1">
-                                  {item.recipe_name}
-                                  {item.notes && item.notes.trim() && (
-                                    <span className="text-gray-600 italic">
-                                      {' '}({item.notes.trim()})
-                                    </span>
-                                  )}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  <div className="hidden print:block mt-12 pt-6 border-t border-gray-300 text-center text-sm text-gray-600">
-                    <p>Cozinha Afeto - Gerado em {format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                    </p>
-                  </div>
-                  </CardContent>
-                </Card>
-              );
-            })
-          )}
-        </div>
-      )}
-    </>
-  );
-
   return (
     <div className="space-y-6 consolidacao-container">
       <Card className="print:hidden border-2 border-blue-200 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50">
@@ -1355,7 +1363,15 @@ const ProgramacaoCozinhaTabs = () => {
               </TabsList>
 
               <TabsContent value="por-empresa" className="mt-6">
-                <ConsolidacaoContent />
+                <ConsolidacaoContent
+                    loading={loading}
+                    ordersByCustomer={ordersByCustomer}
+                    consolidateCustomerItems={consolidateCustomerItems}
+                    weekDays={weekDays}
+                    selectedDay={selectedDay}
+                    globalKitchenFormat={globalKitchenFormat}
+                    formatQuantityDisplay={formatQuantityDisplay}
+                />
               </TabsContent>
 
               <TabsContent value="salada" className="mt-6">
@@ -1415,4 +1431,3 @@ const ProgramacaoCozinhaTabs = () => {
 };
 
 export default ProgramacaoCozinhaTabs;
-

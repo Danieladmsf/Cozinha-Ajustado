@@ -371,6 +371,18 @@ export default function RecipeTechnical() {
     handleClear(resetRecipeData, resetModals, setActiveTab);
   };
 
+  const handleRefresh = () => {
+    if (currentRecipeId) {
+      loadRecipeById(currentRecipeId);
+    } else {
+      toast({
+        title: "Nenhuma receita selecionada",
+        description: "Por favor, busque e selecione uma receita para atualizar.",
+        variant: "destructive"
+      });
+    }
+  };
+
   // ==== FUNÇÃO DE RECÁLCULO AUTOMÁTICO ====
   const recalculateRecipeMetrics = useCallback(() => {
     console.log("[UI] recalculateRecipeMetrics triggered.");
@@ -1399,7 +1411,8 @@ export default function RecipeTechnical() {
                 </p>
               </div>
               <RefreshButton 
-                text="Atualizar Página"
+                text="Atualizar Dados"
+                onClick={handleRefresh}
                 className="shrink-0"
               />
             </div>

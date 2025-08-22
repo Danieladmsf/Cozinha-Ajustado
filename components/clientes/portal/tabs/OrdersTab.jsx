@@ -201,7 +201,10 @@ const OrdersTab = ({
                             <div>
                               <p className="font-medium text-blue-900 text-xs">{item.recipe_name}</p>
                               <p className="text-xs text-blue-600">
-                                {utilFormatCurrency(item.unit_price)}/{item.unit_type}
+                                {(() => {
+                                  console.log(`DEBUG PREÇO: OrdersTab - Rendering ${item.recipe_name}. unit_price: ${item.unit_price}, unit_type: ${item.unit_type}`);
+                                  return utilFormatCurrency(item.unit_price);
+                                })()}/{item.unit_type}
                               </p>
                             </div>
                           </td>

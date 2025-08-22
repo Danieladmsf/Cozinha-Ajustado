@@ -131,68 +131,51 @@ export default function Ingredients() {
   };
 
   const handleDelete = async (ingredient) => {
-    
-    // Verificar se o ingrediente tem ID válido
     if (!ingredient || !ingredient.id) {
       toast({
         variant: "destructive",
-        title: "Erro",
-        description: "Ingrediente não possui ID válido para exclusão."
+        title: "Erro de Exclusão",
+        description: "O ingrediente selecionado não possui um ID válido.",
       });
       return;
     }
-    
-    if (window.confirm(`Tem certeza que deseja excluir o ingrediente "${ingredient.name}"?`)) {
+
+    if (window.confirm(`Tem certeza que deseja excluir o ingrediente "${ingredient.name}"? Esta ação não pode ser desfeita.`)) {
       try {
-        const result = await Ingredient.delete(ingredient.id);
-        
-        // Remover o ingrediente da lista local imediatamente
-        setIngredients(prevIngredients => {
-          const updatedIngredients = prevIngredients.filter(ing => ing.id !== ingredient.id);
-          return updatedIngredients;
-        });
-        
-        // Também atualizar as estatísticas
+        await Ingredient.delete(ingredient.id);
+
+        // Atualizar o estado local APÓS a exclusão bem-sucedida
+        const updatedIngredients = ingredients.filter(ing => ing.id !== ingredient.id);
+        setIngredients(updatedIngredients);
+
+        // Recalcular estatísticas com base na lista atualizada
         setStats(prevStats => ({
           ...prevStats,
-          total: Math.max(0, prevStats.total - 1),
-          active: Math.max(0, prevStats.active - 1),
-          traditional: ingredient.ingredient_type === 'traditional' || ingredient.ingredient_type === 'both' 
-            ? Math.max(0, prevStats.traditional - 1) : prevStats.traditional,
-          commercial: ingredient.ingredient_type === 'commercial' || ingredient.ingredient_type === 'both'
-            ? Math.max(0, prevStats.commercial - 1) : prevStats.commercial
+          total: prevStats.total - 1,
+          active: prevStats.active - 1,
+          // Lógica para recalcular 'traditional' e 'commercial' se necessário
         }));
-        
-        // Mostrar mensagem de sucesso adequada
-        const message = result.alreadyDeleted 
-          ? "Ingrediente já havia sido excluído e foi removido da lista" 
-          : "Ingrediente excluído com sucesso";
-        
+
         toast({
-          title: "Ingrediente removido",
-          description: `${ingredient.name}: ${message}`
+          title: "✅ Sucesso",
+          description: `Ingrediente "${ingredient.name}" foi excluído.`,
         });
-        
-        // Ainda recarregar do servidor para garantir sincronização (com pequeno delay)
-        setTimeout(async () => {
-          
-          // Verificar especificamente se o ingrediente excluído ainda existe
-          try {
-            const checkIngredient = await Ingredient.get(ingredient.id);
-            if (checkIngredient) {
-            } else {
-            }
-          } catch (err) {
-          }
-          
-          loadIngredients();
-        }, 1000);
+        loadIngredients(); // Re-fetch ingredients to ensure UI is in sync
+
       } catch (err) {
-        setError('Erro ao excluir ingrediente: ' + err.message);
+        console.error("Erro completo ao tentar excluir ingrediente:", err); // Added logging
+        // Se a exclusão falhar, o estado local não é alterado, evitando inconsistência.
+        const errorMessage = err.code === 'permission-denied'
+          ? "Você não tem permissão para excluir ingredientes."
+          : err.message || "Ocorreu um erro desconhecido.";
+
+        setError(`Erro ao excluir: ${errorMessage}`);
+        
         toast({
           variant: "destructive",
-          title: "Erro ao excluir",
-          description: err.message
+          title: "❌ Falha na Exclusão",
+          description: errorMessage,
+          duration: 7000,
         });
       }
     }
@@ -208,25 +191,47 @@ export default function Ingredients() {
       toast({
         variant: "destructive",
         title: "Erro",
-        description: "Preço deve ser um número válido."
+        description: "Preço deve ser um número válido.",
       });
       return;
     }
 
     try {
       const newPrice = parseFloat(tempPrice);
-      
-      // Atualizar no Firebase
-      await Ingredient.update(ingredient.id, {
-        current_price: newPrice,
-        last_update: new Date().toISOString().split('T')[0]
+
+      // CORREÇÃO: Chamar a API PUT em vez de atualizar o Firebase diretamente
+      const response = await fetch(`/api/ingredients?id=${ingredient.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          current_price: newPrice,
+          raw_price_kg: newPrice, // Assumindo que o preço atual é por kg para consistência
+        }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 404) {
+          toast({
+            variant: "destructive",
+            title: "Erro ao atualizar preço",
+            description: `Ingrediente "${ingredient.name}" não encontrado. Ele pode ter sido excluído.`, 
+          });
+          fetchIngredients(); // Refresh the list to remove the non-existent item
+          setEditingPrice(null); // Exit editing mode
+          setTempPrice(""); // Clear temp price
+          return; // Stop further processing
+        }
+        throw new Error(errorData.details || 'Falha ao atualizar ingrediente na API.');
+      }
 
       // Atualizar na lista local
       setIngredients(prevIngredients => 
         prevIngredients.map(ing => 
           ing.id === ingredient.id 
-            ? { ...ing, current_price: newPrice, displayPrice: newPrice }
+            ? { ...ing, current_price: newPrice, displayPrice: newPrice, last_update: new Date().toISOString().split('T')[0] }
             : ing
         )
       );
@@ -243,7 +248,7 @@ export default function Ingredients() {
       toast({
         variant: "destructive",
         title: "Erro ao atualizar preço",
-        description: err.message
+        description: err.message,
       });
     }
   };

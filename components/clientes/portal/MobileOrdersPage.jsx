@@ -106,6 +106,8 @@ const MobileOrdersPage = ({ customerId }) => {
   const [loading, setLoading] = useState(true);
   const [appSettings, setAppSettings] = useState({ operational_cost_per_kg: 0, profit_margin: 0 });
   const [pricingReady, setPricingReady] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const handleRefresh = () => setRefreshTrigger(p => p + 1);
   
   // UI States
   const [activeTab, setActiveTab] = useState("orders");
@@ -729,6 +731,66 @@ const MobileOrdersPage = ({ customerId }) => {
     }
   }, [customerId]); // ✅ CORRIGIDO: só executa uma vez por cliente
 
+  // Define a função de busca de dados como um useCallback
+  const fetchData = useCallback(async (dateToFetch) => { // Recebe a data como argumento
+    toast({ description: "Atualizando todos os dados...", duration: 2500 });
+    setLoading(true);
+    try {
+      const weekNumberForFetch = getWeek(dateToFetch, { weekStartsOn: 1 });
+      const yearForFetch = getYear(dateToFetch);
+
+      // 1. Recarregar Receitas
+      const recipesData = await Recipe.list();
+      console.log('DEBUG PREÇO: fetchData - recipesData fetched:', recipesData.length, 'recipes');
+      const saladaAbobrinhaRecipe = recipesData.find(r => r.name === 'S. Abobrinha'); // Assuming 'S. Abobrinha' is the exact name
+      if (saladaAbobrinhaRecipe) {
+        console.log('DEBUG PREÇO: fetchData - Salada Abobrinha recipe data:', JSON.stringify(saladaAbobrinhaRecipe, null, 2));
+      }
+      setRecipes(recipesData);
+
+      // 2. Recarregar Cardápios da Semana
+      const allMenus = await WeeklyMenu.list();
+      const weekKey = `${yearForFetch}-W${String(weekNumberForFetch).padStart(2, '0')}`;
+      const menusData = allMenus.filter(menu => menu.week_key === weekKey);
+      console.log('DEBUG PREÇO: fetchData - menusData fetched:', menusData.length, 'menus');
+      setWeeklyMenus(menusData);
+
+      // 3. Recarregar Pedidos Existentes
+      if (customer) {
+        // Chamar a lógica de loadExistingOrders diretamente aqui, passando os parâmetros
+        const orders = await Order.query([
+          { field: 'customer_id', operator: '==', value: customer.id },
+          { field: 'week_number', operator: '==', value: weekNumberForFetch },
+          { field: 'year', operator: '==', value: yearForFetch }
+        ]);
+        const ordersByDay = {};
+        orders.forEach(order => {
+          ordersByDay[order.day_of_week] = order;
+        });
+        console.log('DEBUG PREÇO: fetchData - existingOrders fetched:', Object.keys(ordersByDay).length, 'orders');
+        setExistingOrders(ordersByDay);
+      }
+      
+      toast({
+        title: "Dados atualizados!",
+        description: "As informações foram recarregadas do servidor.",
+        className: "border-green-200 bg-green-50 text-green-800"
+      });
+
+    } catch (error) {
+      toast({ variant: "destructive", title: "Erro ao atualizar", description: error.message });
+    } finally {
+      setLoading(false);
+    }
+  }, [customer, toast, setRecipes, setWeeklyMenus, setLoading, setExistingOrders]); // Dependências: apenas as estáveis e o customer
+
+  // Efeito para atualização manual de dados
+  useEffect(() => {
+    if (refreshTrigger === 0) return; // Não executar na montagem inicial
+
+    fetchData(currentDate); // Passa a currentDate atual para a função
+  }, [refreshTrigger, fetchData, currentDate]); // Depende de refreshTrigger, fetchData (que é estável agora) e currentDate
+
   // Carregamento de cardápios quando semana muda
   useEffect(() => {
     //console.log('🔄 [loadWeeklyMenus] useEffect executado');
@@ -744,9 +806,10 @@ const MobileOrdersPage = ({ customerId }) => {
       }
 
       // Limpar estado antes de carregar novo cardápio
-      //console.log('🧹 [loadWeeklyMenus] Limpando estado atual');
-      setCurrentOrder(null);
-      setExistingOrders({});
+      // As linhas abaixo foram comentadas em 22/08/2025 para evitar que o pedido seja apagado durante a atualização manual.
+      // A lógica agora preserva o estado do pedido e apenas atualiza os dados do cardápio.
+      // setCurrentOrder(null);
+      // setExistingOrders({});
 
       try {
         const allMenus = await WeeklyMenu.list();
@@ -1823,6 +1886,7 @@ const MobileOrdersPage = ({ customerId }) => {
               text="Atualizar"
               size="sm"
               className="shrink-0"
+              onClick={handleRefresh}
             />
           </div>
 
