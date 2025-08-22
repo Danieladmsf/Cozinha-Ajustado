@@ -3,7 +3,8 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { History, Calendar, Users, DollarSign, CheckCircle, Clock, AlertCircle, Package } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { History, Calendar, Users, DollarSign, CheckCircle, Clock, AlertCircle, Package, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formattedQuantity as utilFormattedQuantity, formatCurrency as utilFormatCurrency, sumCurrency as utilSumCurrency } from "@/components/utils/orderUtils";
@@ -18,9 +19,10 @@ const HistoryTab = ({
   weekNumber,
   customer,
   existingWasteData = {},
-  recipes = [] // Adicionar acesso às receitas para sincronização
+  recipes = [],
+  selectedDay
 }) => {
-  // Calcular totais da semana considerando devoluções
+  // Calcular totais da semana (FIXO)
   const weeklyTotals = React.useMemo(() => {
     let totalMeals = 0;
     let originalTotalAmount = 0;
@@ -32,31 +34,22 @@ const HistoryTab = ({
     Object.entries(existingOrders).forEach(([dayIndex, order]) => {
       if (order) {
         totalMeals += order.total_meals_expected || 0;
-        // Usar soma recalculada dos itens em vez do total_amount salvo
         const recalculatedTotal = order.items ? utilSumCurrency(order.items.map(item => item.total_price || 0)) : (order.total_amount || 0);
-        
-
-        
         originalTotalAmount += recalculatedTotal;
         totalItemsCount += order.total_items || 0;
         ordersCount += 1;
 
-        // Sincronizar itens com receitas atuais antes de calcular peso
         const syncedItems = order.items ? order.items.map(item => {
           const recipe = recipes.find(r => r.id === item.recipe_id);
           if (recipe) {
-            // Usar PortalDataSync para garantir dados atualizados
             return PortalDataSync.syncItemSafely(item, recipe);
           }
           return item;
         }) : [];
         
-        // Usar calculadora centralizada de peso com itens sincronizados
         const dayWeight = calculateTotalWeight(syncedItems);
-
         totalWeight += dayWeight;
 
-        // Calcular depreciação para este dia específico
         const wasteDataForDay = existingWasteData[dayIndex];
         if (wasteDataForDay && wasteDataForDay.items && order.items) {
           const depreciationData = calculateTotalDepreciation(wasteDataForDay.items, order.items);
@@ -80,6 +73,59 @@ const HistoryTab = ({
       hasReturns: totalDepreciation > 0
     };
   }, [existingOrders, existingWasteData, recipes]);
+
+  // Calcular totais cumulativos (DINÂMICO)
+  const cumulativeTotals = React.useMemo(() => {
+    let totalMeals = 0;
+    let originalTotalAmount = 0;
+    let totalDepreciation = 0;
+    let ordersCount = 0;
+    let totalItemsCount = 0;
+    let totalWeight = 0;
+
+    for (let day = 1; day <= selectedDay; day++) {
+      const order = existingOrders[day];
+      if (order) {
+        totalMeals += order.total_meals_expected || 0;
+        const recalculatedTotal = order.items ? utilSumCurrency(order.items.map(item => item.total_price || 0)) : (order.total_amount || 0);
+        originalTotalAmount += recalculatedTotal;
+        totalItemsCount += order.total_items || 0;
+        ordersCount += 1;
+
+        const syncedItems = order.items ? order.items.map(item => {
+          const recipe = recipes.find(r => r.id === item.recipe_id);
+          if (recipe) {
+            return PortalDataSync.syncItemSafely(item, recipe);
+          }
+          return item;
+        }) : [];
+        
+        const dayWeight = calculateTotalWeight(syncedItems);
+        totalWeight += dayWeight;
+
+        const wasteDataForDay = existingWasteData[day];
+        if (wasteDataForDay && wasteDataForDay.items && order.items) {
+          const depreciationData = calculateTotalDepreciation(wasteDataForDay.items, order.items);
+          totalDepreciation += depreciationData.totalDepreciation;
+        }
+      }
+    }
+
+    const finalTotalAmount = originalTotalAmount - totalDepreciation;
+    const averageMealCost = totalMeals > 0 ? finalTotalAmount / totalMeals : 0;
+
+    return { 
+      totalMeals, 
+      originalTotalAmount,
+      totalDepreciation,
+      finalTotalAmount,
+      ordersCount,
+      totalItemsCount,
+      totalWeight,
+      averageMealCost,
+      hasReturns: totalDepreciation > 0
+    };
+  }, [existingOrders, existingWasteData, recipes, selectedDay]);
 
   const getDayStatus = (dayIndex) => {
     const order = existingOrders[dayIndex];
@@ -122,58 +168,102 @@ const HistoryTab = ({
 
   return (
     <div className="space-y-6">
-      {/* Header com informações da semana */}
+      {/* Card Dinâmico (Progresso da Semana) */}
+      <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-blue-800">
+            <TrendingUp className="w-5 h-5" />
+            Progresso da Semana (até {weekDays.find(d => d.dayNumber === selectedDay)?.dayName || ''})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm font-medium text-blue-700">Dia {selectedDay} de 5</span>
+              <span className="text-sm font-bold text-blue-700">{((selectedDay / 5) * 100).toFixed(0)}%</span>
+            </div>
+            <Progress value={(selectedDay / 5) * 100} className="w-full" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center"><Users className="w-5 h-5 text-green-600" /></div>
+              <div>
+                <p className="text-sm text-gray-600">Refeições (Acumul.)</p>
+                <p className="text-lg font-semibold text-gray-800">{cumulativeTotals.totalMeals}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center"><Package className="w-5 h-5 text-orange-600" /></div>
+              <div>
+                <p className="text-sm text-gray-600">Peso (Acumul.)</p>
+                <p className="text-lg font-semibold text-gray-800">{formatWeightDisplay(cumulativeTotals.totalWeight)}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center"><DollarSign className="w-5 h-5 text-teal-600" /></div>
+              <div>
+                <p className="text-sm text-gray-600">Média (Acumul.)</p>
+                <p className="text-lg font-semibold text-gray-800">{utilFormatCurrency(cumulativeTotals.averageMealCost)}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center"><DollarSign className="w-5 h-5 text-purple-600" /></div>
+              <div>
+                <p className="text-sm text-gray-600">Valor (Acumul.)</p>
+                <p className="text-lg font-semibold text-gray-800">{utilFormatCurrency(cumulativeTotals.finalTotalAmount)}</p>
+                {cumulativeTotals.hasReturns && (
+                  <p className="text-xs text-gray-500">
+                    Original: {utilFormatCurrency(cumulativeTotals.originalTotalAmount)} | Devolução: -{utilFormatCurrency(cumulativeTotals.totalDepreciation)}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Card Fixo (Total da Semana) */}
       <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-purple-800">
             <History className="w-5 h-5" />
-            Histórico da Semana {weekNumber}/{year}
+            Resumo Total da Semana {weekNumber}/{year}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-blue-600" />
-              </div>
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center"><Calendar className="w-5 h-5 text-blue-600" /></div>
               <div>
                 <p className="text-sm text-gray-600">Pedidos Realizados</p>
                 <p className="text-lg font-semibold text-gray-800">{weeklyTotals.ordersCount}/5 dias</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <Users className="w-5 h-5 text-green-600" />
-              </div>
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center"><Users className="w-5 h-5 text-green-600" /></div>
               <div>
                 <p className="text-sm text-gray-600">Total de Refeições</p>
                 <p className="text-lg font-semibold text-gray-800">{weeklyTotals.totalMeals}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                <Package className="w-5 h-5 text-orange-600" />
-              </div>
+              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center"><Package className="w-5 h-5 text-orange-600" /></div>
               <div>
                 <p className="text-sm text-gray-600">Peso Total</p>
                 <p className="text-lg font-semibold text-gray-800">{formatWeightDisplay(weeklyTotals.totalWeight)}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-teal-600" />
-              </div>
+              <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center"><DollarSign className="w-5 h-5 text-teal-600" /></div>
               <div>
                 <p className="text-sm text-gray-600">Média por Refeição</p>
                 <p className="text-lg font-semibold text-gray-800">{utilFormatCurrency(weeklyTotals.averageMealCost)}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-purple-600" />
-              </div>
+              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center"><DollarSign className="w-5 h-5 text-purple-600" /></div>
               <div>
-                <p className="text-sm text-gray-600">Valor Total</p>
+                <p className="text-sm text-gray-600">Valor Total Final</p>
                 <p className="text-lg font-semibold text-gray-800">{utilFormatCurrency(weeklyTotals.finalTotalAmount)}</p>
                 {weeklyTotals.hasReturns && (
                   <p className="text-xs text-gray-500">
@@ -186,12 +276,9 @@ const HistoryTab = ({
         </CardContent>
       </Card>
 
-      {/* Resumo de devoluções se existirem */}
-      
-
       {/* Lista de pedidos por dia */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Pedidos por Dia</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Detalhes por Dia</h3>
         
         {weekDays.map((day) => {
           const dayIndex = day.dayNumber;
@@ -204,22 +291,14 @@ const HistoryTab = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="text-center">
-                      <p className="text-2xl font-bold text-gray-800">
-                        {format(day.date, 'dd', { locale: ptBR })}
-                      </p>
-                      <p className="text-xs text-gray-500 uppercase">
-                        {day.dayShort}
-                      </p>
+                      <p className="text-2xl font-bold text-gray-800">{format(day.date, 'dd', { locale: ptBR })}</p>
+                      <p className="text-xs text-gray-500 uppercase">{day.dayShort}</p>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-800">
-                        {format(day.date, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-                      </h4>
+                      <h4 className="font-semibold text-gray-800">{format(day.date, "EEEE, dd 'de' MMMM", { locale: ptBR })}</h4>
                       <div className="flex items-center gap-2 mt-1">
                         {getStatusIcon(status)}
-                        <Badge className={getStatusColor(status)}>
-                          {getStatusText(status)}
-                        </Badge>
+                        <Badge className={getStatusColor(status)}>{getStatusText(status)}</Badge>
                       </div>
                     </div>
                   </div>
@@ -234,7 +313,6 @@ const HistoryTab = ({
                         <div>
                           <p className="text-gray-600">Peso</p>
                           <p className="font-semibold">{(() => {
-                            // Sincronizar itens antes de calcular peso
                             const syncedItems = order.items ? order.items.map(item => {
                               const recipe = recipes.find(r => r.id === item.recipe_id);
                               if (recipe) {
@@ -242,9 +320,7 @@ const HistoryTab = ({
                               }
                               return item;
                             }) : [];
-                            
                             const weight = calculateTotalWeight(syncedItems);
-
                             return formatWeightDisplay(weight);
                           })()}</p>
                         </div>
@@ -254,9 +330,7 @@ const HistoryTab = ({
                         </div>
                       </div>
                       {order.total_items && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          {utilFormattedQuantity(order.total_items)} itens pedidos
-                        </p>
+                        <p className="text-xs text-gray-500 mt-1">{utilFormattedQuantity(order.total_items)} itens pedidos</p>
                       )}
                     </div>
                   )}
@@ -264,9 +338,7 @@ const HistoryTab = ({
                 
                 {order?.general_notes && (
                   <div className="mt-3 pt-3 border-t border-gray-100">
-                    <p className="text-sm text-gray-600">
-                      <strong>Observações:</strong> {order.general_notes}
-                    </p>
+                    <p className="text-sm text-gray-600"><strong>Observações:</strong> {order.general_notes}</p>
                   </div>
                 )}
               </CardContent>

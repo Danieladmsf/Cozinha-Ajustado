@@ -1329,70 +1329,46 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Hidratar todos os pedidos da semana com preços atualizados (para HistoryTab)
   useEffect(() => {
-    if (!hasInitializedDay || !orderItems || orderItems.length === 0 || Object.keys(existingOrders).length === 0) {
+    if (!hasInitializedDay || !recipes || recipes.length === 0 || Object.keys(existingOrders).length === 0 || !pricingReady) {
       return;
     }
     
     const updatedOrders = {};
-    let hasAnyChanges = false;
     
     Object.entries(existingOrders).forEach(([dayIndex, order]) => {
       if (order && order.items) {
-        // Hidratar itens do pedido com preços atualizados
         const hydratedItems = order.items.map(orderItem => {
-          // Encontrar item correspondente nos orderItems atualizados (com preços novos)
-          const currentMenuItem = orderItems.find(oi => 
-            oi.unique_id === orderItem.unique_id || 
-            oi.recipe_id === orderItem.recipe_id
-          );
-          
-          if (currentMenuItem) {
-            const updatedItem = {
+          const recipe = recipes.find(r => r.id === orderItem.recipe_id);
+          if (recipe) {
+            const containerType = getRecipeUnitType(recipe);
+            const unitPrice = PortalPricingSystem.recalculateItemUnitPrice(orderItem, recipe, containerType);
+            
+            return {
               ...orderItem,
-              unit_price: currentMenuItem.unit_price,
-              unit_type: currentMenuItem.unit_type,
-              total_price: (orderItem.quantity || 0) * (currentMenuItem.unit_price || 0)
+              unit_price: unitPrice,
+              unit_type: containerType,
+              total_price: (orderItem.quantity || 0) * unitPrice
             };
-            
-            // Verificar se houve mudança
-            if (updatedItem.unit_price !== orderItem.unit_price || 
-                updatedItem.total_price !== orderItem.total_price ||
-                updatedItem.unit_type !== orderItem.unit_type) {
-              hasAnyChanges = true;
-            }
-            
-            return updatedItem;
           }
-          return orderItem;
+          return orderItem; // Manter item original se a receita não for encontrada
         });
         
-        // Recalcular total do pedido
         const newTotalAmount = utilSumCurrency(hydratedItems.map(item => item.total_price || 0));
-        
-        // Debug apenas para mudanças significativas
-        if (process.env.NODE_ENV === 'development' && Math.abs(newTotalAmount - (order.total_amount || 0)) > 1) {
-
-        }
         
         updatedOrders[dayIndex] = {
           ...order,
           items: hydratedItems,
           total_amount: newTotalAmount
         };
-        
-        if (newTotalAmount !== (order.total_amount || 0)) {
-          hasAnyChanges = true;
-        }
       } else {
         updatedOrders[dayIndex] = order;
       }
     });
     
-    // Usar JSON.stringify para uma comparação mais robusta e evitar loops infinitos
     if (JSON.stringify(updatedOrders) !== JSON.stringify(hydratedOrders)) {
       setHydratedOrders(updatedOrders);
     }
-  }, [hasInitializedDay, orderItems, existingOrders]);
+  }, [hasInitializedDay, recipes, existingOrders, pricingReady, hydratedOrders]);
 
   // Calcular totais, depreciação por devoluções e descontos por não recebimento
   const orderTotals = useMemo(() => {
@@ -2068,6 +2044,7 @@ const MobileOrdersPage = ({ customerId }) => {
             customer={customer}
             existingWasteData={weeklyWasteData}
             recipes={recipes}
+            selectedDay={selectedDay}
           />
         )}
       </div>
