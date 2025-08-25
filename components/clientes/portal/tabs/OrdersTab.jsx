@@ -252,8 +252,14 @@ const OrdersTab = ({
                             />
                           </td>
                           <td className="p-2">
-                            <div className="text-center text-xs font-medium text-blue-700">
-                              {item.unit_type.charAt(0).toUpperCase() + item.unit_type.slice(1)}
+                            <div className="text-center text-xs font-medium">
+                              {item.unit_type ? (
+                                <span className="text-blue-700">
+                                  {item.unit_type.charAt(0).toUpperCase() + item.unit_type.slice(1)}
+                                </span>
+                              ) : (
+                                <span className="text-red-500">sem porcionamento</span>
+                              )}
                             </div>
                           </td>
                           {columnConfig.showPorcionamento && (

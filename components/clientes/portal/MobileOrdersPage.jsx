@@ -107,15 +107,22 @@ const MobileOrdersPage = ({ customerId }) => {
         // Limpar sessões antigas (mais de 5 minutos)
         const activeSessions = existingSessions.filter(s => (now - s.timestamp) < 300000);
         
-        // Adicionar esta sessão
-        const newSession = {
-          id: sessionId,
-          timestamp: now,
-          url: window.location.href,
-          userAgent: navigator.userAgent
-        };
+        // Adicionar ou atualizar esta sessão
+        const existingSessionIndex = activeSessions.findIndex(s => s.id === sessionId);
         
-        activeSessions.push(newSession);
+        if (existingSessionIndex !== -1) {
+          // Atualizar timestamp da sessão existente
+          activeSessions[existingSessionIndex].timestamp = now;
+        } else {
+          // Adicionar nova sessão se não existir
+          const newSession = {
+            id: sessionId,
+            timestamp: now,
+            url: window.location.href,
+            userAgent: navigator.userAgent
+          };
+          activeSessions.push(newSession);
+        }
         localStorage.setItem(sessionKey, JSON.stringify(activeSessions));
         
         console.log('📱 [SESSION TRACKER] Sessão registrada:', {
@@ -1014,26 +1021,8 @@ const MobileOrdersPage = ({ customerId }) => {
     const menu = weeklyMenus[0];
     const menuData = menu?.menu_data?.[selectedDay];
     
-    // Debug específico para o dia 26/08
-    if (currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) {
-      //console.log('📅 [DEBUG 26/08] Menu completo:', menu);
-      //console.log('📅 [DEBUG 26/08] MenuData para dia', selectedDay, ':', menuData);
-      if (menuData) {
-        //console.log('📅 [DEBUG 26/08] Categorias encontradas:', Object.keys(menuData));
-        Object.keys(menuData).forEach(cat => {
-          if (cat.toLowerCase().includes('acompanhamento') || cat.toLowerCase().includes('acomp')) {
-            //console.log('🥗 [DEBUG 26/08] Categoria acompanhamento RAW:', cat, menuData[cat]);
-          }
-        });
-      }
-    }
-    
     if (!menuData) {
-    //console.log('❌ [orderItems] Nenhum menu para o dia', selectedDay);
-    if (currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) {
-    //console.log('❌ [DEBUG 26/08] Menu_data completo:', menu?.menu_data);
-    }
-    return [];
+      return [];
     }
 
     const items = [];
@@ -1046,28 +1035,10 @@ const MobileOrdersPage = ({ customerId }) => {
     Object.entries(menuData).forEach(([categoryId, categoryData]) => {
       const itemsArray = Array.isArray(categoryData) ? categoryData : categoryData.items;
       
-      // Log específico para categoria acompanhamento no dia 26/08
-      if ((currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) && 
-          (categoryId.toLowerCase().includes('acompanhamento') || categoryId.toLowerCase().includes('acomp'))) {
-        //console.log('🥗 [DEBUG 26/08] CATEGORIA ACOMPANHAMENTO encontrada:', categoryId);
-        //console.log('🥗 [DEBUG 26/08] CategoryData:', categoryData);
-        //console.log('🥗 [DEBUG 26/08] ItemsArray length:', itemsArray?.length);
-        //console.log('🥗 [DEBUG 26/08] ItemsArray:', itemsArray);
-      }
-      
       if (itemsArray && Array.isArray(itemsArray)) {
         
         itemsArray.forEach((item, itemIndex) => {
           processedItems++;
-          
-          // Log específico para itens de acompanhamento no dia 26/08
-          if ((currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) && 
-              (categoryId.toLowerCase().includes('acompanhamento') || categoryId.toLowerCase().includes('acomp'))) {
-            //console.log(`🥗 [DEBUG 26/08] Item ${itemIndex + 1} da categoria acompanhamento:`);
-            //console.log(`🥗 [DEBUG 26/08]   - Recipe ID: ${item.recipe_id}`);
-            //console.log(`🥗 [DEBUG 26/08]   - Locations: ${JSON.stringify(item.locations)}`);
-            //console.log(`🥗 [DEBUG 26/08]   - Customer ID: ${customer.id}`);
-          }
           
           // Verificar localização do item
           const itemLocations = item.locations;
@@ -1076,28 +1047,15 @@ const MobileOrdersPage = ({ customerId }) => {
 
           if (!shouldInclude) {
             skippedItems++;
-            // Log para items de acompanhamento excluídos
-            if ((currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) && 
-                (categoryId.toLowerCase().includes('acompanhamento') || categoryId.toLowerCase().includes('acomp'))) {
-              //console.log(`❌ [DEBUG 26/08] Item EXCLUÍDO (localização): Recipe ID ${item.recipe_id}`);
-              //console.log(`❌ [DEBUG 26/08] Motivo: Customer ${customer.id} não está nas locations: ${JSON.stringify(item.locations)}`);
-            }
             return;
           }
           
           customerSpecificItems++;
           const recipe = recipes.find(r => r.id === item.recipe_id && r.active !== false);
           
-          // Log para receita encontrada/não encontrada
-          if ((currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) && 
-              (categoryId.toLowerCase().includes('acompanhamento') || categoryId.toLowerCase().includes('acomp'))) {
-            if (recipe) {
-              //console.log(`✅ [DEBUG 26/08] Receita ENCONTRADA: ${recipe.name} (ID: ${recipe.id})`);
-              //console.log(`✅ [DEBUG 26/08] Categoria da receita: ${recipe.category}`);
-            } else {
-              //console.log(`❌ [DEBUG 26/08] Receita NÃO ENCONTRADA: Recipe ID ${item.recipe_id}`);
-              //console.log(`❌ [DEBUG 26/08] Receitas disponíveis:`, recipes.map(r => ({ id: r.id, name: r.name, active: r.active })));
-            }
+          // Adicionando logs específicos para depuração
+          if (recipe && (recipe.name.includes('Farofa de cuscuz') || recipe.name.includes('Brócolis'))) {
+            console.log(`[DEBUG PREÇO ETAPA 1] Receita encontrada: ${recipe.name}`, JSON.stringify(recipe, null, 2));
           }
           
           if (!recipe) {
@@ -1150,26 +1108,6 @@ const MobileOrdersPage = ({ customerId }) => {
       }
     });
     
-    // Log final para o dia 26/08
-    if (currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) {
-      //console.log('📈 [DEBUG 26/08] RESUMO FINAL:');
-      //console.log('📈 [DEBUG 26/08] Total de itens processados:', processedItems);
-      //console.log('📈 [DEBUG 26/08] Itens incluídos no pedido:', items.length);
-      //console.log('📈 [DEBUG 26/08] Itens excluídos:', skippedItems);
-      //console.log('📈 [DEBUG 26/08] Itens específicos do cliente:', customerSpecificItems);
-      //console.log('📈 [DEBUG 26/08] Conflitos detectados:', conflictsDetected);
-      
-      const acompanhamentoItems = items.filter(item => 
-        item.category?.toLowerCase().includes('acompanhamento') || 
-        item.category?.toLowerCase().includes('acomp')
-      );
-      //console.log('🥗 [DEBUG 26/08] Itens de ACOMPANHAMENTO no resultado final:', acompanhamentoItems.length);
-      acompanhamentoItems.forEach((item, idx) => {
-        //console.log(`🥗 [DEBUG 26/08] Acomp ${idx + 1}: ${item.recipe_name} (${item.recipe_id})`);
-      });
-    }
-    
-    //console.log('✅ [orderItems] Itens processados:', items.length);
     return items;
   }, [weeklyMenus, recipes, customer, selectedDay, weekNumber, year, mealsExpected, appSettings, pricingReady]);
 
@@ -1268,70 +1206,46 @@ const MobileOrdersPage = ({ customerId }) => {
     // Se existe pedido salvo para este dia, usar ele
     if (existingOrders[selectedDay] && orderItems.length > 0) {
       const existingOrder = existingOrders[selectedDay];
-      //console.log('📝 [initializeOrder] Usando pedido existente para dia', selectedDay);
-      
-      
-      // SINCRONIZAR ITENS EXISTENTES com receitas atuais usando PortalDataSync
-      const updatedItems = existingOrder.items.map((existingItem, index) => {
-        
-        // Encontrar item correspondente no menu atual (orderItems)
-        const currentMenuItem = orderItems.find(oi => 
-          oi.unique_id === existingItem.unique_id || 
-          oi.recipe_id === existingItem.recipe_id
-        );
-        
+
+      // SINCRONIZAR ITENS: A nova lógica garante que os preços são sempre os mais atuais
+      const synchronizedItems = existingOrder.items.map(existingItem => {
+        const currentMenuItem = orderItems.find(oi => oi.recipe_id === existingItem.recipe_id);
+
         if (currentMenuItem) {
-          // Usar item do menu atual como base e preservar apenas quantidade/ajustes do pedido salvo
+          // Base é o item do menu do dia (com preço e dados corretos)
+          // Apenas as quantidades e anotações do usuário são preservadas do pedido salvo.
           const mergedItem = {
-            ...currentMenuItem, // Base do menu atual (observações limpas)
-            quantity: existingItem.quantity || 0,
+            ...currentMenuItem,
             base_quantity: existingItem.base_quantity || 0,
             adjustment_percentage: existingItem.adjustment_percentage || 0,
-            unit_price: currentMenuItem.unit_price // Explicitly pass the correct unit_price
-            // NÃO preservar notes - usar sempre o notes limpo do currentMenuItem
+            notes: existingItem.notes || "",
           };
-          
-          // Recalcular valores com as quantidades do pedido salvo
-          const finalItem = CategoryLogic.calculateItemValues(mergedItem, 'quantity', mergedItem.quantity, mealsExpected);
-          return finalItem;
+
+          // Recalcula totais com base nas quantidades salvas
+          return CategoryLogic.calculateItemValues(mergedItem, 'base_quantity', mergedItem.base_quantity, mealsExpected);
         }
-        
-        // Fallback: item não existe no menu atual
-        return existingItem;
-      });
-      
-      // ADICIONAR ITENS NOVOS do cardápio que não existiam no pedido salvo
-      const newItemsFromMenu = orderItems.filter(menuItem => {
-        // Verificar se este item do cardápio já existe no pedido salvo
-        const existsInSavedOrder = existingOrder.items.some(savedItem => 
-          savedItem.unique_id === menuItem.unique_id || 
-          savedItem.recipe_id === menuItem.recipe_id
-        );
-        return !existsInSavedOrder;
-      });
-      
-      // Log para debug
-      if (newItemsFromMenu.length > 0) {
-        //console.log('🆕 [initializeOrder] Itens novos adicionados ao pedido:', newItemsFromMenu.length);
-        newItemsFromMenu.forEach(item => {
-          //console.log(`🆕 [initializeOrder] Novo item: ${item.recipe_name} (${item.recipe_id})`);
-        });
-      }
-      
-      // Merge: itens atualizados + novos itens do cardápio
-      const allItems = [...updatedItems, ...newItemsFromMenu];
-      
+
+        return null; // Item não existe mais no cardápio, será removido
+      }).filter(Boolean); // Remove itens nulos
+
+      // Adicionar itens que estão no cardápio de hoje mas não estavam no pedido salvo
+      const newItemsFromMenu = orderItems.filter(menuItem =>
+        !existingOrder.items.some(savedItem => savedItem.recipe_id === menuItem.recipe_id)
+      );
+
+      const allItems = [...synchronizedItems, ...newItemsFromMenu];
+
       const updatedOrder = {
         ...existingOrder,
-        items: allItems
+        items: allItems,
       };
-      
-      setCurrentOrder(updatedOrder);
 
-    } else if (orderItems.length > 0 && (!currentOrder || currentOrder.day_of_week !== selectedDay)) {
-      //console.log('🆕 [initializeOrder] Criando novo pedido para dia', selectedDay);
-      
-      // Criar novo pedido se não existe pedido salvo E (não existe currentOrder OU currentOrder é de outro dia)
+      setCurrentOrder(updatedOrder);
+      setMealsExpected(updatedOrder.total_meals_expected || 0);
+      setGeneralNotes(updatedOrder.general_notes || "");
+
+    } else if (orderItems.length > 0) {
+      // Criar novo pedido se não houver um existente
       const newOrder = {
         customer_id: customer?.id,
         customer_name: customer?.name,
@@ -1341,14 +1255,11 @@ const MobileOrdersPage = ({ customerId }) => {
         date: format(addDays(weekStart, selectedDay - 1), "yyyy-MM-dd"),
         total_meals_expected: mealsExpected,
         general_notes: generalNotes,
-        items: orderItems
+        items: orderItems,
       };
       setCurrentOrder(newOrder);
-
-    } else if (orderItems.length === 0) {
-      setCurrentOrder(null);
     } else {
-      //console.log('🔄 [initializeOrder] Nenhuma ação necessária');
+      setCurrentOrder(null);
     }
   }, [hasInitializedDay, orderItems, selectedDay, weekNumber, year, existingOrders]);
 
@@ -1643,6 +1554,14 @@ const MobileOrdersPage = ({ customerId }) => {
         });
         
         toast({ description: "Pedido atualizado com sucesso!" });
+
+        // ATUALIZAÇÃO OTIMISTA: Atualizar o estado local com os dados que acabaram de ser salvos
+        const updatedOrder = { ...existingOrders[selectedDay], ...orderData };
+        setExistingOrders(prev => ({
+          ...prev,
+          [selectedDay]: updatedOrder
+        }));
+
       } else {
         console.log('🆕 [SUBMIT ORDER] Criando novo pedido');
         
@@ -1659,12 +1578,13 @@ const MobileOrdersPage = ({ customerId }) => {
           ...prev,
           [selectedDay]: newOrder
         }));
+        setGeneralNotes(orderData.general_notes); // Sincronizar estado da UI
         toast({ description: "Pedido enviado com sucesso!" });
       }
       
-      // Recarregar dados existentes para sincronizar as abas
-      console.log('🔄 [SUBMIT ORDER] Recarregando dados existentes...');
-      await loadExistingOrders();
+      // REMOVIDO: A atualização agora é otimista para evitar race conditions com o DB
+      // console.log('🔄 [SUBMIT ORDER] Recarregando dados existentes...');
+      // await loadExistingOrders();
       
       // Ativar efeito de sucesso e depois sair do modo de edição
       console.log('🎉 [SUBMIT ORDER] Finalizando com sucesso!');

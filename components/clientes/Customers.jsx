@@ -51,6 +51,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+import { generateCustomerPortalLink } from "@/lib/customerLinkUtils";
 
 // Novos imports para funcionalidade de links
 import { useCustomerLink } from "@/hooks/clientes/useCustomerLink";
@@ -551,16 +552,16 @@ export default function Customers() {
                   </TableCell>
                   {/* Link Portal */}
                   <TableCell className="text-center">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-900/20"
-                      onClick={() => handleCopyCustomerLink(customer)}
-                      title="Copiar link do portal do cliente"
+                    <a
+                      href={generateCustomerPortalLink(customer.id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Abrir portal do cliente em nova aba"
+                      className="inline-flex items-center justify-center h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-900/20 rounded-md transition-colors"
                     >
                       <Link className="h-4 w-4" />
-                      <span className="sr-only">Copiar link do portal</span>
-                    </Button>
+                      <span className="sr-only">Abrir portal do cliente</span>
+                    </a>
                   </TableCell>
                   {/* Actions Dropdown */}
                   <TableCell className="text-center">

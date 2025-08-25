@@ -78,11 +78,17 @@ export class CategoryLogic {
 
     // Recalcular quantidade total baseado na categoria
     if (isCarneCategory) {
-      // Para categoria carne: usar fórmula específica
-      updatedItem.quantity = this.calculateCarneTotal(
-        updatedItem.base_quantity,
-        updatedItem.adjustment_percentage
-      );
+      const unit = (item.unit_type || '').toLowerCase();
+      if (unit.includes('cuba') || unit.includes('g') || unit.includes('p')) {
+        // Para carnes com unidade 'cuba', 'g' ou 'p', a quantidade final é a base
+        updatedItem.quantity = updatedItem.base_quantity || 0;
+      } else {
+        // Para outras unidades de carne, usar fórmula específica com porcionamento
+        updatedItem.quantity = this.calculateCarneTotal(
+          updatedItem.base_quantity,
+          updatedItem.adjustment_percentage
+        );
+      }
     } else {
       // Para outras categorias: quantidade = base_quantity
       updatedItem.quantity = updatedItem.base_quantity || 0;
