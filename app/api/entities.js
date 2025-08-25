@@ -78,13 +78,59 @@ const createEntity = (collectionName) => {
 
     // Create new document
     create: async (data) => {
-      const docData = {
-        ...data,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      const docRef = await addDoc(collection(db, collectionName), docData);
-      return { id: docRef.id, ...docData };
+      // 🚨 LOG ANTES DA CRIAÇÃO
+      const currentTime = new Date();
+      const dayOfWeek = currentTime.getDay();
+      const dayName = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][dayOfWeek];
+      
+      console.log(`🆕 [${collectionName.toUpperCase()}.CREATE] Iniciando criação:`, {
+        collection: collectionName,
+        timestamp: currentTime.toISOString(),
+        dayOfWeek: dayOfWeek,
+        dayName: dayName,
+        isFriday: dayOfWeek === 5,
+        dataSize: JSON.stringify(data).length,
+        customerName: data.customer_name || 'N/A',
+        customerId: data.customer_id || 'N/A',
+        date: data.date || 'N/A'
+      });
+      
+      const startTime = Date.now();
+      
+      try {
+        const docData = {
+          ...data,
+          createdAt: currentTime,
+          updatedAt: currentTime
+        };
+        
+        const docRef = await addDoc(collection(db, collectionName), docData);
+        
+        const createTime = Date.now() - startTime;
+        console.log(`✅ [${collectionName.toUpperCase()}.CREATE] Sucesso:`, {
+          id: docRef.id,
+          createTime: `${createTime}ms`,
+          isFriday: dayOfWeek === 5,
+          collection: collectionName
+        });
+        
+        return { id: docRef.id, ...docData };
+      } catch (error) {
+        const errorTime = Date.now() - startTime;
+        console.error(`❌ [${collectionName.toUpperCase()}.CREATE] Erro:`, {
+          error: error.message,
+          code: error.code,
+          stack: error.stack,
+          collection: collectionName,
+          errorTime: `${errorTime}ms`,
+          dayOfWeek: dayOfWeek,
+          dayName: dayName,
+          isFriday: dayOfWeek === 5,
+          customerName: data.customer_name || 'N/A',
+          customerId: data.customer_id || 'N/A'
+        });
+        throw error;
+      }
     },
 
     // Create new document with a specific ID
@@ -101,13 +147,61 @@ const createEntity = (collectionName) => {
 
     // Update document
     update: async (id, data) => {
-      const docRef = doc(db, collectionName, id);
-      const updateData = {
-        ...data,
-        updatedAt: new Date()
-      };
-      await updateDoc(docRef, updateData);
-      return { id, ...updateData };
+      // 🚨 LOG ANTES DA ATUALIZAÇÃO
+      const currentTime = new Date();
+      const dayOfWeek = currentTime.getDay();
+      const dayName = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][dayOfWeek];
+      
+      console.log(`🔄 [${collectionName.toUpperCase()}.UPDATE] Iniciando atualização:`, {
+        collection: collectionName,
+        id: id,
+        timestamp: currentTime.toISOString(),
+        dayOfWeek: dayOfWeek,
+        dayName: dayName,
+        isFriday: dayOfWeek === 5,
+        dataSize: JSON.stringify(data).length,
+        customerName: data.customer_name || 'N/A',
+        customerId: data.customer_id || 'N/A',
+        date: data.date || 'N/A'
+      });
+      
+      const startTime = Date.now();
+      
+      try {
+        const docRef = doc(db, collectionName, id);
+        const updateData = {
+          ...data,
+          updatedAt: currentTime
+        };
+        
+        await updateDoc(docRef, updateData);
+        
+        const updateTime = Date.now() - startTime;
+        console.log(`✅ [${collectionName.toUpperCase()}.UPDATE] Sucesso:`, {
+          id: id,
+          updateTime: `${updateTime}ms`,
+          isFriday: dayOfWeek === 5,
+          collection: collectionName
+        });
+        
+        return { id, ...updateData };
+      } catch (error) {
+        const errorTime = Date.now() - startTime;
+        console.error(`❌ [${collectionName.toUpperCase()}.UPDATE] Erro:`, {
+          error: error.message,
+          code: error.code,
+          stack: error.stack,
+          collection: collectionName,
+          id: id,
+          errorTime: `${errorTime}ms`,
+          dayOfWeek: dayOfWeek,
+          dayName: dayName,
+          isFriday: dayOfWeek === 5,
+          customerName: data.customer_name || 'N/A',
+          customerId: data.customer_id || 'N/A'
+        });
+        throw error;
+      }
     },
 
     // Delete document

@@ -93,11 +93,92 @@ const MobileOrdersPage = ({ customerId }) => {
   const { toast } = useToast();
   const { groupItemsByCategory, getOrderedCategories, generateCategoryStyles } = useCategoryDisplay();
   
+  // 🚨 SISTEMA DE DETECÇÃO DE SESSÕES MÚTIPLAS
+  useEffect(() => {
+    const sessionId = `portal_session_${customerId}_${Date.now()}_${Math.random()}`;
+    const sessionKey = `portal_sessions_${customerId}`;
+    
+    // Registrar esta sessão
+    const registerSession = () => {
+      try {
+        const existingSessions = JSON.parse(localStorage.getItem(sessionKey) || '[]');
+        const now = Date.now();
+        
+        // Limpar sessões antigas (mais de 5 minutos)
+        const activeSessions = existingSessions.filter(s => (now - s.timestamp) < 300000);
+        
+        // Adicionar esta sessão
+        const newSession = {
+          id: sessionId,
+          timestamp: now,
+          url: window.location.href,
+          userAgent: navigator.userAgent
+        };
+        
+        activeSessions.push(newSession);
+        localStorage.setItem(sessionKey, JSON.stringify(activeSessions));
+        
+        console.log('📱 [SESSION TRACKER] Sessão registrada:', {
+          sessionId: sessionId,
+          totalActiveSessions: activeSessions.length,
+          customerId: customerId,
+          activeSessions: activeSessions
+        });
+        
+        // Alerta se houver múltiplas sessões
+        if (activeSessions.length > 1) {
+          console.warn('⚠️ [SESSION TRACKER] MÚTIPLAS SESSÕES DETECTADAS:', {
+            count: activeSessions.length,
+            customerId: customerId,
+            sessions: activeSessions,
+            risk: 'CONFLITO DE DADOS POSSÍVEL'
+          });
+        }
+        
+        return activeSessions.length;
+      } catch (error) {
+        console.error('❌ [SESSION TRACKER] Erro ao registrar sessão:', error);
+        return 1;
+      }
+    };
+    
+    // Cleanup da sessão ao sair
+    const cleanupSession = () => {
+      try {
+        const existingSessions = JSON.parse(localStorage.getItem(sessionKey) || '[]');
+        const filteredSessions = existingSessions.filter(s => s.id !== sessionId);
+        localStorage.setItem(sessionKey, JSON.stringify(filteredSessions));
+        
+        console.log('🧩 [SESSION TRACKER] Sessão removida:', {
+          sessionId: sessionId,
+          remainingSessions: filteredSessions.length
+        });
+      } catch (error) {
+        console.error('❌ [SESSION TRACKER] Erro ao limpar sessão:', error);
+      }
+    };
+    
+    // Registrar sessão inicial
+    const sessionCount = registerSession();
+    
+    // Monitorar sessões a cada 30 segundos
+    const sessionInterval = setInterval(() => {
+      registerSession();
+    }, 30000);
+    
+    // Cleanup quando componente desmonta
+    return () => {
+      clearInterval(sessionInterval);
+      cleanupSession();
+    };
+  }, [customerId]);
+  
   // Estados principais
   const [currentDate, setCurrentDate] = useState(() => {
     return new Date();
   });
   const [customer, setCustomer] = useState(null);
+  const [multipleSessionsDetected, setMultipleSessionsDetected] = useState(false);
   const [recipes, setRecipes] = useState([]);
   const [weeklyMenus, setWeeklyMenus] = useState([]);
   const [currentOrder, setCurrentOrder] = useState(null);
@@ -1264,6 +1345,8 @@ const MobileOrdersPage = ({ customerId }) => {
       };
       setCurrentOrder(newOrder);
 
+    } else if (orderItems.length === 0) {
+      setCurrentOrder(null);
     } else {
       //console.log('🔄 [initializeOrder] Nenhuma ação necessária');
     }
@@ -1423,16 +1506,80 @@ const MobileOrdersPage = ({ customerId }) => {
   }, [currentOrder, wasteItems, receivingItems]);
 
   const submitOrder = useCallback(async () => {
-    if (!currentOrder || !customer) return;
+    // 🚨 LOG INICIAL - Informações básicas da sessão
+    const currentTime = new Date();
+    const dayOfWeek = currentTime.getDay(); // 0=Domingo, 1=Segunda, ... 5=Sexta
+    const dayName = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][dayOfWeek];
+    
+    console.log('🎯 [SUBMIT ORDER] Início do salvamento:', {
+      timestamp: currentTime.toISOString(),
+      dayOfWeek: dayOfWeek,
+      dayName: dayName,
+      isFriday: dayOfWeek === 5,
+      customerId: customerId,
+      customerName: customer?.name || 'N/A',
+      hasCurrentOrder: !!currentOrder,
+      hasCustomer: !!customer,
+      mealsExpected: mealsExpected,
+      selectedDay: selectedDay,
+      isEditMode: isEditMode,
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
+      windowLocation: typeof window !== 'undefined' ? window.location.href : 'N/A'
+    });
+
+    if (!currentOrder || !customer) {
+      console.error('❌ [SUBMIT ORDER] Dados básicos ausentes:', {
+        hasCurrentOrder: !!currentOrder,
+        hasCustomer: !!customer,
+        customerId: customerId
+      });
+      return;
+    }
 
     // Validar se refeições esperadas foi preenchido
     if (!mealsExpected || mealsExpected <= 0) {
+      console.warn('⚠️ [SUBMIT ORDER] Refeições esperadas inválida:', {
+        mealsExpected: mealsExpected,
+        type: typeof mealsExpected
+      });
       toast({ 
         variant: "destructive", 
         title: "Campo Obrigatório", 
         description: "Por favor, preencha o número de refeições esperadas antes de enviar o pedido." 
       });
       return;
+    }
+
+    // 🚨 LOG DE DADOS DO PEDIDO
+    console.log('📋 [SUBMIT ORDER] Dados do pedido:', {
+      itemsCount: currentOrder.items?.length || 0,
+      existingOrderId: existingOrders[selectedDay]?.id || null,
+      isUpdate: !!existingOrders[selectedDay],
+      orderTotals: orderTotals
+    });
+    
+    // 🚨 VERIFICAÇÃO ESPECÍFICA PARA SEXTAS-FEIRAS
+    if (dayOfWeek === 5) {
+      const sessionKey = `portal_sessions_${customerId}`;
+      const activeSessions = JSON.parse(localStorage.getItem(sessionKey) || '[]');
+      const now = Date.now();
+      const recentSessions = activeSessions.filter(s => (now - s.timestamp) < 300000);
+      
+      console.warn('🔥 [SUBMIT ORDER] SEXTA-FEIRA - Verificações adicionais:', {
+        dayName: dayName,
+        activeSessions: recentSessions.length,
+        sessions: recentSessions,
+        hasMultipleSessions: recentSessions.length > 1,
+        localStorage_size: Object.keys(localStorage).length,
+        sessionStorage_size: Object.keys(sessionStorage).length,
+        window_name: window.name || 'unnamed',
+        document_readyState: document.readyState,
+        connection_type: navigator.connection?.effectiveType || 'unknown'
+      });
+      
+      if (recentSessions.length > 1) {
+        console.error('⚠️ [SUBMIT ORDER] RISCO: Múltiplas sessões ativas na sexta-feira!');
+      }
     }
 
     try {
@@ -1471,11 +1618,43 @@ const MobileOrdersPage = ({ customerId }) => {
         depreciation_amount: orderTotals.depreciationAmount
       };
 
+      // 🚨 LOG ANTES DO SALVAMENTO
+      console.log('💾 [SUBMIT ORDER] Preparando para salvar:', {
+        isUpdate: !!existingOrders[selectedDay],
+        existingOrderId: existingOrders[selectedDay]?.id || null,
+        orderDataSize: JSON.stringify(orderData).length,
+        itemsCount: orderData.items?.length || 0,
+        dayOfWeek: dayOfWeek,
+        isFriday: dayOfWeek === 5
+      });
+
+      const startTime = Date.now();
+      
       if (existingOrders[selectedDay]) {
+        console.log('🔄 [SUBMIT ORDER] Atualizando pedido existente:', existingOrders[selectedDay].id);
+        
         await Order.update(existingOrders[selectedDay].id, orderData);
+        
+        const updateTime = Date.now() - startTime;
+        console.log('✅ [SUBMIT ORDER] Pedido atualizado com sucesso!', {
+          orderId: existingOrders[selectedDay].id,
+          updateTime: `${updateTime}ms`,
+          isFriday: dayOfWeek === 5
+        });
+        
         toast({ description: "Pedido atualizado com sucesso!" });
       } else {
+        console.log('🆕 [SUBMIT ORDER] Criando novo pedido');
+        
         const newOrder = await Order.create(orderData);
+        
+        const createTime = Date.now() - startTime;
+        console.log('✅ [SUBMIT ORDER] Pedido criado com sucesso!', {
+          newOrderId: newOrder.id,
+          createTime: `${createTime}ms`,
+          isFriday: dayOfWeek === 5
+        });
+        
         setExistingOrders(prev => ({
           ...prev,
           [selectedDay]: newOrder
@@ -1484,17 +1663,72 @@ const MobileOrdersPage = ({ customerId }) => {
       }
       
       // Recarregar dados existentes para sincronizar as abas
+      console.log('🔄 [SUBMIT ORDER] Recarregando dados existentes...');
       await loadExistingOrders();
       
       // Ativar efeito de sucesso e depois sair do modo de edição
+      console.log('🎉 [SUBMIT ORDER] Finalizando com sucesso!');
       setShowSuccessEffect(true);
       setTimeout(() => {
         setShowSuccessEffect(false);
         setIsEditMode(false);
+        console.log('🏁 [SUBMIT ORDER] Modo de edição desabilitado');
       }, 2000); // 2 segundos de efeito
       
     } catch (error) {
-      toast({ variant: "destructive", description: "Erro ao enviar pedido. Tente novamente." });
+      // 🚨 LOG DETALHADO DO ERRO
+      console.error('❌ [SUBMIT ORDER] Erro ao salvar pedido:', {
+        error: error.message,
+        stack: error.stack,
+        dayOfWeek: dayOfWeek,
+        dayName: dayName,
+        isFriday: dayOfWeek === 5,
+        customerId: customerId,
+        customerName: customer?.name || 'N/A',
+        mealsExpected: mealsExpected,
+        selectedDay: selectedDay,
+        isUpdate: !!existingOrders[selectedDay],
+        existingOrderId: existingOrders[selectedDay]?.id || null,
+        timestamp: new Date().toISOString(),
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
+        connectionType: typeof navigator !== 'undefined' && navigator.connection ? navigator.connection.effectiveType : 'N/A'
+      });
+      
+      // Toast para o usuário
+      toast({ 
+        variant: "destructive", 
+        description: `Erro ao enviar pedido (${dayName}). Tente novamente.`
+      });
+      
+      // 🚨 LOG ADICIONAL SE FOR SEXTA-FEIRA
+      if (dayOfWeek === 5) {
+        const sessionKey = `portal_sessions_${customerId}`;
+        const activeSessions = JSON.parse(localStorage.getItem(sessionKey) || '[]');
+        const now = Date.now();
+        const recentSessions = activeSessions.filter(s => (now - s.timestamp) < 300000);
+        
+        console.error('🔥 [SUBMIT ORDER] ERRO ESPECÍFICO DE SEXTA-FEIRA:', {
+          fridayErrorCount: (window.fridayErrorCount || 0) + 1,
+          sessionStorage: typeof sessionStorage !== 'undefined' ? Object.keys(sessionStorage) : 'N/A',
+          localStorage: typeof localStorage !== 'undefined' ? Object.keys(localStorage) : 'N/A',
+          activeTabsCount: typeof document !== 'undefined' ? document.querySelectorAll('a[href], button').length : 'N/A',
+          activeSessions: recentSessions.length,
+          sessionDetails: recentSessions,
+          possibleCause: recentSessions.length > 1 ? 'MULTIPLE_SESSIONS' : 'OTHER',
+          firebaseOffline: typeof navigator !== 'undefined' ? !navigator.onLine : 'unknown',
+          windowFocus: typeof document !== 'undefined' ? document.hasFocus() : 'unknown'
+        });
+        
+        if (typeof window !== 'undefined') {
+          window.fridayErrorCount = (window.fridayErrorCount || 0) + 1;
+        }
+        
+        // Tentar limpar sessões antigas para evitar conflitos futuros
+        if (recentSessions.length > 1) {
+          console.log('🧩 [SUBMIT ORDER] Limpando sessões múltiplas...');
+          localStorage.removeItem(sessionKey);
+        }
+      }
     }
   }, [currentOrder, customer, mealsExpected, generalNotes, orderTotals, existingOrders, selectedDay, toast]);
 
