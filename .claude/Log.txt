@@ -1,801 +1,385 @@
-[2025-08-25T23:27:32.146Z] [LOG] 📱 [SESSION TRACKER] Sessão registrada: [Object] | Objects: {
-  "sessionId": "portal_session_regtegbrtvbrt_1756164452142_0.2881295456329922",
-  "totalActiveSessions": 2,
-  "customerId": "regtegbrtvbrt",
-  "activeSessions": [
-    {
-      "id": "portal_session_regtegbrtvbrt_1756164327702_0.38659151104519573",
-      "timestamp": 1756164358233,
-      "url": "https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/portal/regtegbrtvbrt/orders",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
-    },
-    {
-      "id": "portal_session_regtegbrtvbrt_1756164452142_0.2881295456329922",
-      "timestamp": 1756164452142,
-      "url": "https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/portal/regtegbrtvbrt/orders",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
-    }
-  ]
-}
-[2025-08-25T23:27:32.152Z] [WARN] ⚠️ [SESSION TRACKER] MÚTIPLAS SESSÕES DETECTADAS: [Object] | Objects: {
-  "count": 2,
-  "customerId": "regtegbrtvbrt",
-  "sessions": [
-    {
-      "id": "portal_session_regtegbrtvbrt_1756164327702_0.38659151104519573",
-      "timestamp": 1756164358233,
-      "url": "https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/portal/regtegbrtvbrt/orders",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
-    },
-    {
-      "id": "portal_session_regtegbrtvbrt_1756164452142_0.2881295456329922",
-      "timestamp": 1756164452142,
-      "url": "https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/portal/regtegbrtvbrt/orders",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
-    }
-  ],
-  "risk": "CONFLITO DE DADOS POSSÍVEL"
-}
-[2025-08-25T23:27:33.354Z] [LOG] [DEBUG PREÇO ETAPA 1] Receita encontrada: Farofa de cuscuz {
-  "id": "8LZ0U6S62ULsPpp8u5fb",
-  "prep_time": 30,
-  "active": true,
-  "category": "Padrão",
-  "total_weight": 0,
-  "name": "Farofa de cuscuz",
-  "ingredients": [],
-  "updatedAt": {
-    "type": "firestore/timestamp/1.0",
-    "seconds": 1753929344,
-    "nanoseconds": 842000000
-  },
-  "createdAt": {
-    "type": "firestore/timestamp/1.0",
-    "seconds": 1753929344,
-    "nanoseconds": 842000000
-  },
-  "yield_weight": 1000
-}
-[2025-08-25T23:27:33.355Z] [LOG] [DEBUG PREÇO ETAPA 4] Item final após calculateItemValues: {
-  "unique_id": "8LZ0U6S62ULsPpp8u5fb_3",
-  "recipe_id": "8LZ0U6S62ULsPpp8u5fb",
-  "recipe_name": "Farofa de cuscuz",
-  "category": "Padrão",
-  "unit_type": null,
-  "base_quantity": 0,
-  "quantity": 0,
-  "unit_price": 0,
-  "total_price": 0,
-  "notes": "",
-  "cuba_weight": 0,
-  "yield_weight": 1000,
-  "total_weight": 0,
-  "adjustment_percentage": 0,
-  "recipe_cuba_weight": 0,
-  "recipe_yield_weight": 1000,
-  "recipe_total_weight": 0,
-  "recipe_cuba_cost": 0,
-  "recipe_portion_cost": 0,
-  "recipe_cost_per_kg_yield": 0,
-  "calculated_total_weight": 0
-}
-[2025-08-25T23:27:33.355Z] [LOG] [DEBUG PREÇO ETAPA 1] Receita encontrada: Brócolis e Couve flor assados {
-  "id": "SW2OWIVyp8mXDwgBYInW",
-  "active": true,
-  "prep_time": 30,
-  "category": "Refogado",
-  "createdAt": {
-    "type": "firestore/timestamp/1.0",
-    "seconds": 1755532031,
-    "nanoseconds": 90000000
-  },
-  "yield_weight": 1000,
-  "ingredients": [],
-  "name": "Brócolis e Couve flor assados",
-  "updatedAt": {
-    "type": "firestore/timestamp/1.0",
-    "seconds": 1755532031,
-    "nanoseconds": 90000000
-  },
-  "total_weight": 0
-}
-[2025-08-25T23:27:33.355Z] [LOG] [DEBUG PREÇO ETAPA 4] Item final após calculateItemValues: {
-  "unique_id": "SW2OWIVyp8mXDwgBYInW_4",
-  "recipe_id": "SW2OWIVyp8mXDwgBYInW",
-  "recipe_name": "Brócolis e Couve flor assados",
-  "category": "Refogado",
-  "unit_type": null,
-  "base_quantity": 0,
-  "quantity": 0,
-  "unit_price": 0,
-  "total_price": 0,
-  "notes": "",
-  "cuba_weight": 0,
-  "yield_weight": 1000,
-  "total_weight": 0,
-  "adjustment_percentage": 0,
-  "recipe_cuba_weight": 0,
-  "recipe_yield_weight": 1000,
-  "recipe_total_weight": 0,
-  "recipe_cuba_cost": 0,
-  "recipe_portion_cost": 0,
-  "recipe_cost_per_kg_yield": 0,
-  "calculated_total_weight": 0
-}
-[2025-08-25T23:27:33.555Z] [LOG] [DEBUG PREÇO ETAPA 1] Receita encontrada: Farofa de cuscuz {
-  "id": "8LZ0U6S62ULsPpp8u5fb",
-  "prep_time": 30,
-  "active": true,
-  "category": "Padrão",
-  "total_weight": 0,
-  "name": "Farofa de cuscuz",
-  "ingredients": [],
-  "updatedAt": {
-    "type": "firestore/timestamp/1.0",
-    "seconds": 1753929344,
-    "nanoseconds": 842000000
-  },
-  "createdAt": {
-    "type": "firestore/timestamp/1.0",
-    "seconds": 1753929344,
-    "nanoseconds": 842000000
-  },
-  "yield_weight": 1000
-}
-[2025-08-25T23:27:33.556Z] [LOG] [DEBUG PREÇO ETAPA 4] Item final após calculateItemValues: {
-  "unique_id": "8LZ0U6S62ULsPpp8u5fb_3",
-  "recipe_id": "8LZ0U6S62ULsPpp8u5fb",
-  "recipe_name": "Farofa de cuscuz",
-  "category": "Padrão",
-  "unit_type": null,
-  "base_quantity": 0,
-  "quantity": 0,
-  "unit_price": 8.944,
-  "total_price": 0,
-  "notes": "",
-  "cuba_weight": 0,
-  "yield_weight": 1000,
-  "total_weight": 0,
-  "adjustment_percentage": 0,
-  "recipe_cuba_weight": 0,
-  "recipe_yield_weight": 1000,
-  "recipe_total_weight": 0,
-  "recipe_cuba_cost": 0,
-  "recipe_portion_cost": 0,
-  "recipe_cost_per_kg_yield": 0,
-  "calculated_total_weight": 0
-}
-[2025-08-25T23:27:33.556Z] [LOG] [DEBUG PREÇO ETAPA 1] Receita encontrada: Brócolis e Couve flor assados {
-  "id": "SW2OWIVyp8mXDwgBYInW",
-  "active": true,
-  "prep_time": 30,
-  "category": "Refogado",
-  "createdAt": {
-    "type": "firestore/timestamp/1.0",
-    "seconds": 1755532031,
-    "nanoseconds": 90000000
-  },
-  "yield_weight": 1000,
-  "ingredients": [],
-  "name": "Brócolis e Couve flor assados",
-  "updatedAt": {
-    "type": "firestore/timestamp/1.0",
-    "seconds": 1755532031,
-    "nanoseconds": 90000000
-  },
-  "total_weight": 0
-}
-[2025-08-25T23:27:33.557Z] [LOG] [DEBUG PREÇO ETAPA 4] Item final após calculateItemValues: {
-  "unique_id": "SW2OWIVyp8mXDwgBYInW_4",
-  "recipe_id": "SW2OWIVyp8mXDwgBYInW",
-  "recipe_name": "Brócolis e Couve flor assados",
-  "category": "Refogado",
-  "unit_type": null,
-  "base_quantity": 0,
-  "quantity": 0,
-  "unit_price": 8.944,
-  "total_price": 0,
-  "notes": "",
-  "cuba_weight": 0,
-  "yield_weight": 1000,
-  "total_weight": 0,
-  "adjustment_percentage": 0,
-  "recipe_cuba_weight": 0,
-  "recipe_yield_weight": 1000,
-  "recipe_total_weight": 0,
-  "recipe_cuba_cost": 0,
-  "recipe_portion_cost": 0,
-  "recipe_cost_per_kg_yield": 0,
-  "calculated_total_weight": 0
-}
-[2025-08-25T23:27:33.619Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:33.620Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
-[2025-08-25T23:27:33.620Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:33.621Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.622Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.622Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.623Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.623Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.623Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.624Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:33.624Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:33.625Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.625Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
-[2025-08-25T23:27:33.886Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:33.887Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
-[2025-08-25T23:27:33.887Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:33.887Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.887Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.888Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.888Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.889Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.889Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.889Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:33.889Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:33.890Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.890Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
-[2025-08-25T23:27:33.904Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:33.904Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
-[2025-08-25T23:27:33.904Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:33.904Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.905Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.905Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.905Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.906Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.906Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.906Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:33.906Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:33.907Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.907Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
-[2025-08-25T23:27:33.919Z] [LOG] [DEBUG PREÇO ETAPA 1] Receita encontrada: Farofa de cuscuz {
-  "id": "8LZ0U6S62ULsPpp8u5fb",
-  "prep_time": 30,
-  "active": true,
-  "category": "Padrão",
-  "total_weight": 0,
-  "name": "Farofa de cuscuz",
-  "ingredients": [],
-  "updatedAt": {
-    "type": "firestore/timestamp/1.0",
-    "seconds": 1753929344,
-    "nanoseconds": 842000000
-  },
-  "createdAt": {
-    "type": "firestore/timestamp/1.0",
-    "seconds": 1753929344,
-    "nanoseconds": 842000000
-  },
-  "yield_weight": 1000
-}
-[2025-08-25T23:27:33.920Z] [LOG] [DEBUG PREÇO ETAPA 4] Item final após calculateItemValues: {
-  "unique_id": "8LZ0U6S62ULsPpp8u5fb_3",
-  "recipe_id": "8LZ0U6S62ULsPpp8u5fb",
-  "recipe_name": "Farofa de cuscuz",
-  "category": "Padrão",
-  "unit_type": null,
-  "base_quantity": 0,
-  "quantity": 0,
-  "unit_price": 8.944,
-  "total_price": 0,
-  "notes": "",
-  "cuba_weight": 0,
-  "yield_weight": 1000,
-  "total_weight": 0,
-  "adjustment_percentage": 0,
-  "recipe_cuba_weight": 0,
-  "recipe_yield_weight": 1000,
-  "recipe_total_weight": 0,
-  "recipe_cuba_cost": 0,
-  "recipe_portion_cost": 0,
-  "recipe_cost_per_kg_yield": 0,
-  "calculated_total_weight": 0
-}
-[2025-08-25T23:27:33.920Z] [LOG] [DEBUG PREÇO ETAPA 1] Receita encontrada: Brócolis e Couve flor assados {
-  "id": "SW2OWIVyp8mXDwgBYInW",
-  "active": true,
-  "prep_time": 30,
-  "category": "Refogado",
-  "createdAt": {
-    "type": "firestore/timestamp/1.0",
-    "seconds": 1755532031,
-    "nanoseconds": 90000000
-  },
-  "yield_weight": 1000,
-  "ingredients": [],
-  "name": "Brócolis e Couve flor assados",
-  "updatedAt": {
-    "type": "firestore/timestamp/1.0",
-    "seconds": 1755532031,
-    "nanoseconds": 90000000
-  },
-  "total_weight": 0
-}
-[2025-08-25T23:27:33.920Z] [LOG] [DEBUG PREÇO ETAPA 4] Item final após calculateItemValues: {
-  "unique_id": "SW2OWIVyp8mXDwgBYInW_4",
-  "recipe_id": "SW2OWIVyp8mXDwgBYInW",
-  "recipe_name": "Brócolis e Couve flor assados",
-  "category": "Refogado",
-  "unit_type": null,
-  "base_quantity": 0,
-  "quantity": 0,
-  "unit_price": 8.944,
-  "total_price": 0,
-  "notes": "",
-  "cuba_weight": 0,
-  "yield_weight": 1000,
-  "total_weight": 0,
-  "adjustment_percentage": 0,
-  "recipe_cuba_weight": 0,
-  "recipe_yield_weight": 1000,
-  "recipe_total_weight": 0,
-  "recipe_cuba_cost": 0,
-  "recipe_portion_cost": 0,
-  "recipe_cost_per_kg_yield": 0,
-  "calculated_total_weight": 0
-}
-[2025-08-25T23:27:33.923Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:33.923Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
-[2025-08-25T23:27:33.924Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:33.924Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.924Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.925Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.925Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.925Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.925Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.926Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:33.926Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:33.926Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.926Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
-[2025-08-25T23:27:33.946Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:33.946Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
-[2025-08-25T23:27:33.946Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:33.947Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.947Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.947Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.947Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.948Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.948Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.948Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:33.948Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:33.949Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:33.949Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
-[2025-08-25T23:27:34.201Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:34.204Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
-[2025-08-25T23:27:34.204Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:34.205Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.205Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.206Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.206Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.207Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.208Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.208Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:34.208Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:34.208Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.209Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
-[2025-08-25T23:27:34.224Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:34.224Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
-[2025-08-25T23:27:34.224Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:34.225Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.225Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.226Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.226Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.226Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.226Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.227Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:34.227Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:34.227Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:34.228Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
-[2025-08-25T23:27:36.649Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:36.649Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
-[2025-08-25T23:27:36.650Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:36.650Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.650Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.651Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.651Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.651Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.652Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.652Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:36.652Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:36.653Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.653Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
-[2025-08-25T23:27:36.685Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:36.685Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.686Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:36.687Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:36.687Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.688Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.688Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.689Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.689Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.689Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:36.690Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:36.690Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.690Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.878Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:36.878Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.879Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:36.879Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:36.879Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.880Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.880Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.880Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.881Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.881Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:36.881Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:36.881Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.882Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.890Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:36.891Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.891Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:36.891Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:36.891Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.892Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.892Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.893Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.893Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.893Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:36.893Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:36.893Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.894Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.902Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:36.903Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.903Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:36.903Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:36.903Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.904Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.904Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.904Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.905Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.905Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:36.905Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:36.905Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.906Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.918Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:36.918Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.919Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:36.919Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:36.920Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.920Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.920Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.921Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.921Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.921Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:36.922Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:36.922Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:36.922Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.146Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:37.146Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.146Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:37.147Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:37.147Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.147Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.148Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.148Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.148Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.149Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:37.149Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:37.150Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.150Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.158Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:37.158Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.158Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:37.158Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:37.159Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.159Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.159Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.159Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.160Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.160Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:37.160Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:37.160Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:37.161Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.631Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:39.632Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.632Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:39.632Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:39.633Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.633Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.633Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.634Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.634Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.634Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:39.634Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:39.635Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.635Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.944Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:39.945Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.945Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:39.945Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:39.946Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.946Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.946Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.947Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.947Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.947Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:39.947Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:39.948Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:39.948Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.811Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:40.811Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.812Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:40.812Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:40.812Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.812Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.813Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.813Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.813Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.813Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:40.813Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:40.814Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.814Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.959Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:40.960Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.961Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:40.962Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:40.963Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.963Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.964Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.965Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.966Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.967Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:40.967Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:40.968Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:40.969Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.079Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:41.080Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.081Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:41.082Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:41.083Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.084Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.084Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.086Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.087Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.088Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:41.089Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:41.090Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.090Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.212Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:41.212Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.213Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:41.213Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:41.214Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.215Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.215Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.216Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.217Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.217Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:41.218Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:41.219Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.219Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.235Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:41.236Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.236Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:41.237Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:41.237Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.237Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.238Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.238Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.239Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.239Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:41.240Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:41.240Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.240Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.601Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:41.601Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.602Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:41.602Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:41.602Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.603Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.603Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.603Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.603Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.604Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:41.604Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:41.604Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.604Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.929Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:41.930Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.930Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:41.930Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:41.931Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.931Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.931Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.931Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.932Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.932Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:41.932Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:41.932Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:41.933Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.080Z] [LOG] 🎯 [SUBMIT ORDER] Início do salvamento: [Object] | Objects: {
-  "timestamp": "2025-08-25T23:27:42.079Z",
-  "dayOfWeek": 1,
-  "dayName": "Segunda",
-  "isFriday": false,
-  "customerId": "regtegbrtvbrt",
-  "customerName": "Nestlé",
-  "hasCurrentOrder": true,
-  "hasCustomer": true,
-  "mealsExpected": 110,
-  "selectedDay": 2,
-  "isEditMode": true,
-  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
-  "windowLocation": "https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/portal/regtegbrtvbrt/orders"
-}
-[2025-08-25T23:27:42.080Z] [LOG] 📋 [SUBMIT ORDER] Dados do pedido: [Object] | Objects: {
-  "itemsCount": 13,
-  "existingOrderId": "oZPcBNyyT3mwrB77vHCH",
-  "isUpdate": true,
-  "orderTotals": {
-    "totalItems": 343,
-    "totalAmount": 3318.86,
-    "totalWeight": 359.05,
-    "depreciation": {
-      "totalDepreciation": 0,
-      "returnedItems": [],
-      "hasReturns": false,
-      "depreciationRate": 0.25
-    },
-    "nonReceivedDiscounts": {
-      "totalNonReceivedDiscount": 0,
-      "nonReceivedItems": [],
-      "hasNonReceived": false,
-      "discountRate": 1
-    },
-    "finalAmount": 3318.86,
-    "originalAmount": 3318.86,
-    "depreciationAmount": 0,
-    "nonReceivedDiscountAmount": 0,
-    "totalDiscountAmount": 0
-  }
-}
-[2025-08-25T23:27:42.081Z] [LOG] 💾 [SUBMIT ORDER] Preparando para salvar: [Object] | Objects: {
-  "isUpdate": true,
-  "existingOrderId": "oZPcBNyyT3mwrB77vHCH",
-  "orderDataSize": 9035,
-  "itemsCount": 13,
-  "dayOfWeek": 1,
-  "isFriday": false
-}
-[2025-08-25T23:27:42.081Z] [LOG] 🔄 [SUBMIT ORDER] Atualizando pedido existente: oZPcBNyyT3mwrB77vHCH
-[2025-08-25T23:27:42.081Z] [LOG] 🔄 [ORDER.UPDATE] Iniciando atualização: [Object] | Objects: {
-  "collection": "Order",
-  "id": "oZPcBNyyT3mwrB77vHCH",
-  "timestamp": "2025-08-25T23:27:42.081Z",
-  "dayOfWeek": 1,
-  "dayName": "Segunda",
-  "isFriday": false,
-  "dataSize": 9035,
-  "customerName": "Nestlé",
-  "customerId": "regtegbrtvbrt",
-  "date": "2025-08-26"
-}
-[2025-08-25T23:27:42.698Z] [LOG] ✅ [ORDER.UPDATE] Sucesso: [Object] | Objects: {
-  "id": "oZPcBNyyT3mwrB77vHCH",
-  "updateTime": "617ms",
-  "isFriday": false,
-  "collection": "Order"
-}
-[2025-08-25T23:27:42.699Z] [LOG] ✅ [SUBMIT ORDER] Pedido atualizado com sucesso! [Object] | Objects: {
-  "orderId": "oZPcBNyyT3mwrB77vHCH",
-  "updateTime": "618ms",
-  "isFriday": false
-}
-[2025-08-25T23:27:42.700Z] [LOG] 🎉 [SUBMIT ORDER] Finalizando com sucesso!
-[2025-08-25T23:27:42.702Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:42.703Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.703Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:42.703Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:42.703Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.704Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.704Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.704Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.705Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.705Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:42.705Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:42.705Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.706Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.730Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:42.731Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.731Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:42.732Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:42.732Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.732Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.733Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.733Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.733Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.734Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:42.734Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:42.734Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.734Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.944Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:42.944Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.945Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:42.945Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:42.945Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.945Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.946Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.946Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.946Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.947Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:42.947Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:42.947Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.947Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.956Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:42.957Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.957Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:42.957Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:42.958Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.958Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.958Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.958Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.959Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.959Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:42.959Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:42.959Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:42.960Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.552Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:43.553Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.554Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:43.554Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:43.555Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.556Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.557Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.558Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.559Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.559Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:43.560Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:43.561Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.561Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.888Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:43.889Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.890Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:43.891Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:43.892Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.893Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.893Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.894Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.895Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.896Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:43.896Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:43.897Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:43.897Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:44.702Z] [LOG] 🏁 [SUBMIT ORDER] Modo de edição desabilitado
-[2025-08-25T23:27:44.706Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:44.706Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:44.707Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:44.707Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:44.708Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:44.709Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:44.710Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:44.710Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:44.711Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:44.711Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:44.712Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:44.712Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:44.713Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:45.418Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:45.419Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:45.420Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:45.421Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:45.422Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:45.423Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:45.423Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:45.424Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:45.425Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:45.425Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:45.426Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:45.426Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:45.427Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:46.709Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
-[2025-08-25T23:27:46.710Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:46.711Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
-[2025-08-25T23:27:46.712Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
-[2025-08-25T23:27:46.713Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:46.714Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:46.715Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:46.716Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:46.717Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:46.718Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
-[2025-08-25T23:27:46.718Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
-[2025-08-25T23:27:46.719Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
-[2025-08-25T23:27:46.719Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.530Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:04.531Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:04.531Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:04.532Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.533Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.533Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.534Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.535Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.535Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.540Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:04.540Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:04.541Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.541Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
+[2025-08-26T02:57:04.844Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:04.845Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:04.845Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:04.845Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.846Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.846Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.847Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.847Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.848Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.849Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:04.849Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:04.849Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.850Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
+[2025-08-26T02:57:04.867Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:04.867Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:04.868Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:04.868Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.868Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.868Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.868Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.869Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.869Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.871Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:04.872Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:04.872Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.872Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
+[2025-08-26T02:57:04.899Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:04.900Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:04.900Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:04.901Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.901Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.901Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.902Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.902Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.905Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.906Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:04.907Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:04.907Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:04.908Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
+[2025-08-26T02:57:05.108Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:05.109Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:05.110Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:05.111Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.112Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.113Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.114Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.115Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.115Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.116Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:05.117Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:05.117Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.118Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
+[2025-08-26T02:57:05.134Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:05.135Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:05.135Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:05.136Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.136Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.139Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.140Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.140Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.140Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.141Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:05.141Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:05.141Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:05.142Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
+[2025-08-26T02:57:21.028Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:21.029Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:21.029Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:21.029Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cuscuz. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.030Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Brócolis e Couve flor assados. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.030Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé de frango marinado na mostarda. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.030Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Carne ao Molho de Vinho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.031Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lasanha Presunto e Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.031Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Chips de batata doce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.032Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:21.033Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:21.033Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Pepino. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.034Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Beterraba Ralada. unit_price: 11.039600000000002, unit_type: cuba-g
+[2025-08-26T02:57:21.073Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:21.074Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:21.074Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão tropeiro. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.074Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:21.074Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de ovos. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.075Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Quiabo tostado. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.075Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango caipira. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.075Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Costela bovina ao molho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.075Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Torresmo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.076Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Mandioca Cremosa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.076Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:21.076Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:21.076Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Cabotiá. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.077Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Couve. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.272Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:21.272Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:21.272Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão tropeiro. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.273Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:21.273Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de ovos. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.273Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Quiabo tostado. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.274Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango caipira. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.274Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Costela bovina ao molho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.274Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Torresmo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.274Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Mandioca Cremosa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.275Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:21.275Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:21.275Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Cabotiá. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.275Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Couve. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.288Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:21.288Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:21.288Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão tropeiro. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.289Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:21.289Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de ovos. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.289Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Quiabo tostado. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.289Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango caipira. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.290Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Costela bovina ao molho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.290Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Torresmo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.290Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Mandioca Cremosa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.290Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:21.291Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:21.291Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Cabotiá. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.291Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Couve. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.309Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:21.309Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:21.310Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão tropeiro. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.310Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:21.310Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de ovos. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.310Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Quiabo tostado. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.311Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango caipira. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.311Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Costela bovina ao molho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.312Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Torresmo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.312Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Mandioca Cremosa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.312Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:21.312Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:21.313Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Cabotiá. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.313Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Couve. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.568Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:21.568Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:21.569Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão tropeiro. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.569Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:21.570Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de ovos. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.570Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Quiabo tostado. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.570Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango caipira. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.570Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Costela bovina ao molho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.571Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Torresmo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.571Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Mandioca Cremosa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.571Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:21.571Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:21.572Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Cabotiá. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.572Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Couve. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.580Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:21.580Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:21.580Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão tropeiro. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.580Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:21.581Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de ovos. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.581Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Quiabo tostado. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.581Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango caipira. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.581Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Costela bovina ao molho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.583Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Torresmo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.584Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Mandioca Cremosa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.585Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:21.585Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:21.586Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Cabotiá. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:21.586Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Couve. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.740Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:25.741Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:25.741Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão tropeiro. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.741Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:25.742Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de ovos. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.742Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Quiabo tostado. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.742Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango caipira. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.742Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Costela bovina ao molho. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.743Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Torresmo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.743Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Mandioca Cremosa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.743Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:25.744Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:25.744Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Cabotiá. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.744Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Couve. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.779Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:25.780Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.780Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:25.781Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
+[2025-08-26T02:57:25.782Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.782Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.782Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.783Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.783Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.784Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:25.784Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:25.784Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.786Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.787Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo Mesclado. unit_price: 19.69505559599636, unit_type: cupa-p
+[2025-08-26T02:57:25.821Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:25.821Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.822Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:25.822Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
+[2025-08-26T02:57:25.823Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.823Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.824Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.824Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.824Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.825Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:25.826Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:25.826Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.826Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.827Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo Mesclado. unit_price: 19.69505559599636, unit_type: cupa-p
+[2025-08-26T02:57:25.998Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:25.999Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:25.999Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:25.999Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
+[2025-08-26T02:57:26.000Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.000Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.001Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.001Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.002Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.004Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:26.005Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:26.005Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.006Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.006Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo Mesclado. unit_price: 19.69505559599636, unit_type: cupa-p
+[2025-08-26T02:57:26.020Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:26.021Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.022Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:26.022Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
+[2025-08-26T02:57:26.022Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.022Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.023Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.023Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.023Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.024Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:26.024Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:26.024Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.024Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.024Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo Mesclado. unit_price: 19.69505559599636, unit_type: cupa-p
+[2025-08-26T02:57:26.189Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:26.190Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.191Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:26.192Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
+[2025-08-26T02:57:26.193Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.194Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.195Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.196Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.196Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.197Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:26.197Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:26.198Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.198Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.199Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo Mesclado. unit_price: 19.69505559599636, unit_type: cupa-p
+[2025-08-26T02:57:26.215Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:26.215Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.216Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:26.216Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
+[2025-08-26T02:57:26.216Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.217Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.217Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.217Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.217Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.218Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:26.218Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:26.218Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.218Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.221Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo Mesclado. unit_price: 19.69505559599636, unit_type: cupa-p
+[2025-08-26T02:57:26.229Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:26.229Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.229Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:26.229Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
+[2025-08-26T02:57:26.230Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.230Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.230Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.231Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.231Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.231Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:26.231Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:26.232Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.232Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:26.232Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo Mesclado. unit_price: 19.69505559599636, unit_type: cupa-p
+[2025-08-26T02:57:34.564Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:34.564Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz integral com abobrinha ralada. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.565Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:34.565Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa Temperada. unit_price: 45.777744999999996, unit_type: cuba-g
+[2025-08-26T02:57:34.565Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Cenoura na manteiga. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.566Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Iscas de tilápia à milanesa. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.566Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Lombro agridoce. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.566Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Omelete recheada com espinafre e parmesão. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.566Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Yakisoba. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.567Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:34.567Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:34.568Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Caponata de berinjela. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.568Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Grão de Bico. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.568Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo Mesclado. unit_price: 19.69505559599636, unit_type: cupa-p
+[2025-08-26T02:57:34.607Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:34.608Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:34.609Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:34.610Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cebola. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:34.611Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Vagem no forno. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.612Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango Supremo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.612Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé mignon suíno ao molho de ervas. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.613Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Esc. de Carne. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.614Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Panqueca de Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.614Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:34.615Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:34.615Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Feijão Branco. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.616Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Abobrinha. unit_price: 28.364005282555283, unit_type: cuba-g
+[2025-08-26T02:57:34.616Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo de Fubá. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.648Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:34.649Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:34.649Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:34.649Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cebola. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:34.650Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Vagem no forno. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.650Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango Supremo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.650Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé mignon suíno ao molho de ervas. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.651Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Esc. de Carne. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.651Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Panqueca de Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.651Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:34.652Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:34.652Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Feijão Branco. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.652Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Abobrinha. unit_price: 28.364005282555283, unit_type: cuba-g
+[2025-08-26T02:57:34.653Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo de Fubá. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.818Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:34.818Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:34.818Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:34.819Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cebola. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:34.819Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Vagem no forno. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.819Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango Supremo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.820Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé mignon suíno ao molho de ervas. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.820Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Esc. de Carne. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.820Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Panqueca de Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.820Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:34.821Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:34.821Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Feijão Branco. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.821Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Abobrinha. unit_price: 28.364005282555283, unit_type: cuba-g
+[2025-08-26T02:57:34.822Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo de Fubá. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.837Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:34.838Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:34.838Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:34.838Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cebola. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:34.839Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Vagem no forno. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.839Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango Supremo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.839Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé mignon suíno ao molho de ervas. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.840Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Esc. de Carne. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.840Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Panqueca de Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.840Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:34.841Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:34.841Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Feijão Branco. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:34.841Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Abobrinha. unit_price: 28.364005282555283, unit_type: cuba-g
+[2025-08-26T02:57:34.843Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo de Fubá. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.116Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:35.117Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:35.118Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:35.119Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cebola. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:35.120Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Vagem no forno. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.120Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango Supremo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.122Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé mignon suíno ao molho de ervas. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.123Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Esc. de Carne. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.124Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Panqueca de Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.125Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:35.127Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:35.128Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Feijão Branco. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.129Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Abobrinha. unit_price: 28.364005282555283, unit_type: cuba-g
+[2025-08-26T02:57:35.130Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo de Fubá. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.152Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Branco. unit_price: 46.019091397849465, unit_type: cuba-g
+[2025-08-26T02:57:35.153Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Arroz Integral. unit_price: 42.168351301115244, unit_type: cuba-g
+[2025-08-26T02:57:35.153Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Feijão. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:35.154Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Farofa de cebola. unit_price: 60.44928220858896, unit_type: cuba-g
+[2025-08-26T02:57:35.154Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Vagem no forno. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.155Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Frango Supremo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.155Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Filé mignon suíno ao molho de ervas. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.156Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Esc. de Carne. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.156Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Panqueca de Queijo. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.156Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Alface. unit_price: 20.360599999999998, unit_type: cuba-g
+[2025-08-26T02:57:35.156Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Tomate. unit_price: 52.059124, unit_type: cuba-g
+[2025-08-26T02:57:35.158Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Feijão Branco. unit_price: 8.944, unit_type: null
+[2025-08-26T02:57:35.158Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering S. Abobrinha. unit_price: 28.364005282555283, unit_type: cuba-g
+[2025-08-26T02:57:35.159Z] [LOG] DEBUG PREÇO: OrdersTab - Rendering Bolo de Fubá. unit_price: 8.944, unit_type: null
