@@ -988,7 +988,8 @@ const MobileOrdersPage = ({ customerId }) => {
             cuba_weight: cubaWeightParsed,
             yield_weight: utilParseQuantity(recipe.yield_weight) || 0,
             total_weight: utilParseQuantity(recipe.total_weight) || 0,
-            adjustment_percentage: 0
+            adjustment_percentage: 0,
+            recipe: recipe, // Adicionado para que o weightCalculator possa acessar os pesos da receita
           };
           
           const syncedItem = PortalDataSync.syncItemSafely(baseItem, recipe);
