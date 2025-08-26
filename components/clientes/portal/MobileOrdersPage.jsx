@@ -45,7 +45,8 @@ import {
   Loader2,
   Check,
   X,
-  CheckCircle
+  CheckCircle,
+  Building2
 } from "lucide-react";
 
 // Utilitários
@@ -93,92 +94,7 @@ const MobileOrdersPage = ({ customerId }) => {
   const { toast } = useToast();
   const { groupItemsByCategory, getOrderedCategories, generateCategoryStyles } = useCategoryDisplay();
   
-  // 🚨 SISTEMA DE DETECÇÃO DE SESSÕES MÚTIPLAS
-  useEffect(() => {
-    const sessionId = `portal_session_${customerId}_${Date.now()}_${Math.random()}`;
-    const sessionKey = `portal_sessions_${customerId}`;
-    
-    // Registrar esta sessão
-    const registerSession = () => {
-      try {
-        const existingSessions = JSON.parse(localStorage.getItem(sessionKey) || '[]');
-        const now = Date.now();
-        
-        // Limpar sessões antigas (mais de 5 minutos)
-        const activeSessions = existingSessions.filter(s => (now - s.timestamp) < 300000);
-        
-        // Adicionar ou atualizar esta sessão
-        const existingSessionIndex = activeSessions.findIndex(s => s.id === sessionId);
-        
-        if (existingSessionIndex !== -1) {
-          // Atualizar timestamp da sessão existente
-          activeSessions[existingSessionIndex].timestamp = now;
-        } else {
-          // Adicionar nova sessão se não existir
-          const newSession = {
-            id: sessionId,
-            timestamp: now,
-            url: window.location.href,
-            userAgent: navigator.userAgent
-          };
-          activeSessions.push(newSession);
-        }
-        localStorage.setItem(sessionKey, JSON.stringify(activeSessions));
-        
-        console.log('📱 [SESSION TRACKER] Sessão registrada:', {
-          sessionId: sessionId,
-          totalActiveSessions: activeSessions.length,
-          customerId: customerId,
-          activeSessions: activeSessions
-        });
-        
-        // Alerta se houver múltiplas sessões
-        if (activeSessions.length > 1) {
-          console.warn('⚠️ [SESSION TRACKER] MÚTIPLAS SESSÕES DETECTADAS:', {
-            count: activeSessions.length,
-            customerId: customerId,
-            sessions: activeSessions,
-            risk: 'CONFLITO DE DADOS POSSÍVEL'
-          });
-        }
-        
-        return activeSessions.length;
-      } catch (error) {
-        console.error('❌ [SESSION TRACKER] Erro ao registrar sessão:', error);
-        return 1;
-      }
-    };
-    
-    // Cleanup da sessão ao sair
-    const cleanupSession = () => {
-      try {
-        const existingSessions = JSON.parse(localStorage.getItem(sessionKey) || '[]');
-        const filteredSessions = existingSessions.filter(s => s.id !== sessionId);
-        localStorage.setItem(sessionKey, JSON.stringify(filteredSessions));
-        
-        console.log('🧩 [SESSION TRACKER] Sessão removida:', {
-          sessionId: sessionId,
-          remainingSessions: filteredSessions.length
-        });
-      } catch (error) {
-        console.error('❌ [SESSION TRACKER] Erro ao limpar sessão:', error);
-      }
-    };
-    
-    // Registrar sessão inicial
-    const sessionCount = registerSession();
-    
-    // Monitorar sessões a cada 30 segundos
-    const sessionInterval = setInterval(() => {
-      registerSession();
-    }, 30000);
-    
-    // Cleanup quando componente desmonta
-    return () => {
-      clearInterval(sessionInterval);
-      cleanupSession();
-    };
-  }, [customerId]);
+
   
   // Estados principais
   const [currentDate, setCurrentDate] = useState(() => {
@@ -263,10 +179,7 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Carregar pedidos existentes da semana
   const loadExistingOrders = useCallback(async () => {
-    //console.log('📋 [loadExistingOrders] Executando...');
-    //console.log('📅 [loadExistingOrders] Semana:', weekNumber, 'Ano:', year, 'Dia selecionado:', selectedDay);
     if (!customer) {
-      //console.log('❌ [loadExistingOrders] Saindo - sem customer');
       return;
     }
     
@@ -276,7 +189,6 @@ const MobileOrdersPage = ({ customerId }) => {
         { field: 'week_number', operator: '==', value: weekNumber },
         { field: 'year', operator: '==', value: year }
       ]);
-      //console.log('📋 [loadExistingOrders] Pedidos encontrados:', orders.length);
       
       // Organizar por dia da semana
       const ordersByDay = {};
@@ -285,7 +197,6 @@ const MobileOrdersPage = ({ customerId }) => {
       });
       
       setExistingOrders(ordersByDay);
-      //console.log('📋 [loadExistingOrders] Pedidos organizados por dia:', Object.keys(ordersByDay));
       
       // Definir mealsExpected baseado no pedido do dia atual
       const currentDayOrder = ordersByDay[selectedDay];
@@ -829,10 +740,8 @@ const MobileOrdersPage = ({ customerId }) => {
 
       // 1. Recarregar Receitas
       const recipesData = await Recipe.list();
-      console.log('DEBUG PREÇO: fetchData - recipesData fetched:', recipesData.length, 'recipes');
       const saladaAbobrinhaRecipe = recipesData.find(r => r.name === 'S. Abobrinha'); // Assuming 'S. Abobrinha' is the exact name
       if (saladaAbobrinhaRecipe) {
-        console.log('DEBUG PREÇO: fetchData - Salada Abobrinha recipe data:', JSON.stringify(saladaAbobrinhaRecipe, null, 2));
       }
       setRecipes(recipesData);
 
@@ -840,7 +749,6 @@ const MobileOrdersPage = ({ customerId }) => {
       const allMenus = await WeeklyMenu.list();
       const weekKey = `${yearForFetch}-W${String(weekNumberForFetch).padStart(2, '0')}`;
       const menusData = allMenus.filter(menu => menu.week_key === weekKey);
-      console.log('DEBUG PREÇO: fetchData - menusData fetched:', menusData.length, 'menus');
       setWeeklyMenus(menusData);
 
       // 3. Recarregar Pedidos Existentes
@@ -855,7 +763,6 @@ const MobileOrdersPage = ({ customerId }) => {
         orders.forEach(order => {
           ordersByDay[order.day_of_week] = order;
         });
-        console.log('DEBUG PREÇO: fetchData - existingOrders fetched:', Object.keys(ordersByDay).length, 'orders');
         setExistingOrders(ordersByDay);
       }
       
@@ -881,15 +788,9 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Carregamento de cardápios quando semana muda
   useEffect(() => {
-    //console.log('🔄 [loadWeeklyMenus] useEffect executado');
-    //console.log('📅 [NAVEGAÇÃO] Data atual:', format(currentDate, 'dd/MM/yyyy'));
-    //console.log('📅 [NAVEGAÇÃO] Semana:', weekNumber, 'Ano:', year);
-    //console.log('👤 [NAVEGAÇÃO] Cliente:', customer?.name || 'Não carregado');
     
     const loadWeeklyMenus = async () => {
-      //console.log('🔄 [loadWeeklyMenus] Iniciando carregamento...');
       if (!customerId || !customer) {
-        //console.log('❌ [loadWeeklyMenus] Saindo - sem customerId ou customer');
         return;
       }
 
@@ -903,13 +804,10 @@ const MobileOrdersPage = ({ customerId }) => {
         const allMenus = await WeeklyMenu.list();
         
         const weekKey = `${year}-W${String(weekNumber).padStart(2, '0')}`;
-        //console.log('🔍 [loadWeeklyMenus] Buscando cardápio com chave:', weekKey);
         const menusData = allMenus.filter(menu => menu.week_key === weekKey);
-        //console.log('📋 [loadWeeklyMenus] Cardápios encontrados:', menusData.length);
 
         if (menusData.length > 0) {
           const menu = menusData[0];
-          //console.log('✅ [loadWeeklyMenus] Cardápio encontrado para semana', weekNumber, '/', year);
           setWeeklyMenus(menusData);
           
           // Analisar estrutura do cardápio
@@ -943,7 +841,6 @@ const MobileOrdersPage = ({ customerId }) => {
           
         } else {
           // Nenhum cardápio encontrado - resetar tudo
-          //console.log('❌ [loadWeeklyMenus] Nenhum cardápio encontrado para semana', weekNumber, '/', year);
           setWeeklyMenus([]);
           setMealsExpected(0);
           setGeneralNotes("");
@@ -1002,19 +899,14 @@ const MobileOrdersPage = ({ customerId }) => {
 
   // Preparar itens do pedido baseado no cardápio
       const orderItems = useMemo(() => {
-    //console.log('🍽️ [orderItems] useMemo executado');
-    //console.log('🍽️ [orderItems] WeeklyMenus:', weeklyMenus.length, 'Recipes:', recipes.length, 'Dia selecionado:', selectedDay);
     
     // Log específico para debugging do dia 26/08
     const currentDateStr = format(currentDate, 'dd/MM');
     if (currentDateStr === '26/08' || selectedDay === 1 || selectedDay === 2) { // Segunda-feira é 1, terça é 2
-      //console.log('🔍 [DEBUG 26/08] Data atual:', currentDateStr, 'Dia selecionado:', selectedDay);
-      //console.log('🔍 [DEBUG 26/08] Customer:', customer?.name, customer?.id);
     }
 
     
     if (!weeklyMenus.length || !recipes.length || !customer) {
-      //console.log('❌ [orderItems] Saindo - dados insuficientes');
       return [];
     }
 
@@ -1055,7 +947,6 @@ const MobileOrdersPage = ({ customerId }) => {
           
           // Adicionando logs específicos para depuração
           if (recipe && (recipe.name.includes('Farofa de cuscuz') || recipe.name.includes('Brócolis'))) {
-            console.log(`[DEBUG PREÇO ETAPA 1] Receita encontrada: ${recipe.name}`, JSON.stringify(recipe, null, 2));
           }
           
           if (!recipe) {
@@ -1190,13 +1081,9 @@ const MobileOrdersPage = ({ customerId }) => {
   // Inicializar pedido quando itens mudam
   useEffect(() => {
     const initKey = `${weekNumber}-${year}-${selectedDay}-${orderItems.length}`;
-    //console.log('📝 [initializeOrder] useEffect executado com initKey:', initKey);
-    //console.log('📝 [initializeOrder] hasInitializedDay:', hasInitializedDay);
-    //console.log('📝 [initializeOrder] orderItems.length:', orderItems.length);
     
     // Só executar após inicialização do dia
     if (!hasInitializedDay) {
-      //console.log('❌ [initializeOrder] Saindo - dia não inicializado');
       return;
     }
     
@@ -1422,37 +1309,12 @@ const MobileOrdersPage = ({ customerId }) => {
     const dayOfWeek = currentTime.getDay(); // 0=Domingo, 1=Segunda, ... 5=Sexta
     const dayName = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][dayOfWeek];
     
-    console.log('🎯 [SUBMIT ORDER] Início do salvamento:', {
-      timestamp: currentTime.toISOString(),
-      dayOfWeek: dayOfWeek,
-      dayName: dayName,
-      isFriday: dayOfWeek === 5,
-      customerId: customerId,
-      customerName: customer?.name || 'N/A',
-      hasCurrentOrder: !!currentOrder,
-      hasCustomer: !!customer,
-      mealsExpected: mealsExpected,
-      selectedDay: selectedDay,
-      isEditMode: isEditMode,
-      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
-      windowLocation: typeof window !== 'undefined' ? window.location.href : 'N/A'
-    });
-
     if (!currentOrder || !customer) {
-      console.error('❌ [SUBMIT ORDER] Dados básicos ausentes:', {
-        hasCurrentOrder: !!currentOrder,
-        hasCustomer: !!customer,
-        customerId: customerId
-      });
       return;
     }
 
     // Validar se refeições esperadas foi preenchido
     if (!mealsExpected || mealsExpected <= 0) {
-      console.warn('⚠️ [SUBMIT ORDER] Refeições esperadas inválida:', {
-        mealsExpected: mealsExpected,
-        type: typeof mealsExpected
-      });
       toast({ 
         variant: "destructive", 
         title: "Campo Obrigatório", 
@@ -1461,14 +1323,6 @@ const MobileOrdersPage = ({ customerId }) => {
       return;
     }
 
-    // 🚨 LOG DE DADOS DO PEDIDO
-    console.log('📋 [SUBMIT ORDER] Dados do pedido:', {
-      itemsCount: currentOrder.items?.length || 0,
-      existingOrderId: existingOrders[selectedDay]?.id || null,
-      isUpdate: !!existingOrders[selectedDay],
-      orderTotals: orderTotals
-    });
-    
     // 🚨 VERIFICAÇÃO ESPECÍFICA PARA SEXTAS-FEIRAS
     if (dayOfWeek === 5) {
       const sessionKey = `portal_sessions_${customerId}`;
@@ -1476,20 +1330,7 @@ const MobileOrdersPage = ({ customerId }) => {
       const now = Date.now();
       const recentSessions = activeSessions.filter(s => (now - s.timestamp) < 300000);
       
-      console.warn('🔥 [SUBMIT ORDER] SEXTA-FEIRA - Verificações adicionais:', {
-        dayName: dayName,
-        activeSessions: recentSessions.length,
-        sessions: recentSessions,
-        hasMultipleSessions: recentSessions.length > 1,
-        localStorage_size: Object.keys(localStorage).length,
-        sessionStorage_size: Object.keys(sessionStorage).length,
-        window_name: window.name || 'unnamed',
-        document_readyState: document.readyState,
-        connection_type: navigator.connection?.effectiveType || 'unknown'
-      });
-      
       if (recentSessions.length > 1) {
-        console.error('⚠️ [SUBMIT ORDER] RISCO: Múltiplas sessões ativas na sexta-feira!');
       }
     }
 
@@ -1529,29 +1370,13 @@ const MobileOrdersPage = ({ customerId }) => {
         depreciation_amount: orderTotals.depreciationAmount
       };
 
-      // 🚨 LOG ANTES DO SALVAMENTO
-      console.log('💾 [SUBMIT ORDER] Preparando para salvar:', {
-        isUpdate: !!existingOrders[selectedDay],
-        existingOrderId: existingOrders[selectedDay]?.id || null,
-        orderDataSize: JSON.stringify(orderData).length,
-        itemsCount: orderData.items?.length || 0,
-        dayOfWeek: dayOfWeek,
-        isFriday: dayOfWeek === 5
-      });
-
       const startTime = Date.now();
       
       if (existingOrders[selectedDay]) {
-        console.log('🔄 [SUBMIT ORDER] Atualizando pedido existente:', existingOrders[selectedDay].id);
         
         await Order.update(existingOrders[selectedDay].id, orderData);
         
         const updateTime = Date.now() - startTime;
-        console.log('✅ [SUBMIT ORDER] Pedido atualizado com sucesso!', {
-          orderId: existingOrders[selectedDay].id,
-          updateTime: `${updateTime}ms`,
-          isFriday: dayOfWeek === 5
-        });
         
         toast({ description: "Pedido atualizado com sucesso!" });
 
@@ -1563,16 +1388,10 @@ const MobileOrdersPage = ({ customerId }) => {
         }));
 
       } else {
-        console.log('🆕 [SUBMIT ORDER] Criando novo pedido');
         
         const newOrder = await Order.create(orderData);
         
         const createTime = Date.now() - startTime;
-        console.log('✅ [SUBMIT ORDER] Pedido criado com sucesso!', {
-          newOrderId: newOrder.id,
-          createTime: `${createTime}ms`,
-          isFriday: dayOfWeek === 5
-        });
         
         setExistingOrders(prev => ({
           ...prev,
@@ -1583,36 +1402,16 @@ const MobileOrdersPage = ({ customerId }) => {
       }
       
       // REMOVIDO: A atualização agora é otimista para evitar race conditions com o DB
-      // console.log('🔄 [SUBMIT ORDER] Recarregando dados existentes...');
       // await loadExistingOrders();
       
       // Ativar efeito de sucesso e depois sair do modo de edição
-      console.log('🎉 [SUBMIT ORDER] Finalizando com sucesso!');
       setShowSuccessEffect(true);
       setTimeout(() => {
         setShowSuccessEffect(false);
         setIsEditMode(false);
-        console.log('🏁 [SUBMIT ORDER] Modo de edição desabilitado');
       }, 2000); // 2 segundos de efeito
       
     } catch (error) {
-      // 🚨 LOG DETALHADO DO ERRO
-      console.error('❌ [SUBMIT ORDER] Erro ao salvar pedido:', {
-        error: error.message,
-        stack: error.stack,
-        dayOfWeek: dayOfWeek,
-        dayName: dayName,
-        isFriday: dayOfWeek === 5,
-        customerId: customerId,
-        customerName: customer?.name || 'N/A',
-        mealsExpected: mealsExpected,
-        selectedDay: selectedDay,
-        isUpdate: !!existingOrders[selectedDay],
-        existingOrderId: existingOrders[selectedDay]?.id || null,
-        timestamp: new Date().toISOString(),
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
-        connectionType: typeof navigator !== 'undefined' && navigator.connection ? navigator.connection.effectiveType : 'N/A'
-      });
       
       // Toast para o usuário
       toast({ 
@@ -1627,25 +1426,12 @@ const MobileOrdersPage = ({ customerId }) => {
         const now = Date.now();
         const recentSessions = activeSessions.filter(s => (now - s.timestamp) < 300000);
         
-        console.error('🔥 [SUBMIT ORDER] ERRO ESPECÍFICO DE SEXTA-FEIRA:', {
-          fridayErrorCount: (window.fridayErrorCount || 0) + 1,
-          sessionStorage: typeof sessionStorage !== 'undefined' ? Object.keys(sessionStorage) : 'N/A',
-          localStorage: typeof localStorage !== 'undefined' ? Object.keys(localStorage) : 'N/A',
-          activeTabsCount: typeof document !== 'undefined' ? document.querySelectorAll('a[href], button').length : 'N/A',
-          activeSessions: recentSessions.length,
-          sessionDetails: recentSessions,
-          possibleCause: recentSessions.length > 1 ? 'MULTIPLE_SESSIONS' : 'OTHER',
-          firebaseOffline: typeof navigator !== 'undefined' ? !navigator.onLine : 'unknown',
-          windowFocus: typeof document !== 'undefined' ? document.hasFocus() : 'unknown'
-        });
-        
         if (typeof window !== 'undefined') {
           window.fridayErrorCount = (window.fridayErrorCount || 0) + 1;
         }
         
         // Tentar limpar sessões antigas para evitar conflitos futuros
         if (recentSessions.length > 1) {
-          console.log('🧩 [SUBMIT ORDER] Limpando sessões múltiplas...');
           localStorage.removeItem(sessionKey);
         }
       }
@@ -1700,11 +1486,9 @@ const MobileOrdersPage = ({ customerId }) => {
    * Esta é a função principal que executa em background sem interface
    */
   const applyAutomaticSuggestions = useCallback(async (newMealsExpected) => {
-    //console.log('🤖 [applyAutomaticSuggestions] Iniciando com:', newMealsExpected, 'Processando:', isProcessingSuggestions);
     
     // Proteção contra execuções múltiplas
     if (isProcessingSuggestions) {
-      //console.log('⏹️ [applyAutomaticSuggestions] Já processando, ignorando...');
       return;
     }
     
@@ -1719,7 +1503,6 @@ const MobileOrdersPage = ({ customerId }) => {
     
     // *** Limpar sugestões APENAS se refeições esperadas for explicitamente 0 ***
     if (newMealsExpected === 0) {
-      //console.log('🗑️ [applyAutomaticSuggestions] Limpando sugestões (refeições = 0)');
       
       const clearedItems = currentOrder.items.map(item => {
         // Limpar sugestões mas manter valores existentes se usuário digitou
@@ -1742,7 +1525,6 @@ const MobileOrdersPage = ({ customerId }) => {
     
     // *** Sair se valor for vazio/indefinido (aguardar usuário terminar de digitar) ***
     if (!newMealsExpected || newMealsExpected < 0) {
-      //console.log('⏸️ [applyAutomaticSuggestions] Aguardando valor válido:', newMealsExpected);
       setIsProcessingSuggestions(false);
       return;
     }
@@ -1768,12 +1550,9 @@ const MobileOrdersPage = ({ customerId }) => {
       // IMPLEMENTAÇÃO CUSTOMIZADA: Gerar sugestões SEM aplicar nos inputs
       
       // 1. Carregar histórico
-      //console.log('🗺 [DEBUG] Carregando histórico para cliente:', customer.id);
       const historicalOrders = await OrderSuggestionManager.loadHistoricalOrders(customer.id, 8);
-      //console.log('🗺 [DEBUG] Histórico carregado:', historicalOrders.length, 'pedidos');
       
       if (historicalOrders.length === 0) {
-        //console.log('⚠️ Sem histórico para gerar sugestões - CRIANDO SUGESTÕES DE TESTE');
         
         // 🧪 MODO DE TESTE: Criar sugestões artificiais para demonstrar a funcionalidade
         const testSuggestions = currentOrder.items.map(originalItem => {
@@ -1802,7 +1581,6 @@ const MobileOrdersPage = ({ customerId }) => {
             }
           }
           
-          //console.log(`🧪 [TESTE] ${originalItem.recipe_name}: ${newMealsExpected} refeições → ${suggestedQuantity} ${originalItem.unit_type}`);
           
           return {
             ...originalItem,
@@ -1823,7 +1601,7 @@ const MobileOrdersPage = ({ customerId }) => {
           };
         });
         
-        //console.log('🧪 [TESTE] Aplicando sugestões artificiais...');
+        
         setCurrentOrder(prevOrder => ({
           ...prevOrder,
           items: testSuggestions,
@@ -1899,27 +1677,19 @@ const MobileOrdersPage = ({ customerId }) => {
       
       
       if (result.success) {
-        // Os itens já vêm com sugestões anexadas e valores originais preservados
-        //console.log('🎆 Sugestões geradas com arredondamento correto!');
-        //console.log('📊 Total de sugestões:', result.metadata.suggestions_applied);
         
         // Debug: Mostrar TODAS as sugestões geradas
-        //console.log('📋 [DEBUG-SUGGESTIONS] Lista completa de sugestões:');
-        result.items.forEach((item, index) => {
-          if (item.suggestion?.has_suggestion) {
-            //console.log(`✅ [${index}] ${item.recipe_name}: ${item.suggestion.suggested_base_quantity} ${item.unit_type} (confiança: ${Math.round(item.suggestion.confidence * 100)}%)`);
-          } else {
-            //console.log(`❌ [${index}] ${item.recipe_name}: Sem sugestão (${item.suggestion?.reason || 'motivo desconhecido'})`);
-          }
-        });
         
         // Aplicar sugestões PRESERVANDO valores originais dos inputs
                 setCurrentOrder(prevOrder => {
-                    const newItems = prevOrder.items.map((item, index) => {
-                        const suggestedItem = result.items[index];
+                    const newItems = prevOrder.items.map(item => {
+                        // Encontrar a sugestão correspondente pelo unique_id para garantir a correspondência correta
+                        const suggestedItem = result.items.find(resItem => resItem.unique_id === item.unique_id);
+                        
                         return {
-                            ...item, // Keep the current item state (with user input)
-                            suggestion: suggestedItem.suggestion // Only update the suggestion
+                            ...item,
+                            // Aplicar a sugestão apenas se encontrada, caso contrário, manter o item como está
+                            suggestion: suggestedItem && suggestedItem.suggestion ? suggestedItem.suggestion : (item.suggestion || null)
                         };
                     });
 
@@ -1930,7 +1700,6 @@ const MobileOrdersPage = ({ customerId }) => {
                     };
                 });
       } else {
-        //console.log('⚠️ Erro ao gerar sugestões:', result.error);
         // Apenas atualizar refeições esperadas
         setCurrentOrder(prevOrder => ({
           ...prevOrder,
@@ -1971,12 +1740,9 @@ const MobileOrdersPage = ({ customerId }) => {
   
   // Carregar pedidos existentes quando customer muda OU semana muda OU dia muda
   useEffect(() => {
-    //console.log('🔄 [loadExistingOrders-useEffect] Executando...');
-    //console.log('🔄 [loadExistingOrders-useEffect] Customer:', customer?.name, 'HasInitialized:', hasInitializedDay);
     if (customer && hasInitializedDay) {
       loadExistingOrders();
     } else {
-      //console.log('❌ [loadExistingOrders-useEffect] Condições não atendidas');
     }
   }, [customer, hasInitializedDay, weekNumber, year, selectedDay, loadExistingOrders]);
 
@@ -2028,7 +1794,6 @@ const MobileOrdersPage = ({ customerId }) => {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                      //console.log('◀️ [NAVEGAÇÃO] Botão Semana Anterior clicado');
                       setCurrentDate(addDays(currentDate, -7));
                     }}
                 className="flex items-center gap-1 text-xs px-2 py-1 h-8 flex-shrink-0"
@@ -2051,7 +1816,6 @@ const MobileOrdersPage = ({ customerId }) => {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                      //console.log('▶️ [NAVEGAÇÃO] Botão Próxima Semana clicado');
                       setCurrentDate(addDays(currentDate, 7));
                     }}
                 className="flex items-center gap-1 text-xs px-2 py-1 h-8 flex-shrink-0"
@@ -2076,7 +1840,6 @@ const MobileOrdersPage = ({ customerId }) => {
                     variant={isSelected ? "default" : "outline"}
                     size="sm"
                     onClick={() => {
-                        //console.log('🗓️ [NAVEGAÇÃO] Dia selecionado:', day.dayNumber, '(' + day.dayName + ')');
                         setSelectedDay(day.dayNumber);
                       }}
                     className={cn(
@@ -2123,6 +1886,7 @@ const MobileOrdersPage = ({ customerId }) => {
 
       {/* Content */}
       <div className="p-4 space-y-4">
+        
         {activeTab === "orders" && (
           <OrdersTab
             key={`orders-${weekNumber}-${year}-${selectedDay}-${currentOrder?.total_amount || 0}`} // ✅ Força re-render quando semana/dia/pedido muda

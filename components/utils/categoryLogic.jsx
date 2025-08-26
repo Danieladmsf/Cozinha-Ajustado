@@ -128,22 +128,21 @@ export class CategoryLogic {
    */
   static getTableHeaders(isCarneCategory) {
     const baseHeaders = [
-      { key: 'item', label: 'Item', className: 'text-left p-2 text-xs font-medium text-blue-700 w-1/4' },
-      { key: 'suggestion_quantity', label: 'Sugestão', className: 'text-center p-2 text-xs font-medium text-amber-600 w-24' },
-      { key: 'quantity', label: 'Quantidade', className: 'text-center p-2 text-xs font-medium text-blue-700 w-24' },
-      { key: 'unit', label: 'Unidade', className: 'text-center p-2 text-xs font-medium text-blue-700 w-16' }
+      { key: 'item', label: 'Item', className: 'text-left p-2 text-xs font-medium text-blue-700 min-w-[150px]' },
+      { key: 'suggestion_quantity', label: 'Sugestão', className: 'text-center p-2 text-xs font-medium text-amber-600 min-w-[60px]' },
+      { key: 'quantity', label: 'Quantidade', className: 'text-center p-2 text-xs font-medium text-blue-700 min-w-[60px]' },
+      { key: 'unit', label: 'Unidade', className: 'text-center p-2 text-xs font-medium text-blue-700 min-w-[50px]' }
     ];
 
     const carneHeaders = [
-      { key: 'suggestion_porcionamento', label: 'Sugestão', className: 'text-center p-2 text-xs font-medium text-amber-600 w-24' },
-      { key: 'porcionamento', label: 'Porcionamento', className: 'text-center p-2 text-xs font-medium text-blue-700 w-24' },
-      { key: 'total_pedido', label: 'Total Pedido', className: 'text-center p-2 text-xs font-medium text-blue-700 w-16' }
+      { key: 'porcionamento', label: 'Porcionamento', className: 'text-center p-2 text-xs font-medium text-blue-700 min-w-[60px]' },
+      { key: 'total_pedido', label: 'Total Pedido', className: 'text-center p-2 text-xs font-medium text-blue-700 min-w-[60px]' }
     ];
 
     const endHeaders = [
-      { key: 'subtotal', label: 'Subtotal', className: 'text-center p-2 text-xs font-medium text-blue-700 w-20' },
-      { key: 'peso_total', label: 'Peso Total', className: 'text-center p-2 text-xs font-medium text-blue-700 w-20' },
-      { key: 'notes', label: 'Observações', className: 'text-left p-2 text-xs font-medium text-blue-700 w-1/4' }
+      { key: 'subtotal', label: 'Subtotal', className: 'text-center p-2 text-xs font-medium text-blue-700 min-w-[70px]' },
+      { key: 'peso_total', label: 'Peso Total', className: 'text-center p-2 text-xs font-medium text-blue-700 min-w-[70px]' },
+      { key: 'notes', label: 'Observações', className: 'text-left p-2 text-xs font-medium text-blue-700 min-w-[150px]' }
     ];
 
     if (isCarneCategory) {

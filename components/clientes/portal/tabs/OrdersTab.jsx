@@ -202,36 +202,24 @@ const OrdersTab = ({
                               <p className="font-medium text-blue-900 text-xs">{item.recipe_name}</p>
                               <p className="text-xs text-blue-600">
                                 {(() => {
-                                  console.log(`DEBUG PREÇO: OrdersTab - Rendering ${item.recipe_name}. unit_price: ${item.unit_price}, unit_type: ${item.unit_type}`);
+                                  
                                   return utilFormatCurrency(item.unit_price);
                                 })()}/{item.unit_type}
                               </p>
                             </div>
                           </td>
                           {/* Coluna de Sugestão de Quantidade */}
-                          <td className="p-2 text-center">
-                            {item.suggestion?.has_suggestion && (
-                              <div className="flex items-center justify-center text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200 whitespace-nowrap">
-                                <span className="font-medium">
-                                  {(() => {
-                                    const originalValue = parseFloat(item.suggestion.suggested_base_quantity || 0);
-                                    const value = utilFormattedQuantity(originalValue);
-                                    return value;
-                                  })()}
-                                </span>
-                                <button
-                                  onClick={() => {
-                                    if (isEditMode && item.suggestion?.suggested_base_quantity) {
-                                      updateOrderItem(item.unique_id, 'base_quantity', item.suggestion.suggested_base_quantity);
-                                    }
-                                  }}
-                                  className="ml-1 text-amber-700 hover:text-amber-900 transition-colors"
-                                  title="Aplicar sugestão"
-                                  disabled={!isEditMode}
-                                >
-                                  ✓
-                                </button>
-                              </div>
+                          <td className="p-2 text-center min-w-[60px]">
+                            {item.suggestion?.has_suggestion ? (
+                              <span className="font-medium text-xs text-amber-600">
+                                {(() => {
+                                  const originalValue = parseFloat(item.suggestion.suggested_base_quantity || 0);
+                                  const value = utilFormattedQuantity(originalValue);
+                                  return value;
+                                })()}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
                             )}
                           </td>
                           {/* Coluna de Input de Quantidade */}
@@ -246,7 +234,7 @@ const OrdersTab = ({
                               }}
                               placeholder={item.unit_type && (item.unit_type.toLowerCase() === 'unid' || item.unit_type.toLowerCase() === 'unid.') ? 'Auto (Refeições)' : '0'}
                               onKeyDown={(e) => handleKeyDown(e, baseInputId)}
-                              className="text-center text-xs h-8 w-16 border-blue-300 focus:border-blue-500"
+                              className="block mx-auto text-center text-xs h-8 max-w-[60px] border-blue-300 focus:border-blue-500"
                               placeholder="0"
                               disabled={!isEditMode}
                             />
@@ -258,37 +246,15 @@ const OrdersTab = ({
                                   {item.unit_type.charAt(0).toUpperCase() + item.unit_type.slice(1)}
                                 </span>
                               ) : (
-                                <span className="text-red-500">sem porcionamento</span>
+                                <span className="text-red-500">-</span>
                               )}
                             </div>
                           </td>
                           {columnConfig.showPorcionamento && (
                             <>
-                              {/* Coluna de Sugestão de Porcionamento */}
-                              <td className="p-2 text-center">
-                                {item.suggestion?.has_suggestion && item.suggestion.suggested_adjustment_percentage >= 0 && (
-                                  <div className="flex items-center justify-center text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200 whitespace-nowrap">
-                                    <span className="font-medium">
-                                      {Math.round(item.suggestion.suggested_adjustment_percentage || 0)}
-                                    </span>
-                                    <button
-                                      onClick={() => {
-                                        if (isEditMode && item.suggestion?.suggested_adjustment_percentage) {
-                                          updateOrderItem(item.unique_id, 'adjustment_percentage', item.suggestion.suggested_adjustment_percentage);
-                                        }
-                                      }}
-                                      className="ml-1 text-amber-700 hover:text-amber-900 transition-colors"
-                                      title="Aplicar sugestão"
-                                      disabled={!isEditMode}
-                                    >
-                                      ✓
-                                    </button>
-                                  </div>
-                                )}
-                              </td>
                               {/* Coluna de Input de Porcionamento */}
                               <td className="p-2 text-center">
-                                <div>
+                                <div className="flex items-center justify-center">
                                   <DecimalInput
                                     ref={(ref) => registerInput(percentInputId, ref)}
                                     value={item.adjustment_percentage === 0 ? '' : item.adjustment_percentage || ''}
@@ -298,11 +264,11 @@ const OrdersTab = ({
                                       }
                                     }}
                                     onKeyDown={(e) => handleKeyDown(e, percentInputId)}
-                                    className="text-center text-xs h-8 w-16 border-blue-300 focus:border-blue-500"
+                                    className="text-center text-xs h-8 max-w-[60px] border-blue-300 focus:border-blue-500"
                                     placeholder="0"
                                     disabled={!isEditMode}
                                   />
-                                  <div className="text-xs text-gray-500 mt-1">%</div>
+                                  <span className="text-xs text-gray-500 ml-1">%</span>
                                 </div>
                               </td>
                             </>
@@ -331,7 +297,7 @@ const OrdersTab = ({
                               value={item.notes || ''}
                               onChange={(e) => isEditMode && updateOrderItem(item.unique_id, 'notes', e.target.value)}
                               onKeyDown={(e) => handleKeyDown(e, notesInputId)}
-                              className="text-xs h-8 border-blue-300 focus:border-blue-500"
+                              className="text-xs h-8 w-full border-blue-300 focus:border-blue-500"
                               placeholder="Observações..."
                               disabled={!isEditMode}
                             />
