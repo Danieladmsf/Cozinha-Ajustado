@@ -1776,7 +1776,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
             <img
               src="/logo-transparent.png"
               alt="Cozinha & Afeto"
-              className="w-auto h-auto max-w-[350px] md:max-w-[550px] mx-auto"
+              className="w-auto h-auto max-w-[450px] md:max-w-[750px] mx-auto"
             />
           </div>
         </div>

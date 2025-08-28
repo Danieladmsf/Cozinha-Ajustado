@@ -24,7 +24,8 @@ import {
   FilePlus,
   FileUp,
   Loader2,
-  Edit
+  Edit,
+  List
 } from "lucide-react";
 
 // Componente de refresh
@@ -57,6 +58,7 @@ import { Textarea } from "@/components/ui/textarea";
 // Componentes organizados
 import AddAssemblyItemModal from "./AddAssemblyItemModal";
 import AssemblySubComponents from "./AssemblySubComponents";
+import RecipeQuickEditor from "./RecipeQuickEditor";
 
 export default function RecipeTechnical() {
   const { toast } = useToast();
@@ -1767,7 +1769,7 @@ export default function RecipeTechnical() {
             className="w-full"
           >
             <div className="border-b border-gray-200 px-6 pt-6">
-              <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-100">
                 <TabsTrigger
                   value="ficha-tecnica"
                   className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
@@ -1781,6 +1783,13 @@ export default function RecipeTechnical() {
                 >
                   <CookingPot className="h-4 w-4 mr-2" />
                   Pré Preparo
+                </TabsTrigger>
+                <TabsTrigger
+                  value="edicao-rapida"
+                  className="data-[state=active]:bg-white data-[state=active]:text-green-600 data-[state=active]:shadow-sm"
+                >
+                  <List className="h-4 w-4 mr-2" />
+                  Edição Rápida
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -1872,6 +1881,9 @@ export default function RecipeTechnical() {
                   </p>
                 </div>
               </div>
+            </TabsContent>
+            <TabsContent value="edicao-rapida" className="p-6 bg-gray-50 rounded-b-lg">
+                <RecipeQuickEditor />
             </TabsContent>
           </Tabs>
         </Card>

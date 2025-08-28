@@ -130,15 +130,18 @@ const OrdersTab = ({
               <label className="block text-sm font-medium text-blue-700 mb-2">
                 Refeições Esperadas <span className="text-red-500">*</span>
               </label>
-              <DecimalInput
+              <Input
+                type="text"
+                inputMode="decimal"
                 ref={(ref) => registerInput('meals-expected', ref)}
                 value={mealsExpected === 0 ? '' : mealsExpected || ''}
                 onChange={(e) => {
                   if (isEditMode) {
                     const rawValue = e.target.value;
-                    const parsedValue = utilParseQuantity(rawValue);
-                    //console.log('🍽️ [OrdersTab] Refeições alteradas:', rawValue, '->', parsedValue);
-                    setMealsExpected(parsedValue || 0); // Garantir que nunca seja null/undefined
+                    // Apenas permitir números e vírgula/ponto
+                    const sanitizedValue = rawValue.replace(/[^0-9,.]/g, '');
+                    const parsedValue = utilParseQuantity(sanitizedValue);
+                    setMealsExpected(parsedValue || 0);
                   }
                 }}
                 onKeyDown={(e) => handleKeyDown(e, 'meals-expected')}
