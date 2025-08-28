@@ -13,6 +13,7 @@ import {
   formatCurrency as utilFormatCurrency,
   formatWeight as utilFormatWeight
 } from "@/components/utils/orderUtils";
+import NoteViewer from '@/components/shared/NoteViewer';
 import { CategoryLogic } from "@/components/utils/categoryLogic";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 
@@ -291,16 +292,20 @@ const OrdersTab = ({
                             </div>
                           </td>
                           <td className="p-2">
-                            <Input
-                              ref={(ref) => registerInput(notesInputId, ref)}
-                              type="text"
-                              value={item.notes || ''}
-                              onChange={(e) => isEditMode && updateOrderItem(item.unique_id, 'notes', e.target.value)}
-                              onKeyDown={(e) => handleKeyDown(e, notesInputId)}
-                              className="text-xs h-8 w-full border-blue-300 focus:border-blue-500"
-                              placeholder="Observações..."
-                              disabled={!isEditMode}
-                            />
+                            {isEditMode ? (
+                              <Input
+                                ref={(ref) => registerInput(notesInputId, ref)}
+                                type="text"
+                                value={item.notes || ''}
+                                onChange={(e) => isEditMode && updateOrderItem(item.unique_id, 'notes', e.target.value)}
+                                onKeyDown={(e) => handleKeyDown(e, notesInputId)}
+                                className="text-xs h-8 w-full border-blue-300 focus:border-blue-500"
+                                placeholder="Observações..."
+                                disabled={!isEditMode}
+                              />
+                            ) : (
+                              <NoteViewer note={item.notes} className="text-xs" />
+                            )}
                           </td>
                         </tr>
                       );

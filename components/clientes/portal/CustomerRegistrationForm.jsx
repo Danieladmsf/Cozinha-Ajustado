@@ -22,71 +22,27 @@ import {
   Loader2
 } from 'lucide-react';
 
-export default function CustomerRegistrationForm({ customerId }) {
-  const [customer, setCustomer] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function CustomerRegistrationForm({ customerId, customerData }) {
+  
   const [saving, setSaving] = useState(false);
-  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState('');
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState(customerData.photo || '');
   const [formData, setFormData] = useState({
-    name: '',
-    company: '',
-    address: '',
-    cnpj: '',
-    phone: '',
-    email: '',
-    category: 'pessoa_fisica',
-    billing_period: 'mensal',
-    payment_day: '',
-    notes: ''
+    name: customerData.name || '',
+    company: customerData.company || '',
+    address: customerData.address || '',
+    cnpj: customerData.cnpj || '',
+    phone: customerData.phone || '',
+    email: customerData.email || '',
+    category: customerData.category || 'pessoa_fisica',
+    billing_period: customerData.billing_period || 'mensal',
+    payment_day: customerData.payment_day || '',
+    notes: customerData.notes || ''
   });
   
   const router = useRouter();
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadCustomer();
-  }, [customerId]);
-
-  const loadCustomer = async () => {
-    try {
-      const customerData = await Customer.get(customerId);
-      
-      if (!customerData) {
-        toast({
-          title: "Cliente não encontrado",
-          description: "Este link de cadastro não é válido.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      setCustomer(customerData);
-      setUploadedPhotoUrl(customerData.photo || '');
-      
-      // Preencher formulário com dados existentes
-      setFormData({
-        name: customerData.name || '',
-        company: customerData.company || '',
-        address: customerData.address || '',
-        cnpj: customerData.cnpj || '',
-        phone: customerData.phone || '',
-        email: customerData.email || '',
-        category: customerData.category || 'pessoa_fisica',
-        billing_period: customerData.billing_period || 'mensal',
-        payment_day: customerData.payment_day || '',
-        notes: customerData.notes || ''
-      });
-      
-    } catch (error) {
-      toast({
-        title: "Erro ao carregar dados",
-        description: "Não foi possível carregar os dados do cliente.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
@@ -147,10 +103,8 @@ export default function CustomerRegistrationForm({ customerId }) {
         description: "Seus dados foram salvos com sucesso. Redirecionando...",
       });
 
-      // Redirecionar para a página de pedidos após 2 segundos
-      setTimeout(() => {
-        router.push(`/portal/${customerId}/orders`);
-      }, 2000);
+      // Reload the page to let the wrapper handle the redirect
+      window.location.reload();
 
     } catch (error) {
       toast({
@@ -163,42 +117,7 @@ export default function CustomerRegistrationForm({ customerId }) {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              Portal do Cliente
-            </h2>
-            <p className="text-gray-600">Carregando dados do cadastro...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!customer) {
-    return (
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6 text-center">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              Link Inválido
-            </h2>
-            <p className="text-gray-600">Link de cadastro inválido ou expirado.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Se o cliente já completou o cadastro, redirecionar
-  if (!customer.pending_registration) {
-    router.push(`/portal/${customerId}/orders`);
-    return null;
-  }
+  
 
   return (
     <div className="py-12 px-4">
@@ -210,7 +129,7 @@ export default function CustomerRegistrationForm({ customerId }) {
               Complete seu Cadastro
             </CardTitle>
             <p className="text-gray-600 mt-2">
-              Olá {customer.name}! Complete suas informações para começar a fazer pedidos.
+              Olá {customerData.name}! Complete suas informações para começar a fazer pedidos.
             </p>
           </CardHeader>
           

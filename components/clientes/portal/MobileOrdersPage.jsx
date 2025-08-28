@@ -90,7 +90,7 @@ import { calculateTotalWeight } from "@/lib/weightCalculator";
 
 
 
-const MobileOrdersPage = ({ customerId }) => {
+const MobileOrdersPage = ({ customerId, customerData }) => {
   const { toast } = useToast();
   const { groupItemsByCategory, getOrderedCategories, generateCategoryStyles } = useCategoryDisplay();
   
@@ -100,7 +100,7 @@ const MobileOrdersPage = ({ customerId }) => {
   const [currentDate, setCurrentDate] = useState(() => {
     return new Date();
   });
-  const [customer, setCustomer] = useState(null);
+  const [customer, setCustomer] = useState(customerData);
   const [multipleSessionsDetected, setMultipleSessionsDetected] = useState(false);
   const [recipes, setRecipes] = useState([]);
   const [weeklyMenus, setWeeklyMenus] = useState([]);
@@ -688,31 +688,32 @@ const MobileOrdersPage = ({ customerId }) => {
         return;
       }
 
+      setLoading(true); // Garante que o loading é true antes de qualquer coisa
 
       try {
-        setLoading(true);
-        
-        // Carregar cliente
-        const customerData = await Customer.getById(customerId);
-        setCustomer(customerData);
+        // Crie uma promessa para o atraso
+        const delayPromise = new Promise(resolve => setTimeout(resolve, 6000));
 
-        // Carregar receitas
-        const recipesData = await Recipe.list();
-        const activeRecipes = recipesData.filter(r => r.active !== false);
-        setRecipes(recipesData);
-
-        // Carregar AppSettings e inicializar PortalPricingSystem
-        const appSettingsDoc = await AppSettings.getById('global'); // Assuming 'global' ID
-        let newAppSettings = { operational_cost_per_kg: 0, profit_margin: 0 };
-        if (appSettingsDoc) {
-          newAppSettings = {
-            operational_cost_per_kg: appSettingsDoc.operational_cost_per_kg || 0,
-            profit_margin: appSettingsDoc.profit_margin || 0
-          };
-        }
-        setAppSettings(newAppSettings);
-        PortalPricingSystem.init(newAppSettings); // Initialize PortalPricingSystem
-        setPricingReady(true);
+        // Execute todas as operações de carregamento em paralelo com o atraso
+        await Promise.all([
+          (async () => { // Função auto-executável para agrupar as chamadas assíncronas
+            const recipesData = await Recipe.list();
+            setRecipes(recipesData.filter(r => r.active !== false)); // Filtrar ativas aqui
+            
+            const appSettingsDoc = await AppSettings.getById('global');
+            let newAppSettings = { operational_cost_per_kg: 0, profit_margin: 0 };
+            if (appSettingsDoc) {
+              newAppSettings = {
+                operational_cost_per_kg: appSettingsDoc.operational_cost_per_kg || 0,
+                profit_margin: appSettingsDoc.profit_margin || 0
+              };
+            }
+            setAppSettings(newAppSettings);
+            PortalPricingSystem.init(newAppSettings);
+            setPricingReady(true);
+          })(),
+          delayPromise // Inclua a promessa de atraso aqui
+        ]);
 
       } catch (error) {
         toast({ 
@@ -1759,9 +1760,26 @@ const MobileOrdersPage = ({ customerId }) => {
 
   if (loading) {
     return (
-      <div className="p-8 text-center">
-        <Loader2 className="w-8 h-8 mx-auto mb-4 text-blue-500 animate-spin" />
-        <p className="text-gray-600">Carregando dados...</p>
+      // Container principal
+      <div className="fixed top-0 left-0 w-full h-full bg-black">
+        {/* Camada 1: Nova imagem de fundo, sem desfoque */}
+        <img
+          src="/background-loading.jpg"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Camada 2: Conteúdo centralizado */}
+        <div className="relative w-full h-full flex flex-col items-center justify-center p-4">
+          {/* Wrapper para aplicar o deslocamento vertical */}
+          <div className="transform translate-y-12 text-center">
+            {/* Logo com fundo transparente */}
+            <img
+              src="/logo-transparent.png"
+              alt="Cozinha & Afeto"
+              className="w-auto h-auto max-w-[350px] md:max-w-[550px] mx-auto"
+            />
+          </div>
+        </div>
       </div>
     );
   }

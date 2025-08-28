@@ -16,16 +16,7 @@ export default function PortalIndex() {
   const [customerIdInput, setCustomerIdInput] = useState('');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    // Tentar extrair customerId da URL ou query params
-    const urlParams = new URLSearchParams(window.location.search);
-    const customerIdFromUrl = urlParams.get('customerId') || urlParams.get('id');
-    
-    if (customerIdFromUrl) {
-      router.push(`/portal/${customerIdFromUrl}`);
-    } else {
-    }
-  }, [router]);
+  
 
   const handleAccessPortal = () => {
     const cleanId = customerIdInput.trim();

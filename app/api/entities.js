@@ -48,6 +48,8 @@ const createEntity = (collectionName) => {
 
     // Get document by ID
     getById: async (id) => {
+      const startTime = Date.now();
+      
       try {
         // Handle temporary customer IDs for portal
         if (collectionName === 'Customer' && id?.startsWith('temp-')) {
@@ -63,10 +65,29 @@ const createEntity = (collectionName) => {
         }
         
         const docRef = doc(db, collectionName, id);
-        const docSnap = await getDoc(docRef);
+        
+        // Add timeout wrapper for Firestore operations
+        const docSnapPromise = getDoc(docRef);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Firestore timeout')), 8000)
+        );
+        
+        const docSnap = await Promise.race([docSnapPromise, timeoutPromise]);
         const result = docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+        
+        const queryTime = Date.now() - startTime;
+        if (queryTime > 1000) {
+          console.warn(`[${collectionName}.getById] Slow query: ${queryTime}ms for ID: ${id}`);
+        }
+        
         return result;
       } catch (error) {
+        const queryTime = Date.now() - startTime;
+        console.error(`[${collectionName}.getById] Error after ${queryTime}ms:`, error.message);
+        
+        if (error.message === 'Firestore timeout') {
+          throw new Error(`Request timed out after ${queryTime}ms. Please try again.`);
+        }
         throw new Error(`Failed to get document ${id} from ${collectionName}: ${error.message}`);
       }
     },
