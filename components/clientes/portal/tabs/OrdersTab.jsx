@@ -39,9 +39,6 @@ const OrdersTab = ({
 }) => {
   const { registerInput, handleKeyDown } = useKeyboardNavigation();
   
-  // Debug: Verificar se os dados com sugestões estão chegando
-  
-  
   // Função para formatar peso baseado na unidade
   const formatWeightByUnit = (item) => {
     const pesoFinal = item.total_weight || item.calculated_total_weight || (item.recipe_cuba_weight * (item.quantity || item.base_quantity || 0)) || 0;
@@ -133,7 +130,6 @@ const OrdersTab = ({
               <Input
                 type="text"
                 inputMode="decimal"
-                ref={(ref) => registerInput('meals-expected', ref)}
                 value={mealsExpected === 0 ? '' : mealsExpected || ''}
                 onChange={(e) => {
                   if (isEditMode) {
@@ -144,7 +140,7 @@ const OrdersTab = ({
                     setMealsExpected(parsedValue || 0);
                   }
                 }}
-                onKeyDown={(e) => handleKeyDown(e, 'meals-expected')}
+                onFocus={(e) => e.target.select()} // Adicionado para selecionar o texto ao focar
                 className={`border-blue-300 focus:border-blue-500 ${
                   (!mealsExpected || mealsExpected <= 0) && isEditMode 
                     ? 'border-red-300 bg-red-50' 

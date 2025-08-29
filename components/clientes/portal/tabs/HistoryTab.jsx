@@ -34,7 +34,13 @@ const HistoryTab = ({
     Object.entries(existingOrders).forEach(([dayIndex, order]) => {
       if (order) {
         totalMeals += order.total_meals_expected || 0;
-        const recalculatedTotal = order.items ? utilSumCurrency(order.items.map(item => item.total_price || 0)) : (order.total_amount || 0);
+                let recalculatedTotal = 0;
+        if (order.items && order.items.length > 0) {
+          recalculatedTotal = utilSumCurrency(order.items.map(item => item.total_price || 0));
+        } else {
+          recalculatedTotal = order.total_amount || 0;
+          console.warn(`[HistoryTab] Usando order.total_amount para o dia ${dayIndex} do pedido ${order.id || 'novo'} porque order.items está vazio ou ausente. total_amount: ${order.total_amount}`);
+        }
         originalTotalAmount += recalculatedTotal;
         totalItemsCount += order.total_items || 0;
         ordersCount += 1;
@@ -61,6 +67,16 @@ const HistoryTab = ({
     const finalTotalAmount = originalTotalAmount - totalDepreciation;
     const averageMealCost = totalMeals > 0 ? finalTotalAmount / totalMeals : 0;
 
+    console.log("Weekly Totals Calculation:");
+    console.log("  Total Meals:", totalMeals);
+    console.log("  Original Total Amount:", originalTotalAmount);
+    console.log("  Total Depreciation:", totalDepreciation);
+    console.log("  Final Total Amount:", finalTotalAmount);
+    console.log("  Orders Count:", ordersCount);
+    console.log("  Total Items Count:", totalItemsCount);
+    console.log("  Total Weight:", totalWeight);
+    console.log("  Average Meal Cost:", averageMealCost);
+    console.log("  Has Returns:", totalDepreciation > 0);
     return { 
       totalMeals, 
       originalTotalAmount,
@@ -87,7 +103,13 @@ const HistoryTab = ({
       const order = existingOrders[day];
       if (order) {
         totalMeals += order.total_meals_expected || 0;
-        const recalculatedTotal = order.items ? utilSumCurrency(order.items.map(item => item.total_price || 0)) : (order.total_amount || 0);
+                let recalculatedTotal = 0;
+        if (order.items && order.items.length > 0) {
+          recalculatedTotal = utilSumCurrency(order.items.map(item => item.total_price || 0));
+        } else {
+          recalculatedTotal = order.total_amount || 0;
+          console.warn(`[HistoryTab] Usando order.total_amount para o dia ${dayIndex} do pedido ${order.id || 'novo'} porque order.items está vazio ou ausente. total_amount: ${order.total_amount}`);
+        }
         originalTotalAmount += recalculatedTotal;
         totalItemsCount += order.total_items || 0;
         ordersCount += 1;
@@ -114,6 +136,16 @@ const HistoryTab = ({
     const finalTotalAmount = originalTotalAmount - totalDepreciation;
     const averageMealCost = totalMeals > 0 ? finalTotalAmount / totalMeals : 0;
 
+    console.log("Cumulative Totals Calculation:");
+    console.log("  CUMULATIVE Total Meals:", totalMeals);
+    console.log("  CUMULATIVE Original Total Amount:", originalTotalAmount);
+    console.log("  CUMULATIVE Total Depreciation:", totalDepreciation);
+    console.log("  CUMULATIVE Final Total Amount:", finalTotalAmount);
+    console.log("  CUMULATIVE Orders Count:", ordersCount);
+    console.log("  CUMULATIVE Total Items Count:", totalItemsCount);
+    console.log("  CUMULATIVE Total Weight:", totalWeight);
+    console.log("  CUMULATIVE Average Meal Cost:", averageMealCost);
+    console.log("  CUMULATIVE Has Returns:", totalDepreciation > 0);
     return { 
       totalMeals, 
       originalTotalAmount,
@@ -285,6 +317,7 @@ const HistoryTab = ({
           const order = existingOrders[dayIndex];
           const status = getDayStatus(dayIndex);
           
+          console.log(`Order for day ${dayIndex}:`, order);
           return (
             <Card key={dayIndex} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">

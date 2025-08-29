@@ -103,8 +103,10 @@ export default function CustomerRegistrationForm({ customerId, customerData }) {
         description: "Seus dados foram salvos com sucesso. Redirecionando...",
       });
 
-      // Reload the page to let the wrapper handle the redirect
-      window.location.reload();
+      // Call the callback to re-validate customer data in parent
+      if (onRegistrationComplete) {
+        onRegistrationComplete();
+      }
 
     } catch (error) {
       toast({

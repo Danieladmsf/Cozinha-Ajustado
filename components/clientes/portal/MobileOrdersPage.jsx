@@ -6,6 +6,7 @@ import { format, startOfWeek, getWeek, getYear, addDays, parseISO } from "date-f
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+import dynamic from 'next/dynamic';
 
 
 
@@ -73,10 +74,10 @@ import {
 } from "@/lib/returnCalculator";
 
 // Tab Components
-import OrdersTab from "./tabs/OrdersTab";
-import ReceivingTab from "./tabs/ReceivingTab";
-import WasteTab from "./tabs/WasteTab";
-import HistoryTab from "./tabs/HistoryTab";
+const OrdersTab = dynamic(() => import("./tabs/OrdersTab"), { ssr: false });
+const ReceivingTab = dynamic(() => import("./tabs/ReceivingTab"), { ssr: false });
+const WasteTab = dynamic(() => import("./tabs/WasteTab"), { ssr: false });
+const HistoryTab = dynamic(() => import("./tabs/HistoryTab"), { ssr: false });
 
 // Refresh Button
 import { RefreshButton } from "@/components/ui/refresh-button";
@@ -117,7 +118,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
   const [activeTab, setActiveTab] = useState("orders");
   const [mealsExpected, setMealsExpected] = useState(0);
   const [generalNotes, setGeneralNotes] = useState("");
-  const [isEditMode, setIsEditMode] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [showSuccessEffect, setShowSuccessEffect] = useState(false);
   const [showReceivingSuccessEffect, setShowReceivingSuccessEffect] = useState(false);
   const [showWasteSuccessEffect, setShowWasteSuccessEffect] = useState(false);
@@ -206,7 +207,8 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
         setGeneralNotes(currentDayOrder.general_notes || "");
         
         const isComplete = isCompleteOrder(currentDayOrder);
-        setIsEditMode(!isComplete);
+        
+        
       } else {
         setMealsExpected(0);
         setGeneralNotes("");
@@ -215,7 +217,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       
     } catch (error) {
     }
-  }, [customer, weekNumber, year, selectedDay]);
+  }, [customer, weekNumber, year, selectedDay, isEditMode]);
 
   // Funções para Sobras
   const loadWasteData = useCallback(async () => {
@@ -695,7 +697,8 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
         const delayPromise = new Promise(resolve => setTimeout(resolve, 6000));
 
         // Execute todas as operações de carregamento em paralelo com o atraso
-        await Promise.all([
+        const [_, initialData] = await Promise.all([
+          delayPromise,
           (async () => { // Função auto-executável para agrupar as chamadas assíncronas
             const recipesData = await Recipe.list();
             setRecipes(recipesData.filter(r => r.active !== false)); // Filtrar ativas aqui
@@ -704,15 +707,14 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
             let newAppSettings = { operational_cost_per_kg: 0, profit_margin: 0 };
             if (appSettingsDoc) {
               newAppSettings = {
-                operational_cost_per_kg: appSettingsDoc.operational_cost_per_kg || 0,
+                operational_cost_per_cost_per_kg: appSettingsDoc.operational_cost_per_kg || 0,
                 profit_margin: appSettingsDoc.profit_margin || 0
               };
             }
             setAppSettings(newAppSettings);
             PortalPricingSystem.init(newAppSettings);
             setPricingReady(true);
-          })(),
-          delayPromise // Inclua a promessa de atraso aqui
+          })()
         ]);
 
       } catch (error) {
@@ -751,6 +753,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       const weekKey = `${yearForFetch}-W${String(weekNumberForFetch).padStart(2, '0')}`;
       const menusData = allMenus.filter(menu => menu.week_key === weekKey);
       setWeeklyMenus(menusData);
+      console.log('fetchData: WeeklyMenus loaded. Count:', menusData.length);
 
       // 3. Recarregar Pedidos Existentes
       if (customer) {
@@ -810,6 +813,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
         if (menusData.length > 0) {
           const menu = menusData[0];
           setWeeklyMenus(menusData);
+          console.log('loadWeeklyMenus: WeeklyMenus set. Count:', menusData.length);
           
           // Analisar estrutura do cardápio
           let totalRecipes = 0;
@@ -843,7 +847,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
         } else {
           // Nenhum cardápio encontrado - resetar tudo
           setWeeklyMenus([]);
-          setMealsExpected(0);
+
           setGeneralNotes("");
           setWasteItems([]);
           setReceivingItems([]);
@@ -908,6 +912,8 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
 
     
     if (!weeklyMenus.length || !recipes.length || !customer) {
+      // LOG: Why orderItems is empty
+      console.log('orderItems useMemo returning empty array. weeklyMenus.length:', weeklyMenus.length, 'recipes.length:', recipes.length, 'customer:', !!customer);
       return [];
     }
 
@@ -915,6 +921,8 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
     const menuData = menu?.menu_data?.[selectedDay];
     
     if (!menuData) {
+      // LOG: Why orderItems is empty (no menu data for day)
+      console.log('orderItems useMemo returning empty array. No menuData for selectedDay:', selectedDay);
       return [];
     }
 
@@ -1130,7 +1138,10 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       };
 
       setCurrentOrder(updatedOrder);
-      setMealsExpected(updatedOrder.total_meals_expected || 0);
+      // Preservar mealsExpected se estiver em modo de edição, caso contrário, usar o valor do pedido
+      if (!isEditMode) {
+        setMealsExpected(updatedOrder.total_meals_expected || 0);
+      }
       setGeneralNotes(updatedOrder.general_notes || "");
 
     } else if (orderItems.length > 0) {
@@ -1150,7 +1161,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
     } else {
       setCurrentOrder(null);
     }
-  }, [hasInitializedDay, orderItems, selectedDay, weekNumber, year, existingOrders]);
+  }, [hasInitializedDay, orderItems, selectedDay, weekNumber, year, existingOrders, isEditMode]);
 
   // Sincronizar wasteItems com orderItems atualizados (mesma lógica dos pedidos)
   useEffect(() => {
@@ -1306,6 +1317,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
   }, [currentOrder, wasteItems, receivingItems]);
 
   const submitOrder = useCallback(async () => {
+    console.log('submitOrder: Function started. isEditMode before logic:', isEditMode); // NEW LOG
     // 🚨 LOG INICIAL - Informações básicas da sessão
     const currentTime = new Date();
     const dayOfWeek = currentTime.getDay(); // 0=Domingo, 1=Segunda, ... 5=Sexta
@@ -1411,10 +1423,11 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       setTimeout(() => {
         setShowSuccessEffect(false);
         setIsEditMode(false);
+        console.log('submitOrder: isEditMode set to false after timeout. Current isEditMode:', isEditMode);
       }, 2000); // 2 segundos de efeito
       
     } catch (error) {
-      
+      console.error('submitOrder: Error during submission:', error); // NEW LOG
       // Toast para o usuário
       toast({ 
         variant: "destructive", 
@@ -1441,6 +1454,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
   }, [currentOrder, customer, mealsExpected, generalNotes, orderTotals, existingOrders, selectedDay, toast]);
 
   const enableEditMode = useCallback(() => {
+    console.log('enableEditMode: Setting isEditMode to true.'); // NEW LOG
     setIsEditMode(true);
   }, []);
 

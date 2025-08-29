@@ -76,7 +76,7 @@ export default function PortalPageWrapper({ customerId }) {
 
   // Decide which component to render
   if (customer.pending_registration) {
-    return <CustomerRegistrationForm customerId={customerId} customerData={customer} />;
+    return <CustomerRegistrationForm customerId={customerId} customerData={customer} onRegistrationComplete={validateAndLoadCustomer} />;
   } else {
     return <MobileOrdersPage customerId={customerId} customerData={customer} />;
   }
