@@ -133,6 +133,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
   const [existingWaste, setExistingWaste] = useState(null);
   const [wasteLoading, setWasteLoading] = useState(false);
   const [weeklyWasteData, setWeeklyWasteData] = useState({});
+  const [weeklyReceivingData, setWeeklyReceivingData] = useState({});
 
   // Estados para Recebimento
   const [receivingItems, setReceivingItems] = useState([]);
@@ -680,6 +681,28 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
     }
   }, [customer, weekNumber, year]);
 
+  // Carregar dados de recebimento da semana inteira para histórico
+  const loadWeeklyReceivingData = useCallback(async () => {
+    if (!customer) return;
+    
+    try {
+      const weeklyReceivings = await OrderReceiving.query([
+        { field: 'customer_id', operator: '==', value: customer.id },
+        { field: 'week_number', operator: '==', value: weekNumber },
+        { field: 'year', operator: '==', value: year }
+      ]);
+      
+      const receivingDataByDay = {};
+      weeklyReceivings.forEach(receiving => {
+        receivingDataByDay[receiving.day_of_week] = receiving;
+      });
+      
+      setWeeklyReceivingData(receivingDataByDay);
+    } catch (error) {
+      console.error("Erro ao carregar dados de recebimento semanais:", error);
+    }
+  }, [customer, weekNumber, year]);
+
 
 
 
@@ -707,7 +730,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
             let newAppSettings = { operational_cost_per_kg: 0, profit_margin: 0 };
             if (appSettingsDoc) {
               newAppSettings = {
-                operational_cost_per_cost_per_kg: appSettingsDoc.operational_cost_per_kg || 0,
+                operational_cost_per_kg: appSettingsDoc.operational_cost_per_kg || 0,
                 profit_margin: appSettingsDoc.profit_margin || 0
               };
             }
@@ -1070,12 +1093,13 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customer, selectedDay, weeklyMenus, recipes, existingOrders, hasInitializedDay, weekNumber, year]);
 
-  // Carregar dados de waste da semana quando a aba history for selecionada OU semana muda
+  // Carregar dados de waste e receiving da semana quando a aba history for selecionada OU semana muda
   useEffect(() => {
     if (activeTab === "history" && customer) {
       loadWeeklyWasteData();
+      loadWeeklyReceivingData(); // CHAMAR A NOVA FUNÇÃO
     }
-  }, [activeTab, customer, weekNumber, year, hasInitializedDay, loadWeeklyWasteData]);
+  }, [activeTab, customer, weekNumber, year, hasInitializedDay, loadWeeklyWasteData, loadWeeklyReceivingData]);
 
   // Reset de efeitos visuais quando mudar de dia
   useEffect(() => {
@@ -1994,6 +2018,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
             weekNumber={weekNumber}
             customer={customer}
             existingWasteData={weeklyWasteData}
+            existingReceivingData={weeklyReceivingData} // NOVO PROP
             recipes={recipes}
             selectedDay={selectedDay}
           />

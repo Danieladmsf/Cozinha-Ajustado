@@ -8,7 +8,7 @@ import { History, Calendar, Users, DollarSign, CheckCircle, Clock, AlertCircle, 
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formattedQuantity as utilFormattedQuantity, formatCurrency as utilFormatCurrency, sumCurrency as utilSumCurrency } from "@/components/utils/orderUtils";
-import { calculateTotalDepreciation, calculateFinalOrderValue } from "@/lib/returnCalculator";
+import { calculateTotalDepreciation, calculateNonReceivedDiscounts, calculateFinalOrderValue } from "@/lib/returnCalculator";
 import { calculateTotalWeight, formatWeightDisplay } from "@/lib/weightCalculator";
 import { PortalDataSync } from "@/lib/portal-data-sync";
 
@@ -19,6 +19,7 @@ const HistoryTab = ({
   weekNumber,
   customer,
   existingWasteData = {},
+  existingReceivingData = {}, // NOVO PROP
   recipes = [],
   selectedDay
 }) => {
@@ -338,33 +339,80 @@ const HistoryTab = ({
                   
                   {order && (
                     <div className="text-right">
-                      <div className="grid grid-cols-3 gap-3 text-sm">
-                        <div>
-                          <p className="text-gray-600">Refeições</p>
-                          <p className="font-semibold">{order.total_meals_expected || 0}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-600">Peso</p>
-                          <p className="font-semibold">{(() => {
-                            const syncedItems = order.items ? order.items.map(item => {
-                              const recipe = recipes.find(r => r.id === item.recipe_id);
-                              if (recipe) {
-                                return PortalDataSync.syncItemSafely(item, recipe);
-                              }
-                              return item;
-                            }) : [];
-                            const weight = calculateTotalWeight(syncedItems);
-                            return formatWeightDisplay(weight);
-                          })()}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-600">Valor</p>
-                          <p className="font-semibold">{utilFormatCurrency(order.items ? utilSumCurrency(order.items.map(item => item.total_price || 0)) : (order.total_amount || 0))}</p>
-                        </div>
-                      </div>
-                      {order.total_items && (
-                        <p className="text-xs text-gray-500 mt-1">{utilFormattedQuantity(order.total_items)} itens pedidos</p>
-                      )}
+                      {/* Calcular os valores uma vez para reutilização */}
+                      {(() => {
+                        const originalDayAmount = utilSumCurrency(order.items ? order.items.map(item => item.total_price || 0) : (order.total_amount || 0));
+                        
+                        const wasteDataForDay = existingWasteData[dayIndex];
+                        const receivingDataForDay = existingReceivingData[dayIndex];
+                        
+                        let depreciationAmount = 0;
+                        if (wasteDataForDay && wasteDataForDay.items && order.items) {
+                          const depreciationData = calculateTotalDepreciation(wasteDataForDay.items, order.items);
+                          depreciationAmount = depreciationData.totalDepreciation;
+                        }
+
+                        let nonReceivedDiscountAmount = 0;
+                        if (receivingDataForDay && receivingDataForDay.items && order.items) {
+                          const nonReceivedDiscountsData = calculateNonReceivedDiscounts(receivingDataForDay.items, order.items);
+                          nonReceivedDiscountAmount = nonReceivedDiscountsData.totalNonReceivedDiscount;
+                        }
+
+                        const finalDayAmount = calculateFinalOrderValue(
+                          originalDayAmount,
+                          depreciationAmount,
+                          nonReceivedDiscountAmount
+                        ).finalTotal;
+
+                        const syncedItems = order.items ? order.items.map(item => {
+                          const recipe = recipes.find(r => r.id === item.recipe_id);
+                          if (recipe) {
+                            return PortalDataSync.syncItemSafely(item, recipe);
+                          }
+                          return item;
+                        }) : [];
+                        const weight = calculateTotalWeight(syncedItems);
+
+                        return (
+                          <div className="space-y-3 text-sm">
+                            <div className="flex justify-between">
+                              <p className="text-gray-600">Refeições:</p>
+                              <p className="font-semibold">{order.total_meals_expected || 0}</p>
+                            </div>
+                            <div className="flex justify-between">
+                              <p className="text-gray-600">Peso:</p>
+                              <p className="font-semibold">{formatWeightDisplay(weight)}</p>
+                            </div>
+                            <div className="flex justify-between">
+                              <p className="text-gray-600">Valor Bruto:</p>
+                              <p className="font-semibold">{utilFormatCurrency(originalDayAmount)}</p>
+                            </div>
+                            
+                            {depreciationAmount > 0 && (
+                              <div className="flex justify-between">
+                                <p className="text-gray-600">Devolução:</p>
+                                <p className="font-semibold text-red-600">-{utilFormatCurrency(depreciationAmount)}</p>
+                              </div>
+                            )}
+                            
+                            {nonReceivedDiscountAmount > 0 && (
+                              <div className="flex justify-between">
+                                <p className="text-gray-600">Não recebido:</p>
+                                <p className="font-semibold text-red-600">-{utilFormatCurrency(nonReceivedDiscountAmount)}</p>
+                              </div>
+                            )}
+                            
+                            <div className="flex justify-between border-t pt-2">
+                              <p className="text-gray-600 font-bold whitespace-nowrap">Total Líquido:</p>
+                              <p className="font-bold text-sm">{utilFormatCurrency(finalDayAmount)}</p>
+                            </div>
+                            
+                            {order.total_items && (
+                              <p className="text-xs text-gray-500 mt-1">{utilFormattedQuantity(order.total_items)} itens pedidos</p>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
