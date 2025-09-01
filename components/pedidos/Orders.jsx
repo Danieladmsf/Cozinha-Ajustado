@@ -383,39 +383,49 @@ export default function Orders() {
   // 1. STABLE CALLBACKS FOR API CALLS - minimal dependencies
   // Update load functions to only set state if data has actually changed
   const loadCustomers = useCallback(async () => {
+    console.log('[DEBUG] loadCustomers: Iniciando...');
     try {
       const customersData = await retryWithDelay(() => Customer.list());
       setCustomers(prevCustomers => {
         if (!deepCompareArrays(prevCustomers, customersData)) {
+          console.log('[DEBUG] loadCustomers: Clientes atualizados.');
           return customersData;
         }
-        debugLog('[loadCustomers] Dados não alterados, evitando setState');
+        console.log('[DEBUG] loadCustomers: Dados não alterados, evitando setState.');
         return prevCustomers;
       });
     } catch (error) {
+      console.error('[DEBUG] loadCustomers: Erro ao carregar clientes:', error);
       toast({ variant: "destructive", description: "Erro ao carregar lista de clientes." });
+    } finally {
+      console.log('[DEBUG] loadCustomers: Finalizado.');
     }
   }, [toast]);
     
   const loadRecipes = useCallback(async () => {
+    console.log('[DEBUG] loadRecipes: Iniciando...');
     try {
       const recipesData = await retryWithDelay(() => Recipe.list());
       setRecipes(prevRecipes => {
         if (!deepCompareArrays(prevRecipes, recipesData)) {
+          console.log('[DEBUG] loadRecipes: Receitas atualizadas.');
           return recipesData;
         }
-        debugLog('[loadRecipes] Dados não alterados, evitando setState');
+        console.log('[DEBUG] loadRecipes: Dados não alterados, evitando setState.');
         return prevRecipes;
       });
     } catch (error) {
+      console.error('[DEBUG] loadRecipes: Erro ao carregar receitas:', error);
       toast({ variant: "destructive", description: "Erro ao carregar receitas." });
+    } finally {
+      console.log('[DEBUG] loadRecipes: Finalizado.');
     }
   }, [toast]);
   
   const loadOrdersForWeek = useCallback(async () => {
+    console.log('[DEBUG] loadOrdersForWeek: Iniciando carregamento', { weekNumber, year });
     try {
-      debugLog('[loadOrdersForWeek] Iniciando carregamento', { weekNumber, year });
-      const weekOrdersData = await retryWithDelay(() => 
+      const weekOrdersData = await retryWithDelay(() =>
         Order.query([
           { field: 'week_number', operator: '==', value: weekNumber },
           { field: 'year', operator: '==', value: year }
@@ -423,22 +433,25 @@ export default function Orders() {
       );
       setOrders(prevOrders => {
         if (!deepCompareArrays(prevOrders, weekOrdersData)) {
-          debugLog('[loadOrdersForWeek] Dados carregados e alterados', { count: weekOrdersData.length });
+          console.log('[DEBUG] loadOrdersForWeek: Pedidos da semana carregados e alterados', { count: weekOrdersData.length });
           return weekOrdersData;
         }
-        debugLog('[loadOrdersForWeek] Dados não alterados, evitando setState');
+        console.log('[DEBUG] loadOrdersForWeek: Pedidos da semana não alterados, evitando setState.');
         return prevOrders;
       });
       return weekOrdersData;
     } catch (error) {
+      console.error('[DEBUG] loadOrdersForWeek: Erro ao carregar pedidos da semana:', error);
       toast({ variant: "destructive", description: "Erro ao carregar pedidos da semana." });
       return [];
+    } finally {
+      console.log('[DEBUG] loadOrdersForWeek: Finalizado.');
     }
   }, [weekNumber, year, toast]);
   
   const loadMenusForWeek = useCallback(async () => {
     try {
-      debugLog('[loadMenusForWeek] Iniciando carregamento', { weekNumber, year });
+      console.log('[DEBUG] loadMenusForWeek: Iniciando carregamento', { weekNumber, year });
       const weekMenusData = await retryWithDelay(() => 
         WeeklyMenu.query([
           { field: 'week_number', operator: '==', value: weekNumber },
@@ -455,47 +468,56 @@ export default function Orders() {
       });
       return weekMenusData;
     } catch (error) {
+      console.error('[DEBUG] loadMenusForWeek: Erro ao carregar cardápios da semana:', error);
       toast({ variant: "destructive", description: "Erro ao carregar cardápios da semana." });
       return [];
+    } finally {
+      console.log('[DEBUG] loadMenusForWeek: Finalizado.');
     }
   }, [weekNumber, year, toast]);
   
   // Aplicar deepCompareArrays em setAllOrdersHistory e setAllWasteHistory
   const loadAllOrdersHistory = useCallback(async () => {
+    console.log('[DEBUG] loadAllOrdersHistory: Iniciando carregamento');
     try {
-      debugLog('[loadAllOrdersHistory] Iniciando carregamento');
       const allOrdersData = await retryWithDelay(() => Order.list());
       setAllOrdersHistory(prevHistory => {
         if (!deepCompareArrays(prevHistory, allOrdersData)) {
-          debugLog('[loadAllOrdersHistory] Histórico carregado e alterado', { count: allOrdersData.length });
+          console.log('[DEBUG] loadAllOrdersHistory: Histórico de pedidos carregado e alterado', { count: allOrdersData.length });
           return allOrdersData || []; // Garantir que seja sempre um array
         }
-        debugLog('[loadAllOrdersHistory] Histórico não alterado, evitando setState');
+        console.log('[DEBUG] loadAllOrdersHistory: Histórico de pedidos não alterado, evitando setState.');
         return prevHistory;
       });
       return allOrdersData || []; // Garantir que seja sempre um array
     } catch (error) {
+      console.error('[DEBUG] loadAllOrdersHistory: Erro ao carregar histórico de pedidos:', error);
       // Não mostrar toast aqui para não poluir UI em atualizações de background
       return [];
+    } finally {
+      console.log('[DEBUG] loadAllOrdersHistory: Finalizado.');
     }
   }, []); 
 
   const loadAllWasteHistory = useCallback(async () => {
+    console.log('[DEBUG] loadAllWasteHistory: Iniciando carregamento');
     try {
-      debugLog('[loadAllWasteHistory] Iniciando carregamento');
       const wasteHistoryData = await retryWithDelay(() => OrderWaste.list());
       setAllWasteHistory(prevWasteHistory => {
         if (!deepCompareArrays(prevWasteHistory, wasteHistoryData)) {
-          debugLog('[loadAllWasteHistory] Histórico de sobras carregado e alterado', { count: wasteHistoryData.length });
+          console.log('[DEBUG] loadAllWasteHistory: Histórico de sobras carregado e alterado', { count: wasteHistoryData.length });
           return wasteHistoryData;
         }
-        debugLog('[loadAllWasteHistory] Histórico de sobras não alterado, evitando setState');
+        console.log('[DEBUG] loadAllWasteHistory: Histórico de sobras não alterado, evitando setState.');
         return prevWasteHistory;
       });
       return wasteHistoryData;
     } catch (error) {
+      console.error('[DEBUG] loadAllWasteHistory: Erro ao carregar histórico de sobras:', error);
       // Não mostrar toast aqui
       return [];
+    } finally {
+      console.log('[DEBUG] loadAllWasteHistory: Finalizado.');
     }
   }, []);
 
@@ -611,22 +633,21 @@ export default function Orders() {
   }, []);
 
   // NOVA `prepareOrder` que usa `generateDisplayOrder`
-  const prepareOrder = useCallback(async () => {
-    debugLog('[prepareOrder] INÍCIO (nova)', { selectedCustomerId: selectedCustomer?.id, currentDay, isDirty });
-    if (!selectedCustomer) { // currentDate is guaranteed to be valid due to useState init
+  if (!selectedCustomer) {
       setCurrentOrder(null);
       setIsDirty(false);
       dirtyOrderRef.current = null;
+      console.log('[DEBUG] prepareOrder: Nenhum cliente selecionado, resetando estado.');
       return;
     }
 
-    // Se o usuário está editando (isDirty = true), não sobrescrever os dados
     if (isDirty) {
-      debugLog('[prepareOrder] SKIP: Usuário está editando, não sobrescrever dados');
+      console.log('[DEBUG] prepareOrder: SKIP - Usuário está editando, não sobrescrever dados.');
       return;
     }
 
     setIsLoadingOrder(true);
+    console.log('[DEBUG] prepareOrder: isLoadingOrder = true');
     try {
       const orderData = generateDisplayOrder({
         selectedCustomer, currentDay, orders, recipes, weeklyMenus, currentDate: validateDate(currentDate, 'prepareOrder date'),
@@ -635,14 +656,24 @@ export default function Orders() {
         debugLog
       });
 
-      setCurrentOrder(prev => deepCompare(prev, orderData) ? prev : orderData);
-      dirtyOrderRef.current = null; 
+      setCurrentOrder(prev => {
+        if (deepCompare(prev, orderData)) {
+          console.log('[DEBUG] prepareOrder: currentOrder não alterado.');
+          return prev;
+        }
+        console.log('[DEBUG] prepareOrder: currentOrder atualizado.');
+        return orderData;
+      });
+      dirtyOrderRef.current = null;
       setIsDirty(false);
+      console.log('[DEBUG] prepareOrder: isDirty = false, dirtyOrderRef = null');
 
     } catch (error) {
+      console.error('[DEBUG] prepareOrder: Erro ao preparar pedido:', error);
       toast({ variant: "destructive", description: "Erro ao preparar pedido." });
     } finally {
       setIsLoadingOrder(false);
+      console.log('[DEBUG] prepareOrder: isLoadingOrder = false');
     }
   }, [
     selectedCustomer, currentDay, currentDate, orders, recipes, weeklyMenus,
@@ -1002,17 +1033,28 @@ export default function Orders() {
   // Efeitos:
   // 1. Carregamento de clientes e receitas (useEffect inicial)
   useEffect(() => {
+    console.log('[DEBUG] useEffect inicial: Iniciando carregamento global (setLoading(true))');
     setLoading(true);
     Promise.all([loadCustomers(), loadRecipes(), loadAllOrdersHistory(), loadAllWasteHistory()])
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        console.log('[DEBUG] useEffect inicial: Carregamento global finalizado (setLoading(false))');
+      });
   }, [loadCustomers, loadRecipes, loadAllOrdersHistory, loadAllWasteHistory]); 
   
   // 2. Carregamento de pedidos e cardápios da semana (quando currentDate muda)
   useEffect(() => {
+    console.log('[DEBUG] useEffect semana: currentDate mudou. loading:', loading);
     if (!loading) { 
+      console.log('[DEBUG] useEffect semana: Iniciando carregamento de pedidos/cardápios da semana (setIsLoadingOrder(true))');
       setIsLoadingOrder(true); 
       Promise.all([loadOrdersForWeek(), loadMenusForWeek()])
-        .finally(() => setIsLoadingOrder(false));
+        .finally(() => {
+          setIsLoadingOrder(false);
+          console.log('[DEBUG] useEffect semana: Carregamento de pedidos/cardápios da semana finalizado (setIsLoadingOrder(false))');
+        });
+    } else {
+      console.log('[DEBUG] useEffect semana: Carregamento de pedidos/cardápios da semana SKIPPED (loading é true).');
     }
   }, [currentDate, loadOrdersForWeek, loadMenusForWeek, loading]); 
   

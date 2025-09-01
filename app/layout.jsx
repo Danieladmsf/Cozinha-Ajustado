@@ -108,6 +108,8 @@ export default function RootLayout({ children }) {
           <meta property="og:description" content="Portal exclusivo para clientes da Cozinha Afeto" />
           <meta property="og:type" content="website" />
           <meta property="og:locale" content="pt_BR" />
+          <link rel="preload" href="/logo-transparent.png" as="image" />
+          <link rel="preload" href="/background-loading.jpg" as="image" />
           <title>Portal do Cliente - Cozinha Afeto</title>
         </head>
         <body>

@@ -109,6 +109,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
   const [existingOrders, setExistingOrders] = useState({});
   const [hydratedOrders, setHydratedOrders] = useState({}); // Pedidos com preços atualizados
   const [loading, setLoading] = useState(true);
+  const [isRefreshingData, setIsRefreshingData] = useState(false);
   const [appSettings, setAppSettings] = useState({ operational_cost_per_kg: 0, profit_margin: 0 });
   const [pricingReady, setPricingReady] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -759,7 +760,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
   // Define a função de busca de dados como um useCallback
   const fetchData = useCallback(async (dateToFetch) => { // Recebe a data como argumento
     toast({ description: "Atualizando todos os dados...", duration: 2500 });
-    setLoading(true);
+    setIsRefreshingData(true);
     try {
       const weekNumberForFetch = getWeek(dateToFetch, { weekStartsOn: 1 });
       const yearForFetch = getYear(dateToFetch);
@@ -802,9 +803,9 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
     } catch (error) {
       toast({ variant: "destructive", title: "Erro ao atualizar", description: error.message });
     } finally {
-      setLoading(false);
+      setIsRefreshingData(false);
     }
-  }, [customer, toast, setRecipes, setWeeklyMenus, setLoading, setExistingOrders]); // Dependências: apenas as estáveis e o customer
+  }, [customer, toast, setRecipes, setWeeklyMenus, setIsRefreshingData, setExistingOrders]); // Dependências: apenas as estáveis e o customer
 
   // Efeito para atualização manual de dados
   useEffect(() => {
@@ -1840,6 +1841,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
               size="sm"
               className="shrink-0"
               onClick={handleRefresh}
+              isLoading={isRefreshingData}
             />
           </div>
 

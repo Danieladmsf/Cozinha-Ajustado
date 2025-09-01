@@ -1,50 +1,43 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
- * Componente de botão para atualizar página completa
- * Força recarregamento total da página incluindo todas as tabs e abas
+ * Componente de botão para atualizar dados.
+ * Controlado externamente pelo estado de carregamento e função onClick.
  */
-export function RefreshButton({ 
+export function RefreshButton({
   className,
   variant = "outline",
   size = "sm",
   showText = true,
   text = "Atualizar",
-  ...props 
+  isLoading = false,
+  onClick,
+  ...props
 }) {
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    
-    // Force complete page reload
-    window.location.reload(true);
-  };
-
   return (
     <Button
       variant={variant}
       size={size}
-      onClick={handleRefresh}
-      disabled={isRefreshing}
+      onClick={onClick}
+      disabled={isLoading}
       className={cn(
         "flex items-center gap-2",
         className
       )}
       {...props}
     >
-      {isRefreshing ? (
+      {isLoading ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
         <RotateCcw className="h-4 w-4" />
       )}
       {showText && (
-        <span>{isRefreshing ? "Atualizando..." : text}</span>
+        <span>{isLoading ? "Atualizando..." : text}</span>
       )}
     </Button>
   );
