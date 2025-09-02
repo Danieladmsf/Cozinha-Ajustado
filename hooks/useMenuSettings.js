@@ -36,6 +36,10 @@ export const useMenuSettings = () => {
         Customer.list()
       ]);
 
+      console.log('useMenuSettings: loadData - categoriesData:', categoriesData);
+      console.log('useMenuSettings: loadData - categoryTreeData:', categoryTreeData);
+      console.log('useMenuSettings: loadData - customersData:', customersData);
+
       setCategories(categoriesData || []);
       setCategoryTree(categoryTreeData || []);
       setCustomers(customersData || []);
@@ -61,6 +65,7 @@ export const useMenuSettings = () => {
       if (configs && configs.length > 0) {
         const config = configs[0];
         setConfigId(config.id);
+        console.log('useMenuSettings: loadConfig - config loaded:', config);
         
         setExpandedCategories(config.expanded_categories || []);
         setCategoryColors(config.category_colors || {});
@@ -71,11 +76,20 @@ export const useMenuSettings = () => {
         
         const rootCategories = categoryTreeData.filter(cat => cat.level === 1);
         const categoriesToUse = rootCategories.length > 0 ? rootCategories : categoryTreeData;
-        const orderToSet = config.category_order && config.category_order.length > 0 
-          ? config.category_order 
-          : categoriesToUse.map(cat => cat.id);
+        
+        let orderToSet;
+        if (config.category_order && config.category_order.length > 0) {
+          // Filter out any IDs from config.category_order that are no longer valid categories
+          const validConfigOrder = config.category_order.filter(id => categoriesToUse.some(cat => cat.id === id));
+          // Add any new root categories that are not in the config.category_order
+          const newRootCategoryIds = rootCategories.map(cat => cat.id).filter(id => !validConfigOrder.includes(id));
+          orderToSet = [...validConfigOrder, ...newRootCategoryIds];
+        } else {
+          orderToSet = categoriesToUse.map(cat => cat.id);
+        }
         
         setCategoryOrder(orderToSet);
+        console.log('useMenuSettings: loadConfig - orderToSet:', orderToSet);
         
         if (config.active_categories) {
           setActiveCategories(config.active_categories);
@@ -85,6 +99,7 @@ export const useMenuSettings = () => {
             initialActiveState[category.id] = true;
           });
           setActiveCategories(initialActiveState);
+          console.log('useMenuSettings: loadConfig - initial active state:', initialActiveState);
         }
       } else {
         await createDefaultConfig(categoryTreeData);
@@ -115,6 +130,7 @@ export const useMenuSettings = () => {
       
       const newConfig = await MenuConfigEntity.create(defaultConfig);
       setConfigId(newConfig.id);
+      console.log('useMenuSettings: createDefaultConfig - new config created:', newConfig);
     } catch (error) {
       setError("Não foi possível criar a configuração padrão.");
     }
@@ -140,6 +156,7 @@ export const useMenuSettings = () => {
         client_category_settings: clientCategorySettings || {},
         is_default: true
       };
+      console.log('useMenuSettings: saveConfig - configData being saved:', configData);
       
       if (configId) {
         await MenuConfigEntity.update(configId, configData);
@@ -171,11 +188,13 @@ export const useMenuSettings = () => {
 
   // Funções utilitárias
   const getFilteredCategories = () => {
+    console.log('useMenuSettings: getFilteredCategories - selectedMainCategories:', selectedMainCategories);
     if (selectedMainCategories.length === 0) {
+      console.log('useMenuSettings: getFilteredCategories - returning all categoryTree (no filter):', categoryTree);
       return categoryTree;
     }
     
-    return categoryTree.filter(subCategory => {
+    const filteredCategories = categoryTree.filter(subCategory => {
       const mainCategory = categories.find(cat => 
         cat.value === subCategory.type
       );
@@ -186,6 +205,8 @@ export const useMenuSettings = () => {
       
       return false;
     });
+    console.log('useMenuSettings: getFilteredCategories - returning filtered categories:', filteredCategories);
+    return filteredCategories;
   };
 
   const toggleCategoryActive = (categoryId) => {

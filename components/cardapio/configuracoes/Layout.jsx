@@ -20,6 +20,10 @@ const LayoutTab = ({
   updateFixedDropdowns,
   setCategoryOrder
 }) => {
+  console.log('LayoutTab: Props received - categories:', categories);
+  console.log('LayoutTab: Props received - categoryTree:', categoryTree);
+  console.log('LayoutTab: Props received - selectedMainCategories:', selectedMainCategories);
+  console.log('LayoutTab: Props received - categoryOrder:', categoryOrder);
   const handleDragEnd = (result) => {
     if (!result.destination) return;
 
@@ -112,7 +116,9 @@ const LayoutTab = ({
                       ref={provided.innerRef}
                     >
                       {categoryOrder.filter(categoryId => {
+                        console.log('LayoutTab: Filtering categoryId:', categoryId);
                         const category = categoryTree.find(c => c.id === categoryId);
+                        console.log('LayoutTab: Category found for filter:', category);
                         if (!category) return false;
                         if (selectedMainCategories.length === 0) return true;
                         const mainCategory = categories.find(cat => cat.value === category.type);

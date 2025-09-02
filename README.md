@@ -1,4 +1,4 @@
-mini# Cozinha Ajustado - Guia de Commits
+geminimini# Cozinha Ajustado - Guia de Commits
 
 Este documento descreve o padrão para criar commits neste projeto. Seguir estas diretrizes ajuda a manter o histórico do repositório limpo, organizado e fácil de entender.
 

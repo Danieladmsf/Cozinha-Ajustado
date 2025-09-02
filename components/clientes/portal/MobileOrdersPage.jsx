@@ -777,7 +777,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       const weekKey = `${yearForFetch}-W${String(weekNumberForFetch).padStart(2, '0')}`;
       const menusData = allMenus.filter(menu => menu.week_key === weekKey);
       setWeeklyMenus(menusData);
-      console.log('fetchData: WeeklyMenus loaded. Count:', menusData.length);
+      
 
       // 3. Recarregar Pedidos Existentes
       if (customer) {
@@ -837,7 +837,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
         if (menusData.length > 0) {
           const menu = menusData[0];
           setWeeklyMenus(menusData);
-          console.log('loadWeeklyMenus: WeeklyMenus set. Count:', menusData.length);
+          
           
           // Analisar estrutura do cardápio
           let totalRecipes = 0;
@@ -937,7 +937,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
     
     if (!weeklyMenus.length || !recipes.length || !customer) {
       // LOG: Why orderItems is empty
-      console.log('orderItems useMemo returning empty array. weeklyMenus.length:', weeklyMenus.length, 'recipes.length:', recipes.length, 'customer:', !!customer);
+      
       return [];
     }
 
@@ -946,7 +946,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
     
     if (!menuData) {
       // LOG: Why orderItems is empty (no menu data for day)
-      console.log('orderItems useMemo returning empty array. No menuData for selectedDay:', selectedDay);
+      
       return [];
     }
 
