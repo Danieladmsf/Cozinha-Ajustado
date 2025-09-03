@@ -1021,9 +1021,27 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
             cuba_weight: cubaWeightParsed,
             yield_weight: utilParseQuantity(recipe.yield_weight) || 0,
             total_weight: utilParseQuantity(recipe.total_weight) || 0,
+            units_quantity: (() => {
+              const portioningPrep = recipe.preparations?.find(prep => prep.title === '2º Etapa: Porcionamento' || prep.processes?.includes('portioning'));
+              if (portioningPrep?.assembly_config?.units_quantity) {
+                return portioningPrep.assembly_config.units_quantity;
+              }
+              return 1; // Default to 1 if not found or invalid
+            })(), // Quantidade de unidades da ficha técnica
+            tech_sheet_unit_weight: utilParseQuantity(recipe.cuba_weight) || utilParseQuantity(recipe.portion_weight_kg) || utilParseQuantity(recipe.total_weight) || 0, // Peso por unidade da ficha técnica
+                        tech_sheet_units_quantity: (() => {
+              const portioningPrep = recipe.preparations?.find(prep => prep.title === '2º Etapa: Porcionamento' || prep.processes?.includes('portioning'));
+              if (portioningPrep?.assembly_config?.units_quantity) {
+                return portioningPrep.assembly_config.units_quantity;
+              }
+              return 1; // Default to 1 if not found or invalid
+            })(), // Quantidade de unidades da ficha técnica
+            
             adjustment_percentage: 0,
             recipe: recipe, // Adicionado para que o weightCalculator possa acessar os pesos da receita
           };
+          // DEBUG: Log recipe units_quantity for inspection
+          console.log(`DEBUG: Recipe Name: ${recipe.name}, recipe.units_quantity (top-level): ${recipe.units_quantity}, typeof recipe.units_quantity (top-level): ${typeof recipe.units_quantity}, recipe.assemblyConfig: ${JSON.stringify(recipe.assemblyConfig)}, recipe.assemblyConfig.units_quantity: ${recipe.assemblyConfig?.units_quantity}, tech_sheet_units_quantity (calculated): ${(() => { const portioningPrep = recipe.preparations?.find(prep => prep.title === '2º Etapa: Porcionamento' || prep.processes?.includes('portioning')); return portioningPrep?.assembly_config?.units_quantity || 1; })()}, recipe.portion_weight_calculated: ${recipe.portion_weight_calculated}, recipe.cuba_weight: ${recipe.cuba_weight}, recipe.yield_weight: ${recipe.yield_weight}`);
           
           const syncedItem = PortalDataSync.syncItemSafely(baseItem, recipe);
           const newItem = CategoryLogic.calculateItemValues(syncedItem, 'base_quantity', 0, mealsExpected);

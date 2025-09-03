@@ -111,9 +111,9 @@ export function formatWeight(weightInKg) {
   if (weight === 0) return "0 g";
   
   if (weight >= 1) { // Se for 1kg ou mais, mostrar em kg
-    return `${weight.toFixed(2).replace('.', ',')} kg`;
+    return `${weight.toFixed(3).replace('.', ',')} kg`;
   } else { // Menos de 1kg, mostrar em gramas
-    return `${Math.round(weight * 1000)} g`;
+    return `${(weight * 1000).toFixed(0).replace('.', ',')} g`;
   }
 }
 

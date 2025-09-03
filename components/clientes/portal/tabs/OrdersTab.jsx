@@ -201,8 +201,18 @@ const OrdersTab = ({
                             <div>
                               <p className="font-medium text-blue-900 text-xs">{item.recipe_name}</p>
                               <p className="text-xs text-blue-600">
+                                {item.tech_sheet_units_quantity > 0 && item.tech_sheet_unit_weight > 0 && (
+                                  <>
+                                    <span className="text-purple-600 text-[9px]">
+                                      (Contém, {item.tech_sheet_units_quantity} {item.unit_type && item.unit_type.toLowerCase() !== 'unid' && item.unit_type.toLowerCase() !== 'unidade' ? item.unit_type : (item.tech_sheet_units_quantity > 1 ? 'unidades' : 'unidade')} de {utilFormatWeight(item.tech_sheet_unit_weight)})
+                                    </span>
+                                    <span className="text-purple-600 text-[9px]">
+                                      {' | '}Peso: {(item.unit_type && item.unit_type.toLowerCase() === 'porção' && item.tech_sheet_units_quantity === 1) ? utilFormatWeight(item.tech_sheet_unit_weight) : utilFormatWeight((item.tech_sheet_units_quantity || 0) * (item.tech_sheet_unit_weight || 0))}
+                                    </span>
+                                    <br />
+                                  </>
+                                )}
                                 {(() => {
-                                  
                                   return utilFormatCurrency(item.unit_price);
                                 })()}/{item.unit_type}
                               </p>
