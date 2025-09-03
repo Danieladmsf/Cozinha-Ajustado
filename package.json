@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --config ./.eslintrc.cjs",
     "lint:fix": "next lint --fix",
     "test:portal": "echo 'Testing portal routes...' && curl -f http://localhost:3000/portal-test || echo 'Portal test failed'",
     "dev:check": "npm run lint && npm run build:test",
