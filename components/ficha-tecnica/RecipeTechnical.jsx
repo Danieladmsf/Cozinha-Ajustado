@@ -65,7 +65,7 @@ export default function RecipeTechnical() {
   const fileInputRef = React.useRef(null);
   const [isUploading, setIsUploading] = useState(false);
   
-  // ==== HOOKS DE ESTADO (CONECTADOS) ====
+  // ==== HOOKS DE ESTADO (CONECTADOS) ==== 
   const {
     // Estados principais
     loading, setLoading,
@@ -126,7 +126,7 @@ export default function RecipeTechnical() {
     resetModals
   } = useRecipeState();
 
-  // ==== HOOKS DE OPERAÇÕES (CONECTADOS) ====
+  // ==== HOOKS DE OPERAÇÕES (CONECTADOS) ==== 
   const {
     parseNumericValue,
     addPreparation,
@@ -142,7 +142,7 @@ export default function RecipeTechnical() {
     loadRecipe
   } = useRecipeOperations();
 
-  // ==== HOOKS DE INTERFACE (CONECTADOS) ====
+  // ==== HOOKS DE INTERFACE (CONECTADOS) ==== 
   const updateRecipeData = useCallback((key, value) => {
     setRecipeData(prev => ({
       ...prev,
@@ -150,7 +150,7 @@ export default function RecipeTechnical() {
     }));
   }, [setRecipeData]);
 
-  const {
+  const { 
     handleTabChange,
     handleSearchFocus,
     handleSearchBlur,
@@ -171,14 +171,14 @@ export default function RecipeTechnical() {
     updateRecipeData 
   });
 
-  // ==== HOOKS DE CÁLCULOS (CONECTADOS) ====
-  const {
+  // ==== HOOKS DE CÁLCULOS (CONECTADOS) ==== 
+  const { 
     calculateRecipeMetrics: hookCalculateRecipeMetrics,
     formatters
   } = useRecipeCalculations();
 
-  // ==== HOOKS DE BUSCA (CONECTADOS) ====
-  const {
+  // ==== HOOKS DE BUSCA (CONECTADOS) ==== 
+  const { 
     searchQuery: searchQueryRecipe,
     searchOpen: searchOpenRecipe,
     filteredRecipes,
@@ -192,8 +192,8 @@ export default function RecipeTechnical() {
     setSearchQuery: setRecipeSearchQuery
   } = useRecipeSearch();
 
-  // ==== HOOKS DE CONFIGURAÇÃO (CONECTADOS) ====
-  const {
+  // ==== HOOKS DE CONFIGURAÇÃO (CONECTADOS) ==== 
+  const { 
     config,
     configSaving,
     loading: configLoading,
@@ -206,8 +206,8 @@ export default function RecipeTechnical() {
     setSelectedCategoryType
   } = useRecipeConfig();
 
-  // ==== HOOKS DE CATEGORIAS (CONECTADOS) ====
-  const {
+  // ==== HOOKS DE CATEGORIAS (CONECTADOS) ==== 
+  const { 
     categories: availableCategories,
     loading: categoriesLoading,
     error: categoriesError,
@@ -217,8 +217,8 @@ export default function RecipeTechnical() {
     reloadCategories
   } = useRecipeCategories();
 
-  // ==== HOOKS DE INGREDIENTES (CONECTADOS) ====
-  const {
+  // ==== HOOKS DE INGREDIENTES (CONECTADOS) ==== 
+  const { 
     ingredients: availableIngredients,
     loading: ingredientsLoading,
     searchTerm: ingredientModalSearchTerm,
@@ -233,7 +233,7 @@ export default function RecipeTechnical() {
   const [ingredientModalOpen, setIngredientModalOpen] = useState(false);
   const [currentPrepIndexForIngredient, setCurrentPrepIndexForIngredient] = useState(null);
 
-  // ==== FUNÇÕES DE CARREGAMENTO (como no Editar Cliente) ====
+  // ==== FUNÇÕES DE CARREGAMENTO (como no Editar Cliente) ==== 
   const loadRecipeById = async (recipeId) => {
     if (!recipeId) return;
     
@@ -272,7 +272,7 @@ export default function RecipeTechnical() {
     }
   };
 
-  // ==== HANDLERS ESPECÍFICOS ====
+  // ==== HANDLERS ESPECÍFICOS ==== 
   const handleRecipeInputChange = (e) => {
     handleInputChange(setRecipeData, e);
     setIsDirty(true);
@@ -388,7 +388,7 @@ export default function RecipeTechnical() {
     }
   };
 
-  // ==== HANDLERS PARA IMPORTAÇÃO DE RECEITA ====
+  // ==== HANDLERS PARA IMPORTAÇÃO DE RECEITA ==== 
   const handleImportClick = () => {
     fileInputRef.current?.click();
   };
@@ -440,7 +440,7 @@ export default function RecipeTechnical() {
     }
   };
 
-  // ==== FUNÇÃO DE RECÁLCULO AUTOMÁTICO ====
+  // ==== FUNÇÃO DE RECÁLCULO AUTOMÁTICO ==== 
   const recalculateRecipeMetrics = useCallback(() => {
     console.log("[UI] recalculateRecipeMetrics triggered.");
     const hasValidData = (preparationsData && preparationsData.length > 0) || 
@@ -498,7 +498,7 @@ export default function RecipeTechnical() {
     }
   }, [preparationsData, recipeData, setRecipeData, setPreparationsData, setIsDirty]);
 
-  // ==== EFFECT PARA RECÁLCULO AUTOMÁTICO (DEBOUNCED) ====
+  // ==== EFFECT PARA RECÁLCULO AUTOMÁTICO (DEBOUNCED) ==== 
   useEffect(() => {
     const handler = setTimeout(() => {
       recalculateRecipeMetrics();
@@ -509,15 +509,15 @@ export default function RecipeTechnical() {
     };
   }, [preparationsData, recalculateRecipeMetrics]);
 
-  // ==== EFFECT PARA DEBUG DOS ESTADOS INICIAIS ====
+  // ==== EFFECT PARA DEBUG DOS ESTADOS INICIAIS ==== 
   // Debug effect removed for production
 
-  // ==== EFFECT PARA RECÁLCULO AUTOMÁTICO (REMOVIDO) ====
+  // ==== EFFECT PARA RECÁLCULO AUTOMÁTICO (REMOVIDO) ==== 
   // O useEffect a seguir foi removido para evitar o recálculo automático dos
   // ingredientes a cada alteração, o que impedia a edição manual dos campos.
   // O cálculo agora é feito apenas ao salvar a receita.
 
-  // ==== EFFECT PARA REFRESH AUTOMÁTICO DE INGREDIENTES ====
+  // ==== EFFECT PARA REFRESH AUTOMÁTICO DE INGREDIENTES ==== 
   useEffect(() => {
     // Refresh automático de ingredientes quando componente monta
     const refreshIngredients = async () => {
@@ -579,7 +579,7 @@ export default function RecipeTechnical() {
     setIsDirty(true);
   };
 
-  // ==== HANDLERS DE INGREDIENTES ====
+  // ==== HANDLERS DE INGREDIENTES ==== 
   const handleOpenIngredientModal = (prepIndex) => {
     setCurrentPrepIndexForIngredient(prepIndex);
     setIngredientModalOpen(true);
@@ -592,7 +592,7 @@ export default function RecipeTechnical() {
     clearIngredientSearch();
   };
 
-  // ==== HANDLERS DE MONTAGEM/PORCIONAMENTO ====
+  // ==== HANDLERS DE MONTAGEM/PORCIONAMENTO ==== 
   const openAddAssemblyItemModal = (prepIndex) => {
     setCurrentPrepIndexForAssembly(prepIndex);
     setIsAssemblyItemModalOpen(true);
@@ -669,7 +669,7 @@ export default function RecipeTechnical() {
       if (ingredientExists) {
         toast({
           title: "Ingrediente já existe",
-          description: `"${ingredient.name}" já foi adicionado a esta preparação.`,
+          description: `"${ingredient.name}" já foi adicionado a esta preparação.`, 
           variant: "destructive"
         });
         return;
@@ -764,13 +764,13 @@ export default function RecipeTechnical() {
   }, [setRecipeData, setPreparationsData, setIsEditing, setCurrentRecipeId, setIsDirty, recalculateRecipeMetrics]);
 
 
-  // ==== CÁLCULOS AUTOMÁTICOS ====
+  // ==== CÁLCULOS AUTOMÁTICOS ==== 
   // Removed duplicate calculation - handled in useRecipeInterface hook
 
-  // ==== FUNÇÃO DE RENDERIZAÇÃO DA TABELA DE INGREDIENTES ====
+  // ==== FUNÇÃO DE RENDERIZAÇÃO DA TABELA DE INGREDIENTES ==== 
   const renderIngredientTable = (prep, prepIndex) => {
     const processes = prep.processes || [];
-    const hasProcess = (processName) => processes.includes(processName);
+    const hasProcess = (processName) => Array.isArray(processes) ? processes.includes(processName) : Object.values(processes).includes(processName);
     const ingredients = prep.ingredients || [];
     
     // Casos especiais: Assembly ou Portioning puros (sem outros processos)
@@ -790,7 +790,7 @@ export default function RecipeTechnical() {
               variant="outline" 
               size="sm" 
               onClick={() => openAddAssemblyItemModal(prepIndex)}
-              className={`border-dashed transition-all duration-200 ${
+              className={`border-dashed transition-all duration-200 ${ 
                 isAssemblyOnly ? 'border-indigo-300 text-indigo-600 hover:bg-indigo-50' : 
                 'border-teal-300 text-teal-600 hover:bg-teal-50'
               }`}
@@ -839,6 +839,7 @@ export default function RecipeTechnical() {
               });
               setIsDirty(true);
             }}
+            showAssemblyConfig={isPortioningOnly}
           />
 
           {/* Área de instruções */}
@@ -864,6 +865,142 @@ export default function RecipeTechnical() {
           </div>
         </div>
       );
+    }
+
+    const baseRecipes = (prep.sub_components || []).map(sc => ({ ...sc, isBase: true }));
+    const variationIngredients = (prep.ingredients || []).map(ing => ({ ...ing, isBase: false }));
+
+    const handleSubComponentChange = (subComponentIndex, field, value) => {
+      const newPreparations = [...preparationsData];
+      const newSubComponents = [...newPreparations[prepIndex].sub_components];
+      newSubComponents[subComponentIndex] = { ...newSubComponents[subComponentIndex], [field]: value };
+      newPreparations[prepIndex] = { ...newPreparations[prepIndex], sub_components: newSubComponents };
+      setPreparationsData(newPreparations);
+      setIsDirty(true);
+    };
+
+    const calculateBaseRecipeCost = (item) => {
+      if (!item) return 0;
+      const totalCost = parseNumericValue(item.input_total_cost);
+      const yieldWeight = parseNumericValue(item.input_yield_weight);
+      const assemblyWeight = parseNumericValue(item.assembly_weight_kg);
+
+      if (yieldWeight === 0) return 0;
+
+      const costPerKg = totalCost / yieldWeight;
+      return costPerKg * assemblyWeight;
+    };
+    
+    if (baseRecipes.length > 0) {
+        return (
+          <div className="space-y-4">
+            <Tabs defaultValue="base-0" className="w-full">
+              <TabsList className="flex flex-wrap h-auto justify-start">
+                {baseRecipes.map((recipe, index) => (
+                  <TabsTrigger key={`trigger-${recipe.id}`} value={`base-${index}`} className="data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700 font-semibold">
+                    {`[Base] ${recipe.name}`}
+                  </TabsTrigger>
+                ))}
+                <TabsTrigger value="variations" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 font-semibold">
+                  + Itens da Variação
+                </TabsTrigger>
+              </TabsList>
+    
+              {baseRecipes.map((recipe, index) => (
+                <TabsContent key={`content-${recipe.id}`} value={`base-${index}`} className="pt-4">
+                    <div className="bg-white border border-orange-200 border-l-4 border-l-orange-500 rounded-xl p-4 shadow-sm">
+                        <div className="flex justify-between items-center">
+                            <div className="flex-grow">
+                                <p className="font-semibold text-xl text-gray-800">{recipe.name}</p>
+                            </div>
+                            <div className="flex items-end gap-x-4">
+                                <div>
+                                    <Label htmlFor={`base-weight-${index}`} className="text-xs font-medium text-gray-500">Peso Utilizado (kg)</Label>
+                                    <Input
+                                        id={`base-weight-${index}`}
+                                        type="text"
+                                        value={recipe.assembly_weight_kg || ''}
+                                        onChange={(e) => handleSubComponentChange(index, 'assembly_weight_kg', e.target.value)}
+                                        className="w-32 h-10 text-center text-lg font-bold bg-gray-50"
+                                        placeholder="0,000"
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="text-xs font-medium text-gray-500">Custo Calculado</Label>
+                                    <div className="w-32 h-10 flex items-center justify-center bg-gray-50 rounded-md border">
+                                        <span className="text-lg font-bold text-green-700">{formatCurrency(calculateBaseRecipeCost(recipe))}</span>
+                                    </div>
+                                </div>
+                                <div className="pl-2">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => removeSubComponent(preparationsData, setPreparationsData, prepIndex, index)}
+                                        className="h-10 w-10 rounded-full hover:bg-red-100"
+                                        title="Remover receita base"
+                                    >
+                                        <Trash2 className="h-5 w-5 text-red-500" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </TabsContent>
+              ))}
+    
+              <TabsContent value="variations" className="pt-4">
+                <div className="flex gap-3 justify-start mb-4">
+                  <Button size="sm" onClick={() => handleOpenIngredientModal(prepIndex)} className="bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition-all duration-200">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar Item
+                  </Button>
+                </div>
+                {variationIngredients.length > 0 ? (
+                  <div className="bg-white rounded-xl overflow-x-auto shadow-sm border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead colSpan="3" className="px-4 py-2 bg-emerald-50/50 font-medium text-emerald-600 text-center border-b">Dados Ingrediente</TableHead>
+                            {orderedActiveProcesses.map(processId => {
+                              const processInfo = processTypes[processId];
+                              const colors = processColors[processId] || { bg: 'bg-gray-50/50', text: 'text-gray-600' };
+                              let colSpan = 2;
+                              if (processId === 'defrosting') colSpan = 3;
+                              else if (processId === 'cleaning') colSpan = 3;
+                              else if (processId === 'cooking') colSpan = 3;
+                              else if (processId === 'portioning') colSpan = 2;
+                              return <TableHead key={processId} colSpan={colSpan} className={`px-4 py-2 ${colors.bg} font-medium ${colors.text} text-center border-b`}>{processInfo.label}</TableHead>;
+                            })}
+                            <TableHead colSpan="2" className="px-4 py-2 bg-purple-50/50 font-medium text-purple-600 text-center border-b">Dados Rendimento</TableHead>
+                          </TableRow>
+                          <TableRow>
+                            <TableHead className="px-4 py-2 bg-emerald-50/50 font-medium text-emerald-600 text-left whitespace-nowrap">Ingrediente</TableHead>
+                            <TableHead className="px-4 py-2 bg-emerald-50/50 font-medium text-emerald-600 text-center whitespace-nowrap">Preço/kg (Bruto)</TableHead>
+                            <TableHead className="px-4 py-2 bg-emerald-50/50 font-medium text-emerald-600 text-center whitespace-nowrap">Preço/kg (Líquido)</TableHead>
+                            {hasProcess('defrosting') && (<><TableHead className="px-4 py-2 bg-blue-50/50 font-medium text-blue-600 text-center whitespace-nowrap">Peso Congelado</TableHead><TableHead className="px-4 py-2 bg-blue-50/50 font-medium text-blue-600 text-center whitespace-nowrap">Peso Resfriado</TableHead><TableHead className="px-4 py-2 bg-blue-50/50 font-medium text-blue-600 text-center whitespace-nowrap">Perda Desc.(%)</TableHead></>)}
+                            {hasProcess('cleaning') && (<><TableHead className="px-4 py-2 bg-green-50/50 font-medium text-green-600 text-center whitespace-nowrap">{hasProcess('defrosting') ? 'Peso Entrada (Limpeza)' : 'Peso Bruto (Limpeza)'}</TableHead><TableHead className="px-4 py-2 bg-green-50/50 font-medium text-green-600 text-center whitespace-nowrap">Pós Limpeza</TableHead><TableHead className="px-4 py-2 bg-green-50/50 font-medium text-green-600 text-center whitespace-nowrap">Perda Limpeza(%)</TableHead></>)}
+                            {hasProcess('cooking') && (<><TableHead className="px-4 py-2 bg-orange-50/50 font-medium text-orange-600 text-center whitespace-nowrap">Pré Cocção</TableHead><TableHead className="px-4 py-2 bg-orange-50/50 font-medium text-orange-600 text-center whitespace-nowrap">Pós Cocção</TableHead><TableHead className="px-4 py-2 bg-orange-50/50 font-medium text-orange-600 text-center whitespace-nowrap">Perda Cocção(%)</TableHead></>)}
+                            {hasProcess('portioning') && (<><TableHead className="px-4 py-2 bg-teal-50/50 font-medium text-teal-600 text-center whitespace-nowrap">Pós Porcionamento</TableHead><TableHead className="px-4 py-2 bg-teal-50/50 font-medium text-teal-600 text-center whitespace-nowrap">Perda Porcion.(%)</TableHead></>)}
+                            <TableHead className="px-4 py-2 bg-purple-50/50 font-medium text-purple-600 text-center whitespace-nowrap">Rendimento(%)</TableHead>
+                            <TableHead className="px-4 py-2 bg-purple-50/50 font-medium text-purple-600 text-center">Ações</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {variationIngredients.map((ingredient, ingredientIndex) => 
+                            renderIngredientRow(ingredient, prepIndex, ingredientIndex, prep)
+                          )}
+                        </TableBody>
+                      </Table>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 p-4 rounded-lg text-center">
+                    <p className="text-gray-500 mb-3">Nenhum item de variação adicionado ainda.</p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+        );
     }
     
     // Mapeamento de cores para processos normais
@@ -1044,7 +1181,7 @@ export default function RecipeTechnical() {
           <TableBody>
             {ingredients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={15} className="px-4 py-8 text-center text-gray-500">
+                <TableCell colSpan="15" className="px-4 py-8 text-center text-gray-500">
                   <div className="flex flex-col items-center gap-2">
                     <ClipboardList className="h-8 w-8 text-gray-400" />
                     <span>Nenhum ingrediente adicionado</span>
@@ -1063,7 +1200,7 @@ export default function RecipeTechnical() {
     );
   };
 
-  // ==== FUNÇÃO DE RENDERIZAÇÃO DE LINHA DE INGREDIENTE ====
+  // ==== FUNÇÃO DE RENDERIZAÇÃO DE LINHA DE INGREDIENTE ==== 
   const renderIngredientRow = (ingredient, prepIndex, ingredientIndex, prep) => {
     const processes = prep.processes || [];
     const hasProcess = (processName) => processes.includes(processName);
@@ -1364,7 +1501,7 @@ export default function RecipeTechnical() {
     );
   };
 
-  // ==== EARLY RETURNS ====
+  // ==== EARLY RETURNS ==== 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -1386,7 +1523,7 @@ export default function RecipeTechnical() {
     );
   }
 
-  // ==== COMPONENTE MODAL DE PROCESSO ====
+  // ==== COMPONENTE MODAL DE PROCESSO ==== 
   const ProcessCreatorModal = () => (
     isProcessCreatorOpen && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -1444,10 +1581,10 @@ export default function RecipeTechnical() {
     )
   );
 
-  // ==== RENDER PRINCIPAL ====
+  // ==== RENDER PRINCIPAL ==== 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 p-4 md:p-6">
-      <div className="max-w-[1400px] mx-auto space-y-6">
+      <div className="max-w-[1400px] mx-auto space-y-6"> 
         
         {/* Card de Cabeçalho */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
@@ -1752,7 +1889,7 @@ export default function RecipeTechnical() {
                 <div className="text-xl font-bold flex items-center text-pink-700">
                   <span className="text-pink-400 mr-1">R$</span>
                   {formatDisplayValue(
-                    calculateCubaCost(recipeData.cuba_weight, recipeData.cost_per_kg_yield), 
+                    calculateCubaCost(recipeData.cuba_weight, recipeData.cost_per_kg_yield),
                     'currency'
                   )}
                 </div>
@@ -1818,55 +1955,104 @@ export default function RecipeTechnical() {
                     </div>
                   </div>
                 ) : (
-                  preparationsData.map((prep, index) => (
-                    <Card key={prep.id} className="border-l-4 border-l-blue-400">
-                      <CardHeader className="bg-blue-50 border-b">
-                        <div className="flex justify-between items-center">
-                          <CardTitle className="text-lg text-blue-800">
-                            {prep.title}
-                          </CardTitle>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removePreparation(preparationsData, setPreparationsData, prep.id)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-6">
-                        <div className="space-y-4">
-                          <div>
-                            <Label className="text-sm font-medium mb-2 block">
-                              Processos: {prep.processes?.map(p => processTypes[p]?.label).join(', ')}
-                            </Label>
-                          </div>
+                  preparationsData.map((prep, index) => {
+                    const processes = prep.processes || [];
+                    const hasProcess = (processName) => Array.isArray(processes) ? processes.includes(processName) : Object.values(processes).includes(processName);
+                    const isAssemblyOnly = hasProcess('assembly') && !hasProcess('defrosting') && !hasProcess('cleaning') && !hasProcess('cooking');
+                    const isPortioningOnly = hasProcess('portioning') && !hasProcess('defrosting') && !hasProcess('cleaning') && !hasProcess('cooking') && !hasProcess('assembly');
 
-                          {/* Tabela de Ingredientes com Processos */}
-                          {renderIngredientTable(prep, index)}
-
-                          <div>
-                            <Label className="text-sm font-medium mb-2 block">
-                              Instruções
-                            </Label>
-                            <textarea
-                              value={prep.instructions || ''}
-                              onChange={(e) => updatePreparation(
-                                preparationsData, 
-                                setPreparationsData, 
-                                index, 
-                                'instructions', 
-                                e.target.value
-                              )}
-                              placeholder="Descreva o modo de preparo desta etapa..."
-                              className="w-full p-3 border border-gray-200 rounded-lg resize-none min-h-[100px] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
+                    return (
+                      <Card key={prep.id} className="border-l-4 border-l-blue-400">
+                        <CardHeader className="bg-blue-50 border-b">
+                          <div className="flex justify-between items-center">
+                            <CardTitle className="text-lg text-blue-800">
+                              {prep.title}
+                            </CardTitle>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removePreparation(preparationsData, setPreparationsData, prep.id)}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
+                        </CardHeader>
+                        <CardContent className="p-6">
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-sm font-medium mb-2 block">
+                                Processos: {Array.isArray(prep.processes) ? prep.processes.map(p => processTypes[p]?.label).join(', ') : Object.values(prep.processes).map(p => processTypes[p]?.label).join(', ')}
+                              </Label>
+                            </div>
+
+                            {(isAssemblyOnly || isPortioningOnly) ? (
+                              <AssemblySubComponents
+                                subComponents={prep.sub_components || []}
+                                onUpdateSubComponents={(components) => {
+                                  setPreparationsData(prev => {
+                                    const newData = [...prev];
+                                    if (newData[index]) {
+                                      newData[index].sub_components = components;
+                                    }
+                                    return newData;
+                                  });
+                                  setIsDirty(true);
+                                }}
+                                preparationsData={preparationsData}
+                                assemblyConfig={prep.assembly_config || {}}
+                                onAssemblyConfigChange={(field, value) => {
+                                  setPreparationsData(prev => {
+                                    const newData = [...prev];
+                                    if (newData[index]) {
+                                      if (!newData[index].assembly_config) {
+                                        newData[index].assembly_config = {};
+                                      }
+                                      newData[index].assembly_config[field] = value;
+                                    }
+                                    return newData;
+                                  });
+                                  setIsDirty(true);
+                                }}
+                                totalYieldWeight={prep.total_yield_weight_prep || 0}
+                                onRemoveSubComponent={(subIndex) => {
+                                  setPreparationsData(prev => {
+                                    const newData = [...prev];
+                                    if (newData[index]?.sub_components) {
+                                      newData[index].sub_components.splice(subIndex, 1);
+                                    }
+                                    return newData;
+                                  });
+                                  setIsDirty(true);
+                                }}
+                                showAssemblyConfig={isPortioningOnly}
+                              />
+                            ) : (
+                              renderIngredientTable(prep, index)
+                            )}
+
+                            <div>
+                              <Label className="text-sm font-medium mb-2 block">
+                                Instruções
+                              </Label>
+                              <textarea
+                                value={prep.instructions || ''}
+                                onChange={(e) => updatePreparation(
+                                  preparationsData, 
+                                  setPreparationsData, 
+                                  index, 
+                                  'instructions', 
+                                  e.target.value
+                                )}
+                                placeholder="Descreva o modo de preparo desta etapa..."
+                                className="w-full p-3 border border-gray-200 rounded-lg resize-none min-h-[100px] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  })
                 )}
               </div>
             </TabsContent>

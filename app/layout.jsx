@@ -18,7 +18,8 @@ import {
   ShoppingCart,
   Clipboard,
   Settings,
-  ClipboardList
+  ClipboardList,
+  DollarSign
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SidebarNav from "@/components/shared/navigation";
@@ -56,6 +57,7 @@ export default function RootLayout({ children }) {
     { name: "Fornecedores e Serviços", href: "/fornecedores-e-servicos", icon: Building2 },
     { name: "Clientes", href: "/clientes", icon: Users },
     { name: "Contas", href: "/contas", icon: CircleDollarSign },
+    { name: "Fechamento", href: "/fechamento", icon: DollarSign },
     { name: "Tabela Nutricional", href: "/tabela-nutricional", icon: Apple }
   ];
 

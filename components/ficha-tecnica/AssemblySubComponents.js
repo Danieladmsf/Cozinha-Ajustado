@@ -16,7 +16,8 @@ const AssemblySubComponents = ({
   assemblyConfig = {},
   onAssemblyConfigChange,
   totalYieldWeight = 0,
-  onRemoveSubComponent
+  onRemoveSubComponent,
+  showAssemblyConfig = false
 }) => {
   
   // Calculate total assembly weight from sub-components
@@ -122,74 +123,76 @@ const AssemblySubComponents = ({
   return (
     <div className="space-y-4">
       {/* Assembly Configuration */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-200">
-        <h4 className="font-semibold text-indigo-800 mb-3 flex items-center">
-          <Layers className="h-5 w-5 mr-2" />
-          Configuração do Porcionamento
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Label className="text-sm font-medium text-indigo-700">
-              Tipo de Porcionamento
-            </Label>
-            <Select
-              value={assemblyConfig.container_type || 'cuba'}
-              onValueChange={(value) => onAssemblyConfigChange('container_type', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="cupa-p">Cupa P</SelectItem>
-                <SelectItem value="cuba-g">Cuba G</SelectItem>
-                <SelectItem value="descartavel">Embalagem Descartável</SelectItem>
-                <SelectItem value="Unid.">Porção Individual</SelectItem>
-                <SelectItem value="kg">Kg</SelectItem>
-                <SelectItem value="outros">Outros</SelectItem>
-                <SelectItem value="Porção">Porção</SelectItem>
-              </SelectContent>
-            </Select>
+      {showAssemblyConfig && (
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-200">
+          <h4 className="font-semibold text-indigo-800 mb-3 flex items-center">
+            <Layers className="h-5 w-5 mr-2" />
+            Configuração do Porcionamento
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label className="text-sm font-medium text-indigo-700">
+                Tipo de Porcionamento
+              </Label>
+              <Select
+                value={assemblyConfig.container_type || 'cuba'}
+                onValueChange={(value) => onAssemblyConfigChange('container_type', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cupa-p">Cupa P</SelectItem>
+                  <SelectItem value="cuba-g">Cuba G</SelectItem>
+                  <SelectItem value="descartavel">Embalagem Descartável</SelectItem>
+                  <SelectItem value="Unid.">Porção Individual</SelectItem>
+                  <SelectItem value="kg">Kg</SelectItem>
+                  <SelectItem value="outros">Outros</SelectItem>
+                  <SelectItem value="Porção">Porção</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label className="text-sm font-medium text-indigo-700">
+                Peso Total (kg)
+              </Label>
+              <Input
+                type="text"
+                value={String(totalAssemblyWeight).replace('.', ',')}
+                readOnly
+                className="text-center bg-gray-50 cursor-not-allowed"
+                title="Este peso é calculado automaticamente a partir dos componentes da montagem."
+              />
+            </div>
+            
+            <div>
+              <Label className="text-sm font-medium text-indigo-700">
+                Quantidade de Unidades
+              </Label>
+              <Input
+                type="text"
+                value={assemblyConfig.units_quantity || ''}
+                onChange={(e) => onAssemblyConfigChange('units_quantity', e.target.value)}
+                placeholder="1"
+                className="text-center"
+              />
+            </div>
           </div>
           
-          <div>
+          <div className="mt-3">
             <Label className="text-sm font-medium text-indigo-700">
-              Peso Total (kg)
+              Observações do Porcionamento
             </Label>
-            <Input
-              type="text"
-              value={String(totalAssemblyWeight).replace('.', ',')}
-              readOnly
-              className="text-center bg-gray-50 cursor-not-allowed"
-              title="Este peso é calculado automaticamente a partir dos componentes da montagem."
-            />
-          </div>
-          
-          <div>
-            <Label className="text-sm font-medium text-indigo-700">
-              Quantidade de Unidades
-            </Label>
-            <Input
-              type="text"
-              value={assemblyConfig.units_quantity || ''}
-              onChange={(e) => onAssemblyConfigChange('units_quantity', e.target.value)}
-              placeholder="1"
-              className="text-center"
+            <Textarea
+              value={assemblyConfig.notes || ''}
+              onChange={(e) => onAssemblyConfigChange('notes', e.target.value)}
+              placeholder="Ex: Escondidinho - 1,6kg de massa + 0,4kg de recheio"
+              className="h-20 resize-none"
             />
           </div>
         </div>
-        
-        <div className="mt-3">
-          <Label className="text-sm font-medium text-indigo-700">
-            Observações do Porcionamento
-          </Label>
-          <Textarea
-            value={assemblyConfig.notes || ''}
-            onChange={(e) => onAssemblyConfigChange('notes', e.target.value)}
-            placeholder="Ex: Escondidinho - 1,6kg de massa + 0,4kg de recheio"
-            className="h-20 resize-none"
-          />
-        </div>
-      </div>
+      )}
 
       {/* Sub-Components Table */}
       <div className="bg-white rounded-xl overflow-x-auto shadow-lg">

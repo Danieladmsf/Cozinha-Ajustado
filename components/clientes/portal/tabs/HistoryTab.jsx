@@ -28,6 +28,7 @@ const HistoryTab = ({
     let totalMeals = 0;
     let originalTotalAmount = 0;
     let totalDepreciation = 0;
+    let totalNonReceivedDiscount = 0;
     let ordersCount = 0;
     let totalItemsCount = 0;
     let totalWeight = 0;
@@ -35,12 +36,11 @@ const HistoryTab = ({
     Object.entries(existingOrders).forEach(([dayIndex, order]) => {
       if (order) {
         totalMeals += order.total_meals_expected || 0;
-                let recalculatedTotal = 0;
+        let recalculatedTotal = 0;
         if (order.items && order.items.length > 0) {
           recalculatedTotal = utilSumCurrency(order.items.map(item => item.total_price || 0));
         } else {
           recalculatedTotal = order.total_amount || 0;
-          console.warn(`[HistoryTab] Usando order.total_amount para o dia ${dayIndex} do pedido ${order.id || 'novo'} porque order.items está vazio ou ausente. total_amount: ${order.total_amount}`);
         }
         originalTotalAmount += recalculatedTotal;
         totalItemsCount += order.total_items || 0;
@@ -62,40 +62,40 @@ const HistoryTab = ({
           const depreciationData = calculateTotalDepreciation(wasteDataForDay.items, order.items);
           totalDepreciation += depreciationData.totalDepreciation;
         }
+
+        const receivingDataForDay = existingReceivingData[dayIndex];
+        if (receivingDataForDay && receivingDataForDay.items && order.items) {
+          const nonReceivedData = calculateNonReceivedDiscounts(receivingDataForDay.items, order.items);
+          totalNonReceivedDiscount += nonReceivedData.totalNonReceivedDiscount;
+        }
       }
     });
 
-    const finalTotalAmount = originalTotalAmount - totalDepreciation;
+    const { finalTotal: finalTotalAmount } = calculateFinalOrderValue(originalTotalAmount, totalDepreciation, totalNonReceivedDiscount);
     const averageMealCost = totalMeals > 0 ? finalTotalAmount / totalMeals : 0;
+    const totalDiscounts = totalDepreciation + totalNonReceivedDiscount;
 
-    console.log("Weekly Totals Calculation:");
-    console.log("  Total Meals:", totalMeals);
-    console.log("  Original Total Amount:", originalTotalAmount);
-    console.log("  Total Depreciation:", totalDepreciation);
-    console.log("  Final Total Amount:", finalTotalAmount);
-    console.log("  Orders Count:", ordersCount);
-    console.log("  Total Items Count:", totalItemsCount);
-    console.log("  Total Weight:", totalWeight);
-    console.log("  Average Meal Cost:", averageMealCost);
-    console.log("  Has Returns:", totalDepreciation > 0);
     return { 
       totalMeals, 
       originalTotalAmount,
       totalDepreciation,
+      totalNonReceivedDiscount,
+      totalDiscounts,
       finalTotalAmount,
       ordersCount,
       totalItemsCount,
       totalWeight,
       averageMealCost,
-      hasReturns: totalDepreciation > 0
+      hasDiscounts: totalDiscounts > 0
     };
-  }, [existingOrders, existingWasteData, recipes]);
+  }, [existingOrders, existingWasteData, existingReceivingData, recipes]);
 
   // Calcular totais cumulativos (DINÂMICO)
   const cumulativeTotals = React.useMemo(() => {
     let totalMeals = 0;
     let originalTotalAmount = 0;
     let totalDepreciation = 0;
+    let totalNonReceivedDiscount = 0;
     let ordersCount = 0;
     let totalItemsCount = 0;
     let totalWeight = 0;
@@ -104,12 +104,11 @@ const HistoryTab = ({
       const order = existingOrders[day];
       if (order) {
         totalMeals += order.total_meals_expected || 0;
-                let recalculatedTotal = 0;
+        let recalculatedTotal = 0;
         if (order.items && order.items.length > 0) {
           recalculatedTotal = utilSumCurrency(order.items.map(item => item.total_price || 0));
         } else {
           recalculatedTotal = order.total_amount || 0;
-          console.warn(`[HistoryTab] Usando order.total_amount para o dia ${dayIndex} do pedido ${order.id || 'novo'} porque order.items está vazio ou ausente. total_amount: ${order.total_amount}`);
         }
         originalTotalAmount += recalculatedTotal;
         totalItemsCount += order.total_items || 0;
@@ -131,34 +130,33 @@ const HistoryTab = ({
           const depreciationData = calculateTotalDepreciation(wasteDataForDay.items, order.items);
           totalDepreciation += depreciationData.totalDepreciation;
         }
+
+        const receivingDataForDay = existingReceivingData[day];
+        if (receivingDataForDay && receivingDataForDay.items && order.items) {
+          const nonReceivedData = calculateNonReceivedDiscounts(receivingDataForDay.items, order.items);
+          totalNonReceivedDiscount += nonReceivedData.totalNonReceivedDiscount;
+        }
       }
     }
 
-    const finalTotalAmount = originalTotalAmount - totalDepreciation;
+    const { finalTotal: finalTotalAmount } = calculateFinalOrderValue(originalTotalAmount, totalDepreciation, totalNonReceivedDiscount);
     const averageMealCost = totalMeals > 0 ? finalTotalAmount / totalMeals : 0;
+    const totalDiscounts = totalDepreciation + totalNonReceivedDiscount;
 
-    console.log("Cumulative Totals Calculation:");
-    console.log("  CUMULATIVE Total Meals:", totalMeals);
-    console.log("  CUMULATIVE Original Total Amount:", originalTotalAmount);
-    console.log("  CUMULATIVE Total Depreciation:", totalDepreciation);
-    console.log("  CUMULATIVE Final Total Amount:", finalTotalAmount);
-    console.log("  CUMULATIVE Orders Count:", ordersCount);
-    console.log("  CUMULATIVE Total Items Count:", totalItemsCount);
-    console.log("  CUMULATIVE Total Weight:", totalWeight);
-    console.log("  CUMULATIVE Average Meal Cost:", averageMealCost);
-    console.log("  CUMULATIVE Has Returns:", totalDepreciation > 0);
     return { 
       totalMeals, 
       originalTotalAmount,
       totalDepreciation,
+      totalNonReceivedDiscount,
+      totalDiscounts,
       finalTotalAmount,
       ordersCount,
       totalItemsCount,
       totalWeight,
       averageMealCost,
-      hasReturns: totalDepreciation > 0
+      hasDiscounts: totalDiscounts > 0
     };
-  }, [existingOrders, existingWasteData, recipes, selectedDay]);
+  }, [existingOrders, existingWasteData, existingReceivingData, recipes, selectedDay]);
 
   const getDayStatus = (dayIndex) => {
     const order = existingOrders[dayIndex];
@@ -244,9 +242,9 @@ const HistoryTab = ({
               <div>
                 <p className="text-sm text-gray-600">Valor (Acumul.)</p>
                 <p className="text-lg font-semibold text-gray-800">{utilFormatCurrency(cumulativeTotals.finalTotalAmount)}</p>
-                {cumulativeTotals.hasReturns && (
+                {cumulativeTotals.hasDiscounts && (
                   <p className="text-xs text-gray-500">
-                    Original: {utilFormatCurrency(cumulativeTotals.originalTotalAmount)} | Devolução: -{utilFormatCurrency(cumulativeTotals.totalDepreciation)}
+                    Original: {utilFormatCurrency(cumulativeTotals.originalTotalAmount)} | Descontos: -{utilFormatCurrency(cumulativeTotals.totalDiscounts)}
                   </p>
                 )}
               </div>
@@ -298,9 +296,9 @@ const HistoryTab = ({
               <div>
                 <p className="text-sm text-gray-600">Valor Total Final</p>
                 <p className="text-lg font-semibold text-gray-800">{utilFormatCurrency(weeklyTotals.finalTotalAmount)}</p>
-                {weeklyTotals.hasReturns && (
+                {weeklyTotals.hasDiscounts && (
                   <p className="text-xs text-gray-500">
-                    Original: {utilFormatCurrency(weeklyTotals.originalTotalAmount)} | Devolução: -{utilFormatCurrency(weeklyTotals.totalDepreciation)}
+                    Original: {utilFormatCurrency(weeklyTotals.originalTotalAmount)} | Total de Descontos: -{utilFormatCurrency(weeklyTotals.totalDiscounts)}
                   </p>
                 )}
               </div>
@@ -318,6 +316,15 @@ const HistoryTab = ({
           const order = existingOrders[dayIndex];
           const status = getDayStatus(dayIndex);
           
+          if (dayIndex === 1) { // Log específico para segunda-feira
+            console.log(`[HistoryTab Debug] Dia ${dayIndex} - Dados para Cálculo de Desconto:`,
+              {
+                orderItems: order?.items,
+                receivingItems: existingReceivingData[dayIndex]?.items
+              }
+            );
+          }
+
           console.log(`Order for day ${dayIndex}:`, order);
           return (
             <Card key={dayIndex} className="hover:shadow-md transition-shadow">
@@ -450,11 +457,11 @@ const HistoryTab = ({
                     <span className="text-green-700">Valor Original da Semana:</span>
                     <span className="font-semibold">{utilFormatCurrency(weeklyTotals.originalTotalAmount)}</span>
                   </div>
-                  {weeklyTotals.hasReturns && (
+                  {weeklyTotals.hasDiscounts && (
                     <>
                       <div className="flex justify-between">
-                        <span className="text-green-700">Desconto por Devoluções:</span>
-                        <span className="font-semibold">-{utilFormatCurrency(weeklyTotals.totalDepreciation)}</span>
+                        <span className="text-green-700">Desconto Total:</span>
+                        <span className="font-semibold">-{utilFormatCurrency(weeklyTotals.totalDiscounts)}</span>
                       </div>
                       <div className="flex justify-between border-t pt-2">
                         <span className="text-green-700 font-bold">Valor Final da Semana:</span>
@@ -462,7 +469,7 @@ const HistoryTab = ({
                       </div>
                     </>
                   )}
-                  {!weeklyTotals.hasReturns && (
+                  {!weeklyTotals.hasDiscounts && (
                     <div className="flex justify-between">
                       <span className="text-green-700">Valor Total da Semana:</span>
                       <span className="font-semibold">{utilFormatCurrency(weeklyTotals.finalTotalAmount)}</span>
