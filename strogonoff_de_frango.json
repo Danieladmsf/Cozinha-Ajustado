@@ -1,0 +1,34 @@
+[
+  {
+    "nome": "Strogonoff de Frango",
+    "categoria": "Carnes",
+    "tempo_preparo_min": 45,
+    "instrucoes_gerais": "Uma receita clássica de strogonoff de frango, perfeita para uma refeição rápida e saborosa. Servir com arroz branco e batata palha.",
+    "preparacoes": [
+      {
+        "titulo": "1ª Etapa: Preparo do Frango",
+        "processos": ["cleaning", "portioning", "cooking"],
+        "instrucoes": "1. Limpe e corte o peito de frango em cubos de tamanho médio.\n2. Em uma panela, aqueça o óleo e doure o alho e a cebola.\n3. Adicione o frango e frite até dourar por completo.\n4. Tempere com sal e pimenta-do-reino a gosto. Reserve.",
+        "ingredientes": [
+          { "nome": "Meio peito de frango", "peso_bruto_kg": 1.0 },
+          { "nome": "Cebola", "peso_bruto_kg": 0.15 },
+          { "nome": "Alho", "peso_bruto_kg": 0.02 },
+          { "nome": "Óleo", "peso_bruto_kg": 0.05 },
+          { "nome": "Sal", "peso_bruto_kg": 0.01 },
+          { "nome": "Pimenta do Reino", "peso_bruto_kg": 0.005 }
+        ]
+      },
+      {
+        "titulo": "2ª Etapa: Molho e Finalização",
+        "processos": ["cooking", "assembly"],
+        "instrucoes": "1. Na mesma panela onde o frango foi dourado, adicione o catchup e a mostarda, e misture bem.\n2. Incorpore o creme de leite e os champignons fatiados.\n3. Deixe o molho aquecer bem, sem ferver.\n4. Adicione os cubos de frango reservados de volta à panela e misture para que fiquem cobertos pelo molho.\n5. Cozinhe por mais 2 minutos. Sirva quente com batata palha por cima.",
+        "ingredientes": [
+          { "nome": "Creme de leite", "peso_bruto_kg": 0.4 },
+          { "nome": "Catchup", "peso_bruto_kg": 0.1 },
+          { "nome": "Mostarda", "peso_bruto_kg": 0.05 },
+          { "nome": "Champignon", "peso_bruto_kg": 0.2 }
+        ]
+      }
+    ]
+  }
+]
