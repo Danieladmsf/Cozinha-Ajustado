@@ -1655,9 +1655,9 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
     
     try {
       // IMPLEMENTAÇÃO CUSTOMIZADA: Gerar sugestões SEM aplicar nos inputs
-      
-      // 1. Carregar histórico
-      const historicalOrders = await OrderSuggestionManager.loadHistoricalOrders(customer.id, 8);
+
+      // 1. Carregar histórico (FILTRANDO PELO DIA DA SEMANA ATUAL)
+      const historicalOrders = await OrderSuggestionManager.loadHistoricalOrders(customer.id, 12, selectedDay);
       
       if (historicalOrders.length === 0) {
         
