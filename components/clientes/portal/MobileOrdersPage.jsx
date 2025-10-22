@@ -1740,20 +1740,37 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
         
         const stats = recipeAnalysis.statistics;
         
-        // ✅ CALCULAR SUGESTÃO COM ARREDONDAMENTO CORRETO
-        let suggestedBaseQuantity = stats.avg_ratio_per_meal * newMealsExpected;
-        
-        // Fallback para média direta se ratio é muito baixo
-        if (suggestedBaseQuantity < 0.1 && stats.avg_base_quantity > 0) {
-          suggestedBaseQuantity = stats.avg_base_quantity;
+        // ✅ LÓGICA DE SUGESTÃO ATUALIZADA (usando mediana)
+        let suggestedBaseQuantity = stats.median_ratio_per_meal * newMealsExpected;
+        let source = 'median_ratio_per_meal';
+
+        // Fallback para mediana da quantidade base
+        if (suggestedBaseQuantity < 0.1 && stats.median_base_quantity > 0) {
+          suggestedBaseQuantity = stats.median_base_quantity;
+          source = 'median_quantity';
+        }
+
+        // Validação de sanidade com média
+        if (stats.avg_base_quantity > 0 && suggestedBaseQuantity > 0) {
+          const ratio = suggestedBaseQuantity / stats.avg_base_quantity;
+          if (ratio < 0.4 || ratio > 2.5) {
+            suggestedBaseQuantity = stats.median_base_quantity;
+            source = 'median_quantity_after_sanity_check';
+          }
+        }
+
+        // Não sugerir 0 se houver histórico
+        if (suggestedBaseQuantity < 0.125 && stats.avg_base_quantity > 0) {
+          suggestedBaseQuantity = 0.25;
+          source = 'min_quantity_instead_of_zero';
         }
         
-        // 🔢 APLICAR ARREDONDAMENTO CORRETO
+        // Arredondamento
         suggestedBaseQuantity = OrderSuggestionManager.roundToPracticalValue(suggestedBaseQuantity, originalItem.unit_type);
         
         const suggestedAdjustmentPercentage = originalItem.category && 
-          originalItem.category.toLowerCase().includes('carne') ? 
-          Math.round(stats.avg_adjustment_percentage) : 0;
+          CategoryLogic.isCarneCategory(originalItem.category) ? 
+          Math.round(stats.median_adjustment_percentage) : 0;
         
         // Retornar item original + dados de sugestão
         return {
