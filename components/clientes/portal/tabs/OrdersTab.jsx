@@ -53,7 +53,6 @@ const OrdersTab = ({
   
 
   if (!currentOrder?.items || currentOrder.items.length === 0) {
-    //console.log('❌ [OrdersTab] Não há itens no currentOrder!');
     return (
       <Card>
         <CardContent className="p-8 text-center">

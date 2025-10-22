@@ -28,6 +28,15 @@ const ReceivingTab = ({
   getOrderedCategories,
   generateCategoryStyles
 }) => {
+  console.log('🔷 [ReceivingTab] RENDERIZANDO', {
+    receivingLoading,
+    isEditMode,
+    showSuccessEffect,
+    receivingItemsLength: receivingItems.length,
+    existingReceivingId: existingReceiving?.id,
+    selectedDay
+  });
+
   if (receivingLoading) {
     return (
       <Card>

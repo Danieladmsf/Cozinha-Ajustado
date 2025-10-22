@@ -109,7 +109,8 @@ const AssemblySubComponents = ({
         proportionalCost = componentWeightNumeric * parseNumericValue(sc.current_price);
       } else if (inputYieldWeightNumeric > 0) {
           proportionalCost = (componentWeightNumeric / inputYieldWeightNumeric) * inputTotalCostNumeric;
-      } else {
+      }
+      else {
           proportionalCost = inputTotalCostNumeric; // Fallback if no yield weight
       }
     }
@@ -118,7 +119,8 @@ const AssemblySubComponents = ({
       ...sc,
       percentage,
       proportionalCost,
-      componentWeightNumeric
+      componentWeightNumeric,
+      displayName: sourcePrep ? sourcePrep.title : sc.name
     };
   });
 
@@ -160,7 +162,7 @@ const AssemblySubComponents = ({
               <tr key={sc.id || index} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="px-3 py-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-900">{sc.name}</span>
+                    <span className="font-medium text-gray-900">{sc.displayName}</span>
                     <Badge
                       variant="outline"
                       className={`text-[10px] px-1.5 py-0 h-4 ${
@@ -179,7 +181,7 @@ const AssemblySubComponents = ({
                     type="text"
                     value={sc.assembly_weight_kg || ''}
                     onChange={(e) => handleWeightChange(sc.id, e.target.value)}
-                    className="w-20 h-7 text-center text-xs border-gray-300"
+                    className="w-20 h-7 text-center text-xs border-gray-300 mx-auto"
                     placeholder="0,000"
                   />
                 </td>
@@ -227,65 +229,63 @@ const AssemblySubComponents = ({
 
         {/* Configuração e Totais Unificados */}
         {showAssemblyConfig && (
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-3 border-t rounded-b-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <Layers className="h-3 w-3 text-indigo-600" />
-              <h6 className="font-semibold text-indigo-800 text-[11px]">Configuração do Porcionamento</h6>
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 border-t rounded-b-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <Layers className="h-4 w-4 text-indigo-600" />
+              <h6 className="font-semibold text-indigo-800 text-sm">Configuração do Porcionamento</h6>
             </div>
 
-            <div className="bg-white/50 rounded-md p-2 border border-indigo-100">
-              <div className="flex items-end gap-3">
-                <div className="flex-none w-32">
-                  <Label className="text-[9px] font-medium text-indigo-700 mb-0.5 block">Tipo</Label>
+            <div className="bg-white/60 rounded-md p-3 border border-indigo-100">
+              <div className="grid grid-cols-4 gap-x-6 gap-y-2 items-center">
+                {/* Row de Labels */}
+                <Label className="text-xs font-medium text-indigo-700">Tipo</Label>
+                <Label className="text-xs font-medium text-indigo-700">Qtd. Unid.</Label>
+                <Label className="text-xs font-medium text-indigo-700">Peso Total (kg)</Label>
+                <Label className="text-xs font-medium text-green-800">Custo Total</Label>
+
+                {/* Row de Inputs e Valores */}
+                <div className="w-full">
                   <Select
                     value={assemblyConfig.container_type || 'cuba'}
                     onValueChange={(value) => onAssemblyConfigChange('container_type', value)}
                   >
-                    <SelectTrigger className="h-6 text-[10px]">
+                    <SelectTrigger className="h-9 text-sm w-full">
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="cupa-p">Cupa P</SelectItem>
+                      <SelectItem value="cuba">Cuba</SelectItem>
+                      <SelectItem value="cuba-p">Cuba P</SelectItem>
                       <SelectItem value="cuba-g">Cuba G</SelectItem>
                       <SelectItem value="descartavel">Descartável</SelectItem>
-                      <SelectItem value="Unid.">Porção Individual</SelectItem>
+                      <SelectItem value="Porção">Porção</SelectItem>
+                      <SelectItem value="Unid.">Unidade</SelectItem>
                       <SelectItem value="kg">Kg</SelectItem>
                       <SelectItem value="outros">Outros</SelectItem>
-                      <SelectItem value="Porção">Porção</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="flex-none w-20">
-                  <Label className="text-[9px] font-medium text-indigo-700 mb-0.5 block">Qtd. Unid.</Label>
+                <div className="w-full">
                   <Input
                     type="text"
                     value={assemblyConfig.units_quantity || ''}
                     onChange={(e) => onAssemblyConfigChange('units_quantity', e.target.value)}
                     placeholder="1"
-                    className="h-6 text-[10px] text-center"
+                    className="h-9 text-sm text-center w-full"
                   />
                 </div>
 
-                <div className="flex-none w-24">
-                  <Label className="text-[9px] font-medium text-indigo-700 mb-0.5 block">Peso Total (kg)</Label>
-                  <div className="h-6 px-2 flex items-center justify-center">
-                    <span className="text-[11px] font-bold text-indigo-700">
-                      {String(totalAssemblyWeight).replace('.', ',')}
-                    </span>
-                  </div>
+                <div className="h-9 px-2 flex items-center justify-center bg-indigo-100/70 rounded-md w-full">
+                  <span className="text-sm font-bold text-indigo-800">
+                    {String((totalAssemblyWeight * (parseNumericValue(assemblyConfig.units_quantity) || 1)).toFixed(3)).replace('.', ',')}
+                  </span>
                 </div>
 
-                <div className="flex-none w-20">
-                  <Label className="text-[9px] font-medium text-green-700 mb-0.5 block">Custo:</Label>
-                  <div className="h-6 px-2 flex items-center justify-center">
-                    <span className="text-[11px] font-bold text-green-700">
-                      {formatCurrency(totalCost)}
-                    </span>
-                  </div>
+                <div className="h-9 px-2 flex items-center justify-center bg-green-100/70 rounded-md w-full">
+                  <span className="text-sm font-bold text-green-900">
+                    {formatCurrency(totalCost * (parseNumericValue(assemblyConfig.units_quantity) || 1))}
+                  </span>
                 </div>
-
-                <div className="flex-1"></div>
               </div>
             </div>
           </div>

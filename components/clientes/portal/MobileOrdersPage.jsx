@@ -1,7 +1,7 @@
 'use client';
 // Navegação e carregamento otimizados - v1.1
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { format, startOfWeek, getWeek, getYear, addDays, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/components/ui/use-toast";
@@ -178,39 +178,57 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
 
   const [selectedDay, setSelectedDay] = useState(1); // Será definido após carregar dados
   const [hasInitializedDay, setHasInitializedDay] = useState(false);
-  
+
+  // Ref para rastrear a última semana/ano carregada
+  const lastLoadedWeekRef = useRef({ weekNumber: null, year: null });
 
   // Carregar pedidos existentes da semana
   const loadExistingOrders = useCallback(async () => {
+
     if (!customer) {
       return;
     }
-    
+
+    // Verificar se a semana/ano mudou desde o último carregamento
+    const weekChanged = lastLoadedWeekRef.current.weekNumber !== weekNumber ||
+                        lastLoadedWeekRef.current.year !== year;
+
+    if (weekChanged) {
+      // Limpar pedidos antigos IMEDIATAMENTE quando mudar de semana
+      // Isso evita que pedidos de semanas anteriores apareçam durante o carregamento
+      setExistingOrders({});
+      lastLoadedWeekRef.current = { weekNumber, year };
+    } else {
+    }
+
     try {
       const orders = await Order.query([
         { field: 'customer_id', operator: '==', value: customer.id },
         { field: 'week_number', operator: '==', value: weekNumber },
         { field: 'year', operator: '==', value: year }
       ]);
-      
+
+
       // Organizar por dia da semana
       const ordersByDay = {};
       orders.forEach(order => {
         ordersByDay[order.day_of_week] = order;
       });
-      
+
+
+
       setExistingOrders(ordersByDay);
-      
+
       // Definir mealsExpected baseado no pedido do dia atual
       const currentDayOrder = ordersByDay[selectedDay];
       if (currentDayOrder) {
-        
+
         setMealsExpected(currentDayOrder.total_meals_expected || 0);
         setGeneralNotes(currentDayOrder.general_notes || "");
-        
+
         const isComplete = isCompleteOrder(currentDayOrder);
-        
-        
+
+
       } else {
         setMealsExpected(0);
         setGeneralNotes("");
@@ -238,11 +256,9 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       const wasteRecord = existingWastes.length > 0 ? existingWastes[0] : null;
       setExistingWaste(wasteRecord);
       setWasteNotes(wasteRecord?.general_notes || "");
-      
-      // Definir modo de edição baseado se já existe dados salvos (apenas se estiver na aba waste)
-      if (activeTab === "waste") {
-        setIsWasteEditMode(!wasteRecord);
-      }
+
+      // Definir modo de edição baseado se já existe dados salvos
+      setIsWasteEditMode(!wasteRecord);
 
       // Criar itens simples baseados no cardápio
       const menu = weeklyMenus[0];
@@ -337,13 +353,24 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
     } finally {
       setWasteLoading(false);
     }
-  }, [activeTab, customer, weeklyMenus, recipes, weekNumber, year, selectedDay, existingOrders, toast]);
+  }, [customer, weeklyMenus, recipes, weekNumber, year, selectedDay, toast]);
 
   // Funções para Recebimento
   const loadReceivingData = useCallback(async () => {
+    console.log('🔵 [loadReceivingData] INICIANDO', {
+      hasCustomer: !!customer,
+      weeklyMenusLength: weeklyMenus.length,
+      recipesLength: recipes.length,
+      weekNumber,
+      year,
+      selectedDay
+    });
+
     if (!customer || !weeklyMenus.length || !recipes.length) {
+      console.log('🔵 [loadReceivingData] ABORTADO - faltam dados');
       return;
     }
+
     setReceivingLoading(true);
     try {
       // Buscar registro de recebimento existente
@@ -355,13 +382,22 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       ]);
 
       const receivingRecord = existingReceivings.length > 0 ? existingReceivings[0] : null;
+      console.log('🔵 [loadReceivingData] Registro encontrado?', !!receivingRecord, {
+        recordId: receivingRecord?.id,
+        hasItems: !!receivingRecord?.items?.length,
+        itemsCount: receivingRecord?.items?.length || 0
+      });
+
       setExistingReceiving(receivingRecord);
       setReceivingNotes(receivingRecord?.general_notes || "");
-      
-      // Definir modo de edição baseado se já existe dados salvos (apenas se estiver na aba receive)
-      if (activeTab === "receive") {
-        setIsReceivingEditMode(!receivingRecord);
-      }
+
+      // Definir modo de edição baseado se já existe dados salvos
+      const newEditMode = !receivingRecord;
+      console.log('🔵 [loadReceivingData] Definindo isReceivingEditMode:', newEditMode, {
+        temRegistro: !!receivingRecord,
+        modoEdicao: newEditMode ? 'EDITANDO (sem dados)' : 'VISUALIZANDO (com dados)'
+      });
+      setIsReceivingEditMode(newEditMode);
 
       // Criar itens de recebimento baseados no cardápio (como a aba de pedidos)
       const menu = weeklyMenus[0];
@@ -453,12 +489,19 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       });
 
       setReceivingItems(items);
+
+      console.log('🔵 [loadReceivingData] FINALIZADO', {
+        totalItens: items.length,
+        isReceivingEditMode: !receivingRecord,
+        existingReceivingId: receivingRecord?.id
+      });
     } catch (error) {
+      console.log('🔵 [loadReceivingData] ERRO:', error);
       toast({ variant: "destructive", description: "Erro ao carregar dados de recebimento." });
     } finally {
       setReceivingLoading(false);
     }
-  }, [activeTab, customer, weeklyMenus, recipes, weekNumber, year, selectedDay, existingOrders, toast]);
+  }, [customer, weeklyMenus, recipes, weekNumber, year, selectedDay, toast]);
 
   const updateReceivingItem = useCallback((index, field, value) => {
     setReceivingItems(prevItems => {
@@ -504,16 +547,28 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
   }, []);
 
   const saveReceivingData = useCallback(async () => {
-    if (!customer || receivingItems.length === 0) return;
+    console.log('💾 [saveReceivingData] INICIANDO salvamento', {
+      hasCustomer: !!customer,
+      receivingItemsLength: receivingItems.length,
+      existingReceivingId: existingReceiving?.id
+    });
+
+    if (!customer || receivingItems.length === 0) {
+      console.log('💾 [saveReceivingData] ABORTADO - sem customer ou sem itens');
+      return;
+    }
 
     try {
       // Verificar se é um registro vazio (para deletar)
-      const isEmpty = receivingItems.every(item => item.status === 'pending') && 
+      const isEmpty = receivingItems.every(item => item.status === 'pending') &&
                      (!receivingNotes || receivingNotes.trim() === '');
-      
+
+      console.log('💾 [saveReceivingData] isEmpty:', isEmpty, '- Iniciando efeito de sucesso e mudando isReceivingEditMode para false em 2s');
+
       // Sempre ativar efeito de sucesso no início
       setShowReceivingSuccessEffect(true);
       setTimeout(() => {
+        console.log('💾 [saveReceivingData setTimeout] Desativando efeito de sucesso e modo de edição');
         setShowReceivingSuccessEffect(false);
         setIsReceivingEditMode(false); // Sair do modo de edição após o sucesso
       }, 2000);
@@ -563,11 +618,14 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
           });
         }
       }
+
+      console.log('💾 [saveReceivingData] SUCESSO - Dados salvos');
     } catch (error) {
-      toast({ 
-        variant: "destructive", 
-        title: "Erro ao Salvar Recebimento", 
-        description: error.message 
+      console.log('💾 [saveReceivingData] ERRO:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao Salvar Recebimento",
+        description: error.message
       });
     }
   }, [customer, receivingItems, receivingNotes, existingReceiving, weekNumber, year, selectedDay, weekStart, toast]);
@@ -700,7 +758,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       
       setWeeklyReceivingData(receivingDataByDay);
     } catch (error) {
-      console.error("Erro ao carregar dados de recebimento semanais:", error);
+      // Erro silencioso
     }
   }, [customer, weekNumber, year]);
 
@@ -1005,44 +1063,36 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
           
           const containerType = getRecipeUnitType(recipe);
           const unitPrice = PortalPricingSystem.recalculateItemUnitPrice(item, recipe, containerType);
-          const cubaWeightParsed = utilParseQuantity(recipe.cuba_weight) || 0;
-          
-          const baseItem = {
-            unique_id: `${item.recipe_id}_${uniqueCounter++}`,
-            recipe_id: item.recipe_id,
-            recipe_name: recipe.name,
-            category: recipe.category || categoryId,
-            unit_type: containerType,
-            base_quantity: 0,
-            quantity: 0,
-            unit_price: unitPrice,
-            total_price: 0,
-            notes: "",
-            cuba_weight: cubaWeightParsed,
-            yield_weight: utilParseQuantity(recipe.yield_weight) || 0,
-            total_weight: utilParseQuantity(recipe.total_weight) || 0,
-            units_quantity: (() => {
-              const portioningPrep = recipe.preparations?.find(prep => prep.title === '2º Etapa: Porcionamento' || prep.processes?.includes('portioning'));
-              if (portioningPrep?.assembly_config?.units_quantity) {
-                return portioningPrep.assembly_config.units_quantity;
-              }
-              return 1; // Default to 1 if not found or invalid
-            })(), // Quantidade de unidades da ficha técnica
-            tech_sheet_unit_weight: utilParseQuantity(recipe.cuba_weight) || utilParseQuantity(recipe.portion_weight_kg) || utilParseQuantity(recipe.total_weight) || 0, // Peso por unidade da ficha técnica
-                        tech_sheet_units_quantity: (() => {
-              const portioningPrep = recipe.preparations?.find(prep => prep.title === '2º Etapa: Porcionamento' || prep.processes?.includes('portioning'));
-              if (portioningPrep?.assembly_config?.units_quantity) {
-                return portioningPrep.assembly_config.units_quantity;
-              }
-              return 1; // Default to 1 if not found or invalid
-            })(), // Quantidade de unidades da ficha técnica
-            
-            adjustment_percentage: 0,
-            recipe: recipe, // Adicionado para que o weightCalculator possa acessar os pesos da receita
-          };
-          // DEBUG: Log recipe units_quantity for inspection
-          console.log(`DEBUG: Recipe Name: ${recipe.name}, recipe.units_quantity (top-level): ${recipe.units_quantity}, typeof recipe.units_quantity (top-level): ${typeof recipe.units_quantity}, recipe.assemblyConfig: ${JSON.stringify(recipe.assemblyConfig)}, recipe.assemblyConfig.units_quantity: ${recipe.assemblyConfig?.units_quantity}, tech_sheet_units_quantity (calculated): ${(() => { const portioningPrep = recipe.preparations?.find(prep => prep.title === '2º Etapa: Porcionamento' || prep.processes?.includes('portioning')); return portioningPrep?.assembly_config?.units_quantity || 1; })()}, recipe.portion_weight_calculated: ${recipe.portion_weight_calculated}, recipe.cuba_weight: ${recipe.cuba_weight}, recipe.yield_weight: ${recipe.yield_weight}`);
-          
+                    const cubaWeightParsed = utilParseQuantity(recipe.cuba_weight) || 0;
+                    const unitsQuantity = (() => {
+                        const portioningPrep = recipe.preparations?.find(prep => prep.title === '2º Etapa: Porcionamento' || prep.processes?.includes('portioning'));
+                        if (portioningPrep?.assembly_config?.units_quantity) {
+                          return utilParseQuantity(portioningPrep.assembly_config.units_quantity) || 1;
+                        }
+                        return 1; // Default to 1 if not found or invalid
+                      })();
+                    
+                    const baseItem = {
+                      unique_id: `${item.recipe_id}_${uniqueCounter++}`,
+                      recipe_id: item.recipe_id,
+                      recipe_name: recipe.name,
+                      category: recipe.category || categoryId,
+                      unit_type: containerType,
+                      base_quantity: 0,
+                      quantity: 0,
+                      unit_price: unitPrice,
+                      total_price: 0,
+                      notes: "",
+                      cuba_weight: cubaWeightParsed,
+                      yield_weight: utilParseQuantity(recipe.yield_weight) || 0,
+                      total_weight: utilParseQuantity(recipe.total_weight) || 0,
+                      units_quantity: unitsQuantity,
+                      tech_sheet_unit_weight: unitsQuantity > 1 ? cubaWeightParsed / unitsQuantity : cubaWeightParsed,
+                      tech_sheet_units_quantity: unitsQuantity,
+                      
+                      adjustment_percentage: 0,
+                      recipe: recipe, // Adicionado para que o weightCalculator possa acessar os pesos da receita
+                    };
           const syncedItem = PortalDataSync.syncItemSafely(baseItem, recipe);
           const newItem = CategoryLogic.calculateItemValues(syncedItem, 'base_quantity', 0, mealsExpected);
           
@@ -1098,19 +1148,28 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
 
   // Carregar dados de sobras automaticamente para cálculo de descontos
   useEffect(() => {
-    if (customer && weeklyMenus.length && recipes.length && hasInitializedDay) {
+    if (customer && hasInitializedDay) {
       loadWasteData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [customer, selectedDay, weeklyMenus, recipes, existingOrders, hasInitializedDay, weekNumber, year]);
+  }, [customer, selectedDay, hasInitializedDay, weekNumber, year, loadWasteData]);
 
   // Carregar dados de recebimento automaticamente para cálculo de descontos
   useEffect(() => {
-    if (customer && weeklyMenus.length && recipes.length && hasInitializedDay) {
+    console.log('🟢 [useEffect loadReceivingData] Disparado', {
+      hasCustomer: !!customer,
+      hasInitializedDay,
+      selectedDay,
+      weekNumber,
+      year
+    });
+
+    if (customer && hasInitializedDay) {
+      console.log('🟢 [useEffect loadReceivingData] Chamando loadReceivingData()');
       loadReceivingData();
+    } else {
+      console.log('🟢 [useEffect loadReceivingData] Não executou - condições não atendidas');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [customer, selectedDay, weeklyMenus, recipes, existingOrders, hasInitializedDay, weekNumber, year]);
+  }, [customer, selectedDay, hasInitializedDay, weekNumber, year, loadReceivingData]);
 
   // Carregar dados de waste e receiving da semana quando a aba history for selecionada OU semana muda
   useEffect(() => {
@@ -1120,32 +1179,22 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
     }
   }, [activeTab, customer, weekNumber, year, hasInitializedDay, loadWeeklyWasteData, loadWeeklyReceivingData]);
 
-  // Reset de efeitos visuais quando mudar de dia
-  useEffect(() => {
-    if (hasInitializedDay) {
-      setShowSuccessEffect(false);
-      setShowReceivingSuccessEffect(false);
-      setShowWasteSuccessEffect(false);
-      setIsReceivingEditMode(true);
-      setIsWasteEditMode(true);
-    }
-  }, [hasInitializedDay, selectedDay]);
-
   // Inicializar pedido quando itens mudam
   useEffect(() => {
     const initKey = `${weekNumber}-${year}-${selectedDay}-${orderItems.length}`;
-    
+
     // Só executar após inicialização do dia
     if (!hasInitializedDay) {
       return;
     }
-    
+
     // Evitar re-execuções desnecessárias
 
-    
+
     // Se existe pedido salvo para este dia, usar ele
     if (existingOrders[selectedDay] && orderItems.length > 0) {
       const existingOrder = existingOrders[selectedDay];
+
 
       // SINCRONIZAR ITENS: A nova lógica garante que os preços são sempre os mais atuais
       const synchronizedItems = existingOrder.items.map(existingItem => {
@@ -1174,6 +1223,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       );
 
       const allItems = [...synchronizedItems, ...newItemsFromMenu];
+
 
       const updatedOrder = {
         ...existingOrder,
@@ -1309,26 +1359,28 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
 
   // Calcular totais, depreciação por devoluções e descontos por não recebimento
   const orderTotals = useMemo(() => {
-    if (!currentOrder?.items) return { 
-      totalItems: 0, 
-      totalAmount: 0, 
-      depreciation: null,
-      nonReceivedDiscounts: null,
-      finalAmount: 0
-    };
-    
+    if (!currentOrder?.items) {
+      return {
+        totalItems: 0,
+        totalAmount: 0,
+        depreciation: null,
+        nonReceivedDiscounts: null,
+        finalAmount: 0
+      };
+    }
+
     const totalItems = currentOrder.items.reduce((sum, item) => {
       // Use quantity if available, otherwise use base_quantity as fallback
       const itemQuantity = item.quantity || item.base_quantity || 0;
       return sum + itemQuantity;
     }, 0);
     const totalAmount = utilSumCurrency(currentOrder.items.map(item => item.total_price || 0));
-    
+
     // Debug simplificado
     if (process.env.NODE_ENV === 'development' && totalAmount > 500) {
 
     }
-    
+
     // Usar calculadora centralizada de peso
     const totalWeight = calculateTotalWeight(currentOrder.items);
     
@@ -1360,7 +1412,6 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
   }, [currentOrder, wasteItems, receivingItems]);
 
   const submitOrder = useCallback(async () => {
-    console.log('submitOrder: Function started. isEditMode before logic:', isEditMode); // NEW LOG
     // 🚨 LOG INICIAL - Informações básicas da sessão
     const currentTime = new Date();
     const dayOfWeek = currentTime.getDay(); // 0=Domingo, 1=Segunda, ... 5=Sexta
@@ -1427,14 +1478,14 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
         depreciation_amount: orderTotals.depreciationAmount
       };
 
+
       const startTime = Date.now();
-      
+
       if (existingOrders[selectedDay]) {
-        
         await Order.update(existingOrders[selectedDay].id, orderData);
-        
+
         const updateTime = Date.now() - startTime;
-        
+
         toast({ description: "Pedido atualizado com sucesso!" });
 
         // ATUALIZAÇÃO OTIMISTA: Atualizar o estado local com os dados que acabaram de ser salvos
@@ -1445,11 +1496,10 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
         }));
 
       } else {
-        
         const newOrder = await Order.create(orderData);
-        
+
         const createTime = Date.now() - startTime;
-        
+
         setExistingOrders(prev => ({
           ...prev,
           [selectedDay]: newOrder
@@ -1466,11 +1516,9 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       setTimeout(() => {
         setShowSuccessEffect(false);
         setIsEditMode(false);
-        console.log('submitOrder: isEditMode set to false after timeout. Current isEditMode:', isEditMode);
       }, 2000); // 2 segundos de efeito
       
     } catch (error) {
-      console.error('submitOrder: Error during submission:', error); // NEW LOG
       // Toast para o usuário
       toast({ 
         variant: "destructive", 
@@ -1497,11 +1545,11 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
   }, [currentOrder, customer, mealsExpected, generalNotes, orderTotals, existingOrders, selectedDay, toast]);
 
   const enableEditMode = useCallback(() => {
-    console.log('enableEditMode: Setting isEditMode to true.'); // NEW LOG
     setIsEditMode(true);
   }, []);
 
   const enableReceivingEditMode = useCallback(() => {
+    console.log('🟠 [enableReceivingEditMode] Botão "Editar Recebimento" clicado - mudando para modo edição');
     setIsReceivingEditMode(true);
   }, []);
 
@@ -1796,14 +1844,39 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       return () => clearTimeout(timeoutId);
     }
   }, [mealsExpected, isEditMode, hasInitializedDay, applyAutomaticSuggestions]); // Incluído applyAutomaticSuggestions para reagir a mudanças
-  
+
   // Carregar pedidos existentes quando customer muda OU semana muda OU dia muda
   useEffect(() => {
+
     if (customer && hasInitializedDay) {
       loadExistingOrders();
-    } else {
     }
   }, [customer, hasInitializedDay, weekNumber, year, selectedDay, loadExistingOrders]);
+
+  // Resetar modos de edição e efeitos visuais quando mudar de semana ou dia
+  useEffect(() => {
+    console.log('🟣 [useEffect Reset] RESETANDO estados de edição', {
+      weekNumber,
+      year,
+      selectedDay
+    });
+    setIsEditMode(false);
+    setShowSuccessEffect(false);
+    setShowReceivingSuccessEffect(false);
+    setShowWasteSuccessEffect(false);
+    console.log('🟣 [useEffect Reset] Estados resetados (isReceivingEditMode será definido por loadReceivingData)');
+    // Nota: isReceivingEditMode e isWasteEditMode são controlados por loadReceivingData e loadWasteData
+  }, [weekNumber, year, selectedDay]);
+
+  // Monitor de mudanças no isReceivingEditMode
+  useEffect(() => {
+    console.log('🟡 [Monitor isReceivingEditMode] Mudou para:', isReceivingEditMode, {
+      weekNumber,
+      year,
+      selectedDay,
+      existingReceivingId: existingReceiving?.id
+    });
+  }, [isReceivingEditMode, weekNumber, year, selectedDay, existingReceiving]);
 
   if (!customerId) {
     return (
@@ -2071,11 +2144,13 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
               </div>
             </div>
             {(isEditMode || showSuccessEffect) ? (
-              <Button 
-                onClick={submitOrder}
+              <Button
+                onClick={() => {
+                  submitOrder();
+                }}
                 className={`w-full text-white transition-all duration-500 ${
-                  showSuccessEffect 
-                    ? 'bg-green-600 hover:bg-green-700 scale-105 shadow-lg' 
+                  showSuccessEffect
+                    ? 'bg-green-600 hover:bg-green-700 scale-105 shadow-lg'
                     : 'bg-blue-600 hover:bg-blue-700'
                 }`}
                 disabled={orderTotals.totalAmount === 0 || showSuccessEffect || !mealsExpected || mealsExpected <= 0}
@@ -2088,7 +2163,10 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
                 ) : (
                   <>
                     <Send className="w-4 h-4 mr-2" />
-                    {existingOrders[selectedDay] ? 'Atualizar Pedido' : 'Enviar Pedido'}
+                    {(() => {
+                      const buttonText = existingOrders[selectedDay] ? 'Atualizar Pedido' : 'Enviar Pedido';
+                      return buttonText;
+                    })()}
                   </>
                 )}
               </Button>

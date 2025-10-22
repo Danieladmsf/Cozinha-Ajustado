@@ -984,28 +984,6 @@ export default function RecipeTechnical() {
             addComponentLabel={isAssemblyOnly ? 'Adicionar Preparo/Receita' : 'Adicionar Produto'}
             addComponentClassName={isAssemblyOnly ? 'border-indigo-300 text-indigo-600 hover:bg-indigo-50' : 'border-teal-300 text-teal-600 hover:bg-teal-50'}
           />
-
-          {/* Área de instruções */}
-          <div>
-            <label className="text-sm font-medium mb-2 block text-gray-700">
-              Modo de Preparo desta Etapa
-            </label>
-            <textarea
-              value={prep.instructions || ''}
-              onChange={(e) => {
-                setPreparationsData(prev => {
-                  const newData = [...prev];
-                  if (newData[prepIndex]) {
-                    newData[prepIndex].instructions = e.target.value;
-                  }
-                  return newData;
-                });
-                setIsDirty(true);
-              }}
-              placeholder="Descreva o modo de preparo desta etapa..."
-              className="w-full p-3 border border-gray-200 rounded-lg resize-none min-h-[100px] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
         </div>
       );
     }
@@ -2018,25 +1996,6 @@ export default function RecipeTechnical() {
                         {isExpanded && (
                           <CardContent className="p-6">
                         <div className="space-y-4">
-                          {/* Ocultar "Processos:" para Assembly/Portioning (já exibido dentro do IngredientTable) */}
-                          {(() => {
-                            const processes = prep.processes || [];
-                            const isAssemblyOnly = processes.includes('assembly') &&
-                              !processes.includes('defrosting') && !processes.includes('cleaning') && !processes.includes('cooking');
-                            const isPortioningOnly = processes.includes('portioning') &&
-                              !processes.includes('defrosting') && !processes.includes('cleaning') && !processes.includes('cooking') && !processes.includes('assembly');
-
-                            if (isAssemblyOnly || isPortioningOnly) return null;
-
-                            return (
-                              <div>
-                                <Label className="text-sm font-medium mb-2 block">
-                                  Processos: {prep.processes?.map(p => processTypes[p]?.label).join(', ')}
-                                </Label>
-                              </div>
-                            );
-                          })()}
-
                           {/* Tabela de Ingredientes com Processos */}
                           <IngredientTable
                             prep={prep}
@@ -2100,24 +2059,6 @@ export default function RecipeTechnical() {
                             }}
                             preparations={preparationsData}
                           />
-
-                          <div>
-                            <Label className="text-sm font-medium mb-2 block">
-                              Instruções
-                            </Label>
-                            <textarea
-                              value={prep.instructions || ''}
-                              onChange={(e) => updatePreparation(
-                                preparationsData, 
-                                setPreparationsData, 
-                                index, 
-                                'instructions', 
-                                e.target.value
-                              )}
-                              placeholder="Descreva o modo de preparo desta etapa..."
-                              className="w-full p-3 border border-gray-200 rounded-lg resize-none min-h-[100px] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
                         </div>
                           </CardContent>
                         )}

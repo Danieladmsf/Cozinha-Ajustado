@@ -30,12 +30,7 @@ const IngredientTable = ({
   if (isAssemblyOnly || isPortioningOnly) {
     return (
       <div className="space-y-4">
-        {/* 1. Processos */}
-        <div className="bg-gray-50 px-3 py-2 rounded-md border border-gray-200">
-          <span className="text-xs font-medium text-gray-600">
-            Processos: {prep.processes?.map(p => processTypes[p]?.label).join(', ')}
-          </span>
-        </div>
+
 
         {/* 2. Tabela de Componentes com Configuração no Rodapé */}
         <AssemblySubComponents
@@ -75,6 +70,8 @@ const IngredientTable = ({
             className="w-full p-3 border border-gray-200 rounded-lg resize-none min-h-[100px] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
+
+
       </div>
     );
   }
@@ -279,8 +276,7 @@ const IngredientTable = ({
               )}
 
               <TableHead className="px-4 py-2 bg-purple-50/50 font-medium text-purple-600 text-center whitespace-nowrap">
-                Rendimento(%)
-              </TableHead>
+                Rendimento(%)              </TableHead>
               <TableHead className="px-4 py-2 bg-purple-50/50 font-medium text-purple-600 text-center">
                 Ações
               </TableHead>
@@ -290,7 +286,7 @@ const IngredientTable = ({
           <TableBody>
             {ingredients.length === 0 && recipes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={15} className="px-4 py-8 text-center text-gray-500">
+                <TableCell colSpan="15" className="px-4 py-8 text-center text-gray-500">
                   <div className="flex flex-col items-center gap-2">
                     <ClipboardList className="h-8 w-8 text-gray-400" />
                     <span>Nenhum ingrediente ou receita adicionado</span>

@@ -315,17 +315,6 @@ const HistoryTab = ({
           const dayIndex = day.dayNumber;
           const order = existingOrders[dayIndex];
           const status = getDayStatus(dayIndex);
-          
-          if (dayIndex === 1) { // Log específico para segunda-feira
-            console.log(`[HistoryTab Debug] Dia ${dayIndex} - Dados para Cálculo de Desconto:`,
-              {
-                orderItems: order?.items,
-                receivingItems: existingReceivingData[dayIndex]?.items
-              }
-            );
-          }
-
-          console.log(`Order for day ${dayIndex}:`, order);
           return (
             <Card key={dayIndex} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
