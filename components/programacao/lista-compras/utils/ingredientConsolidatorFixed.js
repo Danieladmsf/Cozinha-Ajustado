@@ -9,8 +9,14 @@
  */
 
 /**
- * Extrai o peso mais adequado de um ingrediente
- * Tenta diferentes estruturas e propriedades
+ * Extrai o peso mais adequado de um ingrediente PARA LISTA DE COMPRAS
+ * PRIORIDADE: PESO BRUTO (o que você compra) > Pré-cozinha > Limpo > Cozido
+ *
+ * ⚠️ IMPORTANTE: Para lista de compras, precisamos do peso BRUTO (antes de qualquer processamento)!
+ * Exemplo: Coxão duro no Strogonoff
+ *   - Peso Bruto: 2,438 kg ← O QUE VOCÊ COMPRA
+ *   - Pós Limpeza: 2,194 kg
+ *   - Pós Cocção: 1,951 kg
  */
 const getIngredientWeight = (ingredient) => {
   // Helper para converter valores vazios/inválidos e lidar com formato brasileiro (vírgula)
@@ -26,30 +32,29 @@ const getIngredientWeight = (ingredient) => {
     return isNaN(parsed) ? 0 : parsed;
   };
 
-  // 1. Tentar propriedades diretas de peso processado (prioridade: cooked > pre_cooking > clean > thawed)
-  let weight = parseWeight(ingredient.weight_cooked);
+  // 1. PRIORIDADE: Peso bruto/cru (o que você compra no mercado)
+  let weight = parseWeight(ingredient.weight_raw);
+  if (!weight) weight = parseWeight(ingredient.raw_weight);
+  if (!weight) weight = parseWeight(ingredient.weight);
 
+  // 2. Se não tem peso bruto, usar pré-cozinha (já limpo, mas antes de cozinhar)
+  // Este é o "segundo melhor" para lista de compras
   if (!weight) weight = parseWeight(ingredient.weight_pre_cooking);
   if (!weight) weight = parseWeight(ingredient.weight_clean);
   if (!weight) weight = parseWeight(ingredient.weight_thawed);
 
-  // 2. Se não encontrou, tentar objetos aninhados
+  // 3. Tentar objetos aninhados (mesma ordem)
   if (!weight && ingredient.weights) {
-    weight = parseWeight(ingredient.weights.cooked);
+    weight = parseWeight(ingredient.weights.raw);
     if (!weight) weight = parseWeight(ingredient.weights.pre_cooking);
     if (!weight) weight = parseWeight(ingredient.weights.clean);
     if (!weight) weight = parseWeight(ingredient.weights.thawed);
   }
 
-  // 3. Fallback: peso bruto (menos ideal, mas melhor que nada)
-  if (!weight) {
-    weight = parseWeight(ingredient.weight);
-  }
-  if (!weight) {
-    weight = parseWeight(ingredient.weight_raw);
-  }
-  if (!weight) {
-    weight = parseWeight(ingredient.raw_weight);
+  // 4. ÚLTIMO RECURSO: Peso cozido (menos ideal para compras, mas melhor que nada)
+  if (!weight) weight = parseWeight(ingredient.weight_cooked);
+  if (!weight && ingredient.weights) {
+    weight = parseWeight(ingredient.weights.cooked);
   }
 
   return weight;
