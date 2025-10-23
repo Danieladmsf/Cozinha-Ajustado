@@ -132,7 +132,39 @@ const getIngredientWeight = (ingredient) => {
 
 **Resultado:** Ingredientes não são mais perdidos!
 
-#### 3. **Uso Correto da Quantidade do Ingrediente** (linha 83)
+#### 3. **Conversão de Formato Brasileiro (Vírgula) para Formato JS (Ponto)** (linhas 16-27)
+
+**Problema Crítico:**
+```javascript
+// Banco de dados salva com VÍRGULA (formato brasileiro)
+weight_pre_cooking: "0,04"
+
+// parseFloat() interpreta incorretamente:
+parseFloat("0,04") // → 0 (não NaN!)
+
+// Resultado:
+if (!weight) // → true, porque 0 é falsy
+// INGREDIENTE PULADO! ❌
+```
+
+**Código Corrigido:**
+```javascript
+const parseWeight = (value) => {
+  if (value === null || value === undefined || value === '') return 0;
+
+  // Se for string, substituir vírgula por ponto
+  if (typeof value === 'string') {
+    value = value.replace(',', '.');
+  }
+
+  const parsed = parseFloat(value);
+  return isNaN(parsed) ? 0 : parsed;
+};
+```
+
+**Resultado:** Centenas de ingredientes que eram pulados agora são incluídos!
+
+#### 4. **Uso Correto da Quantidade do Ingrediente** (linha 83)
 
 ```javascript
 // ✅ CORRIGIDO - Usa quantidade do ingrediente na receita
@@ -144,6 +176,15 @@ const totalWeight = unitWeight * baseQuantity * recipeMultiplier;
 ```
 
 **Resultado:** Se a receita usa 2 kg de algo, calcula 2 kg!
+
+---
+
+## 📊 Resumo das 4 Correções
+
+1. ✅ **Cálculo baseado em unit_type**: Cuba ≠ Porção ≠ Kg
+2. ✅ **Extração robusta de peso**: Tenta múltiplas propriedades em cascata
+3. ✅ **Conversão vírgula → ponto**: Resolve formato brasileiro "0,04" → 0.04
+4. ✅ **Multiplicação correta**: peso × quantity × multiplier
 
 ---
 
@@ -226,16 +267,20 @@ O novo código inclui logs detalhados no console para diagnóstico:
 ## ✅ Resultado Final
 
 ### Antes das Correções:
-- ❌ Cálculo errado para cubas
+- ❌ Cálculo errado para cubas (tratava como porções)
 - ❌ Ingredientes sem peso específico eram ignorados
+- ❌ **Pesos com vírgula ("0,04") eram interpretados como 0**
 - ❌ Quantidade do ingrediente na receita não era usada
-- ❌ Valores totalmente incorretos na lista de compras
+- ❌ Apenas ~20 ingredientes na lista (faltavam centenas)
+- ❌ Valores totalmente incorretos
 
 ### Depois das Correções:
 - ✅ Cálculo correto para cuba-g, cuba-p, porção, unid., kg
 - ✅ Extração robusta de peso (tenta múltiplas propriedades)
+- ✅ **Conversão automática de vírgula para ponto (formato BR → JS)**
 - ✅ Quantidade do ingrediente é multiplicada corretamente
 - ✅ Logs detalhados para diagnóstico
+- ✅ **Todos os ingredientes com peso são incluídos**
 - ✅ Valores precisos na lista de compras
 
 ---
