@@ -7,20 +7,31 @@ import { Calendar, Scale, Package, AlertCircle } from "lucide-react";
 // Utilitário para consolidação de ingredientes (VERSÃO CORRIGIDA)
 import { consolidateIngredientsFromRecipes } from './utils/ingredientConsolidatorFixed';
 
-const IngredientesConsolidados = ({ 
+const IngredientesConsolidados = ({
   orders = [],
   recipes = [],
   weekDays = [],
   weekNumber,
   year,
+  selectedDay = null,
+  showWeekMode = true,
   dataVersion
 }) => {
-  // Consolidar todos os ingredientes da semana
+  // Filtrar pedidos pelo dia se necessário
+  const filteredOrders = useMemo(() => {
+    if (showWeekMode || !selectedDay) {
+      return orders; // Modo semana: todos os pedidos
+    }
+    // Modo dia: filtrar pelo dia selecionado
+    return orders.filter(order => order.day_of_week === selectedDay);
+  }, [orders, selectedDay, showWeekMode]);
+
+  // Consolidar todos os ingredientes (da semana ou do dia)
   const ingredientesConsolidados = useMemo(() => {
-    if (!orders.length || !recipes.length) return [];
-    
-    return consolidateIngredientsFromRecipes(orders, recipes);
-  }, [orders, recipes, dataVersion]);
+    if (!filteredOrders.length || !recipes.length) return [];
+
+    return consolidateIngredientsFromRecipes(filteredOrders, recipes);
+  }, [filteredOrders, recipes, dataVersion]);
 
   // Agrupar ingredientes por categoria
   const ingredientesPorCategoria = useMemo(() => {
@@ -80,7 +91,16 @@ const IngredientesConsolidados = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-green-800">
             <Scale className="w-6 h-6" />
-            Resumo da Lista de Compras - Semana {weekNumber}/{year}
+            {showWeekMode ? (
+              `Resumo da Lista de Compras - Semana ${weekNumber}/${year}`
+            ) : (
+              <>
+                Resumo da Lista de Compras - {weekDays.find(d => d.dayNumber === selectedDay)?.dayName || `Dia ${selectedDay}`}
+                <span className="text-sm font-normal text-green-600 ml-2">
+                  ({weekDays.find(d => d.dayNumber === selectedDay)?.fullDate})
+                </span>
+              </>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>

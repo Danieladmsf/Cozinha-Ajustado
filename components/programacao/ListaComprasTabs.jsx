@@ -28,7 +28,9 @@ const ListaComprasTabs = () => {
   const [loading, setLoading] = useState(true);
   const [printing, setPrinting] = useState(false);
   const [dataVersion, setDataVersion] = useState(0);
-  
+  const [selectedDay, setSelectedDay] = useState(1); // Dia da semana selecionado (1-5)
+  const [showWeekMode, setShowWeekMode] = useState(true); // true = semana inteira, false = dia selecionado
+
   // Dados
   const [orders, setOrders] = useState([]);
   const [recipes, setRecipes] = useState([]);
@@ -187,32 +189,74 @@ const ListaComprasTabs = () => {
             </Button>
           </div>
 
-          {/* Resumo da semana */}
-          <div className="grid grid-cols-5 gap-3 mb-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200">
+          {/* Toggle: Dia Selecionado / Semana Inteira */}
+          <div className="flex justify-center gap-3 mb-4">
+            <Button
+              variant={!showWeekMode ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowWeekMode(false)}
+              className={`gap-2 ${
+                !showWeekMode
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "border-green-300 text-green-700 hover:bg-green-50"
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              Dia Selecionado
+            </Button>
+
+            <Button
+              variant={showWeekMode ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowWeekMode(true)}
+              className={`gap-2 ${
+                showWeekMode
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "border-green-300 text-green-700 hover:bg-green-50"
+              }`}
+            >
+              <ShoppingCart className="w-4 h-4" />
+              Semana Inteira
+            </Button>
+          </div>
+
+          {/* Seleção de dias da semana (clicáveis) */}
+          <div className="flex justify-center gap-3 mb-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200">
             {weekDays.map((day) => (
-              <div
+              <Button
                 key={day.dayNumber}
-                className="text-center p-3 bg-white rounded-lg border border-emerald-200 shadow-sm"
+                variant={selectedDay === day.dayNumber && !showWeekMode ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setSelectedDay(day.dayNumber);
+                  setShowWeekMode(false); // Automaticamente muda para modo dia
+                }}
+                disabled={showWeekMode}
+                className={`flex flex-col h-16 w-16 p-1 text-xs transition-all duration-200 ${
+                  selectedDay === day.dayNumber && !showWeekMode
+                    ? "bg-emerald-500 text-white border-emerald-600 shadow-lg transform scale-105"
+                    : showWeekMode
+                    ? "border-emerald-200 text-emerald-500 bg-white opacity-60"
+                    : "border-emerald-300 text-emerald-700 hover:bg-emerald-100 hover:scale-105"
+                }`}
               >
-                <h4 className="font-semibold text-emerald-800 text-sm">
-                  {day.dayShort}
-                </h4>
-                <p className="text-xs text-emerald-600 mt-1">
-                  {day.dayDate}
-                </p>
-              </div>
+                <span className="font-medium">{day.dayShort}</span>
+                <span className="text-xs opacity-80">{day.dayDate}</span>
+              </Button>
             ))}
           </div>
         </CardContent>
       </Card>
 
       {/* Componente de ingredientes consolidados */}
-      <IngredientesConsolidados 
+      <IngredientesConsolidados
         orders={orders}
         recipes={recipes}
         weekDays={weekDays}
         weekNumber={weekNumber}
         year={year}
+        selectedDay={selectedDay}
+        showWeekMode={showWeekMode}
         dataVersion={dataVersion}
       />
     </div>

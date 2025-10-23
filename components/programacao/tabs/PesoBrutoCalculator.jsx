@@ -79,9 +79,15 @@ const PesoBrutoCalculator = ({
               };
             }
 
-            // Definir quantidades e calcular peso bruto total (dados já consolidados)
-            carnesConsolidadas[recipeName][customerName].quantidadePorcoes = quantity;
-            carnesConsolidadas[recipeName][customerName].pesoBrutoTotal = (quantity * pesoBrutoPorPorcao);
+            // CORRIGIDO: Somar quantidades ao invés de substituir
+            carnesConsolidadas[recipeName][customerName].quantidadePorcoes += quantity;
+            carnesConsolidadas[recipeName][customerName].pesoBrutoTotal += (quantity * pesoBrutoPorPorcao);
+
+            // Arredondar para evitar problemas de precisão flutuante
+            carnesConsolidadas[recipeName][customerName].quantidadePorcoes =
+              Math.round(carnesConsolidadas[recipeName][customerName].quantidadePorcoes * 100) / 100;
+            carnesConsolidadas[recipeName][customerName].pesoBrutoTotal =
+              Math.round(carnesConsolidadas[recipeName][customerName].pesoBrutoTotal * 1000) / 1000;
           }
         }
       });
