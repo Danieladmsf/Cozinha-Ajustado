@@ -1,0 +1,2036 @@
+═══════════════════════════════════════════════════════
+  VALIDAÇÃO DE PRECISÃO DAS SUGESTÕES
+═══════════════════════════════════════════════════════
+
+Cliente: Museu (fvewfgqwefgrewg)
+Total de pedidos: 57
+
+───────────────────────────────────────────────────────
+ANÁLISE PEDIDO POR PEDIDO
+───────────────────────────────────────────────────────
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #7:
+  Data: 2025-08-11
+  Semana 33/2025 - Seg (dia 1)
+  Refeições: 10
+  Baseado em: 2 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Tomate:
+     Sugerido: 0 cuba-g
+     Real: 0.2 cuba-g
+     Erro: -100.0%
+     Confiança: 50% (2 amostras)
+
+❌ Arroz Branco:
+     Sugerido: 0.5 cuba-g
+     Real: 0.25 cuba-g
+     Erro: +100.0%
+     Confiança: 50% (2 amostras)
+
+✅ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+❌ Farofa Temperada:
+     Sugerido: 0 cuba-g
+     Real: 0.2 cuba-g
+     Erro: -100.0%
+     Confiança: 50% (2 amostras)
+
+❌ S. Alface:
+     Sugerido: 0 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -100.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #10:
+  Data: 2025-08-14
+  Semana 33/2025 - Qui (dia 4)
+  Refeições: 20
+  Baseado em: 2 pedidos de Qui anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+❌ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 0.5 cuba-g
+     Erro: +100.0%
+     Confiança: 50% (2 amostras)
+
+✅ Farofa Temperada:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 50% (2 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #11:
+  Data: 2025-08-18
+  Semana 34/2025 - Seg (dia 1)
+  Refeições: 10
+  Baseado em: 3 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.1 cuba-g
+     Erro: +150.0%
+     Confiança: 75% (3 amostras)
+
+❌ Arroz Branco:
+     Sugerido: 0.5 cuba-g
+     Real: 0.25 cuba-g
+     Erro: +100.0%
+     Confiança: 75% (3 amostras)
+
+✅ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 75% (3 amostras)
+
+❌ S. Alface:
+     Sugerido: 0.25 cuba-g
+     Real: 0.1 cuba-g
+     Erro: +150.0%
+     Confiança: 50% (2 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #12:
+  Data: 2025-08-18
+  Semana 34/2025 - Seg (dia 1)
+  Refeições: 10
+  Baseado em: 4 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ Arroz Branco:
+     Sugerido: 0.5 cuba-g
+     Real: 0.25 cuba-g
+     Erro: +100.0%
+     Confiança: 100% (4 amostras)
+
+✅ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (4 amostras)
+
+✅ Farofa de cebola:
+     Sugerido: 0.1 kg
+     Real: 0.1 kg
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+✅ R. Cabotiá:
+     Sugerido: 0.2 kg
+     Real: 0.2 kg
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #13:
+  Data: 2025-08-18
+  Semana 34/2025 - Seg (dia 1)
+  Refeições: 10
+  Baseado em: 5 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Tomate:
+     Sugerido: 0 cuba-g
+     Real: 0.1 cuba-g
+     Erro: -100.0%
+     Confiança: 100% (5 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (5 amostras)
+
+✅ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (5 amostras)
+
+❌ S. Alface:
+     Sugerido: 0 cuba-g
+     Real: 0.1 cuba-g
+     Erro: -100.0%
+     Confiança: 100% (4 amostras)
+
+✅ Farofa de cebola:
+     Sugerido: 0.1 kg
+     Real: 0.1 kg
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+❌ Sobrecoxa Assada:
+     Sugerido: 0 kg
+     Real: 10 kg
+     Erro: -100.0%
+     Confiança: 50% (2 amostras)
+
+❌ Calabresa Acebolada:
+     Sugerido: 0 kg
+     Real: 10 kg
+     Erro: -100.0%
+     Confiança: 50% (2 amostras)
+
+✅ R. Cabotiá:
+     Sugerido: 0.2 kg
+     Real: 0.2 kg
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+❌ Nhoque ao Sugo:
+     Sugerido: 0.1 kg
+     Real: 0.5 kg
+     Erro: -80.0%
+     Confiança: 50% (2 amostras)
+
+⚠️ Mix de Repolho:
+     Sugerido: 0.05 kg
+     Real: 0.1 kg
+     Erro: -50.0%
+     Confiança: 50% (2 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #14:
+  Data: 2025-08-19
+  Semana 34/2025 - Ter (dia 2)
+  Refeições: 30
+  Baseado em: 2 pedidos de Ter anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+❌ Farofa Temperada:
+     Sugerido: 0 cuba-g
+     Real: 0.25 cuba-g
+     Erro: -100.0%
+     Confiança: 50% (2 amostras)
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+✅ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #15:
+  Data: 2025-08-20
+  Semana 34/2025 - Qua (dia 3)
+  Refeições: 10
+  Baseado em: 2 pedidos de Qua anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+❌ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 0.3 cuba-g
+     Erro: +66.7%
+     Confiança: 50% (2 amostras)
+
+❌ S. Tomate:
+     Sugerido: 0.5 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +150.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #16:
+  Data: 2025-08-21
+  Semana 34/2025 - Qui (dia 4)
+  Refeições: 20
+  Baseado em: 3 pedidos de Qui anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 75% (3 amostras)
+
+⚠️ Arroz Branco:
+     Sugerido: 0.75 cuba-g
+     Real: 0.5 cuba-g
+     Erro: +50.0%
+     Confiança: 75% (3 amostras)
+
+✅ Farofa Temperada:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 75% (3 amostras)
+
+⚠️ Feijão Preto:
+     Sugerido: 0.25 cuba-g
+     Real: 0.5 cuba-g
+     Erro: -50.0%
+     Confiança: 25% (1 amostras)
+
+❌ S. Alface:
+     Sugerido: 0 cuba-g
+     Real: 0.5 cuba-g
+     Erro: -100.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #17:
+  Data: 2025-08-25
+  Semana 35/2025 - Seg (dia 1)
+  Refeições: 10
+  Baseado em: 6 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Tomate:
+     Sugerido: 0 cuba-g
+     Real: 0.2 cuba-g
+     Erro: -100.0%
+     Confiança: 100% (6 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (6 amostras)
+
+✅ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (6 amostras)
+
+❌ S. Alface:
+     Sugerido: 0 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -100.0%
+     Confiança: 100% (5 amostras)
+
+✅ S. Pepino:
+     Sugerido: 0.1 kg
+     Real: 0.1 kg
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #18:
+  Data: 2025-08-26
+  Semana 35/2025 - Ter (dia 2)
+  Refeições: 30
+  Baseado em: 3 pedidos de Ter anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 75% (3 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 75% (3 amostras)
+
+❌ Farofa Temperada:
+     Sugerido: 0 cuba-g
+     Real: 0.25 cuba-g
+     Erro: -100.0%
+     Confiança: 75% (3 amostras)
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 75% (3 amostras)
+
+✅ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #19:
+  Data: 2025-08-27
+  Semana 35/2025 - Qua (dia 3)
+  Refeições: 35
+  Baseado em: 3 pedidos de Qua anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ Arroz Branco:
+     Sugerido: 0.25 cuba-g
+     Real: 1.5 cuba-g
+     Erro: -83.3%
+     Confiança: 50% (2 amostras)
+
+⚠️ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 1 cuba-g
+     Erro: -50.0%
+     Confiança: 75% (3 amostras)
+
+✅ S. Tomate:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+❌ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 1 cuba-g
+     Erro: -75.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #20:
+  Data: 2025-08-28
+  Semana 35/2025 - Qui (dia 4)
+  Refeições: 30
+  Baseado em: 4 pedidos de Qui anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Tomate:
+     Sugerido: 0.5 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (4 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 1.25 cuba-g
+     Real: 1 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (4 amostras)
+
+✅ Farofa Temperada:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (4 amostras)
+
+✅ Feijão Preto:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+✅ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #21:
+  Data: 2025-09-01
+  Semana 36/2025 - Seg (dia 1)
+  Refeições: 10
+  Baseado em: 7 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Tomate:
+     Sugerido: 0 cuba-g
+     Real: 0.2 cuba-g
+     Erro: -100.0%
+     Confiança: 100% (7 amostras)
+
+✅ Maminha assada:
+     Sugerido: 10 Unid.
+     Real: 10 Unid.
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (7 amostras)
+
+✅ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (7 amostras)
+
+✅ S. Alface:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (6 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #22:
+  Data: 2025-09-02
+  Semana 36/2025 - Ter (dia 2)
+  Refeições: 35
+  Baseado em: 4 pedidos de Ter anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (4 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (4 amostras)
+
+✅ Farofa Temperada:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (4 amostras)
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.25 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (4 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #23:
+  Data: 2025-09-03
+  Semana 36/2025 - Qua (dia 3)
+  Refeições: 40
+  Baseado em: 4 pedidos de Qua anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1.25 cuba-g
+     Real: 1.5 cuba-g
+     Erro: -16.7%
+     Confiança: 75% (3 amostras)
+
+❌ Farofa Temperada:
+     Sugerido: 0 cuba-g
+     Real: 0.2 cuba-g
+     Erro: -100.0%
+     Confiança: 25% (1 amostras)
+
+⚠️ S. Alface:
+     Sugerido: 0.75 cuba-g
+     Real: 1.5 cuba-g
+     Erro: -50.0%
+     Confiança: 100% (4 amostras)
+
+⚠️ S. Tomate:
+     Sugerido: 0.5 cuba-g
+     Real: 0.75 cuba-g
+     Erro: -33.3%
+     Confiança: 75% (3 amostras)
+
+❌ Feijão:
+     Sugerido: 1 cuba-g
+     Real: 0.5 cuba-g
+     Erro: +100.0%
+     Confiança: 50% (2 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #24:
+  Data: 2025-09-04
+  Semana 36/2025 - Qui (dia 4)
+  Refeições: 35
+  Baseado em: 5 pedidos de Qui anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Tomate:
+     Sugerido: 0.5 cuba-g
+     Real: 0.25 cuba-g
+     Erro: +100.0%
+     Confiança: 100% (5 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 1.25 cuba-g
+     Real: 1.5 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (5 amostras)
+
+⚠️ Feijão Preto:
+     Sugerido: 0.75 cuba-g
+     Real: 0.5 cuba-g
+     Erro: +50.0%
+     Confiança: 75% (3 amostras)
+
+⚠️ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 1 cuba-g
+     Erro: -50.0%
+     Confiança: 75% (3 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #25:
+  Data: 2025-09-08
+  Semana 37/2025 - Seg (dia 1)
+  Refeições: 10
+  Baseado em: 8 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.1 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (8 amostras)
+
+⚠️ Arroz Branco:
+     Sugerido: 0.25 cuba-g
+     Real: 0.4 cuba-g
+     Erro: -37.5%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (8 amostras)
+
+✅ S. Alface:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (7 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #26:
+  Data: 2025-09-09
+  Semana 37/2025 - Ter (dia 2)
+  Refeições: 30
+  Baseado em: 5 pedidos de Ter anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (5 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (5 amostras)
+
+✅ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 75% (3 amostras)
+
+❌ Batata Palha:
+     Sugerido: 0.5 kg
+     Real: 1.25 kg
+     Erro: -60.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #27:
+  Data: 2025-09-10
+  Semana 37/2025 - Qua (dia 3)
+  Refeições: 40
+  Baseado em: 5 pedidos de Qua anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Mandioca Frita:
+     Sugerido: 30 Unid.
+     Real: 40 Unid.
+     Erro: -25.0%
+     Confiança: 25% (1 amostras)
+
+❌ Vinagrete:
+     Sugerido: 0 cuba-g
+     Real: 0.4 cuba-g
+     Erro: -100.0%
+     Confiança: 25% (1 amostras)
+
+❌ S. Batatonese:
+     Sugerido: 0.25 cuba-g
+     Real: 1 cuba-g
+     Erro: -75.0%
+     Confiança: 25% (1 amostras)
+
+⚠️ Arroz Branco:
+     Sugerido: 1.25 cuba-g
+     Real: 2 cuba-g
+     Erro: -37.5%
+     Confiança: 100% (4 amostras)
+
+⚠️ Feijão Preto:
+     Sugerido: 0.25 cuba-g
+     Real: 0.5 cuba-g
+     Erro: -50.0%
+     Confiança: 25% (1 amostras)
+
+❌ Farofa Temperada:
+     Sugerido: 0 cuba-g
+     Real: 0.4 cuba-g
+     Erro: -100.0%
+     Confiança: 50% (2 amostras)
+
+⚠️ Feijoada:
+     Sugerido: 0.5 cuba-g
+     Real: 1 cuba-g
+     Erro: -50.0%
+     Confiança: 25% (1 amostras)
+
+❌ S. Alface:
+     Sugerido: 1 cuba-g
+     Real: 0.5 cuba-g
+     Erro: +100.0%
+     Confiança: 100% (5 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #28:
+  Data: 2025-09-11
+  Semana 37/2025 - Qui (dia 4)
+  Refeições: 30
+  Baseado em: 6 pedidos de Qui anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.4 cuba-g
+     Erro: -37.5%
+     Confiança: 100% (6 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (6 amostras)
+
+⚠️ Feijão:
+     Sugerido: 0.75 cuba-g
+     Real: 0.5 cuba-g
+     Erro: +50.0%
+     Confiança: 50% (2 amostras)
+
+✅ Farofa Temperada:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (5 amostras)
+
+✅ S. Beterraba:
+     Sugerido: 0.38 kg
+     Real: 0.4 kg
+     Erro: -5.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #29:
+  Data: 2025-09-15
+  Semana 38/2025 - Seg (dia 1)
+  Refeições: 7
+  Baseado em: 8 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Tomate:
+     Sugerido: 0 cuba-g
+     Real: 0.1 cuba-g
+     Erro: -100.0%
+     Confiança: 100% (8 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (8 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #30:
+  Data: 2025-09-16
+  Semana 38/2025 - Ter (dia 2)
+  Refeições: 30
+  Baseado em: 6 pedidos de Ter anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1.2 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (6 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (6 amostras)
+
+⚠️ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.4 cuba-g
+     Erro: -37.5%
+     Confiança: 100% (5 amostras)
+
+✅ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (4 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #31:
+  Data: 2025-09-17
+  Semana 38/2025 - Qua (dia 3)
+  Refeições: 35
+  Baseado em: 6 pedidos de Qua anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1.25 cuba-g
+     Real: 1.25 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (5 amostras)
+
+❌ Farofa Temperada:
+     Sugerido: 0.25 cuba-g
+     Real: 0.1 cuba-g
+     Erro: +150.0%
+     Confiança: 75% (3 amostras)
+
+✅ S. Alface:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (6 amostras)
+
+❌ Feijão:
+     Sugerido: 0.75 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +275.0%
+     Confiança: 75% (3 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #32:
+  Data: 2025-09-18
+  Semana 38/2025 - Qui (dia 4)
+  Refeições: 30
+  Baseado em: 7 pedidos de Qui anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (7 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (7 amostras)
+
+✅ Feijão Preto:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (4 amostras)
+
+✅ Farofa de cebola com alho:
+     Sugerido: 0.1 null
+     Real: 0.1 null
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+✅ Macarrão ao Sugo:
+     Sugerido: 0.75 cuba-g
+     Real: 1 cuba-g
+     Erro: -25.0%
+     Confiança: 25% (1 amostras)
+
+❌ Mix de alface:
+     Sugerido: 1 null
+     Real: 0.5 null
+     Erro: +100.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #33:
+  Data: 2025-09-22
+  Semana 39/2025 - Seg (dia 1)
+  Refeições: 10
+  Baseado em: 8 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (8 amostras)
+
+✅ S. Alface:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (7 amostras)
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (8 amostras)
+
+❌ Farofa de cebola:
+     Sugerido: 0.1 kg
+     Real: 0.05 kg
+     Erro: +100.0%
+     Confiança: 75% (3 amostras)
+
+❌ Calabresa Acebolada:
+     Sugerido: 3.33 kg
+     Real: 0.25 kg
+     Erro: +1232.0%
+     Confiança: 75% (3 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #34:
+  Data: 2025-09-23
+  Semana 39/2025 - Ter (dia 2)
+  Refeições: 30
+  Baseado em: 7 pedidos de Ter anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (7 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (7 amostras)
+
+❌ Farofa Temperada:
+     Sugerido: 0.25 cuba-g
+     Real: 0.1 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (6 amostras)
+
+⚠️ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.4 cuba-g
+     Erro: -37.5%
+     Confiança: 100% (6 amostras)
+
+✅ Mix de alface:
+     Sugerido: 0.4 null
+     Real: 0.5 null
+     Erro: -20.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #35:
+  Data: 2025-09-24
+  Semana 39/2025 - Qua (dia 3)
+  Refeições: 10
+  Baseado em: 7 pedidos de Qua anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ Arroz Branco:
+     Sugerido: 1.5 cuba-g
+     Real: 0.4 cuba-g
+     Erro: +275.0%
+     Confiança: 100% (6 amostras)
+
+❌ Farofa Temperada:
+     Sugerido: 0.25 cuba-g
+     Real: 0.1 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (4 amostras)
+
+❌ S. Alface:
+     Sugerido: 1 cuba-g
+     Real: 0.5 cuba-g
+     Erro: +100.0%
+     Confiança: 100% (7 amostras)
+
+❌ S. Tomate:
+     Sugerido: 0.5 cuba-g
+     Real: 0.1 cuba-g
+     Erro: +400.0%
+     Confiança: 100% (4 amostras)
+
+✅ Costelinha Assada:
+     Sugerido: 10 kg
+     Real: 10 kg
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+❌ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (4 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #36:
+  Data: 2025-09-25
+  Semana 39/2025 - Qui (dia 4)
+  Refeições: 30
+  Baseado em: 8 pedidos de Qui anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.4 cuba-g
+     Erro: -37.5%
+     Confiança: 100% (8 amostras)
+
+⚠️ S. Macarrão:
+     Sugerido: 0.75 cuba-g
+     Real: 0.5 cuba-g
+     Erro: +50.0%
+     Confiança: 50% (2 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão Preto:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (5 amostras)
+
+❌ Mix de alface:
+     Sugerido: 0.8 null
+     Real: 0.5 null
+     Erro: +60.0%
+     Confiança: 50% (2 amostras)
+
+❌ Purê de cabotiá:
+     Sugerido: 0.5 cuba-g
+     Real: 0.3 cuba-g
+     Erro: +66.7%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #37:
+  Data: 2025-09-29
+  Semana 40/2025 - Seg (dia 1)
+  Refeições: 10
+  Baseado em: 8 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ Arroz Branco:
+     Sugerido: 0.25 cuba-g
+     Real: 0.4 cuba-g
+     Erro: -37.5%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (8 amostras)
+
+✅ S. Alface:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (7 amostras)
+
+❌ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.1 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (8 amostras)
+
+❌ Farofa de espinafre:
+     Sugerido: 0.2 null
+     Real: 0.1 null
+     Erro: +100.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #38:
+  Data: 2025-09-30
+  Semana 40/2025 - Ter (dia 2)
+  Refeições: 30
+  Baseado em: 8 pedidos de Ter anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (7 amostras)
+
+❌ Pernil com Molho Chimichurri:
+     Sugerido: 30 null
+     Real: 0.5 null
+     Erro: +5900.0%
+     Confiança: 25% (1 amostras)
+
+✅ Mix de alface:
+     Sugerido: 0.5 null
+     Real: 0.5 null
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #39:
+  Data: 2025-10-01
+  Semana 40/2025 - Qua (dia 3)
+  Refeições: 35
+  Baseado em: 8 pedidos de Qua anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1.5 cuba-g
+     Real: 1.25 cuba-g
+     Erro: +20.0%
+     Confiança: 100% (7 amostras)
+
+❌ S. Alface:
+     Sugerido: 1 cuba-g
+     Real: 0.5 cuba-g
+     Erro: +100.0%
+     Confiança: 100% (8 amostras)
+
+✅ S. Tomate:
+     Sugerido: 0.5 cuba-g
+     Real: 0.4 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (5 amostras)
+
+❌ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (5 amostras)
+
+❌ Quiabo tostado:
+     Sugerido: 0 cuba-g
+     Real: 0.2 cuba-g
+     Erro: -100.0%
+     Confiança: 25% (1 amostras)
+
+✅ Hambúrguer de Frango:
+     Sugerido: 28 null
+     Real: 35 null
+     Erro: -20.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #40:
+  Data: 2025-10-02
+  Semana 40/2025 - Qui (dia 4)
+  Refeições: 25
+  Baseado em: 8 pedidos de Qui anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (8 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão Preto:
+     Sugerido: 0.5 cuba-g
+     Real: 0.4 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (6 amostras)
+
+✅ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (4 amostras)
+
+❌ Fricassê de Frango:
+     Sugerido: 0.8 null
+     Real: 0.5 null
+     Erro: +60.0%
+     Confiança: 25% (1 amostras)
+
+❌ Batata Palha:
+     Sugerido: 1.75 cuba-g
+     Real: 1 cuba-g
+     Erro: +75.0%
+     Confiança: 25% (1 amostras)
+
+⚠️ Abobrinha assada:
+     Sugerido: 0.2 null
+     Real: 0.4 null
+     Erro: -50.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #41:
+  Data: 2025-10-06
+  Semana 41/2025 - Seg (dia 1)
+  Refeições: 13
+  Baseado em: 8 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+❌ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 2 cuba-g
+     Erro: -87.5%
+     Confiança: 100% (8 amostras)
+
+✅ Farofa de cebola:
+     Sugerido: 0.11 kg
+     Real: 0.1 kg
+     Erro: +10.0%
+     Confiança: 75% (3 amostras)
+
+⚠️ Sobrecoxa Assada:
+     Sugerido: 6.5 kg
+     Real: 13 kg
+     Erro: -50.0%
+     Confiança: 50% (2 amostras)
+
+⚠️ R. Cabotiá:
+     Sugerido: 0.26 kg
+     Real: 0.2 kg
+     Erro: +30.0%
+     Confiança: 50% (2 amostras)
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (8 amostras)
+
+❌ S. Ervilha:
+     Sugerido: 0.3 null
+     Real: 0.1 null
+     Erro: +200.0%
+     Confiança: 25% (1 amostras)
+
+⚠️ Mix de alface:
+     Sugerido: 0.2 null
+     Real: 0.3 null
+     Erro: -33.3%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #42:
+  Data: 2025-10-07
+  Semana 41/2025 - Ter (dia 2)
+  Refeições: 30
+  Baseado em: 8 pedidos de Ter anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+❌ Farofa Temperada:
+     Sugerido: 0.25 cuba-g
+     Real: 0.1 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (6 amostras)
+
+✅ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (5 amostras)
+
+⚠️ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.4 cuba-g
+     Erro: -37.5%
+     Confiança: 100% (7 amostras)
+
+⚠️ Batata Palha:
+     Sugerido: 0.88 kg
+     Real: 1.25 kg
+     Erro: -29.6%
+     Confiança: 50% (2 amostras)
+
+✅ Strogonoff de Frango:
+     Sugerido: 1 kg
+     Real: 1 kg
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #43:
+  Data: 2025-10-08
+  Semana 41/2025 - Qua (dia 3)
+  Refeições: 35
+  Baseado em: 8 pedidos de Qua anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ S. Tomate:
+     Sugerido: 0.5 cuba-g
+     Real: 0.4 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (6 amostras)
+
+✅ Iscas de Frango Grelhado:
+     Sugerido: 0.5 kg
+     Real: 0.5 kg
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 1.5 cuba-g
+     Real: 1.25 cuba-g
+     Erro: +20.0%
+     Confiança: 100% (7 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (6 amostras)
+
+✅ Farofa Temperada:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (4 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #44:
+  Data: 2025-10-09
+  Semana 41/2025 - Qui (dia 4)
+  Refeições: 25
+  Baseado em: 8 pedidos de Qui anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 0.75 cuba-g
+     Real: 1 cuba-g
+     Erro: -25.0%
+     Confiança: 100% (8 amostras)
+
+❌ Feijão Preto:
+     Sugerido: 0.5 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (7 amostras)
+
+⚠️ R. Chuchu:
+     Sugerido: 0.38 kg
+     Real: 0.3 kg
+     Erro: +26.7%
+     Confiança: 25% (1 amostras)
+
+❌ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 0.3 cuba-g
+     Erro: +66.7%
+     Confiança: 100% (5 amostras)
+
+✅ Frango Grelhado:
+     Sugerido: 30 kg
+     Real: 25 kg
+     Erro: +20.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #45:
+  Data: 2025-10-14
+  Semana 42/2025 - Ter (dia 2)
+  Refeições: 30
+  Baseado em: 8 pedidos de Ter anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1.25 cuba-g
+     Erro: -20.0%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+❌ Farofa de espinafre:
+     Sugerido: 0.5 null
+     Real: 0.2 null
+     Erro: +150.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #46:
+  Data: 2025-10-14
+  Semana 42/2025 - Ter (dia 2)
+  Refeições: 25
+  Baseado em: 8 pedidos de Ter anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.4 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (8 amostras)
+
+⚠️ S. Alface:
+     Sugerido: 0.25 cuba-g
+     Real: 0.4 cuba-g
+     Erro: -37.5%
+     Confiança: 100% (5 amostras)
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (7 amostras)
+
+✅ Creme de Milho:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 50% (2 amostras)
+
+⚠️ Farofa de espinafre:
+     Sugerido: 0.3 null
+     Real: 0.2 null
+     Erro: +50.0%
+     Confiança: 50% (2 amostras)
+
+❌ S. Macarrão:
+     Sugerido: 0 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -100.0%
+     Confiança: 25% (1 amostras)
+
+✅ R. Abobrinha:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #47:
+  Data: 2025-10-15
+  Semana 42/2025 - Qua (dia 3)
+  Refeições: 30
+  Baseado em: 8 pedidos de Qua anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1.25 cuba-g
+     Erro: -20.0%
+     Confiança: 100% (8 amostras)
+
+⚠️ Feijão:
+     Sugerido: 0.25 cuba-g
+     Real: 0.4 cuba-g
+     Erro: -37.5%
+     Confiança: 100% (7 amostras)
+
+❌ S. Alface:
+     Sugerido: 0.75 cuba-g
+     Real: 0.4 cuba-g
+     Erro: +87.5%
+     Confiança: 100% (7 amostras)
+
+❌ S. Tomate:
+     Sugerido: 0.5 cuba-g
+     Real: 0.3 cuba-g
+     Erro: +66.7%
+     Confiança: 100% (6 amostras)
+
+❌ S. Rúcula:
+     Sugerido: 0 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -100.0%
+     Confiança: 25% (1 amostras)
+
+❌ Batata Palito:
+     Sugerido: 0.8 null
+     Real: 0.5 null
+     Erro: +60.0%
+     Confiança: 25% (1 amostras)
+
+✅ Tiras de carne xadrez:
+     Sugerido: 0.75 cuba-g
+     Real: 1 cuba-g
+     Erro: -25.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #48:
+  Data: 2025-10-16
+  Semana 42/2025 - Qui (dia 4)
+  Refeições: 25
+  Baseado em: 8 pedidos de Qui anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 0.4 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (5 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão Preto:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (7 amostras)
+
+✅ Filé de Frango Acebolado:
+     Sugerido: 25 Unid.
+     Real: 25 Unid.
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #49:
+  Data: 2025-10-20
+  Semana 43/2025 - Seg (dia 1)
+  Refeições: 12
+  Baseado em: 8 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+❌ Feijão:
+     Sugerido: 0.75 cuba-g
+     Real: 0.3 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (8 amostras)
+
+❌ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.1 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (8 amostras)
+
+❌ Mix de alface:
+     Sugerido: 0.2 null
+     Real: 0.1 null
+     Erro: +100.0%
+     Confiança: 50% (2 amostras)
+
+❌ S. Cenoura Ralada:
+     Sugerido: 0 cuba-g
+     Real: 0.2 cuba-g
+     Erro: -100.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #50:
+  Data: 2025-10-21
+  Semana 43/2025 - Ter (dia 2)
+  Refeições: 30
+  Baseado em: 8 pedidos de Ter anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (7 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1.25 cuba-g
+     Erro: -20.0%
+     Confiança: 100% (8 amostras)
+
+⚠️ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 1 cuba-g
+     Erro: -50.0%
+     Confiança: 100% (8 amostras)
+
+❌ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 0.3 cuba-g
+     Erro: +66.7%
+     Confiança: 100% (5 amostras)
+
+✅ Batata Rústica:
+     Sugerido: 90 Unid.
+     Real: 90 Unid.
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #51:
+  Data: 2025-10-22
+  Semana 43/2025 - Qua (dia 3)
+  Refeições: 35
+  Baseado em: 8 pedidos de Qua anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Alface:
+     Sugerido: 1 cuba-g
+     Real: 0.4 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (7 amostras)
+
+❌ S. Tomate:
+     Sugerido: 0.5 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (6 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 1.25 cuba-g
+     Real: 1.25 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (7 amostras)
+
+✅ Farofa Temperada:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (5 amostras)
+
+✅ Macarrão ao Sugo:
+     Sugerido: 1 cuba-g
+     Real: 1.25 cuba-g
+     Erro: -20.0%
+     Confiança: 25% (1 amostras)
+
+✅ Iscas de Frango Grelhado:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #52:
+  Data: 2025-10-22
+  Semana 43/2025 - Qua (dia 3)
+  Refeições: 35
+  Baseado em: 8 pedidos de Qua anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Alface:
+     Sugerido: 0.75 cuba-g
+     Real: 0.4 cuba-g
+     Erro: +87.5%
+     Confiança: 100% (7 amostras)
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (6 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 1.25 cuba-g
+     Real: 1 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (7 amostras)
+
+✅ Macarrão ao Sugo:
+     Sugerido: 1 cuba-g
+     Real: 1.25 cuba-g
+     Erro: -20.0%
+     Confiança: 50% (2 amostras)
+
+✅ Iscas de Frango Grelhado:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 50% (2 amostras)
+
+✅ Bife à milanesa:
+     Sugerido: 35 null
+     Real: 35 null
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+✅ R. Cenoura:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 25% (1 amostras)
+
+⚠️ Guacamole:
+     Sugerido: 0.3 null
+     Real: 0.2 null
+     Erro: +50.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #53:
+  Data: 2025-10-23
+  Semana 43/2025 - Qui (dia 4)
+  Refeições: 25
+  Baseado em: 8 pedidos de Qui anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (6 amostras)
+
+✅ Batata Palha:
+     Sugerido: 1.25 cuba-g
+     Real: 1 cuba-g
+     Erro: +25.0%
+     Confiança: 50% (2 amostras)
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão Preto:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (7 amostras)
+
+✅ S. Pepino:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 25% (1 amostras)
+
+⚠️ Mix de alface:
+     Sugerido: 0.6 null
+     Real: 0.4 null
+     Erro: +50.0%
+     Confiança: 75% (3 amostras)
+
+❌ Farofa com couve:
+     Sugerido: 0 cuba-g
+     Real: 0.2 cuba-g
+     Erro: -100.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #54:
+  Data: 2025-10-27
+  Semana 44/2025 - Seg (dia 1)
+  Refeições: 10
+  Baseado em: 8 pedidos de Seg anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.1 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (8 amostras)
+
+⚠️ Arroz Branco:
+     Sugerido: 0.25 cuba-g
+     Real: 0.5 cuba-g
+     Erro: -50.0%
+     Confiança: 100% (8 amostras)
+
+❌ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +150.0%
+     Confiança: 100% (8 amostras)
+
+✅ Mandioca Cremosa:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 25% (1 amostras)
+
+❌ Farofa de ovos:
+     Sugerido: 0.25 cuba-g
+     Real: 0.1 cuba-g
+     Erro: +150.0%
+     Confiança: 25% (1 amostras)
+
+✅ Mix de alface:
+     Sugerido: 0.2 null
+     Real: 0.2 null
+     Erro: 0.0%
+     Confiança: 75% (3 amostras)
+
+✅ Cupim no forno:
+     Sugerido: 7.2 null
+     Real: 6 null
+     Erro: +20.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #55:
+  Data: 2025-10-28
+  Semana 44/2025 - Ter (dia 2)
+  Refeições: 25
+  Baseado em: 8 pedidos de Ter anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Arroz Branco:
+     Sugerido: 1 cuba-g
+     Real: 1 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão:
+     Sugerido: 0.5 cuba-g
+     Real: 0.5 cuba-g
+     Erro: 0.0%
+     Confiança: 100% (8 amostras)
+
+⚠️ S. Alface:
+     Sugerido: 0.25 cuba-g
+     Real: 0.4 cuba-g
+     Erro: -37.5%
+     Confiança: 100% (6 amostras)
+
+✅ Tomate cereja:
+     Sugerido: 0.5 cuba-g
+     Real: 0.4 cuba-g
+     Erro: +25.0%
+     Confiança: 25% (1 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #56:
+  Data: 2025-10-29
+  Semana 44/2025 - Qua (dia 3)
+  Refeições: 35
+  Baseado em: 8 pedidos de Qua anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ S. Alface:
+     Sugerido: 0.5 cuba-g
+     Real: 0.3 cuba-g
+     Erro: +66.7%
+     Confiança: 100% (7 amostras)
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.3 cuba-g
+     Erro: -16.7%
+     Confiança: 100% (6 amostras)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pedido de Teste #57:
+  Data: 2025-10-30
+  Semana 44/2025 - Qui (dia 4)
+  Refeições: 20
+  Baseado em: 8 pedidos de Qui anteriores
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ Arroz Branco:
+     Sugerido: 0.75 cuba-g
+     Real: 0.5 cuba-g
+     Erro: +50.0%
+     Confiança: 100% (8 amostras)
+
+✅ Feijão Preto:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (7 amostras)
+
+✅ S. Tomate:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 100% (6 amostras)
+
+⚠️ Mix de alface:
+     Sugerido: 0.4 null
+     Real: 0.3 null
+     Erro: +33.3%
+     Confiança: 100% (4 amostras)
+
+✅ R. Cabotiá:
+     Sugerido: 0.25 cuba-g
+     Real: 0.2 cuba-g
+     Erro: +25.0%
+     Confiança: 25% (1 amostras)
+
+❌ Macarrão Caprese:
+     Sugerido: 1 cuba-g
+     Real: 0.5 cuba-g
+     Erro: +100.0%
+     Confiança: 25% (1 amostras)
+
+
+═══════════════════════════════════════════════════════
+  ESTATÍSTICAS GERAIS
+═══════════════════════════════════════════════════════
+
+📊 Comparações realizadas: 259
+
+Erro médio: 74.5%
+Erro mínimo: 0.0%
+Erro máximo: 5900.0%
+
+Precisão por Faixa:
+  ✅ Excelente (≤10%): 77 (29.7%)
+  ✅ Bom (10-25%): 65 (25.1%)
+  ⚠️  Regular (25-50%): 36 (13.9%)
+  ❌ Ruim (>50%): 81 (31.3%)
+
+Top 10 Receitas com Maior Erro:
+  1. Pernil com Molho Chimichurri: 5900.0% (1x)
+  2. Calabresa Acebolada: 666.0% (2x)
+  3. S. Ervilha: 200.0% (1x)
+  4. Farofa de ovos: 150.0% (1x)
+  5. Vinagrete: 100.0% (1x)
+  6. Quiabo tostado: 100.0% (1x)
+  7. S. Rúcula: 100.0% (1x)
+  8. S. Cenoura Ralada: 100.0% (1x)
+  9. Farofa com couve: 100.0% (1x)
+  10. Macarrão Caprese: 100.0% (1x)
+
+═══════════════════════════════════════════════════════

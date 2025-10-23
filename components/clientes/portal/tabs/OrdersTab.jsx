@@ -7,12 +7,13 @@ import { DecimalInput } from "@/components/ui/decimal-input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Utensils, CheckCircle } from "lucide-react";
-import { 
-  parseQuantity as utilParseQuantity, 
-  formattedQuantity as utilFormattedQuantity, 
+import {
+  parseQuantity as utilParseQuantity,
+  formattedQuantity as utilFormattedQuantity,
   formatCurrency as utilFormatCurrency,
   formatWeight as utilFormatWeight
 } from "@/components/utils/orderUtils";
+import { convertCubaGToKitchenFormat } from "@/lib/cubaConversionUtils";
 import NoteViewer from '@/components/shared/NoteViewer';
 import { CategoryLogic } from "@/components/utils/categoryLogic";
 import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
@@ -225,15 +226,22 @@ const OrdersTab = ({
                             </div>
                           </td>
                           {/* Coluna de Sugestão de Quantidade */}
-                          <td className="p-2 text-center min-w-[60px]">
+                          <td className="p-2 text-center min-w-[100px]">
                             {item.suggestion?.has_suggestion ? (
-                              <span className="font-medium text-xs text-amber-600">
-                                {(() => {
-                                  const originalValue = parseFloat(item.suggestion.suggested_base_quantity || 0);
-                                  const value = utilFormattedQuantity(originalValue);
-                                  return value;
-                                })()}
-                              </span>
+                              <div className="flex flex-col items-center gap-0.5">
+                                <span className="font-bold text-sm text-amber-700">
+                                  {(() => {
+                                    const originalValue = parseFloat(item.suggestion.suggested_base_quantity || 0);
+                                    const value = utilFormattedQuantity(originalValue);
+                                    return value;
+                                  })()}
+                                </span>
+                                {item.unit_type?.toLowerCase() === 'cuba-g' && (
+                                  <span className="text-xs text-amber-600 font-semibold">
+                                    ({convertCubaGToKitchenFormat(parseFloat(item.suggestion.suggested_base_quantity || 0))})
+                                  </span>
+                                )}
+                              </div>
                             ) : (
                               <span className="text-gray-400">-</span>
                             )}

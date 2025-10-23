@@ -41,12 +41,19 @@ import EmbalagemTab from './tabs/EmbalagemTab';
 
 // Função utilitária centralizada para formatação de quantidade
 export const formatQuantityForDisplay = (quantity, unitType, useKitchenFormat) => {
+  // Validar quantidade - garantir que é um número válido
+  let validQuantity = quantity ?? 0;
+
+  // Arredondar para evitar problemas de precisão flutuante
+  validQuantity = Math.round(validQuantity * 100) / 100;
+
   if (useKitchenFormat && unitType?.toLowerCase() === 'cuba-g') {
-    return convertQuantityForKitchen(quantity, unitType);
+    return convertQuantityForKitchen(validQuantity, unitType);
   } else {
     // Formato padrão
-    const formattedQty = quantity ? String(quantity).replace('.', ',') : '';
-    return `${formattedQty}${unitType ? ` ${unitType}` : ''}`;
+    const formattedQty = String(validQuantity).replace('.', ',');
+    const unit = unitType || 'cuba-g'; // Default para cuba-g se não tiver unidade
+    return `${formattedQty} ${unit}`;
   }
 };
 
@@ -226,12 +233,20 @@ const ProgramacaoCozinhaTabs = () => {
 
   // Função para formatar quantidade baseada no modo selecionado
   const formatQuantityDisplay = (item) => {
+    // Validar quantidade - garantir que é um número válido
+    let quantity = item.quantity ?? 0;
+
+    // Arredondar para evitar problemas de precisão flutuante
+    quantity = Math.round(quantity * 100) / 100;
+
     if (globalKitchenFormat && item.unit_type?.toLowerCase() === 'cuba-g') {
-      const convertedQuantity = convertQuantityForKitchen(item.quantity, item.unit_type);
+      const convertedQuantity = convertQuantityForKitchen(quantity, item.unit_type);
       return `${convertedQuantity} –`;
     } else {
-      // Formato padrão
-      return `${(item.quantity ? String(item.quantity).replace('.', ',') : '')}${item.unit_type ? ` ${item.unit_type}` : ''} –`;
+      // Formato padrão - substituir ponto por vírgula
+      const formattedQty = String(quantity).replace('.', ',');
+      const unit = item.unit_type || 'cuba-g'; // Default para cuba-g se não tiver unidade
+      return `${formattedQty} ${unit} –`;
     }
   };
 

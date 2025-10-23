@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Utensils, ChefHat, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { parseQuantity } from "@/components/utils/orderUtils";
 
 // Utils
 import { formatQuantityForDisplay } from "../ProgramacaoCozinhaTabs";
@@ -45,11 +46,11 @@ const AcougueTab = ({
       // Processar cada item do pedido
       order.items?.forEach(item => {
         const recipe = recipes.find(r => r.id === item.recipe_id);
-        
+
         // Verificar se é item de carne pela categoria
         if (recipe && recipe.category?.toLowerCase().includes('carne')) {
           const recipeName = recipe.name;
-          const quantity = item.quantity;
+          const quantity = parseQuantity(item.quantity); // Normalizar quantidade
           const unitType = item.unit_type || recipe.unit_type;
 
           // Usar o nome da receita como chave (dinâmico)
@@ -67,8 +68,13 @@ const AcougueTab = ({
             };
           }
 
-          // Definir quantidade (dados já consolidados pelo hook principal)
-          carnesPorReceita[recipeName][customerName].quantity = quantity;
+          // CORRIGIDO: Somar quantidade ao invés de substituir
+          carnesPorReceita[recipeName][customerName].quantity += quantity;
+
+          // Arredondar para evitar problemas de precisão flutuante
+          carnesPorReceita[recipeName][customerName].quantity =
+            Math.round(carnesPorReceita[recipeName][customerName].quantity * 100) / 100;
+
           carnesPorReceita[recipeName][customerName].items.push({
             recipeName,
             quantity,
@@ -86,11 +92,14 @@ const AcougueTab = ({
   const calcularTotais = (clientes) => {
     let totalQuantity = 0;
     let unitType = '';
-    
+
     Object.values(clientes).forEach(data => {
       totalQuantity += data.quantity;
       if (!unitType) unitType = data.unitType;
     });
+
+    // Arredondar para evitar problemas de precisão flutuante (ex: 2.8000000000000003)
+    totalQuantity = Math.round(totalQuantity * 100) / 100;
 
     return { totalQuantity, unitType };
   };

@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { convertCubaGToKitchenFormat } from "@/lib/cubaConversionUtils";
 
 export default function CustomerOrderItems({
   items,
@@ -22,7 +23,7 @@ export default function CustomerOrderItems({
   calculateTotalWeight,
   formatCurrency,
   formattedQuantity,
-  parseQuantity,
+  parseQuantity, // ✅ Já recebido como prop
   quantityInputRefs,
   portioningInputRefs,
   showSuggestions = true,
@@ -78,8 +79,13 @@ export default function CustomerOrderItems({
                             </span>
                           )}
                           {showSuggestions && item.suggested_quantity > 0 && (
-                            <span className="bg-green-100 text-green-600 px-2 py-0.5 rounded">
+                            <span className="bg-green-100 text-green-700 px-2 py-1 rounded font-medium">
                               Sugestão: {formattedQuantity(item.suggested_quantity)}
+                              {item.unit_type?.toLowerCase() === 'cuba-g' && (
+                                <span className="text-xs ml-1 font-semibold">
+                                  ({convertCubaGToKitchenFormat(parseQuantity(item.suggested_quantity))})
+                                </span>
+                              )}
                             </span>
                           )}
                         </div>
@@ -298,15 +304,22 @@ export default function CustomerOrderItems({
                       </td>
                       {showSuggestions && (
                         <td className="px-3 py-3 whitespace-nowrap text-sm text-center">
-                          <span className={cn("px-2 py-1 rounded-full text-xs font-medium", 
-                            (item.suggested_quantity !== null && item.suggested_quantity !== undefined && item.suggested_quantity > 0) 
-                            ? "bg-green-100 text-green-700" 
-                            : "bg-slate-100 text-slate-400"
-                          )}>
-                            {(item.suggested_quantity !== null && item.suggested_quantity !== undefined && item.suggested_quantity > 0)
-                                ? formattedQuantity(item.suggested_quantity)
-                                : '-'}
-                          </span>
+                          {(item.suggested_quantity !== null && item.suggested_quantity !== undefined && item.suggested_quantity > 0) ? (
+                            <div className="flex flex-col items-center gap-1">
+                              <span className="bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-sm font-bold">
+                                {formattedQuantity(item.suggested_quantity)}
+                              </span>
+                              {item.unit_type?.toLowerCase() === 'cuba-g' && (
+                                <span className="text-xs text-green-600 font-semibold">
+                                  ({convertCubaGToKitchenFormat(parseQuantity(item.suggested_quantity))})
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="bg-slate-100 text-slate-400 px-2 py-1 rounded-full text-xs font-medium">
+                              -
+                            </span>
+                          )}
                         </td>
                       )}
                       <td className="px-3 py-3 whitespace-nowrap text-sm text-slate-600 text-right font-bold">

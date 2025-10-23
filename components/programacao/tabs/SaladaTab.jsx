@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Leaf, Calendar, ChefHat } from "lucide-react";
 import { format } from "date-fns";
+import { parseQuantity } from "@/components/utils/orderUtils";
 
 // Utils
 import { formatQuantityForDisplay } from "../ProgramacaoCozinhaTabs";
@@ -42,10 +43,10 @@ const SaladaTab = ({
       // Processar cada item do pedido
       order.items?.forEach(item => {
         const recipe = recipes.find(r => r.id === item.recipe_id);
-        
+
         if (recipe && recipe.category?.toLowerCase().includes('salada')) {
           const recipeName = recipe.name;
-          const quantity = item.quantity;
+          const quantity = parseQuantity(item.quantity); // Normalizar quantidade
           const unitType = item.unit_type || recipe.unit_type;
 
           // Usar o nome da receita diretamente (totalmente dinâmico)
@@ -63,8 +64,13 @@ const SaladaTab = ({
             };
           }
 
-          // Definir quantidade (dados já consolidados pelo hook principal)
-          saladaIngredientes[recipeName][customerName].quantity = quantity;
+          // CORRIGIDO: Somar quantidade ao invés de substituir
+          saladaIngredientes[recipeName][customerName].quantity += quantity;
+
+          // Arredondar para evitar problemas de precisão flutuante
+          saladaIngredientes[recipeName][customerName].quantity =
+            Math.round(saladaIngredientes[recipeName][customerName].quantity * 100) / 100;
+
           saladaIngredientes[recipeName][customerName].items.push({
             recipeName,
             quantity,

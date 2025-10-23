@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChefHat, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { parseQuantity } from "@/components/utils/orderUtils";
 
 // Utils
 import { formatQuantityForDisplay } from "../ProgramacaoCozinhaTabs";
@@ -46,7 +47,7 @@ const CozinhaTab = ({
       // Processar cada item do pedido
       order.items?.forEach(item => {
         const recipe = recipes.find(r => r.id === item.recipe_id);
-        
+
         // Verificar se é item das categorias de cozinha
         if (recipe) {
           const category = recipe.category?.toLowerCase();
@@ -62,7 +63,7 @@ const CozinhaTab = ({
 
           if (targetCategory) {
             const recipeName = recipe.name;
-            const quantity = item.quantity;
+            const quantity = parseQuantity(item.quantity); // Normalizar quantidade
             const unitType = item.unit_type || recipe.unit_type;
 
             // Inicializar receita na categoria se não existir
@@ -80,8 +81,13 @@ const CozinhaTab = ({
               };
             }
 
-            // Definir quantidade (dados já consolidados pelo hook principal)
-            categorias[targetCategory][recipeName][customerName].quantity = quantity;
+            // CORRIGIDO: Somar quantidade ao invés de substituir
+            categorias[targetCategory][recipeName][customerName].quantity += quantity;
+
+            // Arredondar para evitar problemas de precisão flutuante
+            categorias[targetCategory][recipeName][customerName].quantity =
+              Math.round(categorias[targetCategory][recipeName][customerName].quantity * 100) / 100;
+
             categorias[targetCategory][recipeName][customerName].items.push({
               recipeName,
               quantity,
@@ -103,11 +109,14 @@ const CozinhaTab = ({
   const calcularTotais = (clientes) => {
     let totalQuantity = 0;
     let unitType = '';
-    
+
     Object.values(clientes).forEach(data => {
       totalQuantity += data.quantity;
       if (!unitType) unitType = data.unitType;
     });
+
+    // Arredondar para evitar problemas de precisão flutuante (ex: 2.8000000000000003)
+    totalQuantity = Math.round(totalQuantity * 100) / 100;
 
     return { totalQuantity, unitType };
   };
