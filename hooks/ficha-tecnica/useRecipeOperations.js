@@ -63,20 +63,23 @@ export function useRecipeOperations() {
     setPreparationsData(prev => {
       const newPreparations = [...prev];
       if (newPreparations[prepIndex]) {
+        // CORRIGIDO: Spread primeiro, depois garantir campos numéricos
         const newIngredient = {
           id: String(Date.now()),
+          ...ingredient,
           name: ingredient.name,
-          weight_raw: '',
-          weight_frozen: '',
-          weight_thawed: '',
-          weight_clean: '',
-          weight_cooked: '',
-          weight_portioned: '',
+          // Garantir que campos de peso sejam numéricos (0 se vazio)
+          weight_raw: ingredient.weight_raw || 0,
+          weight_frozen: ingredient.weight_frozen || 0,
+          weight_thawed: ingredient.weight_thawed || 0,
+          weight_clean: ingredient.weight_clean || 0,
+          weight_cooked: ingredient.weight_cooked || 0,
+          weight_portioned: ingredient.weight_portioned || 0,
+          weight_pre_cooking: ingredient.weight_pre_cooking || 0,
           current_price: ingredient.current_price || 0,
           unit: ingredient.unit || 'kg',
-          ...ingredient
         };
-        
+
         newPreparations[prepIndex].ingredients = [
           ...(newPreparations[prepIndex].ingredients || []),
           newIngredient
@@ -90,9 +93,13 @@ export function useRecipeOperations() {
     setPreparationsData(prev => {
       const newPreparations = [...prev];
       if (newPreparations[prepIndex]?.ingredients?.[ingredientIndex]) {
+        // CORRIGIDO: Converter strings vazias para 0 em campos de peso
+        const isWeightField = field.startsWith('weight_');
+        const normalizedValue = isWeightField && value === '' ? 0 : value;
+
         newPreparations[prepIndex].ingredients[ingredientIndex] = {
           ...newPreparations[prepIndex].ingredients[ingredientIndex],
-          [field]: value
+          [field]: normalizedValue
         };
       }
       return newPreparations;
@@ -166,19 +173,34 @@ export function useRecipeOperations() {
     try {
       const response = await fetch(`/api/recipes?id=${recipeId}`);
       const result = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error);
       }
-      
+
       const recipe = result.data;
-      
+
       if (!recipe) {
         throw new Error('Receita não encontrada');
       }
-      
-      return { 
-        success: true, 
+
+      // CORRIGIDO: Normalizar campos de peso vazios em ingredientes (Firestore omite strings vazias)
+      const normalizedPreparations = (recipe.preparations || []).map(prep => ({
+        ...prep,
+        ingredients: (prep.ingredients || []).map(ing => ({
+          ...ing,
+          weight_raw: ing.weight_raw || 0,
+          weight_frozen: ing.weight_frozen || 0,
+          weight_thawed: ing.weight_thawed || 0,
+          weight_clean: ing.weight_clean || 0,
+          weight_cooked: ing.weight_cooked || 0,
+          weight_portioned: ing.weight_portioned || 0,
+          weight_pre_cooking: ing.weight_pre_cooking || 0,
+        }))
+      }));
+
+      return {
+        success: true,
         recipe: {
           id: recipe.id,
           name: recipe.name || '',
@@ -193,8 +215,8 @@ export function useRecipeOperations() {
           cost_per_kg_yield: recipe.cost_per_kg_yield || 0,
           active: recipe.active !== undefined ? recipe.active : true,
           instructions: recipe.instructions || ''
-        }, 
-        preparations: recipe.preparations || [] 
+        },
+        preparations: normalizedPreparations
       };
     } catch (error) {
       toast({
@@ -202,7 +224,7 @@ export function useRecipeOperations() {
         description: "Ocorreu um erro ao carregar a receita: " + error.message,
         variant: "destructive"
       });
-      
+
       return { success: false, error };
     }
   }, [toast]);
