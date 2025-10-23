@@ -1496,16 +1496,47 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
         }));
 
       } else {
-        const newOrder = await Order.create(orderData);
+        // ✅ VERIFICAÇÃO DEFENSIVA para prevenir duplicatas
+        // Antes de criar, consulta novamente para garantir que nenhum pedido foi criado
+        // enquanto o usuário estava na página (corrige race condition).
+        const freshOrders = await Order.query([
+          { field: 'customer_id', operator: '==', value: customer.id },
+          { field: 'week_number', operator: '==', value: weekNumber },
+          { field: 'year', operator: '==', value: year },
+          { field: 'day_of_week', operator: '==', value: selectedDay }
+        ]);
 
-        const createTime = Date.now() - startTime;
+        if (freshOrders.length > 0) {
+          // Duplicata encontrada! Em vez de criar, atualiza o pedido mais recente.
+          const getOrderTimestamp = (o) => {
+            const date = o.updatedAt || o.createdAt;
+            if (!date) return 0;
+            return date.toMillis ? date.toMillis() : new Date(date).getTime();
+          };
+          freshOrders.sort((a, b) => getOrderTimestamp(b) - getOrderTimestamp(a));
+          const latestOrder = freshOrders[0];
+          
+          await Order.update(latestOrder.id, orderData);
 
-        setExistingOrders(prev => ({
-          ...prev,
-          [selectedDay]: newOrder
-        }));
-        setGeneralNotes(orderData.general_notes); // Sincronizar estado da UI
-        toast({ description: "Pedido enviado com sucesso!" });
+          // Atualização otimista da UI
+          const updatedOrder = { ...latestOrder, ...orderData };
+          setExistingOrders(prev => ({
+            ...prev,
+            [selectedDay]: updatedOrder
+          }));
+          toast({ description: "Pedido atualizado com sucesso (duplicata evitada)." });
+
+        } else {
+          // Nenhum pedido encontrado, seguro para criar.
+          const newOrder = await Order.create(orderData);
+
+          setExistingOrders(prev => ({
+            ...prev,
+            [selectedDay]: newOrder
+          }));
+          setGeneralNotes(orderData.general_notes);
+          toast({ description: "Pedido enviado com sucesso!" });
+        }
       }
       
       // REMOVIDO: A atualização agora é otimista para evitar race conditions com o DB

@@ -21,35 +21,48 @@ export const useOrderConsolidation = (orders, recipes) => {
   const ordersByCustomer = useMemo(() => {
     if (!orders || !Array.isArray(orders)) return [];
 
-    const grouped = {};
-    
+    // De-duplicate orders for the same customer, keeping only the most recent one.
+    // This handles cases where multiple orders exist for the same customer on the selected day.
+    const latestOrdersMap = new Map();
     orders.forEach(order => {
+      const key = order.customer_id;
+      const existing = latestOrdersMap.get(key);
+
+      const getOrderTimestamp = (o) => {
+        const date = o.updatedAt || o.createdAt;
+        if (!date) return 0;
+        // Handle both Firestore Timestamp objects and ISO strings
+        return date.toMillis ? date.toMillis() : new Date(date).getTime();
+      };
+
+      if (!existing || getOrderTimestamp(order) > getOrderTimestamp(existing)) {
+        latestOrdersMap.set(key, order);
+      }
+    });
+    const latestOrders = Array.from(latestOrdersMap.values());
+
+    // Now, group the de-duplicated orders. Since there's only one order per customer,
+    // the grouping is simpler.
+    const grouped = {};
+    latestOrders.forEach(order => {
       if (!order.customer_id || !order.customer_name) {
         return;
       }
 
       if (!grouped[order.customer_id]) {
+        const originalAmount = validateAmount(order.original_amount);
+        const totalAmount = validateAmount(order.total_amount);
+        const finalAmount = originalAmount > 0 ? originalAmount : totalAmount;
+
         grouped[order.customer_id] = {
           customer_id: order.customer_id,
           customer_name: order.customer_name,
-          orders: [],
-          total_meals: 0,
-          total_amount: 0,
-          total_items: 0
+          orders: [order], // Array with the single latest order
+          total_meals: parseQuantity(order.total_meals_expected),
+          total_amount: finalAmount,
+          total_items: parseQuantity(order.total_items)
         };
       }
-      
-      const customerGroup = grouped[order.customer_id];
-      customerGroup.orders.push(order);
-      customerGroup.total_meals += parseQuantity(order.total_meals_expected);
-      
-      // Validação rigorosa de valores monetários
-      const originalAmount = validateAmount(order.original_amount);
-      const totalAmount = validateAmount(order.total_amount);
-      const finalAmount = originalAmount > 0 ? originalAmount : totalAmount;
-      
-      customerGroup.total_amount += finalAmount;
-      customerGroup.total_items += parseQuantity(order.total_items);
     });
     
     return Object.values(grouped);
@@ -82,31 +95,33 @@ export const useOrderConsolidation = (orders, recipes) => {
       // Se há apenas 1 pedido, não precisa consolidar - apenas agrupa por categoria
       if (customerOrders.length === 1) {
         const order = customerOrders[0];
-        
+
         if (!order.items || order.items.length === 0) {
           return {};
         }
-        
-        // Adicionar informações de categoria aos itens
+
+        // Adicionar informações de categoria aos itens e normalizar quantidades
         const itemsWithCategory = order.items.map(item => {
           const recipe = recipes?.find(r => r.id === item.recipe_id);
           const correctUnitType = getCorrectUnitType(item, recipe);
-          
+
           return {
             ...item,
             category: recipe?.category || item.category || 'Outros',
-            unit_type: correctUnitType
+            unit_type: correctUnitType,
+            quantity: parseQuantity(item.quantity), // CORRIGIDO: Normalizar quantidade
+            recipe_name: recipe?.name || item.recipe_name // Garantir nome da receita
           };
         });
-        
+
         const groupedByCategory = groupItemsByCategory(itemsWithCategory);
         const orderedCategories = getOrderedCategories(groupedByCategory);
-        
+
         const consolidatedItems = {};
         orderedCategories.forEach(({ name, data }) => {
           consolidatedItems[name] = data.items;
         });
-        
+
         return consolidatedItems;
       }
 
@@ -115,39 +130,55 @@ export const useOrderConsolidation = (orders, recipes) => {
       
       customerOrders.forEach((order) => {
         if (!order.items || !Array.isArray(order.items)) return;
-        
+
         order.items.forEach((item) => {
           if (!item.recipe_id && !item.recipe_name) return;
-          
-          const key = item.unique_id || `${item.recipe_id}_${item.recipe_name}`;
-          
+
+          // CORRIGIDO: Sempre usar recipe_id como chave para consolidação correta
+          // unique_id é específico de cada pedido e causa duplicatas
+          const key = item.recipe_id || item.recipe_name;
+
           if (itemsMap.has(key)) {
             const existing = itemsMap.get(key);
             const recipe = recipes?.find(r => r.id === item.recipe_id);
             const correctUnitType = getCorrectUnitType(item, recipe);
             const addQuantity = parseQuantity(item.quantity);
-            
+
             // Verificar se unidades são compatíveis após sincronização
             if (existing.unit_type !== correctUnitType) {
               existing.unit_type = correctUnitType;
             }
-            
+
             existing.quantity += addQuantity;
             existing.total_price += validateAmount(item.total_price);
+
+            // Concatenar notas se existirem
+            if (item.notes && item.notes.trim()) {
+              if (existing.notes && existing.notes.trim()) {
+                // Evitar duplicar a mesma nota
+                if (!existing.notes.includes(item.notes.trim())) {
+                  existing.notes = `${existing.notes}; ${item.notes.trim()}`;
+                }
+              } else {
+                existing.notes = item.notes.trim();
+              }
+            }
           } else {
             const recipe = recipes?.find(r => r.id === item.recipe_id);
-            
+
             // Para consolidação: sincronizar com ficha técnica atual
             const correctUnitType = getCorrectUnitType(item, recipe);
-            
+
             const consolidatedItem = {
               ...item,
               category: recipe?.category || item.category || 'Outros',
               quantity: parseQuantity(item.quantity),
               total_price: validateAmount(item.total_price),
-              unit_type: correctUnitType // Usar unidade sincronizada
+              unit_type: correctUnitType, // Usar unidade sincronizada
+              recipe_name: recipe?.name || item.recipe_name, // Garantir nome da receita
+              unique_id: key // Usar recipe_id como unique_id consolidado
             };
-            
+
             itemsMap.set(key, consolidatedItem);
           }
         });
