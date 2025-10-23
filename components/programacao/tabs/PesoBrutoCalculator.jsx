@@ -46,9 +46,22 @@ const PesoBrutoCalculator = ({
   const calculatePesoBruto = useMemo(() => {
     if (!orders.length || !recipes.length) return {};
 
-    // Filtrar pedidos do dia selecionado
-    const dayOrders = orders.filter(order => order.day_of_week === selectedDay);
-    
+    // ✅ CORRIGIDO: Filtrar para pegar apenas o último pedido de cada cliente por dia
+    const getLatestOrderPerCustomer = (orders, selectedDay) => {
+      const ordersByCustomer = {};
+
+      orders
+        .filter(order => order.day_of_week === selectedDay)
+        .forEach(order => {
+          // Substituir pedido anterior - pega sempre o último do array
+          ordersByCustomer[order.customer_name] = order;
+        });
+
+      return Object.values(ordersByCustomer);
+    };
+
+    const dayOrders = getLatestOrderPerCustomer(orders, selectedDay);
+
     if (!dayOrders.length) return {};
 
     // Consolidar carnes por receita e cliente
@@ -57,7 +70,7 @@ const PesoBrutoCalculator = ({
     dayOrders.forEach(order => {
       order.items?.forEach(item => {
         const recipe = recipes.find(r => r.id === item.recipe_id);
-        
+
         if (recipe && recipe.category?.toLowerCase().includes('carne')) {
           const recipeName = recipe.name;
           const quantity = parseQuantity(item.quantity); // quantidade de porções - CORRIGIDO: usar parseQuantity

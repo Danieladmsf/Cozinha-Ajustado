@@ -33,9 +33,22 @@ const AcougueTab = ({
   const consolidateCarnes = useMemo(() => {
     if (!orders.length || !recipes.length) return {};
 
-    // Filtrar pedidos do dia selecionado
-    const dayOrders = orders.filter(order => order.day_of_week === selectedDay);
-    
+    // ✅ CORRIGIDO: Filtrar para pegar apenas o último pedido de cada cliente por dia
+    const getLatestOrderPerCustomer = (orders, selectedDay) => {
+      const ordersByCustomer = {};
+
+      orders
+        .filter(order => order.day_of_week === selectedDay)
+        .forEach(order => {
+          // Substituir pedido anterior - pega sempre o último do array
+          ordersByCustomer[order.customer_name] = order;
+        });
+
+      return Object.values(ordersByCustomer);
+    };
+
+    const dayOrders = getLatestOrderPerCustomer(orders, selectedDay);
+
     if (!dayOrders.length) return {};
 
     // Consolidar por receita de carne

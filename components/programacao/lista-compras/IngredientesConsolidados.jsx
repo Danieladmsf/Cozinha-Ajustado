@@ -17,13 +17,30 @@ const IngredientesConsolidados = ({
   showWeekMode = true,
   dataVersion
 }) => {
+  // ✅ CORREÇÃO: Filtrar apenas o último pedido de cada cliente por dia
+  // Isso evita somar pedidos duplicados na lista de compras
+  const getLatestOrderPerCustomer = (orders) => {
+    const ordersByCustomerAndDay = {};
+
+    orders.forEach(order => {
+      const key = `${order.customer_name}_${order.day_of_week}`;
+      // Substituir pedido anterior - pega sempre o último do array
+      ordersByCustomerAndDay[key] = order;
+    });
+
+    return Object.values(ordersByCustomerAndDay);
+  };
+
   // Filtrar pedidos pelo dia se necessário
   const filteredOrders = useMemo(() => {
+    // Primeiro, remover duplicados (pegar apenas último pedido de cada cliente por dia)
+    const uniqueOrders = getLatestOrderPerCustomer(orders);
+
     if (showWeekMode || !selectedDay) {
-      return orders; // Modo semana: todos os pedidos
+      return uniqueOrders; // Modo semana: todos os pedidos únicos
     }
     // Modo dia: filtrar pelo dia selecionado
-    return orders.filter(order => order.day_of_week === selectedDay);
+    return uniqueOrders.filter(order => order.day_of_week === selectedDay);
   }, [orders, selectedDay, showWeekMode]);
 
   // Consolidar todos os ingredientes (da semana ou do dia)
