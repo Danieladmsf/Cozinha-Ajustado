@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { parseQuantity } from "@/components/utils/orderUtils";
 
 const PesoBrutoCalculator = ({ 
   orders, 
@@ -18,23 +19,24 @@ const PesoBrutoCalculator = ({
   const getPesoBrutoPorPorcao = (recipe) => {
     try {
       // Usar os dados corretos da ficha técnica baseado na estrutura real
-      const pesoBrutoTotal = recipe.total_weight;
-      const pesoPorcao = recipe.portion_weight_calculated;
-      const rendimentoTotal = recipe.yield_weight;
-      
+      // CORRIGIDO: Usar parseQuantity para converter vírgulas em pontos
+      const pesoBrutoTotal = parseQuantity(recipe.total_weight);
+      const pesoPorcao = parseQuantity(recipe.portion_weight_calculated);
+      const rendimentoTotal = parseQuantity(recipe.yield_weight);
+
       if (!pesoBrutoTotal || !pesoPorcao || !rendimentoTotal) {
         return 0;
       }
-      
+
       // Calcular quantas porções o rendimento produz
       const numeroPorcoes = rendimentoTotal / pesoPorcao;
-      
+
       // Peso bruto necessário por porção
       const pesoBrutoPorPorcao = pesoBrutoTotal / numeroPorcoes;
-      
-      
+
+
       return pesoBrutoPorPorcao;
-      
+
     } catch (error) {
       return 0;
     }
@@ -58,7 +60,7 @@ const PesoBrutoCalculator = ({
         
         if (recipe && recipe.category?.toLowerCase().includes('carne')) {
           const recipeName = recipe.name;
-          const quantity = item.quantity; // quantidade de porções
+          const quantity = parseQuantity(item.quantity); // quantidade de porções - CORRIGIDO: usar parseQuantity
 
           // Buscar dados de peso bruto da receita
           const pesoBrutoPorPorcao = getPesoBrutoPorPorcao(recipe);
