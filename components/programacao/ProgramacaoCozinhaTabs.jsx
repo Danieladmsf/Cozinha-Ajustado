@@ -109,12 +109,6 @@ const ConsolidacaoContent = ({
                           {selectedDayInfo?.fullDate} • {customerData.total_meals} refeições
                         </p>
                       </div>
-                      {globalKitchenFormat && (
-                        <div className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-md inline-block mt-1 sm:mt-0 print:hidden">
-                          <ChefHat className="w-3 h-3 inline mr-1" />
-                          Formato Cozinha
-                        </div>
-                      )}
                     </div>
                   </div>
 
@@ -194,14 +188,8 @@ const ProgramacaoCozinhaTabs = () => {
   const [selectedCustomer, setSelectedCustomer] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   
-  // Estado centralizado do formato cozinha para todas as abas
-  const [globalKitchenFormat, setGlobalKitchenFormat] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('programacao-global-kitchen-format');
-      return saved === 'true';
-    }
-    return false;
-  });
+  // Formato de cozinha sempre ativado (removido toggle)
+  const globalKitchenFormat = true;
 
   // O hook useProgramacaoRealtimeData já gerencia os pedidos automaticamente
   // Não é mais necessário carregar manualmente
@@ -220,16 +208,6 @@ const ProgramacaoCozinhaTabs = () => {
 
   // Hook de consolidação (deve vir depois de filteredOrders)
   const { ordersByCustomer, consolidateCustomerItems } = useOrderConsolidation(filteredOrders, recipes);
-
-  // Função centralizada para alternar formato em todas as abas
-  const toggleGlobalKitchenFormat = () => {
-    const newFormat = !globalKitchenFormat;
-    setGlobalKitchenFormat(newFormat);
-    
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('programacao-global-kitchen-format', newFormat.toString());
-    }
-  };
 
   // Função para formatar quantidade baseada no modo selecionado
   const formatQuantityDisplay = (item) => {
@@ -1230,16 +1208,6 @@ const ProgramacaoCozinhaTabs = () => {
               <RealtimeIndicator status={connectionStatus} />
 
               <Button
-                variant={globalKitchenFormat ? "default" : "outline"}
-                size="sm"
-                onClick={toggleGlobalKitchenFormat}
-                className="gap-2"
-              >
-                <ChefHat className="w-4 h-4" />
-                {globalKitchenFormat ? "Formato Padrão" : "Formato Cozinha"}
-              </Button>
-              
-              <Button
                 variant="outline"
                 size="sm"
                 onClick={handlePrint}
@@ -1404,7 +1372,7 @@ const ProgramacaoCozinhaTabs = () => {
               </TabsContent>
 
               <TabsContent value="salada" className="mt-6">
-                {activeTab === 'salada' && <SaladaTab 
+                {activeTab === 'salada' && <SaladaTab
                   currentDate={currentDate}
                   selectedDay={selectedDay}
                   weekNumber={weekNumber}
@@ -1413,12 +1381,11 @@ const ProgramacaoCozinhaTabs = () => {
                   orders={orders}
                   recipes={recipes}
                   globalKitchenFormat={globalKitchenFormat}
-                  toggleGlobalKitchenFormat={toggleGlobalKitchenFormat}
                 />}
               </TabsContent>
 
               <TabsContent value="acougue" className="mt-6">
-                {activeTab === 'acougue' && <AcougueTab 
+                {activeTab === 'acougue' && <AcougueTab
                   currentDate={currentDate}
                   selectedDay={selectedDay}
                   weekNumber={weekNumber}
@@ -1427,12 +1394,11 @@ const ProgramacaoCozinhaTabs = () => {
                   orders={orders}
                   recipes={recipes}
                   globalKitchenFormat={globalKitchenFormat}
-                  toggleGlobalKitchenFormat={toggleGlobalKitchenFormat}
                 />}
               </TabsContent>
 
               <TabsContent value="cozinha" className="mt-6">
-                {activeTab === 'cozinha' && <CozinhaTab 
+                {activeTab === 'cozinha' && <CozinhaTab
                   currentDate={currentDate}
                   selectedDay={selectedDay}
                   weekNumber={weekNumber}
@@ -1441,14 +1407,12 @@ const ProgramacaoCozinhaTabs = () => {
                   orders={orders}
                   recipes={recipes}
                   globalKitchenFormat={globalKitchenFormat}
-                  toggleGlobalKitchenFormat={toggleGlobalKitchenFormat}
                 />}
               </TabsContent>
 
               <TabsContent value="embalagem" className="mt-6">
-                {activeTab === 'embalagem' && <EmbalagemTab 
+                {activeTab === 'embalagem' && <EmbalagemTab
                   globalKitchenFormat={globalKitchenFormat}
-                  toggleGlobalKitchenFormat={toggleGlobalKitchenFormat}
                 />}
               </TabsContent>
             </Tabs>

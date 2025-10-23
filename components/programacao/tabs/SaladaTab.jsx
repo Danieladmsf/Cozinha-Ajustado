@@ -10,17 +10,16 @@ import { parseQuantity } from "@/components/utils/orderUtils";
 // Utils
 import { formatQuantityForDisplay } from "../ProgramacaoCozinhaTabs";
 
-const SaladaTab = ({ 
+const SaladaTab = ({
   currentDate,
-  selectedDay, 
-  weekNumber, 
+  selectedDay,
+  weekNumber,
   year,
   weekDays,
   orders = [],
   recipes = [],
   dataVersion,
-  globalKitchenFormat,
-  toggleGlobalKitchenFormat
+  globalKitchenFormat
 }) => {
   // Função para formatar quantidade usando estado centralizado
   const formatQuantity = (quantity, unitType) => {
@@ -96,16 +95,6 @@ const SaladaTab = ({
               <Leaf className="w-6 h-6" />
               SALADAS - {selectedDayInfo?.fullDate || format(currentDate, 'dd/MM')}
             </CardTitle>
-            
-            <Button
-              variant={globalKitchenFormat ? "default" : "outline"}
-              size="sm"
-              onClick={toggleGlobalKitchenFormat}
-              className="gap-2 bg-green-600 hover:bg-green-700 text-white"
-            >
-              <ChefHat className="w-4 h-4" />
-              {globalKitchenFormat ? "Formato Padrão" : "Formato Cozinha"}
-            </Button>
           </div>
         </CardHeader>
       </Card>

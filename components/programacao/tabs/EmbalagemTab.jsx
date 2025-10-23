@@ -5,9 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Package2, ChefHat } from "lucide-react";
 
-const EmbalagemTab = ({ 
-  globalKitchenFormat,
-  toggleGlobalKitchenFormat
+const EmbalagemTab = ({
+  globalKitchenFormat
 }) => {
 
   return (
@@ -20,16 +19,6 @@ const EmbalagemTab = ({
               <Package2 className="w-6 h-6" />
               Seção Embalagem
             </CardTitle>
-            
-            <Button
-              variant={globalKitchenFormat ? "default" : "outline"}
-              size="sm"
-              onClick={toggleGlobalKitchenFormat}
-              className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <ChefHat className="w-4 h-4" />
-              {globalKitchenFormat ? "Formato Padrão" : "Formato Cozinha"}
-            </Button>
           </div>
         </CardHeader>
       </Card>

@@ -13,17 +13,16 @@ import { formatQuantityForDisplay } from "../ProgramacaoCozinhaTabs";
 // Components
 import PesoBrutoCalculator from "./PesoBrutoCalculator";
 
-const AcougueTab = ({ 
+const AcougueTab = ({
   currentDate,
-  selectedDay, 
-  weekNumber, 
+  selectedDay,
+  weekNumber,
   year,
   weekDays,
   orders = [],
   recipes = [],
   dataVersion,
-  globalKitchenFormat,
-  toggleGlobalKitchenFormat
+  globalKitchenFormat
 }) => {
   // Função para formatar quantidade usando estado centralizado
   const formatQuantity = (quantity, unitType) => {
@@ -116,16 +115,6 @@ const AcougueTab = ({
               <Utensils className="w-6 h-6" />
               PORCIONAMENTO CARNES - {selectedDayInfo?.fullDate || format(currentDate, 'dd/MM')}
             </CardTitle>
-            
-            <Button
-              variant={globalKitchenFormat ? "default" : "outline"}
-              size="sm"
-              onClick={toggleGlobalKitchenFormat}
-              className="gap-2 bg-red-600 hover:bg-red-700 text-white"
-            >
-              <ChefHat className="w-4 h-4" />
-              {globalKitchenFormat ? "Formato Padrão" : "Formato Cozinha"}
-            </Button>
           </div>
         </CardHeader>
       </Card>
