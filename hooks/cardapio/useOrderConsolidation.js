@@ -69,22 +69,55 @@ export const useOrderConsolidation = (orders, recipes) => {
   }, [orders]);
 
   /**
+   * Obtém o unit_type correto da receita (usa mesma lógica do portal)
+   */
+  const getRecipeUnitType = (recipe) => {
+    if (!recipe) return null;
+
+    // 1. Verificar se já tem unit_type direto na receita
+    if (recipe.unit_type) {
+      return recipe.unit_type;
+    }
+
+    // 2. Buscar container_type nas preparações
+    if (recipe.preparations && recipe.preparations.length > 0) {
+      const lastPrep = recipe.preparations[recipe.preparations.length - 1];
+      if (lastPrep.assembly_config?.container_type) {
+        return lastPrep.assembly_config.container_type;
+      }
+    }
+
+    // 3. Verificar container_type direto na receita
+    if (recipe.container_type) {
+      return recipe.container_type;
+    }
+
+    // 4. Fallback baseado em peso da cuba
+    if (recipe.cuba_weight && parseFloat(recipe.cuba_weight) > 0) {
+      return 'cuba-g'; // Assumir cuba-g se tiver cuba_weight
+    }
+
+    return null;
+  };
+
+  /**
    * Para consolidação, sincroniza com a ficha técnica atual
    * Isso garante consistência com o portal do cliente
    */
   const getCorrectUnitType = (item, recipe) => {
     // 1. PRIORIDADE: Usar unidade da ficha técnica atual (como no portal)
-    if (recipe?.unit_type) {
-      return recipe.unit_type;
+    const recipeUnitType = getRecipeUnitType(recipe);
+    if (recipeUnitType) {
+      return recipeUnitType;
     }
-    
+
     // 2. FALLBACK: Usar unidade do pedido original (dados históricos)
     if (item.unit_type) {
       return item.unit_type;
     }
-    
-    // 3. FALLBACK FINAL: Padrão do sistema
-    return 'cuba-g';
+
+    // 3. FALLBACK FINAL: Null (será tratado na formatação)
+    return null;
   };
 
   // Consolidar itens por categoria para um cliente específico

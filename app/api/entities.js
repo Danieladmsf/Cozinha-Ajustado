@@ -1,16 +1,17 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  addDoc,
   setDoc,
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
-  limit 
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  limit,
+  onSnapshot
 } from 'firebase/firestore';
 import { db } from '../../lib/firebase.js';
 
@@ -255,16 +256,16 @@ const createEntity = (collectionName) => {
     query: async (filters = [], orderByField = null, limitCount = null) => {
       try {
         let q = collection(db, collectionName);
-        
+
         if (filters.length > 0) {
           const constraints = filters.map(filter => where(filter.field, filter.operator, filter.value));
           q = query(q, ...constraints);
         }
-        
+
         if (orderByField) {
           q = query(q, orderBy(orderByField));
         }
-        
+
         if (limitCount) {
           q = query(q, limit(limitCount));
         }
@@ -274,6 +275,45 @@ const createEntity = (collectionName) => {
         return docs;
       } catch (error) {
         throw new Error(`Failed to query ${collectionName}: ${error.message}`);
+      }
+    },
+
+    // Listen to real-time updates
+    listen: (callback, filters = [], orderByField = null, limitCount = null) => {
+      try {
+        let q = collection(db, collectionName);
+
+        if (filters.length > 0) {
+          const constraints = filters.map(filter => where(filter.field, filter.operator, filter.value));
+          q = query(q, ...constraints);
+        }
+
+        if (orderByField) {
+          q = query(q, orderBy(orderByField));
+        }
+
+        if (limitCount) {
+          q = query(q, limit(limitCount));
+        }
+
+        // Subscribe to real-time updates
+        const unsubscribe = onSnapshot(
+          q,
+          (querySnapshot) => {
+            const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            callback(docs);
+          },
+          (error) => {
+            console.error(`[${collectionName}.listen] Error:`, error);
+            callback(null, error);
+          }
+        );
+
+        // Return unsubscribe function
+        return unsubscribe;
+      } catch (error) {
+        console.error(`[${collectionName}.listen] Setup error:`, error);
+        throw new Error(`Failed to setup listener for ${collectionName}: ${error.message}`);
       }
     }
   };

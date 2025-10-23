@@ -4,8 +4,8 @@ import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Scale, Package, AlertCircle } from "lucide-react";
 
-// Utilitário para consolidação de ingredientes
-import { consolidateIngredientsFromRecipes } from './utils/ingredientConsolidator';
+// Utilitário para consolidação de ingredientes (VERSÃO CORRIGIDA)
+import { consolidateIngredientsFromRecipes } from './utils/ingredientConsolidatorFixed';
 
 const IngredientesConsolidados = ({ 
   orders = [],

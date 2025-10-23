@@ -538,12 +538,16 @@ const MobileOrdersPage = ({ customerId }) => {
               
               // Definir preço baseado no container_type
               let unitPrice = 0;
-              if (containerType === "cuba") {
+              if (containerType === "cuba" || containerType === "cuba-g" || containerType === "cuba-p") {
+                // Todos os tipos de cuba usam cuba_cost
                 unitPrice = recipe.cuba_cost || 0;
               } else if (containerType === "kg") {
                 unitPrice = recipe.cost_per_kg_yield || 0;
+              } else if (containerType === "unid." || containerType === "porção") {
+                // Unidades e porções usam portion_cost
+                unitPrice = recipe.portion_cost || recipe.unit_cost || 0;
               } else {
-                // Para outros tipos, tentar campo específico (ex: "unid._cost")
+                // Para outros tipos (descartavel, etc.), tentar campo específico
                 const specificField = `${containerType}_cost`;
                 if (recipe[specificField] && typeof recipe[specificField] === 'number') {
                   unitPrice = recipe[specificField];

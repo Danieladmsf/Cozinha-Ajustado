@@ -8,12 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { 
-  Calendar, 
-  Users, 
-  FileText, 
-  Printer, 
-  ChevronLeft, 
+import {
+  Calendar,
+  Users,
+  FileText,
+  Printer,
+  ChevronLeft,
   ChevronRight,
   Filter,
   Search,
@@ -22,14 +22,13 @@ import {
   ChefHat,
   Leaf,
   Package2,
-  Utensils,
-  RefreshCw
+  Utensils
 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 // Hooks
-import { useProgramacaoData } from '@/hooks/programacao/useProgramacaoData';
+import { useProgramacaoRealtimeData } from '@/hooks/programacao/useProgramacaoRealtimeData';
 import { useOrderConsolidation } from "@/hooks/cardapio/useOrderConsolidation";
 import { convertQuantityForKitchen } from "@/lib/cubaConversionUtils";
 
@@ -38,6 +37,9 @@ import SaladaTab from './tabs/SaladaTab';
 import AcougueTab from './tabs/AcougueTab';
 import CozinhaTab from './tabs/CozinhaTab';
 import EmbalagemTab from './tabs/EmbalagemTab';
+
+// Componentes utilitários
+import { RealtimeIndicator } from './RealtimeIndicator';
 
 // Função utilitária centralizada para formatação de quantidade
 export const formatQuantityForDisplay = (quantity, unitType, useKitchenFormat) => {
@@ -176,13 +178,12 @@ const ProgramacaoCozinhaTabs = () => {
     weekNumber,
     year,
     loading,
+    connectionStatus,
     customers,
     recipes,
     orders,
-    navigateWeek,
-    loadOrdersForWeek,
-    refreshData
-  } = useProgramacaoData();
+    navigateWeek
+  } = useProgramacaoRealtimeData();
 
   // Estados principais
   const [selectedDay, setSelectedDay] = useState(1);
@@ -202,9 +203,8 @@ const ProgramacaoCozinhaTabs = () => {
     return false;
   });
 
-  useEffect(() => {
-    loadOrdersForWeek(weekNumber, year);
-  }, [weekNumber, year, loadOrdersForWeek]);
+  // O hook useProgramacaoRealtimeData já gerencia os pedidos automaticamente
+  // Não é mais necessário carregar manualmente
 
   // Filtrar pedidos por dia e cliente
   const filteredOrders = useMemo(() => {
@@ -239,14 +239,37 @@ const ProgramacaoCozinhaTabs = () => {
     // Arredondar para evitar problemas de precisão flutuante
     quantity = Math.round(quantity * 100) / 100;
 
-    if (globalKitchenFormat && item.unit_type?.toLowerCase() === 'cuba-g') {
-      const convertedQuantity = convertQuantityForKitchen(quantity, item.unit_type);
+    // Obter unit_type (pode ser null se item não tiver)
+    let unitType = item.unit_type;
+
+    // Se não tiver unit_type, tentar buscar da receita
+    if (!unitType && item.recipe_id) {
+      const recipe = recipes.find(r => r.id === item.recipe_id);
+      if (recipe) {
+        // Usar mesma lógica do portal para obter unit_type
+        if (recipe.preparations && recipe.preparations.length > 0) {
+          const lastPrep = recipe.preparations[recipe.preparations.length - 1];
+          unitType = lastPrep.assembly_config?.container_type;
+        }
+        if (!unitType) {
+          unitType = recipe.container_type || recipe.unit_type;
+        }
+      }
+    }
+
+    // Normalizar para lowercase
+    if (unitType) {
+      unitType = unitType.toLowerCase();
+    }
+
+    if (globalKitchenFormat && unitType === 'cuba-g') {
+      const convertedQuantity = convertQuantityForKitchen(quantity, unitType);
       return `${convertedQuantity} –`;
     } else {
       // Formato padrão - substituir ponto por vírgula
       const formattedQty = String(quantity).replace('.', ',');
-      const unit = item.unit_type || 'cuba-g'; // Default para cuba-g se não tiver unidade
-      return `${formattedQty} ${unit} –`;
+      const displayUnit = unitType || ''; // Não forçar padrão, deixar vazio se não tiver
+      return `${formattedQty} ${displayUnit} –`.trim();
     }
   };
 
@@ -1204,17 +1227,8 @@ const ProgramacaoCozinhaTabs = () => {
             </div>
             
             <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={refreshData}
-                disabled={loading.orders}
-                className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50"
-              >
-                <RefreshCw className={`w-4 h-4 ${loading.orders ? 'animate-spin' : ''}`} />
-                Atualizar Dados
-              </Button>
-              
+              <RealtimeIndicator status={connectionStatus} />
+
               <Button
                 variant={globalKitchenFormat ? "default" : "outline"}
                 size="sm"
