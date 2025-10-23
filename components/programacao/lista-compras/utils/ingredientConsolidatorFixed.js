@@ -13,9 +13,15 @@
  * Tenta diferentes estruturas e propriedades
  */
 const getIngredientWeight = (ingredient) => {
-  // Helper para converter valores vazios/inválidos
+  // Helper para converter valores vazios/inválidos e lidar com formato brasileiro (vírgula)
   const parseWeight = (value) => {
     if (value === null || value === undefined || value === '') return 0;
+
+    // Se for string, substituir vírgula por ponto (formato brasileiro → formato JS)
+    if (typeof value === 'string') {
+      value = value.replace(',', '.');
+    }
+
     const parsed = parseFloat(value);
     return isNaN(parsed) ? 0 : parsed;
   };
