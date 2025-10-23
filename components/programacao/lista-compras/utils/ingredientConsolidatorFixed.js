@@ -10,13 +10,23 @@
 
 /**
  * Extrai o peso mais adequado de um ingrediente PARA LISTA DE COMPRAS
- * PRIORIDADE: PESO BRUTO (o que você compra) > Pré-cozinha > Limpo > Cozido
+ * LÓGICA: Usa o PESO INICIAL do PRIMEIRO PROCESSO (o que você compra no mercado)
  *
  * ⚠️ IMPORTANTE: Para lista de compras, precisamos do peso BRUTO (antes de qualquer processamento)!
- * Exemplo: Coxão duro no Strogonoff
- *   - Peso Bruto: 2,438 kg ← O QUE VOCÊ COMPRA
- *   - Pós Limpeza: 2,194 kg
- *   - Pós Cocção: 1,951 kg
+ *
+ * PRIORIDADE (primeiro input de cada processo):
+ *   1. weight_frozen → Se receita começa com Descongelamento
+ *   2. weight_raw → Se receita começa com Limpeza
+ *   3. weight_pre_cooking → Se receita começa apenas com Cocção
+ *   4. weight_thawed → Fim de Descongelamento (2º recurso)
+ *   5. weight_clean → Fim de Limpeza (2º recurso)
+ *   6. weight_cooked → Peso final cozido (último recurso)
+ *
+ * Exemplo: Coxão duro no Strogonoff (processo: Limpeza → Cocção)
+ *   - weight_raw: 2,438 kg ← USADO (início de Limpeza)
+ *   - weight_clean: 2,194 kg
+ *   - weight_pre_cooking: 2,194 kg
+ *   - weight_cooked: 1,951 kg
  */
 const getIngredientWeight = (ingredient) => {
   // Helper para converter valores vazios/inválidos e lidar com formato brasileiro (vírgula)
@@ -32,26 +42,28 @@ const getIngredientWeight = (ingredient) => {
     return isNaN(parsed) ? 0 : parsed;
   };
 
-  // 1. PRIORIDADE: Peso bruto/cru (o que você compra no mercado)
-  let weight = parseWeight(ingredient.weight_raw);
+  // 1. PRIORIDADE: Peso INICIAL do primeiro processo (o que você compra)
+  // Ordem: Descongelamento > Limpeza > Cocção
+  let weight = parseWeight(ingredient.weight_frozen);   // Início de Descongelamento
+  if (!weight) weight = parseWeight(ingredient.weight_raw);      // Início de Limpeza
   if (!weight) weight = parseWeight(ingredient.raw_weight);
   if (!weight) weight = parseWeight(ingredient.weight);
+  if (!weight) weight = parseWeight(ingredient.weight_pre_cooking); // Início de Cocção
 
-  // 2. Se não tem peso bruto, usar pré-cozinha (já limpo, mas antes de cozinhar)
-  // Este é o "segundo melhor" para lista de compras
-  if (!weight) weight = parseWeight(ingredient.weight_pre_cooking);
-  if (!weight) weight = parseWeight(ingredient.weight_clean);
-  if (!weight) weight = parseWeight(ingredient.weight_thawed);
+  // 2. SEGUNDO RECURSO: Peso intermediário (após primeira etapa)
+  if (!weight) weight = parseWeight(ingredient.weight_thawed);  // Fim de Descongelamento
+  if (!weight) weight = parseWeight(ingredient.weight_clean);   // Fim de Limpeza
 
   // 3. Tentar objetos aninhados (mesma ordem)
   if (!weight && ingredient.weights) {
-    weight = parseWeight(ingredient.weights.raw);
+    weight = parseWeight(ingredient.weights.frozen);
+    if (!weight) weight = parseWeight(ingredient.weights.raw);
     if (!weight) weight = parseWeight(ingredient.weights.pre_cooking);
-    if (!weight) weight = parseWeight(ingredient.weights.clean);
     if (!weight) weight = parseWeight(ingredient.weights.thawed);
+    if (!weight) weight = parseWeight(ingredient.weights.clean);
   }
 
-  // 4. ÚLTIMO RECURSO: Peso cozido (menos ideal para compras, mas melhor que nada)
+  // 4. ÚLTIMO RECURSO: Peso final/cozido (menor peso, maior perda)
   if (!weight) weight = parseWeight(ingredient.weight_cooked);
   if (!weight && ingredient.weights) {
     weight = parseWeight(ingredient.weights.cooked);
