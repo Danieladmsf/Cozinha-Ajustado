@@ -2,7 +2,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw, GripVertical } from "lucide-react";
+import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw, GripVertical, Download } from "lucide-react";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import './print-preview.css';
 
 // Constantes de tamanho A4 (baseadas em dimensões físicas reais)
@@ -20,6 +22,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const [selectedBlock, setSelectedBlock] = useState(null);
   const [hasSavedSizes, setHasSavedSizes] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const previewAreaRef = useRef(null);
 
   // Carregar tamanhos salvos do localStorage
@@ -489,6 +492,59 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     }, 500);
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      setIsGeneratingPDF(true);
+
+      // Criar PDF em orientação portrait A4
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = 210; // A4 width em mm
+      const pdfHeight = 297; // A4 height em mm
+
+      // Capturar todos os blocos visíveis
+      const blockElements = document.querySelectorAll('.a4-page');
+
+      for (let i = 0; i < blockElements.length; i++) {
+        const block = blockElements[i];
+
+        // Capturar o bloco como canvas com alta qualidade
+        const canvas = await html2canvas(block, {
+          scale: 2, // Dobrar a qualidade
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff'
+        });
+
+        // Converter canvas para imagem
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+        // Calcular dimensões mantendo proporção
+        const imgWidth = pdfWidth;
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        // Adicionar nova página se não for a primeira
+        if (i > 0) {
+          pdf.addPage();
+        }
+
+        // Adicionar imagem ao PDF
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+      }
+
+      // Gerar nome do arquivo com data
+      const fileName = `Programacao_${selectedDayInfo?.fullDate || 'producao'}.pdf`;
+
+      // Fazer download do PDF
+      pdf.save(fileName);
+
+      setIsGeneratingPDF(false);
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao gerar PDF. Tente novamente.');
+      setIsGeneratingPDF(false);
+    }
+  };
+
   const generatePrintHTML = (blocks) => {
     return `
       <!DOCTYPE html>
@@ -709,6 +765,23 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
           <Button variant="outline" onClick={onClose}>
             <X className="w-4 h-4 mr-2" />
             Cancelar
+          </Button>
+          <Button
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            {isGeneratingPDF ? (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                Gerando...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4 mr-2" />
+                Baixar PDF
+              </>
+            )}
           </Button>
           <Button onClick={handlePrintFinal} className="bg-blue-600 hover:bg-blue-700">
             <Printer className="w-4 h-4 mr-2" />
