@@ -244,12 +244,12 @@ const ProgramacaoCozinhaTabs = () => {
 
     if (globalKitchenFormat && unitType === 'cuba-g') {
       const convertedQuantity = convertQuantityForKitchen(quantity, unitType);
-      return `${convertedQuantity} –`;
+      return convertedQuantity;
     } else {
       // Formato padrão - substituir ponto por vírgula
       const formattedQty = String(quantity).replace('.', ',');
       const displayUnit = unitType || ''; // Não forçar padrão, deixar vazio se não tiver
-      return `${formattedQty} ${displayUnit} –`.trim();
+      return `${formattedQty} ${displayUnit}`.trim();
     }
   };
 
