@@ -19,13 +19,13 @@ import {
   Search,
   Download,
   Loader2,
-  ChefHat,
   Leaf,
   Package2,
   Utensils
 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import PrintPreviewEditor from './PrintPreviewEditor';
 
 // Hooks
 import { useProgramacaoRealtimeData } from '@/hooks/programacao/useProgramacaoRealtimeData';
@@ -35,7 +35,6 @@ import { convertQuantityForKitchen } from "@/lib/cubaConversionUtils";
 // Componentes das abas
 import SaladaTab from './tabs/SaladaTab';
 import AcougueTab from './tabs/AcougueTab';
-import CozinhaTab from './tabs/CozinhaTab';
 import EmbalagemTab from './tabs/EmbalagemTab';
 
 // Componentes utilitários
@@ -183,11 +182,12 @@ const ProgramacaoCozinhaTabs = () => {
   const [selectedDay, setSelectedDay] = useState(1);
   const [printing, setPrinting] = useState(false);
   const [activeTab, setActiveTab] = useState("por-empresa");
-  
+  const [showPreviewEditor, setShowPreviewEditor] = useState(false);
+
   // Filtros
   const [selectedCustomer, setSelectedCustomer] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   // Formato de cozinha sempre ativado (removido toggle)
   const globalKitchenFormat = true;
 
@@ -207,7 +207,9 @@ const ProgramacaoCozinhaTabs = () => {
   }, [orders, selectedDay, selectedCustomer, searchTerm]);
 
   // Hook de consolidação (deve vir depois de filteredOrders)
-  const { ordersByCustomer, consolidateCustomerItems } = useOrderConsolidation(filteredOrders, recipes);
+  // Excluir apenas "salada" da aba "Por Empresa"
+  const excludeCategories = ['salada'];
+  const { ordersByCustomer, consolidateCustomerItems } = useOrderConsolidation(filteredOrders, recipes, excludeCategories);
 
   // Função para formatar quantidade baseada no modo selecionado
   const formatQuantityDisplay = (item) => {
@@ -332,36 +334,36 @@ const ProgramacaoCozinhaTabs = () => {
     return acougueItems;
   };
 
-  const getCozinhaData = () => {
+  const getEmbalagemData = () => {
     const dayOrders = orders.filter(order => order.day_of_week === selectedDay);
-    const cozinhaItems = {};
+    const embalagemItems = {};
 
     dayOrders.forEach(order => {
       order.items?.forEach(item => {
         const recipe = recipes.find(r => r.id === item.recipe_id);
-        
-        if (recipe && !recipe.category?.toLowerCase().includes('salada') && 
-            !recipe.category?.toLowerCase().includes('carne') && 
+
+        if (recipe && !recipe.category?.toLowerCase().includes('salada') &&
+            !recipe.category?.toLowerCase().includes('carne') &&
             !recipe.category?.toLowerCase().includes('açougue')) {
           const recipeName = recipe.name;
           const quantity = item.quantity;
           const unitType = item.unit_type || recipe.unit_type;
 
-          if (!cozinhaItems[recipeName]) {
-            cozinhaItems[recipeName] = {};
+          if (!embalagemItems[recipeName]) {
+            embalagemItems[recipeName] = {};
           }
 
           const customerName = order.customer_name;
-          if (!cozinhaItems[recipeName][customerName]) {
-            cozinhaItems[recipeName][customerName] = {
+          if (!embalagemItems[recipeName][customerName]) {
+            embalagemItems[recipeName][customerName] = {
               quantity: 0,
               unitType: unitType,
               items: []
             };
           }
 
-          cozinhaItems[recipeName][customerName].quantity = quantity;
-          cozinhaItems[recipeName][customerName].items.push({
+          embalagemItems[recipeName][customerName].quantity = quantity;
+          embalagemItems[recipeName][customerName].items.push({
             recipeName,
             quantity,
             unitType,
@@ -371,52 +373,247 @@ const ProgramacaoCozinhaTabs = () => {
       });
     });
 
-    return cozinhaItems;
+    return embalagemItems;
   };
 
-  const getEmbalagemData = () => {
-    return [];
+  // Sistema inteligente de cálculo de fonte
+  const calculateOptimalFontSizes = async (data, progressWindow = null) => {
+    const { selectedDayInfo, porEmpresaData, saladaData, acougueData, embalagemData } = data;
+
+    // Dimensões da página A4 em pixels com margens reduzidas
+    const PAGE_HEIGHT = 1123; // ~297mm
+    const PAGE_WIDTH = 794;   // ~210mm
+    const PADDING = 30;       // 15px em cada lado (top + bottom)
+    const MAX_HEIGHT = PAGE_HEIGHT - PADDING;
+
+    // Função helper para atualizar progresso
+    const updateProgress = (percent, message) => {
+      if (progressWindow && progressWindow.document.getElementById('progress')) {
+        progressWindow.document.getElementById('progress').style.width = percent + '%';
+        progressWindow.document.getElementById('status').textContent = message;
+      }
+    };
+
+    const fontSizes = {
+      porEmpresa: [],
+      salada: 40,
+      acougue: 40,
+      embalagem: 40
+    };
+
+    // Função para medir altura de HTML em iframe invisível
+    const measureHTMLHeight = (htmlContent) => {
+      return new Promise((resolve) => {
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = 'position: absolute; left: -9999px; width: 794px; height: 1500px; visibility: hidden;';
+        document.body.appendChild(iframe);
+
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <style>${getPrintStyles()}</style>
+            </head>
+            <body>${htmlContent}</body>
+          </html>
+        `);
+        iframeDoc.close();
+
+        setTimeout(() => {
+          const contentBody = iframeDoc.querySelector('.content-body, .section-content');
+          const height = contentBody ? contentBody.scrollHeight : 0;
+          document.body.removeChild(iframe);
+          resolve(height);
+        }, 100);
+      });
+    };
+
+    // Função de busca binária para encontrar melhor tamanho de fonte
+    const findOptimalFontSize = async (generateHTMLFunc, minSize = 20, maxSize = 120) => {
+      let bestSize = minSize;
+      let iterations = 0;
+      const maxIterations = 15; // Limitar iterações
+
+      while (maxSize - minSize > 1 && iterations < maxIterations) {
+        const midSize = Math.round((minSize + maxSize) / 2);
+        const html = generateHTMLFunc(midSize);
+        const height = await measureHTMLHeight(html);
+
+        console.log(`Teste: ${midSize}px → Altura: ${height}px / ${MAX_HEIGHT}px`);
+
+        if (height <= MAX_HEIGHT) {
+          bestSize = midSize;
+          minSize = midSize;
+        } else {
+          maxSize = midSize;
+        }
+
+        iterations++;
+      }
+
+      return bestSize;
+    };
+
+    // Calcular total de páginas para progresso
+    const totalPages = (porEmpresaData?.length || 0) +
+                      (saladaData && Object.keys(saladaData).length > 0 ? 1 : 0) +
+                      (acougueData && Object.keys(acougueData).length > 0 ? 1 : 0) +
+                      (embalagemData && Object.keys(embalagemData).length > 0 ? 1 : 0);
+
+    let currentPage = 0;
+
+    // Calcular para cada empresa (Por Empresa)
+    if (porEmpresaData && porEmpresaData.length > 0) {
+      for (let i = 0; i < porEmpresaData.length; i++) {
+        const customerData = porEmpresaData[i];
+        const progress = Math.round((currentPage / totalPages) * 80);
+        updateProgress(progress, `Calculando: ${customerData.customer_name}...`);
+        console.log(`\n🔍 Calculando fonte para: ${customerData.customer_name}`);
+
+        const fontSize = await findOptimalFontSize((size) => {
+          return generatePorEmpresaPageHTML(customerData, selectedDayInfo, size);
+        });
+
+        fontSizes.porEmpresa.push(fontSize);
+        console.log(`✅ ${customerData.customer_name}: ${fontSize}px`);
+        currentPage++;
+      }
+    }
+
+    // Calcular para Salada
+    if (saladaData && Object.keys(saladaData).length > 0) {
+      const progress = Math.round((currentPage / totalPages) * 80);
+      updateProgress(progress, 'Calculando: Salada...');
+      console.log(`\n🔍 Calculando fonte para: Salada`);
+      fontSizes.salada = await findOptimalFontSize((size) => {
+        return generateSaladaPageHTML(saladaData, selectedDayInfo, size);
+      });
+      console.log(`✅ Salada: ${fontSizes.salada}px`);
+      currentPage++;
+    }
+
+    // Calcular para Açougue
+    if (acougueData && Object.keys(acougueData).length > 0) {
+      const progress = Math.round((currentPage / totalPages) * 80);
+      updateProgress(progress, 'Calculando: Açougue...');
+      console.log(`\n🔍 Calculando fonte para: Açougue`);
+      fontSizes.acougue = await findOptimalFontSize((size) => {
+        return generateAcouguePageHTML(acougueData, selectedDayInfo, size);
+      });
+      console.log(`✅ Açougue: ${fontSizes.acougue}px`);
+      currentPage++;
+    }
+
+    // Calcular para Embalagem
+    if (embalagemData && Object.keys(embalagemData).length > 0) {
+      const progress = Math.round((currentPage / totalPages) * 80);
+      updateProgress(progress, 'Calculando: Embalagem...');
+      console.log(`\n🔍 Calculando fonte para: Embalagem`);
+      fontSizes.embalagem = await findOptimalFontSize((size) => {
+        return generateEmbalagemPageHTML(embalagemData, selectedDayInfo, size);
+      });
+      console.log(`✅ Embalagem: ${fontSizes.embalagem}px`);
+      currentPage++;
+    }
+
+    updateProgress(85, 'Cálculo concluído!');
+    console.log('\n✨ Cálculo concluído:', fontSizes);
+    return fontSizes;
   };
 
   const handlePrint = () => {
-    setPrinting(true);
-    
-    try {
-      const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
-      const porEmpresaData = ordersByCustomer;
-      const saladaData = getSaladaData();
-      const acougueData = getAcougueData();
-      const cozinhaData = getCozinhaData();
-      const embalagemData = getEmbalagemData();
+    // Abrir o editor de preview interativo
+    setShowPreviewEditor(true);
+  };
 
-      const printContent = generateCompletePrintContent({
-        selectedDayInfo,
-        weekNumber,
-        year,
-        porEmpresaData,
-        saladaData,
-        acougueData,
-        cozinhaData,
-        embalagemData
-      });
-      
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-      
-    } catch (error) {
-      alert('Erro ao gerar impressão: ' + error.message);
-    } finally {
-      setPrinting(false);
-    }
+  // Funções auxiliares para gerar HTML de páginas individuais (para medição)
+  const generatePorEmpresaPageHTML = (customerData, dayInfo, baseFontSize) => {
+    const consolidatedItems = consolidateCustomerItems(customerData.orders);
+    const h1Size = Math.round(baseFontSize * 1.6);
+    const h2Size = Math.round(baseFontSize * 1.3);
+    const qtySize = Math.round(baseFontSize * 1.1);
+    const nameSize = Math.round(baseFontSize * 1.0);
+    const spacing = Math.round(baseFontSize * 0.4);
+
+    return `
+      <div class="print-page por-empresa-page" style="font-size: ${baseFontSize}px;">
+        <div class="client-main-header" style="margin-bottom: ${spacing * 2}px; padding-bottom: ${spacing}px;">
+          <h1 class="client-title" style="font-size: ${h1Size}px; line-height: 1.2;">
+            ${customerData.customer_name} - <span style="font-size: ${Math.round(baseFontSize * 1.2)}px;">${dayInfo?.fullDate} • ${customerData.total_meals} refeições</span>
+          </h1>
+        </div>
+        <div class="content-body">
+          ${Object.entries(consolidatedItems).map(([categoryName, items]) => `
+            <div class="category-block" style="margin-bottom: ${spacing * 2}px;">
+              <h2 class="category-name" style="font-size: ${h2Size}px; margin-bottom: ${spacing}px;">${categoryName}</h2>
+              <div class="items-list" style="margin-left: ${baseFontSize}px;">
+                ${items.map((item) => `
+                  <div class="item-row" style="margin-bottom: ${spacing}px; gap: ${spacing}px;">
+                    <span class="item-quantity" style="font-size: ${qtySize}px;">${formatQuantityDisplay(item)}</span>
+                    <span class="item-name" style="font-size: ${nameSize}px;">${item.recipe_name}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  };
+
+  const generateSaladaPageHTML = (data, dayInfo, baseFontSize) => {
+    const h1Size = Math.round(baseFontSize * 1.8);
+    const h2Size = Math.round(baseFontSize * 1.4);
+    const textSize = Math.round(baseFontSize * 1.0);
+    const qtySize = Math.round(baseFontSize * 1.1);
+
+    return `
+      <div class="print-page" style="font-size: ${baseFontSize}px;">
+        <div class="page-header">
+          <h1 style="font-size: ${h1Size}px;">Salada</h1>
+          <div class="day-info" style="font-size: ${Math.round(baseFontSize * 1.2)}px;">${dayInfo?.fullDate}</div>
+        </div>
+        <div class="section-content">
+          <div class="recipe-sections">
+            ${Object.entries(data).map(([nomeReceita, clientes], index) => `
+              <div class="recipe-section" style="margin-bottom: ${baseFontSize}px;">
+                <h2 style="font-size: ${h2Size}px; margin-bottom: ${baseFontSize * 0.5}px;">${index + 1}. ${nomeReceita.toUpperCase()}</h2>
+                <div class="clients-list" style="padding-left: ${baseFontSize}px;">
+                  ${Object.entries(clientes).map(([customerName, dataCustomer]) => `
+                    <div class="client-line" style="margin-bottom: ${baseFontSize * 0.4}px; gap: ${baseFontSize * 0.3}px;">
+                      <span style="font-size: ${textSize}px;">${customerName.toUpperCase()}</span>
+                      <span style="font-size: ${textSize}px;">→</span>
+                      <span style="font-size: ${qtySize}px;">${formatQuantityForDisplay(dataCustomer.quantity, dataCustomer.unitType, globalKitchenFormat)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  const generateAcouguePageHTML = (data, dayInfo, baseFontSize) => {
+    return generateSaladaPageHTML(data, dayInfo, baseFontSize).replace('Salada', 'Acougue');
+  };
+
+  const generateEmbalagemPageHTML = (data, dayInfo, baseFontSize) => {
+    return generateSaladaPageHTML(data, dayInfo, baseFontSize).replace('Salada', 'Embalagem');
   };
 
   const generateCompletePrintContent = (data) => {
-    const { selectedDayInfo, weekNumber, year, porEmpresaData, saladaData, acougueData, cozinhaData, embalagemData } = data;
-    
+    const { selectedDayInfo, weekNumber, year, porEmpresaData, saladaData, acougueData, embalagemData, fontSizes } = data;
+
+    // Usar fontSizes calculados ou padrões
+    const porEmpresaFonts = fontSizes?.porEmpresa || [];
+    const saladaFont = fontSizes?.salada || 40;
+    const acougueFont = fontSizes?.acougue || 40;
+    const embalagemFont = fontSizes?.embalagem || 40;
+
     return `
       <!DOCTYPE html>
       <html>
@@ -429,508 +626,334 @@ const ProgramacaoCozinhaTabs = () => {
           </style>
         </head>
         <body>
-          ${generatePorEmpresaSection(porEmpresaData, selectedDayInfo)}
-          ${generateSaladaSection(saladaData, selectedDayInfo)}
-          ${generateAcougueSection(acougueData, selectedDayInfo)}
-          ${generateCozinhaSection(cozinhaData, selectedDayInfo)}
-          ${generateEmbalagemSection(embalagemData, selectedDayInfo)}
+          ${generatePorEmpresaSection(porEmpresaData, selectedDayInfo, porEmpresaFonts)}
+          ${generateSaladaSection(saladaData, selectedDayInfo, saladaFont)}
+          ${generateAcougueSection(acougueData, selectedDayInfo, acougueFont)}
+          ${generateEmbalagemSection(embalagemData, selectedDayInfo, embalagemFont)}
           ${getAutoFontSizeScript()}
         </body>
       </html>
     `;
   };
 
-  const generatePorEmpresaSection = (data, dayInfo) => {
+  const generatePorEmpresaSection = (data, dayInfo, fontSizes = []) => {
     if (!data || data.length === 0) return '';
-    
+
     return data.map((customerData, index) => {
-      const consolidatedItems = consolidateCustomerItems(customerData.orders);
-      
-      return `
-        <div class="print-page">
-          <div class="page-header">
-            <h1>Por Empresa</h1>
-            <div class="day-info">${dayInfo?.fullDate}</div>
-          </div>
-          
-          <div class="company-section">
-            <div class="client-header">
-              <h2>${customerData.customer_name}</h2>
-              <p class="meal-count">${dayInfo?.fullDate} - ${customerData.total_meals} refeicoes</p>
-            </div>
-            
-            ${Object.keys(consolidatedItems).length === 0 ? `
-              <p class="no-items">Nenhum item no pedido deste cliente.</p>
-            ` : Object.entries(consolidatedItems).map(([categoryName, items]) => `
-              <div class="category-section">
-                <div class="category-header">
-                  <h3 class="category-title">${categoryName}</h3>
-                </div>
-                
-                <div class="items-container">
-                  ${items.map((item, itemIndex) => `
-                    <div class="item-line" key="${item.unique_id || item.recipe_id}_${itemIndex}">
-                      <span class="quantity">${formatQuantityDisplay(item)}</span>
-                      <span class="recipe-name">
-                        ${item.recipe_name}${item.notes && item.notes.trim() ? ` <span class="notes">(${item.notes.trim()})</span>` : ''}
-                      </span>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-          
-          <div class="page-footer">
-            <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}
-            </p>
-          </div>
+      const baseFontSize = fontSizes[index] || 40; // Usar tamanho calculado ou padrão
+      return generatePorEmpresaPageHTML(customerData, dayInfo, baseFontSize) + `
+        <!-- Debug Banner -->
+        <div style="position: absolute; top: 5px; right: 5px; background: #000; color: #ff0; padding: 6px 12px; font-size: 14px; font-weight: bold; border: 2px solid #ff0; z-index: 9999;">
+          FONTE: ${baseFontSize}px
         </div>
       `;
     }).join('');
   };
 
-  const generateSaladaSection = (data, dayInfo) => {
+  const generateSaladaSection = (data, dayInfo, fontSize = 40) => {
     if (!data || Object.keys(data).length === 0) return '';
-    
-    return `
-      <div class="print-page">
-        <div class="page-header">
-          <h1>Salada</h1>
-          <div class="day-info">${dayInfo?.fullDate}</div>
-        </div>
-        
-        <div class="section-content">
-          <div class="recipe-sections">
-            ${Object.entries(data).map(([nomeReceita, clientes], index) => `
-              <div class="recipe-section">
-                <div class="recipe-header">
-                  <h2 class="recipe-title">${index + 1}. ${nomeReceita.toUpperCase()}</h2>
-                </div>
-                
-                <div class="clients-list">
-                  ${Object.entries(clientes).map(([customerName, dataCustomer]) => {
-                    const hasNotes = dataCustomer.items.some(item => item.notes && item.notes.trim());
-                    return `
-                      <div class="client-line">
-                        <span class="customer-name">${customerName.toUpperCase()}</span>
-                        <span class="arrow">→</span>
-                        <span class="quantity">${formatQuantityForDisplay(dataCustomer.quantity, dataCustomer.unitType, globalKitchenFormat)}</span>
-                        ${hasNotes ? `
-                          <div class="notes-section">
-                            ${dataCustomer.items
-                              .filter(item => item.notes && item.notes.trim())
-                              .map(item => `<span class="note">(${item.notes.trim()})</span>`)
-                              .join('')
-                            }
-                          </div>
-                        ` : ''}
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-        
-        <div class="page-footer">
-          <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}
-          </p>
-        </div>
+
+    return generateSaladaPageHTML(data, dayInfo, fontSize) + `
+      <div style="position: absolute; top: 5px; right: 5px; background: #000; color: #0f0; padding: 6px 12px; font-size: 14px; font-weight: bold; border: 2px solid #0f0; z-index: 9999;">
+        FONTE: ${fontSize}px
+      </div>
+      <div class="page-footer">
+        <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}</p>
       </div>
     `;
   };
 
-  const generateAcougueSection = (data, dayInfo) => {
+  const generateAcougueSection = (data, dayInfo, fontSize = 40) => {
     if (!data || Object.keys(data).length === 0) return '';
-    
-    return `
-      <div class="print-page">
-        <div class="page-header">
-          <h1>Acougue</h1>
-          <div class="day-info">${dayInfo?.fullDate}</div>
-        </div>
-        
-        <div class="section-content">
-          <div class="recipe-sections">
-            ${Object.entries(data).map(([nomeReceita, clientes], index) => `
-              <div class="recipe-section">
-                <div class="recipe-header">
-                  <h2 class="recipe-title">${index + 1}. ${nomeReceita.toUpperCase()}</h2>
-                </div>
-                
-                <div class="clients-list">
-                  ${Object.entries(clientes).map(([customerName, dataCustomer]) => {
-                    const hasNotes = dataCustomer.items.some(item => item.notes && item.notes.trim());
-                    return `
-                      <div class="client-line">
-                        <span class="customer-name">${customerName.toUpperCase()}</span>
-                        <span class="arrow">→</span>
-                        <span class="quantity">${formatQuantityForDisplay(dataCustomer.quantity, dataCustomer.unitType, globalKitchenFormat)}</span>
-                        ${hasNotes ? `
-                          <div class="notes-section">
-                            ${dataCustomer.items
-                              .filter(item => item.notes && item.notes.trim())
-                              .map(item => `<span class="note">(${item.notes.trim()})</span>`)
-                              .join('')
-                            }
-                          </div>
-                        ` : ''}
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-        
-        <div class="page-footer">
-          <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}
-          </p>
-        </div>
+
+    return generateAcouguePageHTML(data, dayInfo, fontSize) + `
+      <div style="position: absolute; top: 5px; right: 5px; background: #000; color: #f00; padding: 6px 12px; font-size: 14px; font-weight: bold; border: 2px solid #f00; z-index: 9999;">
+        FONTE: ${fontSize}px
+      </div>
+      <div class="page-footer">
+        <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}</p>
       </div>
     `;
   };
 
-  const generateCozinhaSection = (data, dayInfo) => {
+  const generateEmbalagemSection = (data, dayInfo, fontSize = 40) => {
     if (!data || Object.keys(data).length === 0) return '';
-    
-    return `
-      <div class="print-page">
-        <div class="page-header">
-          <h1>Cozinha</h1>
-          <div class="day-info">${dayInfo?.fullDate}</div>
-        </div>
-        
-        <div class="section-content">
-          <div class="recipe-sections">
-            ${Object.entries(data).map(([nomeReceita, clientes], index) => `
-              <div class="recipe-section">
-                <div class="recipe-header">
-                  <h2 class="recipe-title">${index + 1}. ${nomeReceita.toUpperCase()}</h2>
-                </div>
-                
-                <div class="clients-list">
-                  ${Object.entries(clientes).map(([customerName, dataCustomer]) => {
-                    const hasNotes = dataCustomer.items.some(item => item.notes && item.notes.trim());
-                    return `
-                      <div class="client-line">
-                        <span class="customer-name">${customerName.toUpperCase()}</span>
-                        <span class="arrow">→</span>
-                        <span class="quantity">${formatQuantityForDisplay(dataCustomer.quantity, dataCustomer.unitType, globalKitchenFormat)}</span>
-                        ${hasNotes ? `
-                          <div class="notes-section">
-                            ${dataCustomer.items
-                              .filter(item => item.notes && item.notes.trim())
-                              .map(item => `<span class="note">(${item.notes.trim()})</span>`)
-                              .join('')
-                            }
-                          </div>
-                        ` : ''}
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-        
-        <div class="page-footer">
-          <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}
-          </p>
-        </div>
+
+    return generateEmbalagemPageHTML(data, dayInfo, fontSize) + `
+      <div style="position: absolute; top: 5px; right: 5px; background: #000; color: #0af; padding: 6px 12px; font-size: 14px; font-weight: bold; border: 2px solid #0af; z-index: 9999;">
+        FONTE: ${fontSize}px
+      </div>
+      <div class="page-footer">
+        <p>Cozinha Afeto - Gerado em ${format(new Date(), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}</p>
       </div>
     `;
-  };
-
-  const generateEmbalagemSection = (data, dayInfo) => {
-    return '';
   };
 
   const getAutoFontSizeScript = () => {
+    // Não é mais necessário - fontes já são calculadas no React
+    return `
+      <script>
+        console.log('Impressão pronta - fontes já ajustadas pelo React');
+      </script>
+    `;
+  };
+
+  /*
+  REMOVIDO: Toda a lógica complexa de ajuste JavaScript foi substituída
+  por cálculo direto em React baseado na quantidade de itens.
+
+  Agora cada seção (Por Empresa, Salada, Açougue, Embalagem) calcula
+  seu próprio tamanho de fonte baseado na quantidade de conteúdo.
+
+  const getAutoFontSizeScriptOLD_DISABLED = () => {
     return `
       <script>
         function autoAdjustFontSize() {
-          
           setTimeout(() => {
             const pages = document.querySelectorAll('.print-page');
-            
-            if (pages.length === 0) {
-              const altPages = document.querySelectorAll('div, .page, .content');
-              return;
-            }
-            
+
+            if (pages.length === 0) return;
+
             pages.forEach((page, pageIndex) => {
-              
-              const pageTitle = page.querySelector('.page-header h1');
-              const pageSubtitle = page.querySelector('.day-info');
-              const clientName = page.querySelector('h2');
-              
-              
+              // Identificar o conteúdo principal da página
               const selectors = [
+                '.content-body',
                 '.company-section',
-                '.section-content', 
+                '.section-content',
                 '.recipe-sections',
                 '.items-container',
                 '.category-section',
-                '.clients-list'
+                '.clients-list',
+                '.category-block'
               ];
-              
+
               let content = null;
-              let usedSelector = null;
-              
               for (let selector of selectors) {
                 const found = page.querySelector(selector);
                 if (found && !content) {
                   content = found;
-                  usedSelector = selector;
+                  break;
                 }
               }
-              
+
               if (!content) {
                 content = page.children[1];
-                if (content) {
-                  usedSelector = 'fallback';
-                } else {
-                  return;
-                }
+                if (!content) return;
               }
-              
-              
-              const elementCounts = {
-                h1: content.querySelectorAll('h1').length,
-                h2: content.querySelectorAll('h2').length,
-                h3: content.querySelectorAll('h3').length,
-                quantity: content.querySelectorAll('.quantity').length,
-                customerName: content.querySelectorAll('.customer-name').length,
-                recipeName: content.querySelectorAll('.recipe-name').length,
-                itemLine: content.querySelectorAll('.item-line, .client-line').length,
-                notes: content.querySelectorAll('.notes, .note').length
-              };
-              
-              Object.entries(elementCounts).forEach(([key, count]) => {
-              });
-              
+
+              // Resetar estilos inline
               const allElements = page.querySelectorAll('*');
-              let resetCount = 0;
               allElements.forEach(el => {
                 if (el.style) {
-                  if (el.style.fontSize) resetCount++;
                   el.style.fontSize = null;
                   el.style.lineHeight = null;
                   el.style.margin = null;
                   el.style.padding = null;
                 }
               });
-              
+
+              // Forçar reflow
               page.offsetHeight;
-              const afterReflow = performance.now();
-              
+
+              // Dimensões da página A4 em pixels (72 DPI)
               const PAGE_WIDTH = 794;
               const PAGE_HEIGHT = 1123;
-              const MARGIN = 57;
-              
-              
-              const pageRect = page.getBoundingClientRect();
-              
-              const header = page.querySelector('.page-header');
+              const MARGIN = 38;
+
+              const header = page.querySelector('.page-header, .client-main-header');
               const footer = page.querySelector('.page-footer');
-              
+
               let headerHeight = 0;
               let footerHeight = 0;
-              
-              if (header) {
-                const headerRect = header.getBoundingClientRect();
-                headerHeight = headerRect.height;
-              } else {
-              }
-              
-              if (footer) {
-                const footerRect = footer.getBoundingClientRect();
-                footerHeight = footerRect.height;
-              } else {
-              }
-              
+
+              if (header) headerHeight = header.getBoundingClientRect().height;
+              if (footer) footerHeight = footer.getBoundingClientRect().height;
+
               const availableHeight = PAGE_HEIGHT - headerHeight - footerHeight - (MARGIN * 2);
               const availableWidth = PAGE_WIDTH - (MARGIN * 2);
-              
-              
-              const initialContentHeight = content.scrollHeight;
-              const initialContentWidth = content.scrollWidth;
-              
-              let currentSize = 10;
-              let maxTestedSize = 10;
-              const MAX_FONT_SIZE = 48;
-              const INCREMENT = 2;
-              
-              
-              let testCount = 0;
-              
-              function measureContent(fontSize) {
-                testCount++;
-                const testStart = performance.now();
-                
+
+              // Busca binária para encontrar o maior tamanho de fonte que cabe
+              let minSize = 20;
+              let maxSize = 180;
+              let bestSize = minSize;
+
+              function applyFontSize(fontSize, showDebug = false) {
                 content.style.fontSize = fontSize + 'px';
-                content.style.lineHeight = '1.4';
-                
-                const ratio = fontSize / 12;
-                let appliedStyles = {
-                  h1: 0, h2: 0, h3: 0, quantity: 0, 
-                  customerName: 0, recipeName: 0, notes: 0, spacing: 0
-                };
-                
-                page.querySelectorAll('h1').forEach(h1 => {
-                  const newSize = Math.max(fontSize * 1.8, 20);
-                  h1.style.fontSize = newSize + 'px';
-                  appliedStyles.h1++;
+                content.style.lineHeight = '1.3';
+
+                // Função auxiliar para adicionar badge de debug NO TEXTO
+                function addDebugBadge(element, appliedSize) {
+                  if (!showDebug) return;
+
+                  const originalText = element.textContent.replace(/\s*\[.*?px\]\s*$/, ''); // Remove badge anterior
+                  const badge = ' [' + Math.round(appliedSize) + 'px]';
+                  element.textContent = originalText + badge;
+                  element.style.color = '#000';
+                }
+
+                // Títulos principais (Por Empresa ou padrão)
+                page.querySelectorAll('h1, .client-title').forEach(h1 => {
+                  const size = fontSize * 1.7;
+                  h1.style.fontSize = size + 'px';
+                  h1.style.lineHeight = '1.2';
+                  addDebugBadge(h1, size);
                 });
-                
-                content.querySelectorAll('h2').forEach(h2 => {
-                  const newSize = Math.max(fontSize * 1.5, 16);
-                  const newMargin = Math.max(fontSize * 0.5, 6);
-                  h2.style.fontSize = newSize + 'px';
-                  h2.style.marginBottom = newMargin + 'px';
-                  appliedStyles.h2++;
+
+                // Data/subtítulo no header
+                page.querySelectorAll('.header-date').forEach(date => {
+                  const size = fontSize * 1.2;
+                  date.style.fontSize = size + 'px';
+                  addDebugBadge(date, size);
                 });
-                
+
+                // Categorias (h2)
+                content.querySelectorAll('h2, .category-name').forEach(h2 => {
+                  const size = fontSize * 1.4;
+                  h2.style.fontSize = size + 'px';
+                  h2.style.marginBottom = (fontSize * 0.5) + 'px';
+                  h2.style.lineHeight = '1.3';
+                  addDebugBadge(h2, size);
+                });
+
                 content.querySelectorAll('h3').forEach(h3 => {
-                  const newSize = Math.max(fontSize * 1.2, 14);
-                  const newMargin = Math.max(fontSize * 0.4, 5);
-                  h3.style.fontSize = newSize + 'px';
-                  h3.style.marginBottom = newMargin + 'px';
-                  appliedStyles.h3++;
+                  const size = fontSize * 1.2;
+                  h3.style.fontSize = size + 'px';
+                  h3.style.marginBottom = (fontSize * 0.4) + 'px';
+                  addDebugBadge(h3, size);
                 });
-                
-                content.querySelectorAll('.quantity').forEach(qty => {
-                  const newSize = Math.max(fontSize * 1.1, 12);
-                  qty.style.fontSize = newSize + 'px';
+
+                // Quantidades do layout "Por Empresa"
+                content.querySelectorAll('.item-quantity').forEach((qty, index) => {
+                  const size = fontSize * 1.15;
+                  qty.style.fontSize = size + 'px';
                   qty.style.fontWeight = 'bold';
-                  appliedStyles.quantity++;
+                  if (index === 0) addDebugBadge(qty, size); // Apenas primeiro item
                 });
-                
-                content.querySelectorAll('.customer-name').forEach(name => {
-                  const newSize = Math.max(fontSize, 10);
-                  name.style.fontSize = newSize + 'px';
+
+                // Nomes dos itens do layout "Por Empresa"
+                content.querySelectorAll('.item-name').forEach((name, index) => {
+                  const size = fontSize * 1.05;
+                  name.style.fontSize = size + 'px';
+                  if (index === 0) addDebugBadge(name, size); // Apenas primeiro item
+                });
+
+                // Quantidades gerais (outras abas)
+                content.querySelectorAll('.quantity').forEach((qty, index) => {
+                  const size = fontSize * 1.1;
+                  qty.style.fontSize = size + 'px';
+                  qty.style.fontWeight = 'bold';
+                  if (index === 0) addDebugBadge(qty, size); // Apenas primeiro item
+                });
+
+                content.querySelectorAll('.customer-name').forEach((name, index) => {
+                  const size = fontSize * 0.95;
+                  name.style.fontSize = size + 'px';
                   name.style.fontWeight = 'bold';
-                  appliedStyles.customerName++;
+                  if (index === 0) addDebugBadge(name, size); // Apenas primeiro item
                 });
-                
-                content.querySelectorAll('.recipe-name, .meal-count').forEach(text => {
-                  const newSize = Math.max(fontSize, 10);
-                  text.style.fontSize = newSize + 'px';
-                  appliedStyles.recipeName++;
+
+                content.querySelectorAll('.recipe-name, .meal-count').forEach((text, index) => {
+                  text.style.fontSize = fontSize + 'px';
+                  if (index === 0) addDebugBadge(text, fontSize); // Apenas primeiro item
                 });
-                
-                content.querySelectorAll('.notes, .note').forEach(note => {
-                  const newSize = Math.max(fontSize * 0.8, 8);
-                  note.style.fontSize = newSize + 'px';
-                  appliedStyles.notes++;
+
+                content.querySelectorAll('.notes, .note').forEach((note, index) => {
+                  const size = fontSize * 0.85;
+                  note.style.fontSize = size + 'px';
+                  if (index === 0) addDebugBadge(note, size); // Apenas primeiro item
                 });
-                
-                content.querySelectorAll('.item-line, .client-line').forEach(line => {
-                  const newMargin = Math.max(fontSize * 0.3, 3);
-                  line.style.marginBottom = newMargin + 'px';
-                  appliedStyles.spacing++;
+
+                // Espaçamentos entre linhas
+                content.querySelectorAll('.item-line, .client-line, .item-row').forEach(line => {
+                  line.style.marginBottom = (fontSize * 0.35) + 'px';
+                  line.style.gap = (fontSize * 0.5) + 'px';
                 });
-                
-                content.querySelectorAll('.category-section, .recipe-section').forEach(section => {
-                  const newMargin = Math.max(fontSize * 0.8, 8);
-                  section.style.marginBottom = newMargin + 'px';
-                  appliedStyles.spacing++;
+
+                // Espaçamentos entre seções
+                content.querySelectorAll('.category-section, .recipe-section, .category-block').forEach(section => {
+                  section.style.marginBottom = (fontSize * 0.9) + 'px';
                 });
-                
+
+                // Header principal (Por Empresa)
+                page.querySelectorAll('.client-main-header').forEach(header => {
+                  header.style.marginBottom = (fontSize * 1.0) + 'px';
+                  header.style.paddingBottom = (fontSize * 0.5) + 'px';
+                });
+
+                // Indentação das listas
+                content.querySelectorAll('.items-list').forEach(list => {
+                  list.style.marginLeft = (fontSize * 1.0) + 'px';
+                });
+
+                // Forçar reflow
                 content.offsetHeight;
-                
+
                 const contentHeight = content.scrollHeight;
                 const contentWidth = content.scrollWidth;
-                const testEnd = performance.now();
-                
-                const fits = contentHeight <= availableHeight && contentWidth <= availableWidth;
-                const utilization = Math.round((contentHeight / availableHeight) * 100);
-                
-                
-                return fits;
+
+                return contentHeight <= availableHeight && contentWidth <= availableWidth;
               }
-              
-              
-              const searchStart = performance.now();
-              let searchResults = [];
-              
-              while (currentSize <= MAX_FONT_SIZE) {
-                const testResult = {
-                  fontSize: currentSize,
-                  fits: measureContent(currentSize),
-                  height: content.scrollHeight,
-                  width: content.scrollWidth
-                };
-                
-                searchResults.push(testResult);
-                
-                if (testResult.fits) {
-                  maxTestedSize = currentSize;
-                  currentSize += INCREMENT;
+
+              // Busca binária com precisão de 0.5px
+              while (maxSize - minSize > 0.5) {
+                const midSize = (minSize + maxSize) / 2;
+
+                if (applyFontSize(midSize, false)) {
+                  bestSize = midSize;
+                  minSize = midSize;
                 } else {
-                  break;
+                  maxSize = midSize;
                 }
               }
-              
-              const searchEnd = performance.now();
-              
-              
-              measureContent(maxTestedSize);
-              
-              const finalHeight = content.scrollHeight;
-              const finalWidth = content.scrollWidth;
-              const utilization = Math.round((finalHeight / availableHeight) * 100);
-              const improvement = maxTestedSize > 10 ? Math.round(((maxTestedSize - 10) / 10) * 100) : 0;
-              
-              
-              if (utilization < 50) {
-              } else if (utilization > 95) {
-              } else {
-              }
-              
-              if (maxTestedSize === 10) {
-              }
+
+              // Aplicar o melhor tamanho encontrado COM DEBUG ATIVADO
+              applyFontSize(bestSize, true);
+
+              // Adicionar banner de debug bem visível no topo
+              const debugBanner = document.createElement('div');
+              debugBanner.style.cssText = 'position: absolute; top: 5px; right: 5px; background: #000; color: #ff0; padding: 8px 16px; font-size: 16px; font-weight: bold; border: 3px solid #ff0; z-index: 9999; font-family: monospace;';
+              debugBanner.textContent = 'FONTE BASE: ' + Math.round(bestSize) + 'px | USO: ' + Math.round((content.scrollHeight / availableHeight) * 100) + '%';
+              page.style.position = 'relative';
+              page.insertBefore(debugBanner, page.firstChild);
+
+              console.log('Página', pageIndex + 1, '- Fonte ajustada para:', Math.round(bestSize) + 'px',
+                          '| Altura:', content.scrollHeight + 'px /', availableHeight + 'px',
+                          '| Utilização:', Math.round((content.scrollHeight / availableHeight) * 100) + '%');
             });
-            
-            
+
           }, 100);
         }
-        
+
         function runMultipleTimes() {
           autoAdjustFontSize();
-          setTimeout(autoAdjustFontSize, 300);
-          setTimeout(autoAdjustFontSize, 700);
-          setTimeout(autoAdjustFontSize, 1200);
+          setTimeout(autoAdjustFontSize, 400);
+          setTimeout(autoAdjustFontSize, 900);
         }
-        
+
         if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', runMultipleTimes);
         }
-        
+
         if (document.readyState === 'interactive' || document.readyState === 'complete') {
           runMultipleTimes();
         }
-        
+
         window.addEventListener('load', runMultipleTimes);
-        
+
         window.addEventListener('beforeprint', () => {
           autoAdjustFontSize();
         });
-        
+
       </script>
     `;
   };
+  */
 
   const getPrintStyles = () => {
     return `
       @page {
         size: A4;
-        margin: 15mm;
+        margin: 10mm;
       }
       
       * {
@@ -1136,7 +1159,66 @@ const ProgramacaoCozinhaTabs = () => {
         font-size: 10px;
         color: #9ca3af;
       }
-      
+
+      /* Estilos específicos para Por Empresa - SEM tamanhos fixos (controlado por JS) */
+      .por-empresa-page {
+        padding: 8mm;
+      }
+
+      .client-main-header {
+        border-bottom: 3px solid #333;
+      }
+
+      .client-title {
+        font-weight: bold;
+        color: #000;
+        margin: 0;
+        line-height: 1.2;
+      }
+
+      .header-date {
+        font-weight: normal;
+        color: #333;
+      }
+
+      .content-body {
+        flex: 1;
+        overflow: auto;
+      }
+
+      .category-block {
+        page-break-inside: avoid;
+      }
+
+      .category-name {
+        font-weight: bold;
+        color: #000;
+        margin: 0;
+        padding: 0;
+      }
+
+      .items-list {
+        /* Indentação será controlada pelo JS */
+      }
+
+      .item-row {
+        display: flex;
+        align-items: baseline;
+        page-break-inside: avoid;
+      }
+
+      .item-quantity {
+        font-weight: bold;
+        color: #2563eb;
+        min-width: 110px;
+        flex-shrink: 0;
+      }
+
+      .item-name {
+        color: #000;
+        flex: 1;
+      }
+
       .print-page:has(.page-header h1:contains("Por Empresa")) .page-header h1 {
         color: #6366f1;
       }
@@ -1148,11 +1230,7 @@ const ProgramacaoCozinhaTabs = () => {
       .print-page:has(.page-header h1:contains("Acougue")) .page-header h1 {
         color: #dc2626;
       }
-      
-      .print-page:has(.page-header h1:contains("Cozinha")) .page-header h1 {
-        color: #ea580c;
-      }
-      
+
       .print-page:has(.page-header h1:contains("Embalagem")) .page-header h1 {
         color: #2563eb;
       }
@@ -1186,6 +1264,30 @@ const ProgramacaoCozinhaTabs = () => {
           <p className="text-gray-600">Carregando dados iniciais...</p>
         </div>
       </div>
+    );
+  }
+
+  // Renderizar editor de preview se estiver aberto
+  if (showPreviewEditor) {
+    const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
+    return (
+      <PrintPreviewEditor
+        data={{
+          porEmpresaData: ordersByCustomer,
+          saladaData: getSaladaData(),
+          acougueData: getAcougueData(),
+          embalagemData: getEmbalagemData(),
+          selectedDayInfo,
+          formatQuantityDisplay,
+          consolidateCustomerItems,
+          recipes
+        }}
+        onClose={() => setShowPreviewEditor(false)}
+        onPrint={() => {
+          // Callback após impressão bem-sucedida
+          setShowPreviewEditor(false);
+        }}
+      />
     );
   }
 
@@ -1321,7 +1423,7 @@ const ProgramacaoCozinhaTabs = () => {
 
           <div className="mt-6 p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg border border-orange-200">
             <Tabs defaultValue="por-empresa" className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-5 bg-white border-2 border-orange-200 p-2 rounded-lg">
+              <TabsList className="grid w-full grid-cols-4 bg-white border-2 border-orange-200 p-2 rounded-lg">
                 <TabsTrigger 
                   value="por-empresa" 
                   className="flex items-center gap-2 data-[state=active]:bg-indigo-500 data-[state=active]:text-white data-[state=active]:border-indigo-600 border-2 border-transparent hover:border-indigo-300 hover:bg-indigo-50 transition-all duration-200"
@@ -1336,22 +1438,15 @@ const ProgramacaoCozinhaTabs = () => {
                   <Leaf className="w-4 h-4" />
                   Salada
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="acougue" 
+                <TabsTrigger
+                  value="acougue"
                   className="flex items-center gap-2 data-[state=active]:bg-red-500 data-[state=active]:text-white data-[state=active]:border-red-600 border-2 border-transparent hover:border-red-300 hover:bg-red-50 transition-all duration-200"
                 >
                   <Utensils className="w-4 h-4" />
                   Açougue
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="cozinha" 
-                  className="flex items-center gap-2 data-[state=active]:bg-orange-500 data-[state=active]:text-white data-[state=active]:border-orange-600 border-2 border-transparent hover:border-orange-300 hover:bg-orange-50 transition-all duration-200"
-                >
-                  <ChefHat className="w-4 h-4" />
-                  Cozinha
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="embalagem" 
+                <TabsTrigger
+                  value="embalagem"
                   className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:border-blue-600 border-2 border-transparent hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
                 >
                   <Package2 className="w-4 h-4" />
@@ -1397,8 +1492,8 @@ const ProgramacaoCozinhaTabs = () => {
                 />}
               </TabsContent>
 
-              <TabsContent value="cozinha" className="mt-6">
-                {activeTab === 'cozinha' && <CozinhaTab
+              <TabsContent value="embalagem" className="mt-6">
+                {activeTab === 'embalagem' && <EmbalagemTab
                   currentDate={currentDate}
                   selectedDay={selectedDay}
                   weekNumber={weekNumber}
@@ -1406,12 +1501,6 @@ const ProgramacaoCozinhaTabs = () => {
                   weekDays={weekDays}
                   orders={orders}
                   recipes={recipes}
-                  globalKitchenFormat={globalKitchenFormat}
-                />}
-              </TabsContent>
-
-              <TabsContent value="embalagem" className="mt-6">
-                {activeTab === 'embalagem' && <EmbalagemTab
                   globalKitchenFormat={globalKitchenFormat}
                 />}
               </TabsContent>

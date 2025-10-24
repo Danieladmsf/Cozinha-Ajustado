@@ -5,9 +5,23 @@ import { useCategoryDisplay } from '@/hooks/shared/useCategoryDisplay';
 /**
  * Hook para consolidação de pedidos e itens
  * Separa a lógica complexa de consolidação do componente principal
+ * @param {Array} orders - Lista de pedidos
+ * @param {Array} recipes - Lista de receitas
+ * @param {Array} excludeCategories - Lista de categorias a serem excluídas (opcional)
  */
-export const useOrderConsolidation = (orders, recipes) => {
+export const useOrderConsolidation = (orders, recipes, excludeCategories = []) => {
   const { groupItemsByCategory, getOrderedCategories } = useCategoryDisplay();
+
+  // Função para verificar se uma categoria deve ser excluída
+  const shouldExcludeCategory = (category) => {
+    if (!category || excludeCategories.length === 0) return false;
+
+    const categoryLower = category.toLowerCase();
+    return excludeCategories.some(excludeCat =>
+      categoryLower.includes(excludeCat.toLowerCase())
+    );
+  };
+
   // Validação de valores monetários
   const validateAmount = (amount) => {
     const numAmount = parseQuantity(amount);
@@ -147,7 +161,12 @@ export const useOrderConsolidation = (orders, recipes) => {
           };
         });
 
-        const groupedByCategory = groupItemsByCategory(itemsWithCategory);
+        // Filtrar categorias excluídas
+        const filteredItems = itemsWithCategory.filter(item =>
+          !shouldExcludeCategory(item.category)
+        );
+
+        const groupedByCategory = groupItemsByCategory(filteredItems);
         const orderedCategories = getOrderedCategories(groupedByCategory);
 
         const consolidatedItems = {};
@@ -160,12 +179,17 @@ export const useOrderConsolidation = (orders, recipes) => {
 
       // Múltiplos pedidos - precisa consolidar
       const itemsMap = new Map();
-      
+
       customerOrders.forEach((order) => {
         if (!order.items || !Array.isArray(order.items)) return;
 
         order.items.forEach((item) => {
           if (!item.recipe_id && !item.recipe_name) return;
+
+          // Verificar se a categoria deve ser excluída
+          const recipe = recipes?.find(r => r.id === item.recipe_id);
+          const category = recipe?.category || item.category || 'Outros';
+          if (shouldExcludeCategory(category)) return;
 
           // CORRIGIDO: Sempre usar recipe_id como chave para consolidação correta
           // unique_id é específico de cada pedido e causa duplicatas
@@ -173,7 +197,6 @@ export const useOrderConsolidation = (orders, recipes) => {
 
           if (itemsMap.has(key)) {
             const existing = itemsMap.get(key);
-            const recipe = recipes?.find(r => r.id === item.recipe_id);
             const correctUnitType = getCorrectUnitType(item, recipe);
             const addQuantity = parseQuantity(item.quantity);
 
@@ -197,8 +220,6 @@ export const useOrderConsolidation = (orders, recipes) => {
               }
             }
           } else {
-            const recipe = recipes?.find(r => r.id === item.recipe_id);
-
             // Para consolidação: sincronizar com ficha técnica atual
             const correctUnitType = getCorrectUnitType(item, recipe);
 
@@ -230,7 +251,7 @@ export const useOrderConsolidation = (orders, recipes) => {
       
       return consolidatedItems;
     };
-  }, [recipes, groupItemsByCategory, getOrderedCategories]);
+  }, [recipes, groupItemsByCategory, getOrderedCategories, excludeCategories]);
 
   // Estatísticas gerais
   const statistics = useMemo(() => {
