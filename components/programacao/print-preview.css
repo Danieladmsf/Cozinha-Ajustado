@@ -42,10 +42,11 @@
   padding: 12px;
   margin-bottom: 8px;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: grab;
   transition: all 0.2s;
   background: #f9fafb;
   border: 2px solid transparent;
+  user-select: none;
 }
 
 .sidebar-item:hover {
@@ -56,6 +57,17 @@
 .sidebar-item.active {
   background: #dbeafe;
   border-color: #3b82f6;
+}
+
+.sidebar-item.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-item[draggable="true"]:active {
+  cursor: grabbing;
 }
 
 .sidebar-item-number {
@@ -189,14 +201,18 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 40px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 30px;
-  transform-origin: top center;
-  transition: transform 0.2s ease;
   scroll-behavior: smooth;
+  background: #f5f5f5;
+  position: relative;
+}
+
+/* Ajusta tamanho do conteúdo dentro da área de preview */
+.preview-area > div {
+  max-height: fit-content;
 }
 
 /* Editable Block */
@@ -209,6 +225,10 @@
   border: 3px solid transparent;
   display: flex;
   flex-direction: column;
+  width: 794px;  /* Largura fixa A4 */
+  height: 1123px; /* Altura fixa A4 - todos os cards com mesma altura */
+  flex-shrink: 0; /* Não comprimir */
+  overflow: visible; /* Permite badges ficarem fora do card */
 }
 
 .editable-block:hover {
@@ -232,11 +252,12 @@
 /* A4 Page Dimensions */
 .a4-page {
   width: 794px;  /* A4 width in pixels at 96dpi */
+  height: 1123px; /* A4 height - todas as folhas com mesma altura visual */
   padding: 10px; /* Margens mínimas para maximizar área útil */
   box-sizing: border-box;
-  flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Esconde conteúdo que ultrapassa (só visual) */
 }
 
 /* Block Status */

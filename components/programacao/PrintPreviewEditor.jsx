@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw } from "lucide-react";
+import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw, GripVertical } from "lucide-react";
 import './print-preview.css';
 
 // Constantes de tamanho A4 (baseadas em dimensões físicas reais)
@@ -16,9 +16,10 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
   const [editableBlocks, setEditableBlocks] = useState([]);
   const [blockStatus, setBlockStatus] = useState({});
-  const [zoom, setZoom] = useState(100);
+  const [zoom, setZoom] = useState(50); // Zoom inicial reduzido para 50% para visualizar folha inteira
   const [selectedBlock, setSelectedBlock] = useState(null);
   const [hasSavedSizes, setHasSavedSizes] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState(null);
   const previewAreaRef = useRef(null);
 
   // Carregar tamanhos salvos do localStorage
@@ -33,6 +34,30 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     } catch (error) {
       console.error('Erro ao carregar tamanhos salvos:', error);
       return {};
+    }
+  };
+
+  // Carregar ordem salva do localStorage
+  const loadSavedOrder = () => {
+    try {
+      const saved = localStorage.getItem('print-preview-page-order');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      return [];
+    } catch (error) {
+      console.error('Erro ao carregar ordem salva:', error);
+      return [];
+    }
+  };
+
+  // Salvar ordem no localStorage
+  const savePageOrder = (blocks) => {
+    try {
+      const order = blocks.map(block => block.id);
+      localStorage.setItem('print-preview-page-order', JSON.stringify(order));
+    } catch (error) {
+      console.error('Erro ao salvar ordem:', error);
     }
   };
 
@@ -242,13 +267,35 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       });
     }
 
-    setEditableBlocks(blocks);
+    // Aplicar ordem salva se existir
+    const savedOrder = loadSavedOrder();
+    if (savedOrder.length > 0) {
+      // Reordenar blocks baseado na ordem salva
+      const orderedBlocks = [];
+      const blocksMap = new Map(blocks.map(b => [b.id, b]));
+
+      // Adicionar blocos na ordem salva
+      savedOrder.forEach(id => {
+        if (blocksMap.has(id)) {
+          orderedBlocks.push(blocksMap.get(id));
+          blocksMap.delete(id);
+        }
+      });
+
+      // Adicionar blocos novos que não estavam na ordem salva
+      blocksMap.forEach(block => orderedBlocks.push(block));
+
+      setEditableBlocks(orderedBlocks);
+    } else {
+      setEditableBlocks(blocks);
+    }
   }, [porEmpresaData, saladaData, acougueData, embalagemData, recipes]);
 
-  // Salvar automaticamente quando fontSize mudar
+  // Salvar automaticamente quando fontSize ou ordem mudar
   useEffect(() => {
     if (editableBlocks.length > 0) {
       saveFontSizes(editableBlocks);
+      savePageOrder(editableBlocks);
     }
   }, [editableBlocks]);
 
@@ -295,12 +342,19 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     const element = document.getElementById(`block-${blockId}`);
     if (element && previewAreaRef.current) {
       const container = previewAreaRef.current;
-      const elementTop = element.offsetTop;
-      const containerTop = container.scrollTop;
-      const offset = 100; // Espaço do topo
+
+      // Obter posição do elemento no wrapper escalado
+      const elementRect = element.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      // Calcular posição relativa considerando o scroll atual
+      const relativeTop = elementRect.top - containerRect.top + container.scrollTop;
+
+      // Compensar pelo scale/zoom
+      const scaledOffset = 50 / (zoom / 100); // Offset ajustado pelo zoom
 
       container.scrollTo({
-        top: elementTop - offset,
+        top: relativeTop - scaledOffset,
         behavior: 'smooth'
       });
 
@@ -324,11 +378,44 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   };
 
   const handleResetFontSizes = () => {
-    if (confirm('Deseja resetar todos os tamanhos de fonte para os valores padrão?')) {
+    if (confirm('Deseja resetar todos os tamanhos de fonte e ordem das páginas para os valores padrão?')) {
       localStorage.removeItem('print-preview-font-sizes');
+      localStorage.removeItem('print-preview-page-order');
       // Recarregar página para aplicar os padrões
       window.location.reload();
     }
+  };
+
+  // Handlers de drag and drop
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e, dropIndex) => {
+    e.preventDefault();
+
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null);
+      return;
+    }
+
+    // Reordenar blocos
+    const newBlocks = [...editableBlocks];
+    const [draggedBlock] = newBlocks.splice(draggedIndex, 1);
+    newBlocks.splice(dropIndex, 0, draggedBlock);
+
+    setEditableBlocks(newBlocks);
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
   };
 
   const handleContentEdit = (blockId, field, value) => {
@@ -348,8 +435,12 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       if (element) {
         const contentElement = element.querySelector('.block-content');
         if (contentElement) {
+          // Pegar o wrapper interno (primeiro filho) que contém o conteúdo real
+          const contentWrapper = contentElement.firstElementChild;
+          if (!contentWrapper) return block;
+
           // Clonar para não modificar o original
-          const clone = contentElement.cloneNode(true);
+          const clone = contentWrapper.cloneNode(true);
 
           // Limpar atributos de edição e estilos inline extras
           clone.querySelectorAll('[contenteditable]').forEach(el => {
@@ -632,6 +723,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         <div className="sidebar-navigation">
           <div className="sidebar-header">
             <h3 className="text-sm font-bold text-gray-700">Páginas</h3>
+            <p className="text-xs text-gray-500 mt-1">Arraste para reordenar</p>
           </div>
           <div className="sidebar-content">
             {editableBlocks.map((block, index) => {
@@ -642,9 +734,16 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
               return (
                 <div
                   key={block.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDrop={(e) => handleDrop(e, index)}
+                  onDragEnd={handleDragEnd}
                   onClick={() => scrollToBlock(block.id)}
-                  className={`sidebar-item ${selectedBlock === block.id ? 'active' : ''}`}
+                  className={`sidebar-item ${selectedBlock === block.id ? 'active' : ''} ${draggedIndex === index ? 'dragging' : ''}`}
+                  style={{ cursor: draggedIndex === index ? 'grabbing' : 'grab' }}
                 >
+                  <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
                   <div className="sidebar-item-number">{index + 1}</div>
                   <div className="sidebar-item-content">
                     <div className="sidebar-item-title">{block.title}</div>
@@ -669,21 +768,32 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         </div>
 
         {/* Preview Area */}
-        <div ref={previewAreaRef} className="preview-area" style={{ transform: `scale(${zoom / 100})` }}>
-          {editableBlocks.map((block, index) => (
-            <EditableBlock
-              key={block.id}
-              block={block}
-              isSelected={selectedBlock === block.id}
-              onSelect={() => setSelectedBlock(block.id)}
-              onFontSizeChange={(delta) => handleFontSizeChange(block.id, delta)}
-              onAutoFit={() => handleAutoFit(block.id)}
-              onAutoFitComplete={() => handleAutoFitComplete(block.id)}
-              onContentEdit={(field, value) => handleContentEdit(block.id, field, value)}
-              onStatusUpdate={handleStatusUpdate}
-              formatQuantityDisplay={formatQuantityDisplay}
-            />
-          ))}
+        <div ref={previewAreaRef} className="preview-area">
+          <div style={{
+            transform: `scale(${zoom / 100})`,
+            transformOrigin: 'top center',
+            display: 'inline-flex', // inline-flex evita expansão desnecessária
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '20px',
+            minWidth: '794px', // Largura mínima = largura do card A4
+            paddingBottom: '20px'
+          }}>
+            {editableBlocks.map((block, index) => (
+              <EditableBlock
+                key={block.id}
+                block={block}
+                isSelected={selectedBlock === block.id}
+                onSelect={() => setSelectedBlock(block.id)}
+                onFontSizeChange={(delta) => handleFontSizeChange(block.id, delta)}
+                onAutoFit={() => handleAutoFit(block.id)}
+                onAutoFitComplete={() => handleAutoFitComplete(block.id)}
+                onContentEdit={(field, value) => handleContentEdit(block.id, field, value)}
+                onStatusUpdate={handleStatusUpdate}
+                formatQuantityDisplay={formatQuantityDisplay}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -821,24 +931,26 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
       )}
 
       {/* Content */}
-      <div ref={contentRef} className="block-content a4-page">
-        <h1
-          contentEditable={isSelected}
-          suppressContentEditableWarning
-          onBlur={(e) => onContentEdit('title', e.target.textContent)}
-          className="block-title"
-        >
-          {block.title}
-        </h1>
+      <div className="block-content a4-page">
+        {/* Wrapper interno para medir altura real do conteúdo */}
+        <div ref={contentRef}>
+          <h1
+            contentEditable={isSelected}
+            suppressContentEditableWarning
+            onBlur={(e) => onContentEdit('title', e.target.textContent)}
+            className="block-title"
+          >
+            {block.title}
+          </h1>
 
-        <div
-          contentEditable={isSelected}
-          suppressContentEditableWarning
-          onBlur={(e) => onContentEdit('subtitle', e.target.textContent)}
-          className="block-subtitle"
-        >
-          {block.subtitle}
-        </div>
+          <div
+            contentEditable={isSelected}
+            suppressContentEditableWarning
+            onBlur={(e) => onContentEdit('subtitle', e.target.textContent)}
+            className="block-subtitle"
+          >
+            {block.subtitle}
+          </div>
 
         {block.type === 'empresa' && block.items && (
           <div className="items-container">
@@ -971,6 +1083,7 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
             ))}
           </div>
         )}
+        </div> {/* Fecha wrapper de medição de conteúdo */}
       </div>
 
       {/* Page Overflow Indicator */}
