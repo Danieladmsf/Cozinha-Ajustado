@@ -23,6 +23,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const [hasSavedSizes, setHasSavedSizes] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [pdfProgress, setPdfProgress] = useState({ current: 0, total: 0 });
   const previewAreaRef = useRef(null);
 
   // Carregar tamanhos salvos do localStorage
@@ -493,8 +494,15 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   };
 
   const handleDownloadPDF = async () => {
+    const originalZoom = zoom;
     try {
       setIsGeneratingPDF(true);
+
+      // Salvar zoom atual e resetar para 100% para captura precisa
+      setZoom(100);
+
+      // Aguardar um momento para o DOM atualizar com zoom 100%
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       // Criar PDF em orientação portrait A4
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -503,44 +511,71 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
       // Capturar todos os blocos visíveis
       const blockElements = document.querySelectorAll('.a4-page');
+      const totalPages = blockElements.length;
+
+      setPdfProgress({ current: 0, total: totalPages });
 
       for (let i = 0; i < blockElements.length; i++) {
         const block = blockElements[i];
 
+        // Atualizar progresso
+        setPdfProgress({ current: i + 1, total: totalPages });
+
         // Capturar o bloco como canvas com alta qualidade
         const canvas = await html2canvas(block, {
-          scale: 2, // Dobrar a qualidade
+          scale: 3, // Tripla qualidade para texto mais nítido
           useCORS: true,
+          allowTaint: true,
           logging: false,
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
+          windowWidth: 794, // Largura fixa A4
+          windowHeight: 1123, // Altura fixa A4
+          letterRendering: true, // Melhor renderização de texto
+          removeContainer: true, // Remove o container temporário
+          imageTimeout: 0, // Sem timeout para imagens
+          onclone: (clonedDoc) => {
+            // Garantir que todos os estilos sejam aplicados no clone
+            const clonedBlock = clonedDoc.querySelector('.a4-page');
+            if (clonedBlock) {
+              clonedBlock.style.width = '794px';
+              clonedBlock.style.height = '1123px';
+              clonedBlock.style.overflow = 'visible';
+            }
+          }
         });
 
-        // Converter canvas para imagem
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        // Converter canvas para imagem PNG (melhor qualidade que JPEG)
+        const imgData = canvas.toDataURL('image/png', 1.0);
 
-        // Calcular dimensões mantendo proporção
+        // Calcular dimensões mantendo proporção A4
         const imgWidth = pdfWidth;
-        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+        const imgHeight = pdfHeight;
 
         // Adicionar nova página se não for a primeira
         if (i > 0) {
           pdf.addPage();
         }
 
-        // Adicionar imagem ao PDF
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+        // Adicionar imagem ao PDF cobrindo toda a página
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
       }
 
-      // Gerar nome do arquivo com data
-      const fileName = `Programacao_${selectedDayInfo?.fullDate || 'producao'}.pdf`;
+      // Gerar nome do arquivo com data formatada
+      const dateStr = selectedDayInfo?.fullDate?.replace(/\//g, '_') || 'producao';
+      const fileName = `Programacao_${dateStr}.pdf`;
 
       // Fazer download do PDF
       pdf.save(fileName);
 
+      // Restaurar zoom original
+      setZoom(originalZoom);
+      setPdfProgress({ current: 0, total: 0 });
       setIsGeneratingPDF(false);
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
-      alert('Erro ao gerar PDF. Tente novamente.');
+      alert('Erro ao gerar PDF. Por favor, tente novamente.');
+      setZoom(originalZoom);
+      setPdfProgress({ current: 0, total: 0 });
       setIsGeneratingPDF(false);
     }
   };
@@ -774,7 +809,9 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
             {isGeneratingPDF ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Gerando...
+                {pdfProgress.total > 0
+                  ? `Gerando ${pdfProgress.current}/${pdfProgress.total}...`
+                  : 'Preparando...'}
               </>
             ) : (
               <>
