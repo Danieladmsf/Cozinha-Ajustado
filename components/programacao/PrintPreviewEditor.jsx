@@ -284,10 +284,56 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     }
   }, [markItemAsEdited]);
 
-  const handleRejectPortalChange = useCallback((itemKey) => {
-    setResolvedConflicts(prev => ({ ...prev, [itemKey]: 'rejected' }));
+  const handleRejectPortalChange = useCallback((itemKey, currentValue) => {
+    setResolvedConflicts(prev => ({
+      ...prev,
+      [itemKey]: {
+        status: 'rejected',
+        portalValueAtResolution: currentValue
+      }
+    }));
     rejectPortalChange(itemKey);
   }, [rejectPortalChange]);
+
+  // Helper para obter status de resolução (suporta formato antigo e novo)
+  const getResolutionStatus = useCallback((itemKey) => {
+    const resolution = resolvedConflicts[itemKey];
+    if (!resolution) return null;
+    // Formato novo: { status: 'accepted'/'rejected', portalValueAtResolution: '...' }
+    if (typeof resolution === 'object' && resolution.status) {
+      return resolution.status;
+    }
+    // Formato antigo: 'accepted' ou 'rejected' (string)
+    return resolution;
+  }, [resolvedConflicts]);
+
+  // Limpar conflitos resolvidos se o valor do portal mudou novamente
+  useEffect(() => {
+    if (!changedItems || Object.keys(changedItems).length === 0) return;
+
+    setResolvedConflicts(prev => {
+      const updated = { ...prev };
+      let hasChanges = false;
+
+      Object.entries(prev).forEach(([itemKey, resolution]) => {
+        // Se foi rejeitado, verificar se o valor do portal mudou novamente
+        const status = typeof resolution === 'object' ? resolution.status : resolution;
+        if (status === 'rejected') {
+          const changeInfo = changedItems[itemKey];
+          if (changeInfo && resolution?.portalValueAtResolution) {
+            const currentPortalValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
+            if (currentPortalValue !== resolution.portalValueAtResolution) {
+              // Valor do portal mudou novamente, limpar resolução
+              delete updated[itemKey];
+              hasChanges = true;
+            }
+          }
+        }
+      });
+
+      return hasChanges ? updated : prev;
+    });
+  }, [changedItems]);
 
   // Resetar snapshot (considerar valores atuais como novos valores base)
   const handleResetSnapshot = useCallback(() => {
@@ -1472,7 +1518,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
                 getItemChangeInfo={getItemChangeInfo}
                 acceptPortalChange={handleAcceptPortalChange}
                 rejectPortalChange={handleRejectPortalChange}
-                resolvedConflicts={resolvedConflicts}
+                getResolutionStatus={getResolutionStatus}
                 isLocked={isLocked}
               />
             ))}
@@ -1483,7 +1529,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   );
 }
 
-function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFit, onAutoFitComplete, onContentEdit, onItemEdit, onStatusUpdate, formatQuantityDisplay, isItemEdited, getItemEditInfo, isItemChanged, getItemChangeInfo, acceptPortalChange, rejectPortalChange, resolvedConflicts, isLocked }) {
+function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFit, onAutoFitComplete, onContentEdit, onItemEdit, onStatusUpdate, formatQuantityDisplay, isItemEdited, getItemEditInfo, isItemChanged, getItemChangeInfo, acceptPortalChange, rejectPortalChange, getResolutionStatus, isLocked }) {
   const blockRef = useRef(null);
   const contentRef = useRef(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -1684,7 +1730,7 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
 
                   // PRIORIDADE 1: Detectar CONFLITO (editado manualmente + mudou no portal)
                   const hasConflict = edited && changed;
-                  const conflictResolution = resolvedConflicts[itemKey];
+                  const conflictResolution = getResolutionStatus ? getResolutionStatus(itemKey) : null;
 
                   let tooltipContent = null;
                   let lineStyles = {};
@@ -1814,7 +1860,10 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                             });
                             acceptPortalChange(itemKey, newValue);
                           }}
-                          onReject={() => rejectPortalChange(itemKey)}
+                          onReject={() => {
+                            const currentValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
+                            rejectPortalChange(itemKey, currentValue);
+                          }}
                         />
                       )}
                     </div>
@@ -1957,7 +2006,10 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                             });
                             acceptPortalChange(itemKey, newValue);
                           }}
-                          onReject={() => rejectPortalChange(itemKey)}
+                          onReject={() => {
+                            const currentValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
+                            rejectPortalChange(itemKey, currentValue);
+                          }}
                         />
                       )}
                     </div>
@@ -2114,7 +2166,10 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                             });
                             acceptPortalChange(itemKey, newValue);
                           }}
-                          onReject={() => rejectPortalChange(itemKey)}
+                          onReject={() => {
+                            const currentValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
+                            rejectPortalChange(itemKey, currentValue);
+                          }}
                         />
                       )}
                     </div>
