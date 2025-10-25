@@ -8,6 +8,7 @@ import html2canvas from 'html2canvas';
 import { useImpressaoProgramacao } from '@/hooks/programacao/useImpressaoProgramacao';
 import { formatRecipeName } from './utils/formatUtils';
 import { createItemKey } from './utils/itemKeyUtils';
+import { createOrdersSnapshot, detectOrderChanges, loadSnapshot, saveSnapshot } from './utils/snapshotUtils';
 import './print-preview.css';
 
 // Constantes de tamanho A4 (baseadas em dimensões físicas reais)
@@ -169,19 +170,8 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       initialOrdersRef.current = parsed;
       setInitialSnapshot(parsed);
     } else if (!initialOrdersRef.current) {
-      // Criar novo snapshot
-      const snapshot = {};
-      originalOrders.forEach(order => {
-        if (!order.items) return;
-        order.items.forEach(item => {
-          const itemKey = createItemKey(item.recipe_name, order.customer_name);
-          snapshot[itemKey] = {
-            quantity: item.quantity,
-            unit_type: item.unit_type,
-            createdAt: new Date().toISOString()
-          };
-        });
-      });
+      // Criar novo snapshot usando utilitário
+      const snapshot = createOrdersSnapshot(originalOrders);
       initialOrdersRef.current = snapshot;
       setInitialSnapshot(snapshot);
       // Salvar no localStorage
@@ -194,19 +184,9 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     if (!initialOrdersRef.current || !originalOrders) return;
 
     const changes = {};
-    const currentSnapshot = {};
 
-    // Criar snapshot atual
-    originalOrders.forEach(order => {
-      if (!order.items) return;
-      order.items.forEach(item => {
-        const itemKey = createItemKey(item.recipe_name, order.customer_name);
-        currentSnapshot[itemKey] = {
-          quantity: item.quantity,
-          unit_type: item.unit_type
-        };
-      });
-    });
+    // Criar snapshot atual usando utilitário
+    const currentSnapshot = createOrdersSnapshot(originalOrders);
 
     // Comparar com snapshot inicial
     Object.entries(currentSnapshot).forEach(([itemKey, current]) => {
@@ -338,19 +318,8 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
     const savedSnapshotKey = `initial-snapshot-${weekNumber}-${year}-${dayNumber}`;
 
-    // Criar novo snapshot com valores atuais
-    const snapshot = {};
-    originalOrders.forEach(order => {
-      if (!order.items) return;
-      order.items.forEach(item => {
-        const itemKey = createItemKey(item.recipe_name, order.customer_name);
-        snapshot[itemKey] = {
-          quantity: item.quantity,
-          unit_type: item.unit_type,
-          createdAt: new Date().toISOString()
-        };
-      });
-    });
+    // Criar novo snapshot com valores atuais usando utilitário
+    const snapshot = createOrdersSnapshot(originalOrders);
 
     // Atualizar refs e state
     initialOrdersRef.current = snapshot;
