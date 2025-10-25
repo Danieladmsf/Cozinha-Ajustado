@@ -16,6 +16,9 @@ import { ChangeTimestamp } from './components/ChangeTimestamp';
 import { useConflictResolution } from './hooks/useConflictResolution';
 import { useFontSizeManager } from './hooks/useFontSizeManager';
 import { useBlockManagement } from './hooks/useBlockManagement';
+import { EmpresaBlockContent } from './components/EditableBlock/EmpresaBlockContent';
+import { DetailedSectionBlock } from './components/EditableBlock/DetailedSectionBlock';
+import { EmbalagemBlock } from './components/EditableBlock/EmbalagemBlock';
 import './print-preview.css';
 
 // Constantes de tamanho A4 (baseadas em dimensões físicas reais)
