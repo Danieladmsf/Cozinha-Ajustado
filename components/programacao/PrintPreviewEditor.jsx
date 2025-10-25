@@ -337,23 +337,29 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         if (!resolution?.portalValueAtResolution) return;
 
         // Extrair informações da chave de resolução
-        // Formato: "CompanyName_RecipeName_CustomerName" OU "RecipeName_CustomerName"
+        // Formato blocos empresa: "CompanyName_RecipeName_CustomerName"
+        // Ex: "Museu_Costelinha Assada_sem_cliente"
+        // Formato outros blocos: "RecipeName_CustomerName"
         const parts = resolvedItemKey.split('_');
-        let recipeName, customerName;
+        let recipeName, companyName;
 
         if (parts.length >= 3) {
           // Formato empresa: "CompanyName_RecipeName_CustomerName"
-          customerName = parts[0]; // CompanyName serve como customerName
-          recipeName = parts.slice(1, -1).join('_');
+          companyName = parts[0]; // "Museu"
+          recipeName = parts.slice(1, -1).join('_'); // "Costelinha Assada"
+          // Último elemento é "sem_cliente", ignorar
         } else {
           // Formato padrão: "RecipeName_CustomerName"
           recipeName = parts[0];
-          customerName = parts[1];
+          companyName = parts[1];
         }
 
-        // Procurar por mudança com chave padrão
-        const changeKey = `${recipeName}_${customerName}`;
+        // Construir chave para changedItems: "RecipeName_CompanyName"
+        // Ex: "Costelinha Assada_Museu"
+        const changeKey = `${recipeName}_${companyName}`;
         const changeInfo = changedItems[changeKey];
+
+        console.log('🔍 Mapeando:', resolvedItemKey, '→', changeKey, changeInfo ? '✅ encontrado' : '❌ não encontrado');
 
         if (changeInfo) {
           const currentPortalValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
