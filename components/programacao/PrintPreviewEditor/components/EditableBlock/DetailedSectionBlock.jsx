@@ -1,5 +1,6 @@
 import { Tooltip } from '../Tooltip';
 import { ConflictButtons } from '../ConflictButtons';
+import { ChangeTimestamp } from '../ChangeTimestamp';
 import { createItemKey } from '../../utils/itemKeyUtils';
 import { formatRecipeName } from '../../utils/formatUtils';
 import { getConflictLineStyles, getConflictTooltip } from '../../utils/conflictUtils';
@@ -107,6 +108,10 @@ export function DetailedSectionBlock({
                     })})
                   </span>
                 )}
+                {/* Timestamp para mudanças do portal (não conflito) */}
+                {!hasConflict && changed && changeInfo?.detectedAt && (
+                  <ChangeTimestamp timestamp={changeInfo.detectedAt} />
+                )}
                 {/* Botões de resolução de conflito */}
                 {hasConflict && !conflictResolution && changeInfo && (
                   <ConflictButtons
@@ -125,6 +130,20 @@ export function DetailedSectionBlock({
               </div>
             );
           })}
+          {recipe.showTotal && (
+            <div className="item-line" style={{ borderTop: '2px solid #e5e7eb', paddingTop: '8px', marginTop: '8px', fontWeight: 'bold' }}>
+              <span className="item-text">TOTAL:</span>
+              <span className="item-qty">→</span>
+              <span
+                className="item-qty"
+                contentEditable={isSelected && !isLocked}
+                suppressContentEditableWarning
+                style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
+              >
+                {formatQuantityDisplay({ quantity: recipe.total, unit_type: recipe.unit_type })}
+              </span>
+            </div>
+          )}
         </div>
       ))}
     </div>

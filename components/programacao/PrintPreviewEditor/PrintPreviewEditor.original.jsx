@@ -1260,395 +1260,58 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
             {block.subtitle}
           </div>
 
-        {block.type === 'empresa' && block.items && (
-          <div className="items-container">
-            {Object.entries(block.items).map(([categoryName, items]) => (
-              <div key={categoryName} className="category-section">
-                <h2
-                  className="category-title"
-                  contentEditable={isSelected && !isLocked}
-                  suppressContentEditableWarning
-                  style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
-                >
-                  {categoryName}
-                </h2>
-                {items.map((item, idx) => {
-                  // Normalizar customer_name para garantir consistência
-                  const normalizedCustomerName = item.customer_name || 'sem_cliente';
-                  // Para blocos 'empresa', incluir block.title na chave para evitar colisões
-                  const itemKey = createItemKey(item.recipe_name, normalizedCustomerName, block.title);
-
-                  const edited = isItemEdited ? isItemEdited(itemKey) : false;
-                  // Para blocos 'empresa', usar block.title como clientName na detecção de mudanças
-                  const changed = isItemChanged ? isItemChanged(item.recipe_name, block.title) : false;
-                  const editInfo = edited && getItemEditInfo ? getItemEditInfo(itemKey) : null;
-                  const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(item.recipe_name, block.title) : null;
-
-                  // PRIORIDADE 1: Detectar CONFLITO (editado manualmente + mudou no portal)
-                  const hasConflict = edited && changed;
-                  const conflictResolution = getResolutionStatus ? getResolutionStatus(itemKey) : null;
-
-                  // Usar utilitários para obter estilos e tooltip
-                  const lineStyles = getConflictLineStyles({
-                    conflictResolution,
-                    hasConflict,
-                    edited,
-                    changed
-                  });
-
-                  const tooltipContent = getConflictTooltip({
-                    conflictResolution,
-                    hasConflict,
-                    edited,
-                    changed,
-                    editInfo,
-                    changeInfo
-                  });
-
-                  return (
-                    <div
-                      key={idx}
-                      className="item-line"
-                      style={lineStyles}
-                    >
-                      <Tooltip content={tooltipContent}>
-                        <span
-                          className="item-qty"
-                          contentEditable={isSelected && !isLocked && !hasConflict}
-                          suppressContentEditableWarning
-                          onFocus={(e) => handleEditStart(e, item.recipe_name, normalizedCustomerName, block.title)}
-                          onBlur={(e) => handleEditEnd(e, item.recipe_name, normalizedCustomerName, 'quantity', block.title)}
-                        >
-                          {(() => {
-                            // PRIORIDADE 1: Se foi editado manualmente, mostra valor editado
-                            if (edited && editInfo?.editedValue) {
-                              return editInfo.editedValue;
-                            }
-                            // PRIORIDADE 2: Se mudou no portal (sem edição manual), mostra novo valor do portal
-                            if (changed && !edited && changeInfo?.currentQuantity) {
-                              return formatQuantityDisplay({
-                                quantity: changeInfo.currentQuantity,
-                                unit_type: changeInfo.currentUnit || item.unit_type
-                              });
-                            }
-                            // PRIORIDADE 3: Mostra valor original
-                            return formatQuantityDisplay(item);
-                          })()}
-                        </span>
-                      </Tooltip>
-                      <Tooltip content={tooltipContent}>
-                        <span
-                          className="item-text"
-                          contentEditable={isSelected && !isLocked && !hasConflict}
-                          suppressContentEditableWarning
-                          onFocus={(e) => handleEditStart(e, item.recipe_name, normalizedCustomerName, block.title)}
-                          onBlur={(e) => handleEditEnd(e, item.recipe_name, normalizedCustomerName, 'name', block.title)}
-                        >
-                          {formatRecipeName(item.recipe_name)}
-                        </span>
-                      </Tooltip>
-                      {/* Valor do portal entre parênteses (em caso de conflito não resolvido) */}
-                      {hasConflict && !conflictResolution && changeInfo?.currentQuantity && (
-                        <span className="portal-value no-print" style={{
-                          marginLeft: '8px',
-                          color: '#6b7280',
-                          fontSize: '0.95em'
-                        }}>
-                          ({formatQuantityDisplay({
-                            quantity: changeInfo.currentQuantity,
-                            unit_type: changeInfo.currentUnit || item.unit_type
-                          })})
-                        </span>
-                      )}
-                      {/* Timestamp para mudanças do portal (não conflito) */}
-                      {!hasConflict && changed && changeInfo?.detectedAt && (
-                        <ChangeTimestamp timestamp={changeInfo.detectedAt} />
-                      )}
-                      {/* Botões de conflito (apenas se não resolvido) */}
-                      {hasConflict && !conflictResolution && changeInfo && (
-                        <ConflictButtons
-                          onAccept={() => {
-                            const newValue = formatQuantityDisplay({
-                              quantity: changeInfo.currentQuantity,
-                              unit_type: changeInfo.currentUnit || item.unit_type || cliente.unit_type
-                            });
-                            acceptPortalChange(
-                              itemKey,
-                              newValue,
-                              changeInfo.currentQuantity,
-                              changeInfo.currentUnit || item.unit_type || cliente.unit_type
-                            );
-                          }}
-                          onReject={() => {
-                            const currentValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
-                            rejectPortalChange(itemKey, currentValue);
-                          }}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
+        {block.type === 'empresa' && (
+          <EmpresaBlockContent
+            block={block}
+            isSelected={isSelected}
+            isLocked={isLocked}
+            handleEditStart={handleEditStart}
+            handleEditEnd={handleEditEnd}
+            formatQuantityDisplay={formatQuantityDisplay}
+            isItemEdited={isItemEdited}
+            getItemEditInfo={getItemEditInfo}
+            isItemChanged={isItemChanged}
+            getItemChangeInfo={getItemChangeInfo}
+            acceptPortalChange={acceptPortalChange}
+            rejectPortalChange={rejectPortalChange}
+            getResolutionStatus={getResolutionStatus}
+          />
         )}
 
-        {block.type === 'detailed-section' && block.items && (
-          <div className="items-container">
-            {block.items.map((recipe, recipeIdx) => (
-              <div key={recipeIdx} className="category-section">
-                <h2
-                  className="category-title"
-                  contentEditable={isSelected && !isLocked}
-                  suppressContentEditableWarning
-                  style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
-                >
-                  {formatRecipeName(recipe.recipe_name)}
-                </h2>
-                {recipe.clientes.map((cliente, idx) => {
-                  const itemKey = createItemKey(recipe.recipe_name, cliente.customer_name);
-                  const edited = isItemEdited && isItemEdited(itemKey);
-                  const changed = isItemChanged && isItemChanged(recipe.recipe_name, cliente.customer_name);
-                  const editInfo = edited && getItemEditInfo ? getItemEditInfo(itemKey) : null;
-                  const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(recipe.recipe_name, cliente.customer_name) : null;
-
-                  const hasConflict = edited && changed;
-                  const conflictResolution = getResolutionStatus ? getResolutionStatus(itemKey) : null;
-
-                  // Usar utilitários para obter estilos e tooltip
-                  const lineStyles = getConflictLineStyles({
-                    conflictResolution,
-                    hasConflict,
-                    edited,
-                    changed
-                  });
-
-                  const tooltipContent = getConflictTooltip({
-                    conflictResolution,
-                    hasConflict,
-                    edited,
-                    changed,
-                    editInfo,
-                    changeInfo
-                  });
-
-                  return (
-                    <div
-                      key={idx}
-                      className="item-line"
-                      style={lineStyles}
-                    >
-                      <Tooltip content={tooltipContent}>
-                        <span
-                          className="item-text"
-                          style={{ textTransform: 'uppercase' }}
-                          contentEditable={isSelected && !isLocked}
-                          suppressContentEditableWarning
-                          onFocus={(e) => handleEditStart(e, itemKey)}
-                          onBlur={(e) => handleEditEnd(e, recipe.recipe_name, cliente.customer_name, 'customer')}
-                        >
-                          {cliente.customer_name}
-                        </span>
-                      </Tooltip>
-                      <span className="item-qty">→</span>
-                      <Tooltip content={tooltipContent}>
-                        <span
-                          className="item-qty"
-                          contentEditable={isSelected && !isLocked}
-                          suppressContentEditableWarning
-                          onFocus={(e) => handleEditStart(e, itemKey)}
-                          onBlur={(e) => handleEditEnd(e, recipe.recipe_name, cliente.customer_name, 'quantity')}
-                        >
-                          {formatQuantityDisplay(cliente)}
-                        </span>
-                      </Tooltip>
-                      {/* Valor do portal entre parênteses (em caso de conflito não resolvido) */}
-                      {hasConflict && !conflictResolution && changeInfo?.currentQuantity && (
-                        <span className="portal-value no-print" style={{
-                          marginLeft: '8px',
-                          color: '#6b7280',
-                          fontSize: '0.95em'
-                        }}>
-                          ({formatQuantityDisplay({
-                            quantity: changeInfo.currentQuantity,
-                            unit_type: changeInfo.currentUnit || cliente.unit_type
-                          })})
-                        </span>
-                      )}
-                      {/* Timestamp para mudanças do portal (não conflito) */}
-                      {!hasConflict && changed && changeInfo?.detectedAt && (
-                        <ChangeTimestamp timestamp={changeInfo.detectedAt} />
-                      )}
-                      {/* Botões de conflito (apenas se não resolvido) */}
-                      {hasConflict && !conflictResolution && changeInfo && (
-                        <ConflictButtons
-                          onAccept={() => {
-                            const newValue = formatQuantityDisplay({
-                              quantity: changeInfo.currentQuantity,
-                              unit_type: changeInfo.currentUnit || item.unit_type || cliente.unit_type
-                            });
-                            acceptPortalChange(
-                              itemKey,
-                              newValue,
-                              changeInfo.currentQuantity,
-                              changeInfo.currentUnit || item.unit_type || cliente.unit_type
-                            );
-                          }}
-                          onReject={() => {
-                            const currentValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
-                            rejectPortalChange(itemKey, currentValue);
-                          }}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-                {recipe.showTotal && (
-                  <div className="item-line" style={{ borderTop: '2px solid #e5e7eb', paddingTop: '8px', marginTop: '8px', fontWeight: 'bold' }}>
-                    <span className="item-text">TOTAL:</span>
-                    <span className="item-qty"></span>
-                    <span
-                      className="item-qty"
-                      contentEditable={isSelected && !isLocked}
-                      suppressContentEditableWarning
-                      style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
-                    >
-                      {formatQuantityDisplay({ quantity: recipe.total, unit_type: recipe.unit_type })}
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+        {block.type === 'detailed-section' && (
+          <DetailedSectionBlock
+            block={block}
+            isSelected={isSelected}
+            isLocked={isLocked}
+            handleEditStart={handleEditStart}
+            handleEditEnd={handleEditEnd}
+            formatQuantityDisplay={formatQuantityDisplay}
+            isItemEdited={isItemEdited}
+            getItemEditInfo={getItemEditInfo}
+            isItemChanged={isItemChanged}
+            getItemChangeInfo={getItemChangeInfo}
+            acceptPortalChange={acceptPortalChange}
+            rejectPortalChange={rejectPortalChange}
+            getResolutionStatus={getResolutionStatus}
+          />
         )}
 
-        {block.type === 'embalagem-category' && block.items && (
-          <div className="items-container">
-            {block.items.map((recipe, recipeIdx) => (
-              <div key={recipeIdx} className="category-section">
-                <h2
-                  className="category-title"
-                  contentEditable={isSelected && !isLocked}
-                  suppressContentEditableWarning
-                  style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
-                >
-                  {formatRecipeName(recipe.recipe_name)}
-                </h2>
-                {recipe.clientes.map((cliente, idx) => {
-                  const itemKey = createItemKey(recipe.recipe_name, cliente.customer_name);
-                  const edited = isItemEdited && isItemEdited(itemKey);
-                  const changed = isItemChanged && isItemChanged(recipe.recipe_name, cliente.customer_name);
-                  const editInfo = edited && getItemEditInfo ? getItemEditInfo(itemKey) : null;
-                  const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(recipe.recipe_name, cliente.customer_name) : null;
-
-                  const hasConflict = edited && changed;
-                  const conflictResolution = getResolutionStatus ? getResolutionStatus(itemKey) : null;
-
-                  // Usar utilitários para obter estilos e tooltip
-                  const lineStyles = getConflictLineStyles({
-                    conflictResolution,
-                    hasConflict,
-                    edited,
-                    changed
-                  });
-
-                  const tooltipContent = getConflictTooltip({
-                    conflictResolution,
-                    hasConflict,
-                    edited,
-                    changed,
-                    editInfo,
-                    changeInfo
-                  });
-
-                  return (
-                    <div
-                      key={idx}
-                      className="item-line"
-                      style={lineStyles}
-                    >
-                      <Tooltip content={tooltipContent}>
-                        <span
-                          className="item-text"
-                          style={{ textTransform: 'uppercase' }}
-                          contentEditable={isSelected && !isLocked}
-                          suppressContentEditableWarning
-                          onFocus={(e) => handleEditStart(e, itemKey)}
-                          onBlur={(e) => handleEditEnd(e, recipe.recipe_name, cliente.customer_name, 'customer')}
-                        >
-                          {cliente.customer_name}
-                        </span>
-                      </Tooltip>
-                      <span className="item-qty">→</span>
-                      <Tooltip content={tooltipContent}>
-                        <span
-                          className="item-qty"
-                          contentEditable={isSelected && !isLocked}
-                          suppressContentEditableWarning
-                          onFocus={(e) => handleEditStart(e, itemKey)}
-                          onBlur={(e) => handleEditEnd(e, recipe.recipe_name, cliente.customer_name, 'quantity')}
-                        >
-                          {formatQuantityDisplay(cliente)}
-                        </span>
-                      </Tooltip>
-                      {/* Valor do portal entre parênteses (em caso de conflito não resolvido) */}
-                      {hasConflict && !conflictResolution && changeInfo?.currentQuantity && (
-                        <span className="portal-value no-print" style={{
-                          marginLeft: '8px',
-                          color: '#6b7280',
-                          fontSize: '0.95em'
-                        }}>
-                          ({formatQuantityDisplay({
-                            quantity: changeInfo.currentQuantity,
-                            unit_type: changeInfo.currentUnit || cliente.unit_type
-                          })})
-                        </span>
-                      )}
-                      {/* Timestamp para mudanças do portal (não conflito) */}
-                      {!hasConflict && changed && changeInfo?.detectedAt && (
-                        <ChangeTimestamp timestamp={changeInfo.detectedAt} />
-                      )}
-                      {/* Botões de conflito (apenas se não resolvido) */}
-                      {hasConflict && !conflictResolution && changeInfo && (
-                        <ConflictButtons
-                          onAccept={() => {
-                            const newValue = formatQuantityDisplay({
-                              quantity: changeInfo.currentQuantity,
-                              unit_type: changeInfo.currentUnit || item.unit_type || cliente.unit_type
-                            });
-                            acceptPortalChange(
-                              itemKey,
-                              newValue,
-                              changeInfo.currentQuantity,
-                              changeInfo.currentUnit || item.unit_type || cliente.unit_type
-                            );
-                          }}
-                          onReject={() => {
-                            const currentValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
-                            rejectPortalChange(itemKey, currentValue);
-                          }}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-                {recipe.showTotal && (
-                  <div className="item-line" style={{ borderTop: '2px solid #e5e7eb', paddingTop: '8px', marginTop: '8px', fontWeight: 'bold' }}>
-                    <span className="item-text">TOTAL:</span>
-                    <span className="item-qty"></span>
-                    <span
-                      className="item-qty"
-                      contentEditable={isSelected && !isLocked}
-                      suppressContentEditableWarning
-                      style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
-                    >
-                      {formatQuantityDisplay({ quantity: recipe.total, unit_type: recipe.unit_type })}
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+        {block.type === 'embalagem-category' && (
+          <EmbalagemBlock
+            block={block}
+            isSelected={isSelected}
+            isLocked={isLocked}
+            handleEditStart={handleEditStart}
+            handleEditEnd={handleEditEnd}
+            formatQuantityDisplay={formatQuantityDisplay}
+            isItemEdited={isItemEdited}
+            getItemEditInfo={getItemEditInfo}
+            isItemChanged={isItemChanged}
+            getItemChangeInfo={getItemChangeInfo}
+            acceptPortalChange={acceptPortalChange}
+            rejectPortalChange={rejectPortalChange}
+            getResolutionStatus={getResolutionStatus}
+          />
         )}
         </div> {/* Fecha wrapper de medição de conteúdo */}
       </div>

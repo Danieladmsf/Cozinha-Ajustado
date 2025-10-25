@@ -1,5 +1,6 @@
 import { Tooltip } from '../Tooltip';
 import { ConflictButtons } from '../ConflictButtons';
+import { ChangeTimestamp } from '../ChangeTimestamp';
 import { createItemKey } from '../../utils/itemKeyUtils';
 import { formatRecipeName } from '../../utils/formatUtils';
 import { getConflictLineStyles, getConflictTooltip } from '../../utils/conflictUtils';
@@ -126,6 +127,10 @@ export function EmpresaBlockContent({
                       unit_type: changeInfo.currentUnit || item.unit_type
                     })})
                   </span>
+                )}
+                {/* Timestamp para mudanças do portal (não conflito) */}
+                {!hasConflict && changed && changeInfo?.detectedAt && (
+                  <ChangeTimestamp timestamp={changeInfo.detectedAt} />
                 )}
                 {/* Botões de resolução de conflito */}
                 {hasConflict && !conflictResolution && changeInfo && (
