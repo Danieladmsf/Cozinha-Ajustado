@@ -1280,7 +1280,8 @@ const ProgramacaoCozinhaTabs = () => {
           selectedDayInfo,
           formatQuantityDisplay,
           consolidateCustomerItems,
-          recipes
+          recipes,
+          originalOrders: filteredOrders
         }}
         onClose={() => setShowPreviewEditor(false)}
         onPrint={() => {

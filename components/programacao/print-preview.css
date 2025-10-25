@@ -373,7 +373,8 @@
   font-weight: bold;
   margin-bottom: 8px; /* Reduzido de 16px para 8px */
   border-bottom: 2px solid #e5e7eb;
-  padding-bottom: 4px; /* Reduzido de 8px para 4px */
+  padding-bottom: 8px; /* Aumentado de 4px para 8px para linha ficar visível */
+  display: block; /* Garante que a borda fique sempre abaixo do texto */
 }
 
 .item-line {
@@ -450,4 +451,16 @@
   .preview-area {
     padding: 20px;
   }
+}
+
+/* Ocultar elementos que não devem aparecer na impressão/PDF */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Também ocultar durante captura de canvas para PDF */
+.print-mode .no-print {
+  display: none !important;
 }

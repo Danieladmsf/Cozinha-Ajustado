@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
-import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw, GripVertical, Download } from "lucide-react";
+import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw, GripVertical, Download, Users, Lock, AlertTriangle, Cloud, CheckCircle } from "lucide-react";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { useImpressaoProgramacao } from '@/hooks/programacao/useImpressaoProgramacao';
 import './print-preview.css';
 
 // Constantes de tamanho A4 (baseadas em dimensões físicas reais)
@@ -13,8 +14,141 @@ const A4_WIDTH_PX = 794;   // 210mm = 794px
 const A4_HEIGHT_PX = 1123;  // 297mm = 1123px
 const PAGE_PADDING_PX = 10; // Padding definido em .a4-page (print-preview.css)
 
+// Componente Tooltip para mostrar informações de edição
+function Tooltip({ children, content }) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  if (!content) return children;
+
+  return (
+    <div
+      className="relative inline-block"
+      onMouseEnter={() => setIsVisible(true)}
+      onMouseLeave={() => setIsVisible(false)}
+    >
+      {children}
+      {isVisible && (
+        <div className="absolute z-50 px-3 py-2 text-xs font-medium text-white bg-gray-900 rounded-lg shadow-sm whitespace-nowrap" style={{ bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '8px' }}>
+          {content}
+          <div className="absolute w-2 h-2 bg-gray-900 transform rotate-45" style={{ bottom: '-4px', left: '50%', marginLeft: '-4px' }}></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Componente de botões de resolução de conflito
+function ConflictButtons({ onAccept, onReject }) {
+  return (
+    <div className="conflict-buttons no-print" style={{
+      display: 'inline-flex',
+      gap: '4px',
+      marginLeft: '8px',
+      verticalAlign: 'middle'
+    }}>
+      <button
+        onClick={onAccept}
+        className="conflict-btn accept"
+        title="Aceitar mudança do portal"
+        style={{
+          background: '#10b981',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          width: '24px',
+          height: '24px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '14px',
+          fontWeight: 'bold'
+        }}
+      >
+        ✓
+      </button>
+      <button
+        onClick={onReject}
+        className="conflict-btn reject"
+        title="Manter edição manual"
+        style={{
+          background: '#ef4444',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          width: '24px',
+          height: '24px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '14px',
+          fontWeight: 'bold'
+        }}
+      >
+        ✗
+      </button>
+    </div>
+  );
+}
+
+// Componente de timestamp para mudanças do portal
+function ChangeTimestamp({ timestamp }) {
+  if (!timestamp) return null;
+
+  const date = new Date(timestamp);
+  const formattedTime = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const formattedDate = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+
+  return (
+    <span className="change-timestamp no-print" style={{
+      fontSize: '0.75em',
+      color: '#6b7280',
+      marginLeft: '8px',
+      fontStyle: 'italic'
+    }}>
+      ({formattedTime} {formattedDate})
+    </span>
+  );
+}
+
+// Função para formatar nomes de receitas e títulos adicionando espaços
+const formatRecipeName = (name) => {
+  if (!name) return '';
+
+  // Adiciona espaço antes de letras maiúsculas (camelCase)
+  let formatted = name.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+  // Adiciona espaço antes de palavras específicas que ficam concatenadas
+  formatted = formatted.replace(/([a-zà-ú])(Assada|Assado|Acebolada|Frita|Cremosa|Ralada|Cozidos)/gi, '$1 $2');
+
+  // Corrige casos específicos conhecidos de receitas
+  formatted = formatted.replace(/Molhobarbecue/gi, 'Molho barbecue');
+  formatted = formatted.replace(/Panquecade/gi, 'Panqueca de');
+  formatted = formatted.replace(/Macarrãomacand/gi, 'Macarrão mac and');
+  formatted = formatted.replace(/macand\s*cheese/gi, 'mac and cheese');
+  formatted = formatted.replace(/Batatabolinha/gi, 'Batata bolinha');
+  formatted = formatted.replace(/bolinha\s*em\s*conserva/gi, 'bolinha em conserva');
+  formatted = formatted.replace(/Farofade/gi, 'Farofa de');
+
+  // Corrige nomes de pratos específicos
+  formatted = formatted.replace(/Costelinha\s*Assada/gi, 'Costelinha Assada');
+  formatted = formatted.replace(/Drumet\s*Assado/gi, 'Drumet Assado');
+  formatted = formatted.replace(/Calabresa\s*Acebolada/gi, 'Calabresa Acebolada');
+  formatted = formatted.replace(/Polenta\s*Frita/gi, 'Polenta Frita');
+  formatted = formatted.replace(/Polenta\s*Cremosa/gi, 'Polenta Cremosa');
+  formatted = formatted.replace(/Ovos\s*cozidos/gi, 'Ovos cozidos');
+
+  // Corrige títulos de seções
+  formatted = formatted.replace(/Porcionament\s*[oC]arnes/gi, 'Porcionamento Carnes');
+  formatted = formatted.replace(/Cenoura\s*Ralada/gi, 'Cenoura Ralada');
+  formatted = formatted.replace(/Mixde/gi, 'Mix de');
+
+  return formatted;
+};
+
 export default function PrintPreviewEditor({ data, onClose, onPrint }) {
-  const { porEmpresaData, saladaData, acougueData, embalagemData, selectedDayInfo, formatQuantityDisplay, consolidateCustomerItems, recipes } = data;
+  const { porEmpresaData, saladaData, acougueData, embalagemData, selectedDayInfo, formatQuantityDisplay, consolidateCustomerItems, recipes, originalOrders } = data;
 
   const [editableBlocks, setEditableBlocks] = useState([]);
   const [blockStatus, setBlockStatus] = useState({});
@@ -26,6 +160,103 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const [pdfProgress, setPdfProgress] = useState({ current: 0, total: 0 });
   const previewAreaRef = useRef(null);
 
+  // Extrair informações de semana/ano/dia do selectedDayInfo
+  const weekNumber = selectedDayInfo?.weekNumber || 0;
+  const year = selectedDayInfo?.year || new Date().getFullYear();
+  const dayNumber = selectedDayInfo?.dayNumber || 0;
+
+  // Hooks Firebase
+  const {
+    blocks: firebaseBlocks,
+    updateBlocks: updateFirebaseBlocks,
+    editedItems,
+    markItemAsEdited,
+    isItemEdited,
+    getItemEditInfo,
+    acceptPortalChange,
+    rejectPortalChange,
+    editingUsers,
+    isLocked,
+    isSyncing,
+    lastSyncTime,
+    sessionId
+  } = useImpressaoProgramacao(weekNumber, year, dayNumber, data);
+
+  // Snapshot inicial dos pedidos (captura ao abrir o editor)
+  const initialOrdersRef = useRef(null);
+  const [changedItems, setChangedItems] = useState({});
+
+  // Criar snapshot inicial apenas uma vez
+  useEffect(() => {
+    if (originalOrders && !initialOrdersRef.current) {
+      const snapshot = {};
+      originalOrders.forEach(order => {
+        if (!order.items) return;
+        order.items.forEach(item => {
+          const itemKey = `${item.recipe_name}_${order.customer_name}`;
+          snapshot[itemKey] = {
+            quantity: item.quantity,
+            unit_type: item.unit_type
+          };
+        });
+      });
+      initialOrdersRef.current = snapshot;
+    }
+  }, [originalOrders]);
+
+  // Detectar mudanças comparando originalOrders atual com snapshot inicial
+  useEffect(() => {
+    if (!initialOrdersRef.current || !originalOrders) return;
+
+    const changes = {};
+    const currentSnapshot = {};
+
+    // Criar snapshot atual
+    originalOrders.forEach(order => {
+      if (!order.items) return;
+      order.items.forEach(item => {
+        const itemKey = `${item.recipe_name}_${order.customer_name}`;
+        currentSnapshot[itemKey] = {
+          quantity: item.quantity,
+          unit_type: item.unit_type
+        };
+      });
+    });
+
+    // Comparar com snapshot inicial
+    Object.entries(currentSnapshot).forEach(([itemKey, current]) => {
+      const initial = initialOrdersRef.current[itemKey];
+      if (initial && (initial.quantity !== current.quantity || initial.unit_type !== current.unit_type)) {
+        changes[itemKey] = {
+          type: 'modified',
+          previousQuantity: initial.quantity,
+          currentQuantity: current.quantity,
+          previousUnit: initial.unit_type,
+          currentUnit: current.unit_type,
+          detectedAt: new Date().toISOString()
+        };
+      }
+    });
+
+    if (Object.keys(changes).length > 0) {
+      setChangedItems(changes);
+    }
+  }, [originalOrders]);
+
+  // Funções helper
+  const isItemChanged = useCallback((itemName, clientName) => {
+    const itemKey = `${itemName}_${clientName}`;
+    return !!changedItems[itemKey];
+  }, [changedItems]);
+
+  const getItemChangeInfo = useCallback((itemName, clientName) => {
+    const itemKey = `${itemName}_${clientName}`;
+    return changedItems[itemKey] || null;
+  }, [changedItems]);
+
+  const hasChanges = Object.keys(changedItems).length > 0;
+
+
   // Carregar tamanhos salvos do localStorage
   const loadSavedFontSizes = () => {
     try {
@@ -36,7 +267,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       }
       return {};
     } catch (error) {
-      console.error('Erro ao carregar tamanhos salvos:', error);
       return {};
     }
   };
@@ -50,7 +280,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       }
       return [];
     } catch (error) {
-      console.error('Erro ao carregar ordem salva:', error);
       return [];
     }
   };
@@ -61,7 +290,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       const order = blocks.map(block => block.id);
       localStorage.setItem('print-preview-page-order', JSON.stringify(order));
     } catch (error) {
-      console.error('Erro ao salvar ordem:', error);
+      // Silenciar erro
     }
   };
 
@@ -76,11 +305,84 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       });
       localStorage.setItem('print-preview-font-sizes', JSON.stringify(fontSizes));
     } catch (error) {
-      console.error('Erro ao salvar tamanhos:', error);
+      // Silenciar erro
     }
   };
 
+  // Função para aplicar edições salvas aos blocos
+  const applyEditsToBlocks = (blocks, editedItemsMap) => {
+    if (!editedItemsMap || Object.keys(editedItemsMap).length === 0) {
+      return blocks;
+    }
+
+    return blocks.map(block => {
+      const updatedBlock = { ...block };
+
+      // Aplicar edições em blocos tipo 'empresa'
+      if (updatedBlock.type === 'empresa' && updatedBlock.items) {
+        const newItems = {};
+        Object.entries(updatedBlock.items).forEach(([category, categoryItems]) => {
+          newItems[category] = categoryItems.map(item => {
+            const normalizedCustomerName = item.customer_name || 'sem_cliente';
+            // Novo formato: inclui o título do bloco (empresa)
+            const newFormatKey = `${updatedBlock.title}_${item.recipe_name}_${normalizedCustomerName}`;
+            // Formato antigo: para retrocompatibilidade
+            const oldFormatKey = `${item.recipe_name}_${normalizedCustomerName}`;
+
+            // Tentar primeiro o novo formato, depois o antigo
+            const editInfo = editedItemsMap[newFormatKey] || editedItemsMap[oldFormatKey];
+
+            if (editInfo && editInfo.field === 'quantity') {
+              // Extrair número do valor editado
+              const numMatch = editInfo.editedValue.match(/[\d.,]+/);
+              if (numMatch) {
+                return { ...item, quantity: parseFloat(numMatch[0].replace(',', '.')) };
+              }
+            } else if (editInfo && editInfo.field === 'name') {
+              return { ...item, recipe_name: editInfo.editedValue };
+            }
+            return item;
+          });
+        });
+        updatedBlock.items = newItems;
+      }
+
+      // Aplicar edições em blocos tipo 'detailed-section' e 'embalagem-category'
+      if ((updatedBlock.type === 'detailed-section' || updatedBlock.type === 'embalagem-category') && updatedBlock.items) {
+        updatedBlock.items = updatedBlock.items.map(recipe => {
+          const newClientes = recipe.clientes.map(cliente => {
+            const itemKey = `${recipe.recipe_name}_${cliente.customer_name}`;
+            const editInfo = editedItemsMap[itemKey];
+
+            if (editInfo && editInfo.field === 'quantity') {
+              const numMatch = editInfo.editedValue.match(/[\d.,]+/);
+              if (numMatch) {
+                return { ...cliente, quantity: parseFloat(numMatch[0].replace(',', '.')) };
+              }
+            } else if (editInfo && editInfo.field === 'customer') {
+              return { ...cliente, customer_name: editInfo.editedValue };
+            }
+            return cliente;
+          });
+
+          // Recalcular total se necessário
+          if (recipe.showTotal) {
+            const newTotal = newClientes.reduce((sum, c) => sum + (c.quantity || 0), 0);
+            return { ...recipe, clientes: newClientes, total: Math.round(newTotal * 100) / 100 };
+          }
+
+          return { ...recipe, clientes: newClientes };
+        });
+      }
+
+      return updatedBlock;
+    });
+  };
+
   // Inicializar blocos editáveis
+  // Criar blocos iniciais APENAS UMA VEZ na montagem
+  // Não recriar quando dados mudarem para preservar edições do usuário
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const blocks = [];
     const savedFontSizes = loadSavedFontSizes();
@@ -293,15 +595,57 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     } else {
       setEditableBlocks(blocks);
     }
-  }, [porEmpresaData, saladaData, acougueData, embalagemData, recipes]);
+  }, []); // Rodar apenas uma vez na montagem - não recriar blocos quando dados mudarem
+
+  // Ref para prevenir loop infinito
+  const isSyncingRef = useRef(false);
+  const lastSavedBlocksRef = useRef(null);
+  const hasLoadedFromFirebaseRef = useRef(false);
 
   // Salvar automaticamente quando fontSize ou ordem mudar
   useEffect(() => {
-    if (editableBlocks.length > 0) {
-      saveFontSizes(editableBlocks);
-      savePageOrder(editableBlocks);
+    if (editableBlocks.length > 0 && !isSyncingRef.current && hasLoadedFromFirebaseRef.current) {
+      // Verificar se realmente mudou
+      const currentSerialized = JSON.stringify(editableBlocks);
+      const lastSerialized = lastSavedBlocksRef.current;
+
+      if (currentSerialized !== lastSerialized) {
+        saveFontSizes(editableBlocks);
+        savePageOrder(editableBlocks);
+        // Sincronizar com Firebase
+        updateFirebaseBlocks(editableBlocks);
+        lastSavedBlocksRef.current = currentSerialized;
+      }
     }
-  }, [editableBlocks]);
+  }, [editableBlocks, updateFirebaseBlocks]);
+
+  // Carregar blocos do Firebase APENAS na primeira vez (carga inicial)
+  useEffect(() => {
+    if (firebaseBlocks && firebaseBlocks.length > 0 && !hasLoadedFromFirebaseRef.current) {
+      isSyncingRef.current = true;
+
+      // Aplicar edições salvas aos blocos carregados
+      const blocksWithEdits = applyEditsToBlocks(firebaseBlocks, editedItems);
+
+      setEditableBlocks(blocksWithEdits);
+      lastSavedBlocksRef.current = JSON.stringify(blocksWithEdits);
+      hasLoadedFromFirebaseRef.current = true;
+
+      // Liberar após um pequeno delay
+      setTimeout(() => {
+        isSyncingRef.current = false;
+      }, 100);
+    }
+  }, [firebaseBlocks, editedItems]);
+
+  // Aplicar edições quando editedItems for carregado DEPOIS dos blocos
+  const hasAppliedEditedItemsRef = useRef(false);
+  useEffect(() => {
+    if (hasLoadedFromFirebaseRef.current && editedItems && Object.keys(editedItems).length > 0 && !hasAppliedEditedItemsRef.current) {
+      setEditableBlocks(prevBlocks => applyEditsToBlocks(prevBlocks, editedItems));
+      hasAppliedEditedItemsRef.current = true;
+    }
+  }, [editedItems]);
 
   const handleFontSizeChange = (blockId, delta) => {
     setEditableBlocks(blocks =>
@@ -432,6 +776,92 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     );
   };
 
+  const handleItemEdit = (itemName, clientName, originalValue, editedValue, field = 'content', blockTitle = null) => {
+    // Normalizar clientName para corresponder à chave usada na renderização
+    const normalizedClientName = clientName || 'sem_cliente';
+
+    // Para blocos tipo 'empresa', incluir blockTitle na chave para evitar colisões
+    // entre receitas com mesmo nome em empresas diferentes
+    const itemKey = blockTitle
+      ? `${blockTitle}_${itemName}_${normalizedClientName}`
+      : `${itemName}_${normalizedClientName}`;
+
+    // Marcar item como editado no Firebase
+    markItemAsEdited(itemKey, originalValue, editedValue, field);
+
+    // Atualizar o valor nos blocos para persistir visualmente
+    setEditableBlocks(blocks =>
+      blocks.map(block => {
+        // Clonar o bloco para não modificar diretamente
+        const updatedBlock = { ...block };
+        let modified = false;
+
+        // Atualizar blocos tipo 'empresa'
+        if (updatedBlock.type === 'empresa' && updatedBlock.items) {
+          const newItems = {};
+          Object.entries(updatedBlock.items).forEach(([category, categoryItems]) => {
+            newItems[category] = categoryItems.map(item => {
+              // Para empresa blocks, precisamos verificar se o blockTitle corresponde também
+              const matchesBlock = blockTitle ? updatedBlock.title === blockTitle : true;
+              if (matchesBlock &&
+                  item.recipe_name === itemName &&
+                  (item.customer_name || 'sem_cliente') === normalizedClientName) {
+                modified = true;
+                if (field === 'quantity') {
+                  // Extrair apenas o número do editedValue
+                  const numMatch = editedValue.match(/[\d.,]+/);
+                  if (numMatch) {
+                    return { ...item, quantity: parseFloat(numMatch[0].replace(',', '.')) };
+                  }
+                } else if (field === 'name') {
+                  return { ...item, recipe_name: editedValue };
+                }
+              }
+              return item;
+            });
+          });
+          if (modified) {
+            updatedBlock.items = newItems;
+          }
+        }
+
+        // Atualizar blocos tipo 'detailed-section' (Salada, Açougue)
+        if ((updatedBlock.type === 'detailed-section' || updatedBlock.type === 'embalagem-category') && updatedBlock.items) {
+          updatedBlock.items = updatedBlock.items.map(recipe => {
+            if (recipe.recipe_name === itemName || recipe.clientes?.some(c => c.customer_name === normalizedClientName)) {
+              const newClientes = recipe.clientes.map(cliente => {
+                if (cliente.customer_name === normalizedClientName) {
+                  modified = true;
+                  if (field === 'quantity') {
+                    // Extrair apenas o número do editedValue
+                    const numMatch = editedValue.match(/[\d.,]+/);
+                    if (numMatch) {
+                      return { ...cliente, quantity: parseFloat(numMatch[0].replace(',', '.')) };
+                    }
+                  } else if (field === 'customer') {
+                    return { ...cliente, customer_name: editedValue };
+                  }
+                }
+                return cliente;
+              });
+
+              // Recalcular total se necessário
+              if (modified && recipe.showTotal) {
+                const newTotal = newClientes.reduce((sum, c) => sum + (c.quantity || 0), 0);
+                return { ...recipe, clientes: newClientes, total: Math.round(newTotal * 100) / 100 };
+              }
+
+              return { ...recipe, clientes: newClientes };
+            }
+            return recipe;
+          });
+        }
+
+        return updatedBlock;
+      })
+    );
+  };
+
   const handlePrintFinal = () => {
     // Capturar HTML editado de cada bloco do DOM
     const blocksWithEditedContent = editableBlocks.map(block => {
@@ -445,6 +875,9 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
           // Clonar para não modificar o original
           const clone = contentWrapper.cloneNode(true);
+
+          // Remover elementos .no-print (botões de conflito, timestamps)
+          clone.querySelectorAll('.no-print').forEach(el => el.remove());
 
           // Limpar atributos de edição e estilos inline extras
           clone.querySelectorAll('[contenteditable]').forEach(el => {
@@ -501,8 +934,8 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       // Salvar zoom atual e resetar para 100% para captura precisa
       setZoom(100);
 
-      // Aguardar um momento para o DOM atualizar com zoom 100%
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Aguardar um momento para o DOM atualizar com zoom 100% e React re-renderizar
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Aumentado de 300ms para 1000ms
 
       // Criar PDF em orientação portrait A4
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -533,13 +966,31 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
           letterRendering: true, // Melhor renderização de texto
           removeContainer: true, // Remove o container temporário
           imageTimeout: 0, // Sem timeout para imagens
+          ignoreElements: () => false, // Não ignorar nenhum elemento
+          foreignObjectRendering: false, // Desabilita foreign object para melhor compatibilidade
           onclone: (clonedDoc) => {
+            // Remover elementos .no-print (botões e timestamps)
+            clonedDoc.querySelectorAll('.no-print').forEach(el => el.remove());
+
             // Garantir que todos os estilos sejam aplicados no clone
             const clonedBlock = clonedDoc.querySelector('.a4-page');
             if (clonedBlock) {
               clonedBlock.style.width = '794px';
               clonedBlock.style.height = '1123px';
               clonedBlock.style.overflow = 'visible';
+
+              // Forçar cores azuis nos números
+              const quantityElements = clonedBlock.querySelectorAll('.item-qty');
+              quantityElements.forEach(el => {
+                el.style.color = '#2563eb';
+                el.style.fontWeight = 'bold';
+              });
+
+              // Garantir que títulos de categoria tenham borda cinza
+              const categoryTitles = clonedBlock.querySelectorAll('.category-title');
+              categoryTitles.forEach(el => {
+                el.style.borderBottom = '2px solid #e5e7eb';
+              });
             }
           }
         });
@@ -572,7 +1023,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       setPdfProgress({ current: 0, total: 0 });
       setIsGeneratingPDF(false);
     } catch (error) {
-      console.error('Erro ao gerar PDF:', error);
       alert('Erro ao gerar PDF. Por favor, tente novamente.');
       setZoom(originalZoom);
       setPdfProgress({ current: 0, total: 0 });
@@ -625,7 +1075,8 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
               font-weight: bold;
               margin-bottom: 8px;
               border-bottom: 2px solid #e5e7eb;
-              padding-bottom: 4px;
+              padding-bottom: 8px;
+              display: block;
             }
             .item-line {
               display: flex;
@@ -689,7 +1140,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     if (block.type === 'empresa') {
       return `
         <div class="print-page" style="font-size: ${baseFontSize}px; line-height: 1.4;">
-          <h1 style="font-size: ${h1Size}px; line-height: 1.1; margin-bottom: 8px;">${block.title}</h1>
+          <h1 style="font-size: ${h1Size}px; line-height: 1.1; margin-bottom: 8px;">${formatRecipeName(block.title)}</h1>
           <div class="subtitle" style="font-size: ${subtitleSize}px; margin-bottom: 16px;">${block.subtitle}</div>
           ${Object.entries(block.items).map(([categoryName, items]) => `
             <div class="category-block" style="margin-bottom: 16px;">
@@ -697,7 +1148,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
               ${items.map(item => `
                 <div class="item-row" style="margin-bottom: 4px; padding: 2px;">
                   <span class="item-quantity" style="font-size: ${qtySize}px;">${formatQuantityDisplay(item)}</span>
-                  <span class="item-name" style="font-size: ${textSize}px;">${item.recipe_name}</span>
+                  <span class="item-name" style="font-size: ${textSize}px;">${formatRecipeName(item.recipe_name)}</span>
                 </div>
               `).join('')}
             </div>
@@ -709,11 +1160,11 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     if (block.type === 'detailed-section') {
       return `
         <div class="print-page" style="font-size: ${baseFontSize}px; line-height: 1.4;">
-          <h1 style="font-size: ${h1Size}px; line-height: 1.1; margin-bottom: 8px;">${block.title}</h1>
+          <h1 style="font-size: ${h1Size}px; line-height: 1.1; margin-bottom: 8px;">${formatRecipeName(block.title)}</h1>
           <div class="subtitle" style="font-size: ${subtitleSize}px; margin-bottom: 16px;">${block.subtitle}</div>
           ${block.items.map((recipe, idx) => `
             <div class="category-block" style="margin-bottom: 16px;">
-              <h2 style="font-size: ${h2Size}px; margin-bottom: 8px; font-weight: bold;">${recipe.recipe_name}</h2>
+              <h2 style="font-size: ${h2Size}px; margin-bottom: 8px; font-weight: bold;">${formatRecipeName(recipe.recipe_name)}</h2>
               ${recipe.clientes.map(cliente => `
                 <div class="item-row" style="display: flex; gap: 10px; align-items: baseline; margin-bottom: 4px; padding: 2px;">
                   <span class="item-name" style="font-size: ${textSize}px; flex: 0 0 200px; text-transform: uppercase;">${cliente.customer_name}</span>
@@ -737,11 +1188,11 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     if (block.type === 'embalagem-category') {
       return `
         <div class="print-page" style="font-size: ${baseFontSize}px; line-height: 1.4;">
-          <h1 style="font-size: ${h1Size}px; line-height: 1.1; margin-bottom: 8px;">${block.title}</h1>
+          <h1 style="font-size: ${h1Size}px; line-height: 1.1; margin-bottom: 8px;">${formatRecipeName(block.title)}</h1>
           <div class="subtitle" style="font-size: ${subtitleSize}px; margin-bottom: 16px;">${block.subtitle}</div>
           ${block.items.map((recipe, idx) => `
             <div class="category-block" style="margin-bottom: 16px;">
-              <h2 style="font-size: ${h2Size}px; margin-bottom: 8px; font-weight: bold;">${recipe.recipe_name}</h2>
+              <h2 style="font-size: ${h2Size}px; margin-bottom: 8px; font-weight: bold;">${formatRecipeName(recipe.recipe_name)}</h2>
               ${recipe.clientes.map(cliente => `
                 <div class="item-row" style="display: flex; gap: 10px; align-items: baseline; margin-bottom: 4px; padding: 2px;">
                   <span class="item-name" style="font-size: ${textSize}px; flex: 0 0 200px; text-transform: uppercase;">${cliente.customer_name}</span>
@@ -763,7 +1214,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     }
 
     return `<div class="print-page" style="font-size: ${baseFontSize}px;">
-      <h1 style="font-size: ${h1Size}px;">${block.title}</h1>
+      <h1 style="font-size: ${h1Size}px;">${formatRecipeName(block.title)}</h1>
       <div class="subtitle" style="font-size: ${subtitleSize}px;">${block.subtitle}</div>
     </div>`;
   };
@@ -778,6 +1229,44 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
           {hasSavedSizes && (
             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
               ✓ Ajustes salvos
+            </span>
+          )}
+
+          {/* Status de sincronização Firebase */}
+          {isSyncing && (
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold flex items-center gap-1">
+              <Cloud className="w-3 h-3 animate-pulse" />
+              Sincronizando...
+            </span>
+          )}
+          {!isSyncing && lastSyncTime && (
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold flex items-center gap-1">
+              <CheckCircle className="w-3 h-3" />
+              Sincronizado
+            </span>
+          )}
+
+          {/* Bloqueio de edição */}
+          {isLocked && (
+            <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-semibold flex items-center gap-1">
+              <Lock className="w-3 h-3" />
+              Bloqueado
+            </span>
+          )}
+
+          {/* Usuários editando */}
+          {editingUsers.length > 0 && (
+            <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-semibold flex items-center gap-1" title={editingUsers.map(u => u.userName).join(', ')}>
+              <Users className="w-3 h-3" />
+              {editingUsers.length} {editingUsers.length === 1 ? 'usuário' : 'usuários'}
+            </span>
+          )}
+
+          {/* Mudanças nos pedidos originais */}
+          {hasChanges && (
+            <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold flex items-center gap-1" title="Pedidos originais foram modificados">
+              <AlertTriangle className="w-3 h-3" />
+              Pedidos alterados
             </span>
           )}
         </div>
@@ -856,7 +1345,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
                   <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
                   <div className="sidebar-item-number">{index + 1}</div>
                   <div className="sidebar-item-content">
-                    <div className="sidebar-item-title">{block.title}</div>
+                    <div className="sidebar-item-title">{formatRecipeName(block.title)}</div>
                     <div className="sidebar-item-meta">{block.fontSize}px</div>
                   </div>
                   {needsFix && (
@@ -899,8 +1388,16 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
                 onAutoFit={() => handleAutoFit(block.id)}
                 onAutoFitComplete={() => handleAutoFitComplete(block.id)}
                 onContentEdit={(field, value) => handleContentEdit(block.id, field, value)}
+                onItemEdit={handleItemEdit}
                 onStatusUpdate={handleStatusUpdate}
                 formatQuantityDisplay={formatQuantityDisplay}
+                isItemEdited={isItemEdited}
+                getItemEditInfo={getItemEditInfo}
+                isItemChanged={isItemChanged}
+                getItemChangeInfo={getItemChangeInfo}
+                acceptPortalChange={acceptPortalChange}
+                rejectPortalChange={rejectPortalChange}
+                isLocked={isLocked}
               />
             ))}
           </div>
@@ -910,12 +1407,36 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   );
 }
 
-function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFit, onAutoFitComplete, onContentEdit, onStatusUpdate, formatQuantityDisplay }) {
+function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFit, onAutoFitComplete, onContentEdit, onItemEdit, onStatusUpdate, formatQuantityDisplay, isItemEdited, getItemEditInfo, isItemChanged, getItemChangeInfo, acceptPortalChange, rejectPortalChange, isLocked }) {
   const blockRef = useRef(null);
   const contentRef = useRef(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [numPages, setNumPages] = useState(1);
   const [isAutoFitting, setIsAutoFitting] = useState(false);
+
+  // Armazenar valores originais para detectar mudanças
+  const originalValuesRef = useRef({});
+
+  // Handler para capturar valor antes de editar
+  const handleEditStart = (e, itemName, clientName, blockTitle = null) => {
+    const itemKey = blockTitle
+      ? `${blockTitle}_${itemName}_${clientName || 'sem_cliente'}`
+      : `${itemName}_${clientName || 'sem_cliente'}`;
+    originalValuesRef.current[itemKey] = e.target.textContent;
+  };
+
+  // Handler para detectar mudanças após editar
+  const handleEditEnd = (e, itemName, clientName, field, blockTitle = null) => {
+    const itemKey = blockTitle
+      ? `${blockTitle}_${itemName}_${clientName || 'sem_cliente'}`
+      : `${itemName}_${clientName || 'sem_cliente'}`;
+    const originalValue = originalValuesRef.current[itemKey];
+    const newValue = e.target.textContent;
+
+    if (originalValue !== newValue && onItemEdit) {
+      onItemEdit(itemName, clientName, originalValue, newValue, field, blockTitle);
+    }
+  };
 
   // Função para medir altura com um fontSize específico
   const measureHeight = (fontSize) => {
@@ -943,7 +1464,6 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
       const findBestSize = () => {
         // Verificar se contentRef está disponível antes de começar
         if (!contentRef.current) {
-          console.warn('ContentRef não disponível, aguardando...');
           setTimeout(findBestSize, 200);
           return;
         }
@@ -987,8 +1507,6 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
         const contentHeight = contentRef.current.scrollHeight;
         const overflow = contentHeight > A4_USABLE_HEIGHT;
         const pages = Math.ceil(contentHeight / A4_USABLE_HEIGHT);
-
-        console.log(`[${block.id}] Altura: ${contentHeight}px / Limite: ${A4_USABLE_HEIGHT}px (A4 real) / Overflow: ${overflow} / Páginas: ${pages}`);
 
         setIsOverflowing(overflow);
         setNumPages(pages);
@@ -1045,19 +1563,21 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
         {/* Wrapper interno para medir altura real do conteúdo */}
         <div ref={contentRef}>
           <h1
-            contentEditable={isSelected}
+            contentEditable={isSelected && !isLocked}
             suppressContentEditableWarning
             onBlur={(e) => onContentEdit('title', e.target.textContent)}
             className="block-title"
+            style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
           >
-            {block.title}
+            {formatRecipeName(block.title)}
           </h1>
 
           <div
-            contentEditable={isSelected}
+            contentEditable={isSelected && !isLocked}
             suppressContentEditableWarning
             onBlur={(e) => onContentEdit('subtitle', e.target.textContent)}
             className="block-subtitle"
+            style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
           >
             {block.subtitle}
           </div>
@@ -1068,29 +1588,124 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
               <div key={categoryName} className="category-section">
                 <h2
                   className="category-title"
-                  contentEditable={isSelected}
+                  contentEditable={isSelected && !isLocked}
                   suppressContentEditableWarning
+                  style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
                 >
                   {categoryName}
                 </h2>
-                {items.map((item, idx) => (
-                  <div key={idx} className="item-line">
-                    <span
-                      className="item-qty"
-                      contentEditable={isSelected}
-                      suppressContentEditableWarning
+                {items.map((item, idx) => {
+                  // Normalizar customer_name para garantir consistência
+                  const normalizedCustomerName = item.customer_name || 'sem_cliente';
+                  // Para blocos 'empresa', incluir block.title na chave para evitar colisões
+                  const itemKey = `${block.title}_${item.recipe_name}_${normalizedCustomerName}`;
+
+                  const edited = isItemEdited ? isItemEdited(itemKey) : false;
+                  // Para blocos 'empresa', usar block.title como clientName na detecção de mudanças
+                  const changed = isItemChanged ? isItemChanged(item.recipe_name, block.title) : false;
+                  const editInfo = edited && getItemEditInfo ? getItemEditInfo(itemKey) : null;
+                  const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(item.recipe_name, block.title) : null;
+
+                  // PRIORIDADE 1: Detectar CONFLITO (editado manualmente + mudou no portal)
+                  const hasConflict = edited && changed;
+
+                  let tooltipContent = null;
+                  let lineStyles = {};
+
+                  if (hasConflict) {
+                    // CONFLITO: vermelho/rosa
+                    tooltipContent = `⚠️ CONFLITO: Você editou manualmente E o portal modificou este item`;
+                    lineStyles = {
+                      backgroundColor: '#fee2e2',
+                      borderLeft: '4px solid #dc2626',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else if (edited) {
+                    // PRIORIDADE 1: Editado manualmente (amarelo)
+                    tooltipContent = `Editado por ${editInfo.userName} em ${new Date(editInfo.timestamp).toLocaleString()}`;
+                    lineStyles = {
+                      backgroundColor: '#fef3c7',
+                      borderLeft: '3px solid #f59e0b',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else if (changed) {
+                    // PRIORIDADE 2: Modificado no portal (laranja)
+                    const changeType = changeInfo.type === 'modified' ? 'Modificado' : changeInfo.type === 'added' ? 'Adicionado' : 'Removido';
+                    tooltipContent = `${changeType} nos pedidos originais`;
+                    lineStyles = {
+                      backgroundColor: '#fed7aa',
+                      borderLeft: '3px solid #fb923c',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else {
+                    // Sem modificações
+                    lineStyles = {
+                      backgroundColor: 'transparent',
+                      borderLeft: 'none',
+                      paddingLeft: '2px',
+                      borderRadius: '4px'
+                    };
+                  }
+
+                  return (
+                    <div
+                      key={idx}
+                      className="item-line"
+                      style={lineStyles}
                     >
-                      {formatQuantityDisplay(item)}
-                    </span>
-                    <span
-                      className="item-text"
-                      contentEditable={isSelected}
-                      suppressContentEditableWarning
-                    >
-                      {item.recipe_name}
-                    </span>
-                  </div>
-                ))}
+                      <Tooltip content={tooltipContent}>
+                        <span
+                          className="item-qty"
+                          contentEditable={isSelected && !isLocked && !hasConflict}
+                          suppressContentEditableWarning
+                          onFocus={(e) => handleEditStart(e, item.recipe_name, normalizedCustomerName, block.title)}
+                          onBlur={(e) => handleEditEnd(e, item.recipe_name, normalizedCustomerName, 'quantity', block.title)}
+                        >
+                          {(() => {
+                            // PRIORIDADE 1: Se foi editado manualmente, mostra valor editado
+                            if (edited && editInfo?.editedValue) {
+                              return editInfo.editedValue;
+                            }
+                            // PRIORIDADE 2: Se mudou no portal (sem edição manual), mostra novo valor do portal
+                            if (changed && !edited && changeInfo?.currentQuantity) {
+                              return formatQuantityDisplay({
+                                quantity: changeInfo.currentQuantity,
+                                unit_type: changeInfo.currentUnit || item.unit_type
+                              });
+                            }
+                            // PRIORIDADE 3: Mostra valor original
+                            return formatQuantityDisplay(item);
+                          })()}
+                        </span>
+                      </Tooltip>
+                      {/* Botões de conflito */}
+                      {hasConflict && (
+                        <ConflictButtons
+                          onAccept={() => acceptPortalChange(itemKey)}
+                          onReject={() => rejectPortalChange(itemKey)}
+                        />
+                      )}
+                      {/* Timestamp para mudanças do portal (não conflito) */}
+                      {!hasConflict && changed && changeInfo?.detectedAt && (
+                        <ChangeTimestamp timestamp={changeInfo.detectedAt} />
+                      )}
+                      <Tooltip content={tooltipContent}>
+                        <span
+                          className="item-text"
+                          contentEditable={isSelected && !isLocked && !hasConflict}
+                          suppressContentEditableWarning
+                          onFocus={(e) => handleEditStart(e, item.recipe_name, normalizedCustomerName, block.title)}
+                          onBlur={(e) => handleEditEnd(e, item.recipe_name, normalizedCustomerName, 'name', block.title)}
+                        >
+                          {formatRecipeName(item.recipe_name)}
+                        </span>
+                      </Tooltip>
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
@@ -1102,39 +1717,74 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
               <div key={recipeIdx} className="category-section">
                 <h2
                   className="category-title"
-                  contentEditable={isSelected}
+                  contentEditable={isSelected && !isLocked}
                   suppressContentEditableWarning
+                  style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
                 >
-                  {recipe.recipe_name}
+                  {formatRecipeName(recipe.recipe_name)}
                 </h2>
-                {recipe.clientes.map((cliente, idx) => (
-                  <div key={idx} className="item-line">
-                    <span
-                      className="item-text"
-                      style={{ textTransform: 'uppercase' }}
-                      contentEditable={isSelected}
-                      suppressContentEditableWarning
+                {recipe.clientes.map((cliente, idx) => {
+                  const itemKey = `${recipe.recipe_name}_${cliente.customer_name}`;
+                  const edited = isItemEdited && isItemEdited(itemKey);
+                  const changed = isItemChanged && isItemChanged(recipe.recipe_name, cliente.customer_name);
+                  const editInfo = edited && getItemEditInfo ? getItemEditInfo(itemKey) : null;
+                  const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(recipe.recipe_name, cliente.customer_name) : null;
+
+                  let tooltipContent = null;
+                  if (editInfo) {
+                    tooltipContent = `Editado por ${editInfo.userName} em ${new Date(editInfo.timestamp).toLocaleString()}`;
+                  } else if (changeInfo) {
+                    const changeType = changeInfo.type === 'modified' ? 'Modificado' : changeInfo.type === 'added' ? 'Adicionado' : 'Removido';
+                    tooltipContent = `${changeType} nos pedidos originais`;
+                  }
+
+                  return (
+                    <div
+                      key={idx}
+                      className="item-line"
+                      style={{
+                        backgroundColor: edited ? '#fef3c7' : changed ? '#fed7aa' : 'transparent',
+                        borderLeft: edited ? '3px solid #f59e0b' : changed ? '3px solid #fb923c' : 'none',
+                        paddingLeft: (edited || changed) ? '8px' : '2px',
+                        borderRadius: '4px'
+                      }}
                     >
-                      {cliente.customer_name}
-                    </span>
-                    <span className="item-qty">→</span>
-                    <span
-                      className="item-qty"
-                      contentEditable={isSelected}
-                      suppressContentEditableWarning
-                    >
-                      {formatQuantityDisplay(cliente)}
-                    </span>
-                  </div>
-                ))}
+                      <Tooltip content={tooltipContent}>
+                        <span
+                          className="item-text"
+                          style={{ textTransform: 'uppercase' }}
+                          contentEditable={isSelected && !isLocked}
+                          suppressContentEditableWarning
+                          onFocus={(e) => handleEditStart(e, itemKey)}
+                          onBlur={(e) => handleEditEnd(e, recipe.recipe_name, cliente.customer_name, 'customer')}
+                        >
+                          {cliente.customer_name}
+                        </span>
+                      </Tooltip>
+                      <span className="item-qty">→</span>
+                      <Tooltip content={tooltipContent}>
+                        <span
+                          className="item-qty"
+                          contentEditable={isSelected && !isLocked}
+                          suppressContentEditableWarning
+                          onFocus={(e) => handleEditStart(e, itemKey)}
+                          onBlur={(e) => handleEditEnd(e, recipe.recipe_name, cliente.customer_name, 'quantity')}
+                        >
+                          {formatQuantityDisplay(cliente)}
+                        </span>
+                      </Tooltip>
+                    </div>
+                  );
+                })}
                 {recipe.showTotal && (
                   <div className="item-line" style={{ borderTop: '2px solid #e5e7eb', paddingTop: '8px', marginTop: '8px', fontWeight: 'bold' }}>
                     <span className="item-text">TOTAL:</span>
                     <span className="item-qty"></span>
                     <span
                       className="item-qty"
-                      contentEditable={isSelected}
+                      contentEditable={isSelected && !isLocked}
                       suppressContentEditableWarning
+                      style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
                     >
                       {formatQuantityDisplay({ quantity: recipe.total, unit_type: recipe.unit_type })}
                     </span>
@@ -1151,39 +1801,74 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
               <div key={recipeIdx} className="category-section">
                 <h2
                   className="category-title"
-                  contentEditable={isSelected}
+                  contentEditable={isSelected && !isLocked}
                   suppressContentEditableWarning
+                  style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
                 >
-                  {recipe.recipe_name}
+                  {formatRecipeName(recipe.recipe_name)}
                 </h2>
-                {recipe.clientes.map((cliente, idx) => (
-                  <div key={idx} className="item-line">
-                    <span
-                      className="item-text"
-                      style={{ textTransform: 'uppercase' }}
-                      contentEditable={isSelected}
-                      suppressContentEditableWarning
+                {recipe.clientes.map((cliente, idx) => {
+                  const itemKey = `${recipe.recipe_name}_${cliente.customer_name}`;
+                  const edited = isItemEdited && isItemEdited(itemKey);
+                  const changed = isItemChanged && isItemChanged(recipe.recipe_name, cliente.customer_name);
+                  const editInfo = edited && getItemEditInfo ? getItemEditInfo(itemKey) : null;
+                  const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(recipe.recipe_name, cliente.customer_name) : null;
+
+                  let tooltipContent = null;
+                  if (editInfo) {
+                    tooltipContent = `Editado por ${editInfo.userName} em ${new Date(editInfo.timestamp).toLocaleString()}`;
+                  } else if (changeInfo) {
+                    const changeType = changeInfo.type === 'modified' ? 'Modificado' : changeInfo.type === 'added' ? 'Adicionado' : 'Removido';
+                    tooltipContent = `${changeType} nos pedidos originais`;
+                  }
+
+                  return (
+                    <div
+                      key={idx}
+                      className="item-line"
+                      style={{
+                        backgroundColor: edited ? '#fef3c7' : changed ? '#fed7aa' : 'transparent',
+                        borderLeft: edited ? '3px solid #f59e0b' : changed ? '3px solid #fb923c' : 'none',
+                        paddingLeft: (edited || changed) ? '8px' : '2px',
+                        borderRadius: '4px'
+                      }}
                     >
-                      {cliente.customer_name}
-                    </span>
-                    <span className="item-qty">→</span>
-                    <span
-                      className="item-qty"
-                      contentEditable={isSelected}
-                      suppressContentEditableWarning
-                    >
-                      {formatQuantityDisplay(cliente)}
-                    </span>
-                  </div>
-                ))}
+                      <Tooltip content={tooltipContent}>
+                        <span
+                          className="item-text"
+                          style={{ textTransform: 'uppercase' }}
+                          contentEditable={isSelected && !isLocked}
+                          suppressContentEditableWarning
+                          onFocus={(e) => handleEditStart(e, itemKey)}
+                          onBlur={(e) => handleEditEnd(e, recipe.recipe_name, cliente.customer_name, 'customer')}
+                        >
+                          {cliente.customer_name}
+                        </span>
+                      </Tooltip>
+                      <span className="item-qty">→</span>
+                      <Tooltip content={tooltipContent}>
+                        <span
+                          className="item-qty"
+                          contentEditable={isSelected && !isLocked}
+                          suppressContentEditableWarning
+                          onFocus={(e) => handleEditStart(e, itemKey)}
+                          onBlur={(e) => handleEditEnd(e, recipe.recipe_name, cliente.customer_name, 'quantity')}
+                        >
+                          {formatQuantityDisplay(cliente)}
+                        </span>
+                      </Tooltip>
+                    </div>
+                  );
+                })}
                 {recipe.showTotal && (
                   <div className="item-line" style={{ borderTop: '2px solid #e5e7eb', paddingTop: '8px', marginTop: '8px', fontWeight: 'bold' }}>
                     <span className="item-text">TOTAL:</span>
                     <span className="item-qty"></span>
                     <span
                       className="item-qty"
-                      contentEditable={isSelected}
+                      contentEditable={isSelected && !isLocked}
                       suppressContentEditableWarning
+                      style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
                     >
                       {formatQuantityDisplay({ quantity: recipe.total, unit_type: recipe.unit_type })}
                     </span>
