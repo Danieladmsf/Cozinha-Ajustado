@@ -126,7 +126,14 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   // Isso permite que mudanças do portal sejam refletidas em tempo real
   // preservando edições manuais do usuário
   useEffect(() => {
+    console.log('[PrintPreviewEditor] useEffect atualização - Verificando condições:', {
+      hasOriginalOrders: !!originalOrders,
+      hasInitialized: hasInitializedBlocksRef.current,
+      blocksLength: editableBlocks.length
+    });
+
     if (!originalOrders || !hasInitializedBlocksRef.current || editableBlocks.length === 0) {
+      console.log('[PrintPreviewEditor] Pulando atualização - condições não satisfeitas');
       return;
     }
 
@@ -237,7 +244,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         return updatedBlock;
       });
     });
-  }, [originalOrders, isItemEdited]);
+  }, [originalOrders, isItemEdited, editableBlocks.length]);
 
   // Função para aplicar edições salvas aos blocos
   const applyEditsToBlocks = (blocks, editedItemsMap) => {
