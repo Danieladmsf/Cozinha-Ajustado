@@ -14,6 +14,7 @@ import { Tooltip } from './components/Tooltip';
 import { ConflictButtons } from './components/ConflictButtons';
 import { ChangeTimestamp } from './components/ChangeTimestamp';
 import { useConflictResolution } from './hooks/useConflictResolution';
+import { useFontSizeManager } from './hooks/useFontSizeManager';
 import './print-preview.css';
 
 // Constantes de tamanho A4 (baseadas em dimensões físicas reais)
@@ -29,10 +30,19 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const [blockStatus, setBlockStatus] = useState({});
   const [zoom, setZoom] = useState(50); // Zoom inicial reduzido para 50% para visualizar folha inteira
   const [selectedBlock, setSelectedBlock] = useState(null);
-  const [hasSavedSizes, setHasSavedSizes] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [pdfProgress, setPdfProgress] = useState({ current: 0, total: 0 });
+
+  // Hook de gerenciamento de fontes e ordem
+  const {
+    hasSavedSizes,
+    setHasSavedSizes,
+    loadSavedFontSizes,
+    loadSavedOrder,
+    savePageOrder,
+    saveFontSizes
+  } = useFontSizeManager();
   const previewAreaRef = useRef(null);
 
   // Extrair informações de semana/ano/dia do selectedDayInfo
@@ -77,59 +87,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     markItemAsEdited,
     rejectPortalChange
   );
-
-
-  // Carregar tamanhos salvos do localStorage
-  const loadSavedFontSizes = () => {
-    try {
-      const saved = localStorage.getItem('print-preview-font-sizes');
-      if (saved) {
-        setHasSavedSizes(true);
-        return JSON.parse(saved);
-      }
-      return {};
-    } catch (error) {
-      return {};
-    }
-  };
-
-  // Carregar ordem salva do localStorage
-  const loadSavedOrder = () => {
-    try {
-      const saved = localStorage.getItem('print-preview-page-order');
-      if (saved) {
-        return JSON.parse(saved);
-      }
-      return [];
-    } catch (error) {
-      return [];
-    }
-  };
-
-  // Salvar ordem no localStorage
-  const savePageOrder = (blocks) => {
-    try {
-      const order = blocks.map(block => block.id);
-      localStorage.setItem('print-preview-page-order', JSON.stringify(order));
-    } catch (error) {
-      // Silenciar erro
-    }
-  };
-
-  // Salvar tamanhos no localStorage
-  const saveFontSizes = (blocks) => {
-    try {
-      const fontSizes = {};
-      blocks.forEach(block => {
-        // Criar chave única baseada no tipo e título
-        const key = `${block.type}:${block.title}`;
-        fontSizes[key] = block.fontSize;
-      });
-      localStorage.setItem('print-preview-font-sizes', JSON.stringify(fontSizes));
-    } catch (error) {
-      // Silenciar erro
-    }
-  };
 
   // Função para aplicar edições salvas aos blocos
   const applyEditsToBlocks = (blocks, editedItemsMap) => {
