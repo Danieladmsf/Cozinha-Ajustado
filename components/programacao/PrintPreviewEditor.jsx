@@ -1774,24 +1774,67 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                   const editInfo = edited && getItemEditInfo ? getItemEditInfo(itemKey) : null;
                   const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(recipe.recipe_name, cliente.customer_name) : null;
 
+                  const hasConflict = edited && changed;
+                  const conflictResolution = resolvedConflicts[itemKey];
+
                   let tooltipContent = null;
-                  if (editInfo) {
+                  let lineStyles = {};
+
+                  if (conflictResolution === 'accepted') {
+                    tooltipContent = `Mudança do portal aceita`;
+                    lineStyles = {
+                      backgroundColor: '#e9d5ff',
+                      borderLeft: '3px solid #9333ea',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else if (conflictResolution === 'rejected') {
+                    tooltipContent = `Edição manual mantida`;
+                    lineStyles = {
+                      backgroundColor: '#fed7aa',
+                      borderLeft: '3px solid #f97316',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else if (hasConflict) {
+                    tooltipContent = `⚠️ CONFLITO: Você editou manualmente E o portal modificou este item`;
+                    lineStyles = {
+                      backgroundColor: '#fee2e2',
+                      borderLeft: '4px solid #dc2626',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else if (editInfo) {
                     tooltipContent = `Editado por ${editInfo.userName} em ${new Date(editInfo.timestamp).toLocaleString()}`;
+                    lineStyles = {
+                      backgroundColor: '#fef3c7',
+                      borderLeft: '3px solid #f59e0b',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
                   } else if (changeInfo) {
                     const changeType = changeInfo.type === 'modified' ? 'Modificado' : changeInfo.type === 'added' ? 'Adicionado' : 'Removido';
                     tooltipContent = `${changeType} nos pedidos originais`;
+                    lineStyles = {
+                      backgroundColor: '#d1fae5',
+                      borderLeft: '3px solid #10b981',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else {
+                    lineStyles = {
+                      backgroundColor: 'transparent',
+                      borderLeft: 'none',
+                      paddingLeft: '2px',
+                      borderRadius: '4px'
+                    };
                   }
 
                   return (
                     <div
                       key={idx}
                       className="item-line"
-                      style={{
-                        backgroundColor: edited ? '#fef3c7' : changed ? '#d1fae5' : 'transparent',
-                        borderLeft: edited ? '3px solid #f59e0b' : changed ? '3px solid #10b981' : 'none',
-                        paddingLeft: (edited || changed) ? '8px' : '2px',
-                        borderRadius: '4px'
-                      }}
+                      style={lineStyles}
                     >
                       <Tooltip content={tooltipContent}>
                         <span
@@ -1817,6 +1860,30 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                           {formatQuantityDisplay(cliente)}
                         </span>
                       </Tooltip>
+                      {/* Valor do portal entre parênteses (em caso de conflito não resolvido) */}
+                      {hasConflict && !conflictResolution && changeInfo?.currentQuantity && (
+                        <span className="portal-value no-print" style={{
+                          marginLeft: '8px',
+                          color: '#6b7280',
+                          fontSize: '0.95em'
+                        }}>
+                          ({formatQuantityDisplay({
+                            quantity: changeInfo.currentQuantity,
+                            unit_type: changeInfo.currentUnit || cliente.unit_type
+                          })})
+                        </span>
+                      )}
+                      {/* Timestamp para mudanças do portal (não conflito) */}
+                      {!hasConflict && changed && changeInfo?.detectedAt && (
+                        <ChangeTimestamp timestamp={changeInfo.detectedAt} />
+                      )}
+                      {/* Botões de conflito (apenas se não resolvido) */}
+                      {hasConflict && !conflictResolution && (
+                        <ConflictButtons
+                          onAccept={() => handleAcceptPortalChange(itemKey)}
+                          onReject={() => handleRejectPortalChange(itemKey)}
+                        />
+                      )}
                     </div>
                   );
                 })}
@@ -1858,24 +1925,67 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                   const editInfo = edited && getItemEditInfo ? getItemEditInfo(itemKey) : null;
                   const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(recipe.recipe_name, cliente.customer_name) : null;
 
+                  const hasConflict = edited && changed;
+                  const conflictResolution = resolvedConflicts[itemKey];
+
                   let tooltipContent = null;
-                  if (editInfo) {
+                  let lineStyles = {};
+
+                  if (conflictResolution === 'accepted') {
+                    tooltipContent = `Mudança do portal aceita`;
+                    lineStyles = {
+                      backgroundColor: '#e9d5ff',
+                      borderLeft: '3px solid #9333ea',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else if (conflictResolution === 'rejected') {
+                    tooltipContent = `Edição manual mantida`;
+                    lineStyles = {
+                      backgroundColor: '#fed7aa',
+                      borderLeft: '3px solid #f97316',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else if (hasConflict) {
+                    tooltipContent = `⚠️ CONFLITO: Você editou manualmente E o portal modificou este item`;
+                    lineStyles = {
+                      backgroundColor: '#fee2e2',
+                      borderLeft: '4px solid #dc2626',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else if (editInfo) {
                     tooltipContent = `Editado por ${editInfo.userName} em ${new Date(editInfo.timestamp).toLocaleString()}`;
+                    lineStyles = {
+                      backgroundColor: '#fef3c7',
+                      borderLeft: '3px solid #f59e0b',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
                   } else if (changeInfo) {
                     const changeType = changeInfo.type === 'modified' ? 'Modificado' : changeInfo.type === 'added' ? 'Adicionado' : 'Removido';
                     tooltipContent = `${changeType} nos pedidos originais`;
+                    lineStyles = {
+                      backgroundColor: '#d1fae5',
+                      borderLeft: '3px solid #10b981',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else {
+                    lineStyles = {
+                      backgroundColor: 'transparent',
+                      borderLeft: 'none',
+                      paddingLeft: '2px',
+                      borderRadius: '4px'
+                    };
                   }
 
                   return (
                     <div
                       key={idx}
                       className="item-line"
-                      style={{
-                        backgroundColor: edited ? '#fef3c7' : changed ? '#d1fae5' : 'transparent',
-                        borderLeft: edited ? '3px solid #f59e0b' : changed ? '3px solid #10b981' : 'none',
-                        paddingLeft: (edited || changed) ? '8px' : '2px',
-                        borderRadius: '4px'
-                      }}
+                      style={lineStyles}
                     >
                       <Tooltip content={tooltipContent}>
                         <span
@@ -1901,6 +2011,30 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                           {formatQuantityDisplay(cliente)}
                         </span>
                       </Tooltip>
+                      {/* Valor do portal entre parênteses (em caso de conflito não resolvido) */}
+                      {hasConflict && !conflictResolution && changeInfo?.currentQuantity && (
+                        <span className="portal-value no-print" style={{
+                          marginLeft: '8px',
+                          color: '#6b7280',
+                          fontSize: '0.95em'
+                        }}>
+                          ({formatQuantityDisplay({
+                            quantity: changeInfo.currentQuantity,
+                            unit_type: changeInfo.currentUnit || cliente.unit_type
+                          })})
+                        </span>
+                      )}
+                      {/* Timestamp para mudanças do portal (não conflito) */}
+                      {!hasConflict && changed && changeInfo?.detectedAt && (
+                        <ChangeTimestamp timestamp={changeInfo.detectedAt} />
+                      )}
+                      {/* Botões de conflito (apenas se não resolvido) */}
+                      {hasConflict && !conflictResolution && (
+                        <ConflictButtons
+                          onAccept={() => handleAcceptPortalChange(itemKey)}
+                          onReject={() => handleRejectPortalChange(itemKey)}
+                        />
+                      )}
                     </div>
                   );
                 })}
