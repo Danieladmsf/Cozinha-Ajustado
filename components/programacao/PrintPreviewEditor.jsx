@@ -257,6 +257,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     });
 
     if (Object.keys(changes).length > 0) {
+      console.log('🔍 Mudanças detectadas:', changes);
       setChangedItems(changes);
     }
   }, [originalOrders]);
@@ -276,11 +277,14 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
   // Wrappers para rastrear resolução de conflitos
   const handleAcceptPortalChange = useCallback((itemKey, newValue, portalQuantity, portalUnit) => {
+    const portalValue = `${portalQuantity}_${portalUnit}`;
+    console.log('✅ Aceitando mudança:', itemKey, '→', portalValue);
+
     setResolvedConflicts(prev => ({
       ...prev,
       [itemKey]: {
         status: 'accepted',
-        portalValueAtResolution: `${portalQuantity}_${portalUnit}`
+        portalValueAtResolution: portalValue
       }
     }));
 
@@ -291,6 +295,8 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   }, [markItemAsEdited]);
 
   const handleRejectPortalChange = useCallback((itemKey, currentValue) => {
+    console.log('❌ Rejeitando mudança:', itemKey, '→', currentValue);
+
     setResolvedConflicts(prev => ({
       ...prev,
       [itemKey]: {
@@ -317,21 +323,45 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   useEffect(() => {
     if (!changedItems || Object.keys(changedItems).length === 0) return;
 
+    console.log('🔄 Verificando resoluções:', {
+      resolvedConflicts: Object.keys(resolvedConflicts),
+      changedItems: Object.keys(changedItems)
+    });
+
     setResolvedConflicts(prev => {
       const updated = { ...prev };
       let hasChanges = false;
 
-      Object.entries(prev).forEach(([itemKey, resolution]) => {
+      Object.entries(prev).forEach(([resolvedItemKey, resolution]) => {
         // Verificar se o valor do portal mudou novamente (tanto para accepted quanto rejected)
-        const status = typeof resolution === 'object' ? resolution.status : resolution;
-        const changeInfo = changedItems[itemKey];
+        if (!resolution?.portalValueAtResolution) return;
 
-        if (changeInfo && resolution?.portalValueAtResolution) {
+        // Extrair informações da chave de resolução
+        // Formato: "CompanyName_RecipeName_CustomerName" OU "RecipeName_CustomerName"
+        const parts = resolvedItemKey.split('_');
+        let recipeName, customerName;
+
+        if (parts.length >= 3) {
+          // Formato empresa: "CompanyName_RecipeName_CustomerName"
+          customerName = parts[0]; // CompanyName serve como customerName
+          recipeName = parts.slice(1, -1).join('_');
+        } else {
+          // Formato padrão: "RecipeName_CustomerName"
+          recipeName = parts[0];
+          customerName = parts[1];
+        }
+
+        // Procurar por mudança com chave padrão
+        const changeKey = `${recipeName}_${customerName}`;
+        const changeInfo = changedItems[changeKey];
+
+        if (changeInfo) {
           const currentPortalValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
 
           // Se o valor do portal mudou, limpar resolução (aceito OU rejeitado)
           if (currentPortalValue !== resolution.portalValueAtResolution) {
-            delete updated[itemKey];
+            console.log('🔄 Limpando resolução:', resolvedItemKey, 'mudou de', resolution.portalValueAtResolution, 'para', currentPortalValue);
+            delete updated[resolvedItemKey];
             hasChanges = true;
           }
         }
