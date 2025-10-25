@@ -122,6 +122,123 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     }
   }, [originalOrders]);
 
+  // Atualizar quantidades nos blocos quando originalOrders muda (sem recriar blocos)
+  // Isso permite que mudanças do portal sejam refletidas em tempo real
+  // preservando edições manuais do usuário
+  useEffect(() => {
+    if (!originalOrders || !hasInitializedBlocksRef.current || editableBlocks.length === 0) {
+      return;
+    }
+
+    console.log('[PrintPreviewEditor] Atualizando quantidades dos blocos com dados do portal...');
+
+    // Criar mapa de quantidades atuais do portal
+    const currentQuantities = {};
+    originalOrders.forEach(order => {
+      if (!order.items) return;
+      order.items.forEach(item => {
+        const itemKey = createItemKey(item.recipe_name, order.customer_name);
+        currentQuantities[itemKey] = {
+          quantity: item.quantity,
+          unit_type: item.unit_type
+        };
+      });
+    });
+
+    // Atualizar blocos preservando estrutura e edições
+    setEditableBlocks(prevBlocks => {
+      return prevBlocks.map(block => {
+        const updatedBlock = { ...block };
+
+        // Atualizar blocos tipo 'empresa'
+        if (block.type === 'empresa' && block.items) {
+          const newItems = {};
+          Object.entries(block.items).forEach(([category, items]) => {
+            newItems[category] = items.map(item => {
+              const itemKey = createItemKey(item.recipe_name, item.customer_name || 'sem_cliente', block.title);
+              const editInfo = isItemEdited ? isItemEdited(itemKey) : false;
+
+              // Se foi editado manualmente, manter valor editado
+              if (editInfo) {
+                return item;
+              }
+
+              // Senão, atualizar com valor do portal
+              const portalData = currentQuantities[itemKey];
+              if (portalData) {
+                return {
+                  ...item,
+                  quantity: portalData.quantity,
+                  unit_type: portalData.unit_type
+                };
+              }
+              return item;
+            });
+          });
+          updatedBlock.items = newItems;
+        }
+
+        // Atualizar blocos tipo 'detailed-section'
+        if (block.type === 'detailed-section' && block.items) {
+          updatedBlock.items = block.items.map(recipe => {
+            const newClientes = recipe.clientes.map(cliente => {
+              const itemKey = createItemKey(recipe.recipe_name, cliente.customer_name);
+              const editInfo = isItemEdited ? isItemEdited(itemKey) : false;
+
+              // Se foi editado manualmente, manter valor editado
+              if (editInfo) {
+                return cliente;
+              }
+
+              // Senão, atualizar com valor do portal
+              const portalData = currentQuantities[itemKey];
+              if (portalData) {
+                return {
+                  ...cliente,
+                  quantity: portalData.quantity,
+                  unit_type: portalData.unit_type
+                };
+              }
+              return cliente;
+            });
+
+            return { ...recipe, clientes: newClientes };
+          });
+        }
+
+        // Atualizar blocos tipo 'embalagem-category'
+        if (block.type === 'embalagem-category' && block.items) {
+          updatedBlock.items = block.items.map(recipe => {
+            const newClientes = recipe.clientes.map(cliente => {
+              const itemKey = createItemKey(recipe.recipe_name, cliente.customer_name);
+              const editInfo = isItemEdited ? isItemEdited(itemKey) : false;
+
+              // Se foi editado manualmente, manter valor editado
+              if (editInfo) {
+                return cliente;
+              }
+
+              // Senão, atualizar com valor do portal
+              const portalData = currentQuantities[itemKey];
+              if (portalData) {
+                return {
+                  ...cliente,
+                  quantity: portalData.quantity,
+                  unit_type: portalData.unit_type
+                };
+              }
+              return cliente;
+            });
+
+            return { ...recipe, clientes: newClientes };
+          });
+        }
+
+        return updatedBlock;
+      });
+    });
+  }, [originalOrders, isItemEdited]);
+
   // Função para aplicar edições salvas aos blocos
   const applyEditsToBlocks = (blocks, editedItemsMap) => {
     if (!editedItemsMap || Object.keys(editedItemsMap).length === 0) {
