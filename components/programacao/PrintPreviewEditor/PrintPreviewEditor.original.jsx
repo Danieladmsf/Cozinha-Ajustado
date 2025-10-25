@@ -185,11 +185,27 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     });
   };
 
+  // Ref para rastrear se já inicializamos os blocos
+  const hasInitializedBlocksRef = useRef(false);
+
   // Inicializar blocos editáveis
   // Criar blocos iniciais APENAS UMA VEZ na montagem
   // Não recriar quando dados mudarem para preservar edições do usuário
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    // Se já inicializamos, não fazer nada
+    if (hasInitializedBlocksRef.current) {
+      return;
+    }
+
+    // Só inicializar se houver dados disponíveis
+    if (!porEmpresaData && !saladaData && !acougueData && !embalagemData) {
+      return;
+    }
+
+    // Marcar como inicializado
+    hasInitializedBlocksRef.current = true;
+
     const blocks = [];
     const savedFontSizes = loadSavedFontSizes();
 
@@ -401,7 +417,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     } else {
       setEditableBlocks(blocks);
     }
-  }, []); // Rodar apenas uma vez na montagem - não recriar blocos quando dados mudarem
+  }, [porEmpresaData, saladaData, acougueData, embalagemData]); // Executar quando dados chegarem, mas só uma vez graças à ref
 
   // Ref para prevenir loop infinito
   const isSyncingRef = useRef(false);
