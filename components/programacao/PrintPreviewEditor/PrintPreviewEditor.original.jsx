@@ -9,6 +9,7 @@ import { useImpressaoProgramacao } from '@/hooks/programacao/useImpressaoProgram
 import { formatRecipeName } from './utils/formatUtils';
 import { createItemKey } from './utils/itemKeyUtils';
 import { createOrdersSnapshot, detectOrderChanges, loadSnapshot, saveSnapshot } from './utils/snapshotUtils';
+import { getConflictLineStyles, getConflictTooltip, shouldShowConflictButtons } from './utils/conflictUtils';
 import './print-preview.css';
 
 // Constantes de tamanho A4 (baseadas em dimensões físicas reais)
@@ -1692,64 +1693,22 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                   const hasConflict = edited && changed;
                   const conflictResolution = getResolutionStatus ? getResolutionStatus(itemKey) : null;
 
-                  let tooltipContent = null;
-                  let lineStyles = {};
+                  // Usar utilitários para obter estilos e tooltip
+                  const lineStyles = getConflictLineStyles({
+                    conflictResolution,
+                    hasConflict,
+                    edited,
+                    changed
+                  });
 
-                  if (conflictResolution === 'accepted') {
-                    // Conflito resolvido: ACEITO (roxo)
-                    tooltipContent = `Mudança do portal aceita`;
-                    lineStyles = {
-                      backgroundColor: '#e9d5ff',
-                      borderLeft: '3px solid #9333ea',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else if (conflictResolution === 'rejected') {
-                    // Conflito resolvido: REJEITADO (laranja)
-                    tooltipContent = `Edição manual mantida`;
-                    lineStyles = {
-                      backgroundColor: '#fed7aa',
-                      borderLeft: '3px solid #f97316',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else if (hasConflict) {
-                    // CONFLITO: vermelho/rosa
-                    tooltipContent = `⚠️ CONFLITO: Você editou manualmente E o portal modificou este item`;
-                    lineStyles = {
-                      backgroundColor: '#fee2e2',
-                      borderLeft: '4px solid #dc2626',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else if (edited) {
-                    // PRIORIDADE 1: Editado manualmente (amarelo)
-                    tooltipContent = `Editado por ${editInfo.userName} em ${new Date(editInfo.timestamp).toLocaleString()}`;
-                    lineStyles = {
-                      backgroundColor: '#fef3c7',
-                      borderLeft: '3px solid #f59e0b',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else if (changed) {
-                    // PRIORIDADE 2: Modificado no portal (verde)
-                    const changeType = changeInfo.type === 'modified' ? 'Modificado' : changeInfo.type === 'added' ? 'Adicionado' : 'Removido';
-                    tooltipContent = `${changeType} nos pedidos originais`;
-                    lineStyles = {
-                      backgroundColor: '#d1fae5',
-                      borderLeft: '3px solid #10b981',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else {
-                    // Sem modificações
-                    lineStyles = {
-                      backgroundColor: 'transparent',
-                      borderLeft: 'none',
-                      paddingLeft: '2px',
-                      borderRadius: '4px'
-                    };
-                  }
+                  const tooltipContent = getConflictTooltip({
+                    conflictResolution,
+                    hasConflict,
+                    edited,
+                    changed,
+                    editInfo,
+                    changeInfo
+                  });
 
                   return (
                     <div
@@ -1861,58 +1820,22 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                   const hasConflict = edited && changed;
                   const conflictResolution = getResolutionStatus ? getResolutionStatus(itemKey) : null;
 
-                  let tooltipContent = null;
-                  let lineStyles = {};
+                  // Usar utilitários para obter estilos e tooltip
+                  const lineStyles = getConflictLineStyles({
+                    conflictResolution,
+                    hasConflict,
+                    edited,
+                    changed
+                  });
 
-                  if (conflictResolution === 'accepted') {
-                    tooltipContent = `Mudança do portal aceita`;
-                    lineStyles = {
-                      backgroundColor: '#e9d5ff',
-                      borderLeft: '3px solid #9333ea',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else if (conflictResolution === 'rejected') {
-                    tooltipContent = `Edição manual mantida`;
-                    lineStyles = {
-                      backgroundColor: '#fed7aa',
-                      borderLeft: '3px solid #f97316',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else if (hasConflict) {
-                    tooltipContent = `⚠️ CONFLITO: Você editou manualmente E o portal modificou este item`;
-                    lineStyles = {
-                      backgroundColor: '#fee2e2',
-                      borderLeft: '4px solid #dc2626',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else if (editInfo) {
-                    tooltipContent = `Editado por ${editInfo.userName} em ${new Date(editInfo.timestamp).toLocaleString()}`;
-                    lineStyles = {
-                      backgroundColor: '#fef3c7',
-                      borderLeft: '3px solid #f59e0b',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else if (changeInfo) {
-                    const changeType = changeInfo.type === 'modified' ? 'Modificado' : changeInfo.type === 'added' ? 'Adicionado' : 'Removido';
-                    tooltipContent = `${changeType} nos pedidos originais`;
-                    lineStyles = {
-                      backgroundColor: '#d1fae5',
-                      borderLeft: '3px solid #10b981',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else {
-                    lineStyles = {
-                      backgroundColor: 'transparent',
-                      borderLeft: 'none',
-                      paddingLeft: '2px',
-                      borderRadius: '4px'
-                    };
-                  }
+                  const tooltipContent = getConflictTooltip({
+                    conflictResolution,
+                    hasConflict,
+                    edited,
+                    changed,
+                    editInfo,
+                    changeInfo
+                  });
 
                   return (
                     <div
@@ -2026,58 +1949,22 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                   const hasConflict = edited && changed;
                   const conflictResolution = getResolutionStatus ? getResolutionStatus(itemKey) : null;
 
-                  let tooltipContent = null;
-                  let lineStyles = {};
+                  // Usar utilitários para obter estilos e tooltip
+                  const lineStyles = getConflictLineStyles({
+                    conflictResolution,
+                    hasConflict,
+                    edited,
+                    changed
+                  });
 
-                  if (conflictResolution === 'accepted') {
-                    tooltipContent = `Mudança do portal aceita`;
-                    lineStyles = {
-                      backgroundColor: '#e9d5ff',
-                      borderLeft: '3px solid #9333ea',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else if (conflictResolution === 'rejected') {
-                    tooltipContent = `Edição manual mantida`;
-                    lineStyles = {
-                      backgroundColor: '#fed7aa',
-                      borderLeft: '3px solid #f97316',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else if (hasConflict) {
-                    tooltipContent = `⚠️ CONFLITO: Você editou manualmente E o portal modificou este item`;
-                    lineStyles = {
-                      backgroundColor: '#fee2e2',
-                      borderLeft: '4px solid #dc2626',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else if (editInfo) {
-                    tooltipContent = `Editado por ${editInfo.userName} em ${new Date(editInfo.timestamp).toLocaleString()}`;
-                    lineStyles = {
-                      backgroundColor: '#fef3c7',
-                      borderLeft: '3px solid #f59e0b',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else if (changeInfo) {
-                    const changeType = changeInfo.type === 'modified' ? 'Modificado' : changeInfo.type === 'added' ? 'Adicionado' : 'Removido';
-                    tooltipContent = `${changeType} nos pedidos originais`;
-                    lineStyles = {
-                      backgroundColor: '#d1fae5',
-                      borderLeft: '3px solid #10b981',
-                      paddingLeft: '8px',
-                      borderRadius: '4px'
-                    };
-                  } else {
-                    lineStyles = {
-                      backgroundColor: 'transparent',
-                      borderLeft: 'none',
-                      paddingLeft: '2px',
-                      borderRadius: '4px'
-                    };
-                  }
+                  const tooltipContent = getConflictTooltip({
+                    conflictResolution,
+                    hasConflict,
+                    edited,
+                    changed,
+                    editInfo,
+                    changeInfo
+                  });
 
                   return (
                     <div
