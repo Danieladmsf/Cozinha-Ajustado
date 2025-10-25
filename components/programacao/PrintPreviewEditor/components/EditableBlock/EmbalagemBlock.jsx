@@ -108,9 +108,25 @@ export function EmbalagemBlock({
                     })})
                   </span>
                 )}
-                {/* Timestamp para mudanças do portal (não conflito) */}
-                {!hasConflict && changed && changeInfo?.detectedAt && (
-                  <ChangeTimestamp timestamp={changeInfo.detectedAt} />
+                {/* Timestamps e indicadores */}
+                {/* Conflito resolvido - mostrar resolução */}
+                {conflictResolution === 'accepted' && changeInfo?.detectedAt && (
+                  <ChangeTimestamp timestamp={changeInfo.detectedAt} color="#10b981" />
+                )}
+                {conflictResolution === 'rejected' && editInfo && (
+                  <span className="no-print" style={{ marginLeft: '8px', fontSize: '0.85em', color: '#f59e0b', fontWeight: '600' }}>
+                    (editado)
+                  </span>
+                )}
+                {/* Mudança do portal sem conflito */}
+                {!hasConflict && !conflictResolution && changed && changeInfo?.detectedAt && (
+                  <ChangeTimestamp timestamp={changeInfo.detectedAt} color="#10b981" />
+                )}
+                {/* Edição manual sem conflito */}
+                {!hasConflict && !conflictResolution && edited && !changed && (
+                  <span className="no-print" style={{ marginLeft: '8px', fontSize: '0.85em', color: '#f59e0b', fontWeight: '600' }}>
+                    (editado)
+                  </span>
                 )}
                 {/* Botões de resolução de conflito */}
                 {hasConflict && !conflictResolution && changeInfo && (
