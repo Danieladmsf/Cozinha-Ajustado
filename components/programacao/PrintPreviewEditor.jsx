@@ -1407,8 +1407,9 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
                 getItemEditInfo={getItemEditInfo}
                 isItemChanged={isItemChanged}
                 getItemChangeInfo={getItemChangeInfo}
-                acceptPortalChange={acceptPortalChange}
-                rejectPortalChange={rejectPortalChange}
+                acceptPortalChange={handleAcceptPortalChange}
+                rejectPortalChange={handleRejectPortalChange}
+                resolvedConflicts={resolvedConflicts}
                 isLocked={isLocked}
               />
             ))}
@@ -1419,7 +1420,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   );
 }
 
-function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFit, onAutoFitComplete, onContentEdit, onItemEdit, onStatusUpdate, formatQuantityDisplay, isItemEdited, getItemEditInfo, isItemChanged, getItemChangeInfo, acceptPortalChange, rejectPortalChange, isLocked }) {
+function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFit, onAutoFitComplete, onContentEdit, onItemEdit, onStatusUpdate, formatQuantityDisplay, isItemEdited, getItemEditInfo, isItemChanged, getItemChangeInfo, acceptPortalChange, rejectPortalChange, resolvedConflicts, isLocked }) {
   const blockRef = useRef(null);
   const contentRef = useRef(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -1743,8 +1744,8 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                       {/* Botões de conflito (apenas se não resolvido) */}
                       {hasConflict && !conflictResolution && (
                         <ConflictButtons
-                          onAccept={() => handleAcceptPortalChange(itemKey)}
-                          onReject={() => handleRejectPortalChange(itemKey)}
+                          onAccept={() => acceptPortalChange(itemKey)}
+                          onReject={() => rejectPortalChange(itemKey)}
                         />
                       )}
                     </div>
@@ -1880,8 +1881,8 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                       {/* Botões de conflito (apenas se não resolvido) */}
                       {hasConflict && !conflictResolution && (
                         <ConflictButtons
-                          onAccept={() => handleAcceptPortalChange(itemKey)}
-                          onReject={() => handleRejectPortalChange(itemKey)}
+                          onAccept={() => acceptPortalChange(itemKey)}
+                          onReject={() => rejectPortalChange(itemKey)}
                         />
                       )}
                     </div>
@@ -2031,8 +2032,8 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                       {/* Botões de conflito (apenas se não resolvido) */}
                       {hasConflict && !conflictResolution && (
                         <ConflictButtons
-                          onAccept={() => handleAcceptPortalChange(itemKey)}
-                          onReject={() => handleRejectPortalChange(itemKey)}
+                          onAccept={() => acceptPortalChange(itemKey)}
+                          onReject={() => rejectPortalChange(itemKey)}
                         />
                       )}
                     </div>
