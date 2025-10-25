@@ -275,8 +275,14 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const hasChanges = Object.keys(changedItems).length > 0;
 
   // Wrappers para rastrear resolução de conflitos
-  const handleAcceptPortalChange = useCallback((itemKey, newValue) => {
-    setResolvedConflicts(prev => ({ ...prev, [itemKey]: 'accepted' }));
+  const handleAcceptPortalChange = useCallback((itemKey, newValue, portalQuantity, portalUnit) => {
+    setResolvedConflicts(prev => ({
+      ...prev,
+      [itemKey]: {
+        status: 'accepted',
+        portalValueAtResolution: `${portalQuantity}_${portalUnit}`
+      }
+    }));
 
     // Atualizar o item com o novo valor do portal
     if (newValue) {
@@ -316,17 +322,17 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       let hasChanges = false;
 
       Object.entries(prev).forEach(([itemKey, resolution]) => {
-        // Se foi rejeitado, verificar se o valor do portal mudou novamente
+        // Verificar se o valor do portal mudou novamente (tanto para accepted quanto rejected)
         const status = typeof resolution === 'object' ? resolution.status : resolution;
-        if (status === 'rejected') {
-          const changeInfo = changedItems[itemKey];
-          if (changeInfo && resolution?.portalValueAtResolution) {
-            const currentPortalValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
-            if (currentPortalValue !== resolution.portalValueAtResolution) {
-              // Valor do portal mudou novamente, limpar resolução
-              delete updated[itemKey];
-              hasChanges = true;
-            }
+        const changeInfo = changedItems[itemKey];
+
+        if (changeInfo && resolution?.portalValueAtResolution) {
+          const currentPortalValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
+
+          // Se o valor do portal mudou, limpar resolução (aceito OU rejeitado)
+          if (currentPortalValue !== resolution.portalValueAtResolution) {
+            delete updated[itemKey];
+            hasChanges = true;
           }
         }
       });
@@ -1858,7 +1864,12 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                               quantity: changeInfo.currentQuantity,
                               unit_type: changeInfo.currentUnit || item.unit_type || cliente.unit_type
                             });
-                            acceptPortalChange(itemKey, newValue);
+                            acceptPortalChange(
+                              itemKey,
+                              newValue,
+                              changeInfo.currentQuantity,
+                              changeInfo.currentUnit || item.unit_type || cliente.unit_type
+                            );
                           }}
                           onReject={() => {
                             const currentValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
@@ -2004,7 +2015,12 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                               quantity: changeInfo.currentQuantity,
                               unit_type: changeInfo.currentUnit || item.unit_type || cliente.unit_type
                             });
-                            acceptPortalChange(itemKey, newValue);
+                            acceptPortalChange(
+                              itemKey,
+                              newValue,
+                              changeInfo.currentQuantity,
+                              changeInfo.currentUnit || item.unit_type || cliente.unit_type
+                            );
                           }}
                           onReject={() => {
                             const currentValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
@@ -2164,7 +2180,12 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                               quantity: changeInfo.currentQuantity,
                               unit_type: changeInfo.currentUnit || item.unit_type || cliente.unit_type
                             });
-                            acceptPortalChange(itemKey, newValue);
+                            acceptPortalChange(
+                              itemKey,
+                              newValue,
+                              changeInfo.currentQuantity,
+                              changeInfo.currentUnit || item.unit_type || cliente.unit_type
+                            );
                           }}
                           onReject={() => {
                             const currentValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
