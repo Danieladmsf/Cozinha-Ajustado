@@ -51,7 +51,7 @@ function ConflictButtons({ onAccept, onReject }) {
         className="conflict-btn accept"
         title="Aceitar mudança do portal"
         style={{
-          background: '#10b981',
+          background: '#9333ea',
           color: 'white',
           border: 'none',
           borderRadius: '4px',
@@ -72,7 +72,7 @@ function ConflictButtons({ onAccept, onReject }) {
         className="conflict-btn reject"
         title="Manter edição manual"
         style={{
-          background: '#ef4444',
+          background: '#f97316',
           color: 'white',
           border: 'none',
           borderRadius: '4px',
@@ -185,6 +185,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   // Snapshot inicial dos pedidos (captura ao abrir o editor)
   const initialOrdersRef = useRef(null);
   const [changedItems, setChangedItems] = useState({});
+  const [resolvedConflicts, setResolvedConflicts] = useState({}); // { itemKey: 'accepted' | 'rejected' }
 
   // Criar snapshot inicial apenas uma vez
   useEffect(() => {
@@ -255,6 +256,17 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   }, [changedItems]);
 
   const hasChanges = Object.keys(changedItems).length > 0;
+
+  // Wrappers para rastrear resolução de conflitos
+  const handleAcceptPortalChange = useCallback((itemKey) => {
+    setResolvedConflicts(prev => ({ ...prev, [itemKey]: 'accepted' }));
+    acceptPortalChange(itemKey);
+  }, [acceptPortalChange]);
+
+  const handleRejectPortalChange = useCallback((itemKey) => {
+    setResolvedConflicts(prev => ({ ...prev, [itemKey]: 'rejected' }));
+    rejectPortalChange(itemKey);
+  }, [rejectPortalChange]);
 
 
   // Carregar tamanhos salvos do localStorage
@@ -1608,11 +1620,30 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
 
                   // PRIORIDADE 1: Detectar CONFLITO (editado manualmente + mudou no portal)
                   const hasConflict = edited && changed;
+                  const conflictResolution = resolvedConflicts[itemKey];
 
                   let tooltipContent = null;
                   let lineStyles = {};
 
-                  if (hasConflict) {
+                  if (conflictResolution === 'accepted') {
+                    // Conflito resolvido: ACEITO (roxo)
+                    tooltipContent = `Mudança do portal aceita`;
+                    lineStyles = {
+                      backgroundColor: '#e9d5ff',
+                      borderLeft: '3px solid #9333ea',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else if (conflictResolution === 'rejected') {
+                    // Conflito resolvido: REJEITADO (laranja)
+                    tooltipContent = `Edição manual mantida`;
+                    lineStyles = {
+                      backgroundColor: '#fed7aa',
+                      borderLeft: '3px solid #f97316',
+                      paddingLeft: '8px',
+                      borderRadius: '4px'
+                    };
+                  } else if (hasConflict) {
                     // CONFLITO: vermelho/rosa
                     tooltipContent = `⚠️ CONFLITO: Você editou manualmente E o portal modificou este item`;
                     lineStyles = {
@@ -1681,17 +1712,6 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                           })()}
                         </span>
                       </Tooltip>
-                      {/* Botões de conflito */}
-                      {hasConflict && (
-                        <ConflictButtons
-                          onAccept={() => acceptPortalChange(itemKey)}
-                          onReject={() => rejectPortalChange(itemKey)}
-                        />
-                      )}
-                      {/* Timestamp para mudanças do portal (não conflito) */}
-                      {!hasConflict && changed && changeInfo?.detectedAt && (
-                        <ChangeTimestamp timestamp={changeInfo.detectedAt} />
-                      )}
                       <Tooltip content={tooltipContent}>
                         <span
                           className="item-text"
@@ -1703,6 +1723,30 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                           {formatRecipeName(item.recipe_name)}
                         </span>
                       </Tooltip>
+                      {/* Valor do portal entre parênteses (em caso de conflito não resolvido) */}
+                      {hasConflict && !conflictResolution && changeInfo?.currentQuantity && (
+                        <span className="portal-value no-print" style={{
+                          marginLeft: '8px',
+                          color: '#6b7280',
+                          fontSize: '0.95em'
+                        }}>
+                          ({formatQuantityDisplay({
+                            quantity: changeInfo.currentQuantity,
+                            unit_type: changeInfo.currentUnit || item.unit_type
+                          })})
+                        </span>
+                      )}
+                      {/* Timestamp para mudanças do portal (não conflito) */}
+                      {!hasConflict && changed && changeInfo?.detectedAt && (
+                        <ChangeTimestamp timestamp={changeInfo.detectedAt} />
+                      )}
+                      {/* Botões de conflito (apenas se não resolvido) */}
+                      {hasConflict && !conflictResolution && (
+                        <ConflictButtons
+                          onAccept={() => handleAcceptPortalChange(itemKey)}
+                          onReject={() => handleRejectPortalChange(itemKey)}
+                        />
+                      )}
                     </div>
                   );
                 })}
