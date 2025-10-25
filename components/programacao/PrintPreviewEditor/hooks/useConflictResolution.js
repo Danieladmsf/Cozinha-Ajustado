@@ -74,9 +74,16 @@ export function useConflictResolution(
     });
 
     if (Object.keys(changes).length > 0) {
+      console.log('[useConflictResolution] Mudanças detectadas:', changes);
       setChangedItems(changes);
+    } else {
+      // Limpar mudanças se não houver mais (caso os dados voltem ao normal)
+      if (Object.keys(changedItems).length > 0) {
+        console.log('[useConflictResolution] Limpando mudanças (dados voltaram ao normal)');
+        setChangedItems({});
+      }
     }
-  }, [originalOrders]);
+  }, [originalOrders, changedItems]);
 
   // Funções helper
   const isItemChanged = useCallback((itemName, clientName) => {
