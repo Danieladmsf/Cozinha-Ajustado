@@ -115,6 +115,13 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     rejectPortalChange
   );
 
+  // Debug: Log quando originalOrders muda
+  useEffect(() => {
+    if (originalOrders) {
+      console.log('[PrintPreviewEditor] originalOrders atualizado, total de pedidos:', originalOrders.length);
+    }
+  }, [originalOrders]);
+
   // Função para aplicar edições salvas aos blocos
   const applyEditsToBlocks = (blocks, editedItemsMap) => {
     if (!editedItemsMap || Object.keys(editedItemsMap).length === 0) {
