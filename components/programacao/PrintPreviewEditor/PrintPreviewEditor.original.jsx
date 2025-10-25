@@ -7,6 +7,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useImpressaoProgramacao } from '@/hooks/programacao/useImpressaoProgramacao';
 import { formatRecipeName } from './utils/formatUtils';
+import { createItemKey } from './utils/itemKeyUtils';
 import './print-preview.css';
 
 // Constantes de tamanho A4 (baseadas em dimensões físicas reais)
@@ -173,7 +174,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       originalOrders.forEach(order => {
         if (!order.items) return;
         order.items.forEach(item => {
-          const itemKey = `${item.recipe_name}_${order.customer_name}`;
+          const itemKey = createItemKey(item.recipe_name, order.customer_name);
           snapshot[itemKey] = {
             quantity: item.quantity,
             unit_type: item.unit_type,
@@ -199,7 +200,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     originalOrders.forEach(order => {
       if (!order.items) return;
       order.items.forEach(item => {
-        const itemKey = `${item.recipe_name}_${order.customer_name}`;
+        const itemKey = createItemKey(item.recipe_name, order.customer_name);
         currentSnapshot[itemKey] = {
           quantity: item.quantity,
           unit_type: item.unit_type
@@ -229,12 +230,12 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
   // Funções helper
   const isItemChanged = useCallback((itemName, clientName) => {
-    const itemKey = `${itemName}_${clientName}`;
+    const itemKey = createItemKey(itemName, clientName);
     return !!changedItems[itemKey];
   }, [changedItems]);
 
   const getItemChangeInfo = useCallback((itemName, clientName) => {
-    const itemKey = `${itemName}_${clientName}`;
+    const itemKey = createItemKey(itemName, clientName);
     return changedItems[itemKey] || null;
   }, [changedItems]);
 
@@ -342,7 +343,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     originalOrders.forEach(order => {
       if (!order.items) return;
       order.items.forEach(item => {
-        const itemKey = `${item.recipe_name}_${order.customer_name}`;
+        const itemKey = createItemKey(item.recipe_name, order.customer_name);
         snapshot[itemKey] = {
           quantity: item.quantity,
           unit_type: item.unit_type,
@@ -456,7 +457,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       if ((updatedBlock.type === 'detailed-section' || updatedBlock.type === 'embalagem-category') && updatedBlock.items) {
         updatedBlock.items = updatedBlock.items.map(recipe => {
           const newClientes = recipe.clientes.map(cliente => {
-            const itemKey = `${recipe.recipe_name}_${cliente.customer_name}`;
+            const itemKey = createItemKey(recipe.recipe_name, cliente.customer_name);
             const editInfo = editedItemsMap[itemKey];
 
             if (editInfo && editInfo.field === 'quantity') {
@@ -887,9 +888,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
     // Para blocos tipo 'empresa', incluir blockTitle na chave para evitar colisões
     // entre receitas com mesmo nome em empresas diferentes
-    const itemKey = blockTitle
-      ? `${blockTitle}_${itemName}_${normalizedClientName}`
-      : `${itemName}_${normalizedClientName}`;
+    const itemKey = createItemKey(itemName, normalizedClientName, blockTitle);
 
     // Marcar item como editado no Firebase
     markItemAsEdited(itemKey, originalValue, editedValue, field);
@@ -1537,17 +1536,13 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
 
   // Handler para capturar valor antes de editar
   const handleEditStart = (e, itemName, clientName, blockTitle = null) => {
-    const itemKey = blockTitle
-      ? `${blockTitle}_${itemName}_${clientName || 'sem_cliente'}`
-      : `${itemName}_${clientName || 'sem_cliente'}`;
+    const itemKey = createItemKey(itemName, clientName, blockTitle);
     originalValuesRef.current[itemKey] = e.target.textContent;
   };
 
   // Handler para detectar mudanças após editar
   const handleEditEnd = (e, itemName, clientName, field, blockTitle = null) => {
-    const itemKey = blockTitle
-      ? `${blockTitle}_${itemName}_${clientName || 'sem_cliente'}`
-      : `${itemName}_${clientName || 'sem_cliente'}`;
+    const itemKey = createItemKey(itemName, clientName, blockTitle);
     const originalValue = originalValuesRef.current[itemKey];
     const newValue = e.target.textContent;
 
@@ -1716,7 +1711,7 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                   // Normalizar customer_name para garantir consistência
                   const normalizedCustomerName = item.customer_name || 'sem_cliente';
                   // Para blocos 'empresa', incluir block.title na chave para evitar colisões
-                  const itemKey = `${block.title}_${item.recipe_name}_${normalizedCustomerName}`;
+                  const itemKey = createItemKey(item.recipe_name, normalizedCustomerName, block.title);
 
                   const edited = isItemEdited ? isItemEdited(itemKey) : false;
                   // Para blocos 'empresa', usar block.title como clientName na detecção de mudanças
@@ -1888,7 +1883,7 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                   {formatRecipeName(recipe.recipe_name)}
                 </h2>
                 {recipe.clientes.map((cliente, idx) => {
-                  const itemKey = `${recipe.recipe_name}_${cliente.customer_name}`;
+                  const itemKey = createItemKey(recipe.recipe_name, cliente.customer_name);
                   const edited = isItemEdited && isItemEdited(itemKey);
                   const changed = isItemChanged && isItemChanged(recipe.recipe_name, cliente.customer_name);
                   const editInfo = edited && getItemEditInfo ? getItemEditInfo(itemKey) : null;
@@ -2053,7 +2048,7 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                   {formatRecipeName(recipe.recipe_name)}
                 </h2>
                 {recipe.clientes.map((cliente, idx) => {
-                  const itemKey = `${recipe.recipe_name}_${cliente.customer_name}`;
+                  const itemKey = createItemKey(recipe.recipe_name, cliente.customer_name);
                   const edited = isItemEdited && isItemEdited(itemKey);
                   const changed = isItemChanged && isItemChanged(recipe.recipe_name, cliente.customer_name);
                   const editInfo = edited && getItemEditInfo ? getItemEditInfo(itemKey) : null;
