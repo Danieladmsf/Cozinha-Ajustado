@@ -93,7 +93,7 @@ function ConflictButtons({ onAccept, onReject }) {
 }
 
 // Componente de timestamp para mudanças do portal
-function ChangeTimestamp({ timestamp }) {
+function ChangeTimestamp({ timestamp, color = '#10b981' }) {
   if (!timestamp) return null;
 
   const date = new Date(timestamp);
@@ -102,10 +102,10 @@ function ChangeTimestamp({ timestamp }) {
 
   return (
     <span className="change-timestamp no-print" style={{
-      fontSize: '0.75em',
-      color: '#6b7280',
+      fontSize: '0.85em',
+      color: color,
       marginLeft: '8px',
-      fontStyle: 'italic'
+      fontWeight: '600'
     }}>
       ({formattedTime} {formattedDate})
     </span>
