@@ -1,16 +1,31 @@
 'use client';
 
+/**
+ * PrintPreviewEditor - Editor de visualização e impressão de programação
+ *
+ * Componente principal para editar, visualizar e gerar PDFs da programação de produção.
+ * Suporta:
+ * - Edição inline de blocos e itens
+ * - Ajuste automático de fonte (auto-fit)
+ * - Detecção de conflitos entre edições manuais e mudanças do portal
+ * - Sincronização em tempo real via Firebase
+ * - Geração de PDF com html2canvas
+ * - Drag & drop para reordenar blocos
+ * - Zoom e controles de impressão
+ *
+ * Estrutura modular:
+ * - hooks/ - Custom hooks para gerenciamento de estado (conflitos, fontes, blocos)
+ * - components/ - Componentes reutilizáveis (EditableBlock, Tooltip, ConflictButtons, etc)
+ * - utils/ - Funções utilitárias (formatação, detecção de mudanças, chaves de itens)
+ * - services/ - Serviços externos (geração de PDF)
+ */
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw, GripVertical, Download, Users, Lock, AlertTriangle, Cloud, CheckCircle } from "lucide-react";
 import { useImpressaoProgramacao } from '@/hooks/programacao/useImpressaoProgramacao';
 import { formatRecipeName } from './utils/formatUtils';
 import { createItemKey } from './utils/itemKeyUtils';
-import { createOrdersSnapshot, detectOrderChanges, loadSnapshot, saveSnapshot } from './utils/snapshotUtils';
-import { getConflictLineStyles, getConflictTooltip, shouldShowConflictButtons } from './utils/conflictUtils';
-import { Tooltip } from './components/Tooltip';
-import { ConflictButtons } from './components/ConflictButtons';
-import { ChangeTimestamp } from './components/ChangeTimestamp';
 import { useConflictResolution } from './hooks/useConflictResolution';
 import { useFontSizeManager } from './hooks/useFontSizeManager';
 import { useBlockManagement } from './hooks/useBlockManagement';
