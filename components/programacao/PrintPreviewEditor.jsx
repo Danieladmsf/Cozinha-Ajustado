@@ -275,10 +275,14 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const hasChanges = Object.keys(changedItems).length > 0;
 
   // Wrappers para rastrear resolução de conflitos
-  const handleAcceptPortalChange = useCallback((itemKey) => {
+  const handleAcceptPortalChange = useCallback((itemKey, newValue) => {
     setResolvedConflicts(prev => ({ ...prev, [itemKey]: 'accepted' }));
-    acceptPortalChange(itemKey);
-  }, [acceptPortalChange]);
+
+    // Atualizar o item com o novo valor do portal
+    if (newValue) {
+      markItemAsEdited(itemKey, '', newValue, 'quantity');
+    }
+  }, [markItemAsEdited]);
 
   const handleRejectPortalChange = useCallback((itemKey) => {
     setResolvedConflicts(prev => ({ ...prev, [itemKey]: 'rejected' }));
@@ -1801,9 +1805,15 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                         <ChangeTimestamp timestamp={changeInfo.detectedAt} />
                       )}
                       {/* Botões de conflito (apenas se não resolvido) */}
-                      {hasConflict && !conflictResolution && (
+                      {hasConflict && !conflictResolution && changeInfo && (
                         <ConflictButtons
-                          onAccept={() => acceptPortalChange(itemKey)}
+                          onAccept={() => {
+                            const newValue = formatQuantityDisplay({
+                              quantity: changeInfo.currentQuantity,
+                              unit_type: changeInfo.currentUnit || item.unit_type || cliente.unit_type
+                            });
+                            acceptPortalChange(itemKey, newValue);
+                          }}
                           onReject={() => rejectPortalChange(itemKey)}
                         />
                       )}
@@ -1938,9 +1948,15 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                         <ChangeTimestamp timestamp={changeInfo.detectedAt} />
                       )}
                       {/* Botões de conflito (apenas se não resolvido) */}
-                      {hasConflict && !conflictResolution && (
+                      {hasConflict && !conflictResolution && changeInfo && (
                         <ConflictButtons
-                          onAccept={() => acceptPortalChange(itemKey)}
+                          onAccept={() => {
+                            const newValue = formatQuantityDisplay({
+                              quantity: changeInfo.currentQuantity,
+                              unit_type: changeInfo.currentUnit || item.unit_type || cliente.unit_type
+                            });
+                            acceptPortalChange(itemKey, newValue);
+                          }}
                           onReject={() => rejectPortalChange(itemKey)}
                         />
                       )}
@@ -2089,9 +2105,15 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                         <ChangeTimestamp timestamp={changeInfo.detectedAt} />
                       )}
                       {/* Botões de conflito (apenas se não resolvido) */}
-                      {hasConflict && !conflictResolution && (
+                      {hasConflict && !conflictResolution && changeInfo && (
                         <ConflictButtons
-                          onAccept={() => acceptPortalChange(itemKey)}
+                          onAccept={() => {
+                            const newValue = formatQuantityDisplay({
+                              quantity: changeInfo.currentQuantity,
+                              unit_type: changeInfo.currentUnit || item.unit_type || cliente.unit_type
+                            });
+                            acceptPortalChange(itemKey, newValue);
+                          }}
                           onReject={() => rejectPortalChange(itemKey)}
                         />
                       )}
