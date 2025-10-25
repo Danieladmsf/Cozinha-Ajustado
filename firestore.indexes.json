@@ -1,0 +1,14 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "impressaoProgramacao",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "metadata.weekNumber", "order": "ASCENDING" },
+        { "fieldPath": "metadata.year", "order": "ASCENDING" },
+        { "fieldPath": "metadata.dayNumber", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

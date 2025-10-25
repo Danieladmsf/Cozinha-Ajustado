@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Regras para impressaoProgramacao
+    match /impressaoProgramacao/{docId} {
+      // Permitir leitura para todos (permite usuários anônimos)
+      allow read: if true;
+
+      // Permitir escrita para todos (desenvolvimento)
+      // TODO: Em produção, adicionar validação de autenticação
+      allow create, update: if true;
+
+      // Não permitir deletar (apenas admins podem fazer via console)
+      allow delete: if false;
+
+      // Sub-coleção de presença de edição
+      match /editingPresence/{userId} {
+        // Permitir leitura para todos
+        allow read: if true;
+        // Permitir escrita/delete para qualquer um (desenvolvimento)
+        // TODO: Em produção, validar que userId corresponde ao usuário
+        allow write, delete: if true;
+      }
+    }
+
+    // Regras para pedidos (já existentes, manter como estão)
+    match /pedidos/{docId} {
+      // Permitir leitura para todos (desenvolvimento)
+      allow read: if true;
+      // Permitir escrita para todos (desenvolvimento)
+      allow write: if true;
+    }
+  }
+}
