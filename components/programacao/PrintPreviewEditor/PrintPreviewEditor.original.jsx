@@ -15,6 +15,7 @@ import { ConflictButtons } from './components/ConflictButtons';
 import { ChangeTimestamp } from './components/ChangeTimestamp';
 import { useConflictResolution } from './hooks/useConflictResolution';
 import { useFontSizeManager } from './hooks/useFontSizeManager';
+import { useBlockManagement } from './hooks/useBlockManagement';
 import './print-preview.css';
 
 // Constantes de tamanho A4 (baseadas em dimensões físicas reais)
@@ -27,12 +28,10 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const { porEmpresaData, saladaData, acougueData, embalagemData, selectedDayInfo, formatQuantityDisplay, consolidateCustomerItems, recipes, originalOrders } = data;
 
   const [editableBlocks, setEditableBlocks] = useState([]);
-  const [blockStatus, setBlockStatus] = useState({});
   const [zoom, setZoom] = useState(50); // Zoom inicial reduzido para 50% para visualizar folha inteira
-  const [selectedBlock, setSelectedBlock] = useState(null);
-  const [draggedIndex, setDraggedIndex] = useState(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [pdfProgress, setPdfProgress] = useState({ current: 0, total: 0 });
+  const previewAreaRef = useRef(null);
 
   // Hook de gerenciamento de fontes e ordem
   const {
@@ -43,7 +42,26 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     savePageOrder,
     saveFontSizes
   } = useFontSizeManager();
-  const previewAreaRef = useRef(null);
+
+  // Hook de gerenciamento de blocos
+  const {
+    draggedIndex,
+    selectedBlock,
+    setSelectedBlock,
+    blockStatus,
+    handleFontSizeChange,
+    handleAutoFit,
+    handleAutoFitComplete,
+    handleStatusUpdate,
+    scrollToBlock,
+    handleFixBlock,
+    handleResetFontSizes,
+    handleDragStart,
+    handleDragOver,
+    handleDrop,
+    handleDragEnd,
+    handleContentEdit
+  } = useBlockManagement(editableBlocks, setEditableBlocks, previewAreaRef, zoom);
 
   // Extrair informações de semana/ano/dia do selectedDayInfo
   const weekNumber = selectedDayInfo?.weekNumber || 0;
@@ -425,135 +443,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       hasAppliedEditedItemsRef.current = true;
     }
   }, [editedItems]);
-
-  const handleFontSizeChange = (blockId, delta) => {
-    setEditableBlocks(blocks =>
-      blocks.map(block =>
-        block.id === blockId
-          ? { ...block, fontSize: Math.max(8, Math.min(30, block.fontSize + delta)) }
-          : block
-      )
-    );
-  };
-
-  const handleAutoFit = (blockId) => {
-    // Marcar bloco para auto-fit
-    setEditableBlocks(blocks =>
-      blocks.map(block =>
-        block.id === blockId
-          ? { ...block, autoFitting: true, autoFitTimestamp: Date.now() }
-          : block
-      )
-    );
-  };
-
-  const handleAutoFitComplete = (blockId) => {
-    // Limpar flag de auto-fitting
-    setEditableBlocks(blocks =>
-      blocks.map(block =>
-        block.id === blockId
-          ? { ...block, autoFitting: false }
-          : block
-      )
-    );
-  };
-
-  const handleStatusUpdate = (blockId, isOverflowing, numPages) => {
-    setBlockStatus(prev => ({
-      ...prev,
-      [blockId]: { isOverflowing, numPages }
-    }));
-  };
-
-  const scrollToBlock = (blockId) => {
-    const element = document.getElementById(`block-${blockId}`);
-    if (element && previewAreaRef.current) {
-      const container = previewAreaRef.current;
-
-      // Obter posição do elemento no wrapper escalado
-      const elementRect = element.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-
-      // Calcular posição relativa considerando o scroll atual
-      const relativeTop = elementRect.top - containerRect.top + container.scrollTop;
-
-      // Compensar pelo scale/zoom
-      const scaledOffset = 50 / (zoom / 100); // Offset ajustado pelo zoom
-
-      container.scrollTo({
-        top: relativeTop - scaledOffset,
-        behavior: 'smooth'
-      });
-
-      setSelectedBlock(blockId);
-    }
-  };
-
-  const handleFixBlock = (blockId, e) => {
-    e.stopPropagation(); // Evitar que o click no badge também acione o click do item
-
-    // Primeiro seleciona o bloco (necessário para o auto-fit funcionar)
-    setSelectedBlock(blockId);
-
-    // Navega para o bloco
-    scrollToBlock(blockId);
-
-    // Executa o auto-fit após dar tempo para o elemento renderizar e estar pronto
-    setTimeout(() => {
-      handleAutoFit(blockId);
-    }, 600);
-  };
-
-  const handleResetFontSizes = () => {
-    if (confirm('Deseja resetar todos os tamanhos de fonte e ordem das páginas para os valores padrão?')) {
-      localStorage.removeItem('print-preview-font-sizes');
-      localStorage.removeItem('print-preview-page-order');
-      // Recarregar página para aplicar os padrões
-      window.location.reload();
-    }
-  };
-
-  // Handlers de drag and drop
-  const handleDragStart = (e, index) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOver = (e, index) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDrop = (e, dropIndex) => {
-    e.preventDefault();
-
-    if (draggedIndex === null || draggedIndex === dropIndex) {
-      setDraggedIndex(null);
-      return;
-    }
-
-    // Reordenar blocos
-    const newBlocks = [...editableBlocks];
-    const [draggedBlock] = newBlocks.splice(draggedIndex, 1);
-    newBlocks.splice(dropIndex, 0, draggedBlock);
-
-    setEditableBlocks(newBlocks);
-    setDraggedIndex(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-  };
-
-  const handleContentEdit = (blockId, field, value) => {
-    setEditableBlocks(blocks =>
-      blocks.map(block =>
-        block.id === blockId
-          ? { ...block, [field]: value }
-          : block
-      )
-    );
-  };
 
   const handleItemEdit = (itemName, clientName, originalValue, editedValue, field = 'content', blockTitle = null) => {
     // Normalizar clientName para corresponder à chave usada na renderização
