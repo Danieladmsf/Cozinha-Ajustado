@@ -10,6 +10,9 @@ import { formatRecipeName } from './utils/formatUtils';
 import { createItemKey } from './utils/itemKeyUtils';
 import { createOrdersSnapshot, detectOrderChanges, loadSnapshot, saveSnapshot } from './utils/snapshotUtils';
 import { getConflictLineStyles, getConflictTooltip, shouldShowConflictButtons } from './utils/conflictUtils';
+import { Tooltip } from './components/Tooltip';
+import { ConflictButtons } from './components/ConflictButtons';
+import { ChangeTimestamp } from './components/ChangeTimestamp';
 import './print-preview.css';
 
 // Constantes de tamanho A4 (baseadas em dimensões físicas reais)
@@ -17,104 +20,6 @@ import './print-preview.css';
 const A4_WIDTH_PX = 794;   // 210mm = 794px
 const A4_HEIGHT_PX = 1123;  // 297mm = 1123px
 const PAGE_PADDING_PX = 10; // Padding definido em .a4-page (print-preview.css)
-
-// Componente Tooltip para mostrar informações de edição
-function Tooltip({ children, content }) {
-  const [isVisible, setIsVisible] = useState(false);
-
-  if (!content) return children;
-
-  return (
-    <div
-      className="relative inline-block"
-      onMouseEnter={() => setIsVisible(true)}
-      onMouseLeave={() => setIsVisible(false)}
-    >
-      {children}
-      {isVisible && (
-        <div className="absolute z-50 px-3 py-2 text-xs font-medium text-white bg-gray-900 rounded-lg shadow-sm whitespace-nowrap" style={{ bottom: '100%', left: '50%', transform: 'translateX(-50%)', marginBottom: '8px' }}>
-          {content}
-          <div className="absolute w-2 h-2 bg-gray-900 transform rotate-45" style={{ bottom: '-4px', left: '50%', marginLeft: '-4px' }}></div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Componente de botões de resolução de conflito
-function ConflictButtons({ onAccept, onReject }) {
-  return (
-    <div className="conflict-buttons no-print" style={{
-      display: 'inline-flex',
-      gap: '4px',
-      marginLeft: '8px',
-      verticalAlign: 'middle'
-    }}>
-      <button
-        onClick={onAccept}
-        className="conflict-btn accept"
-        title="Aceitar mudança do portal"
-        style={{
-          background: '#9333ea',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          width: '24px',
-          height: '24px',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '14px',
-          fontWeight: 'bold'
-        }}
-      >
-        ✓
-      </button>
-      <button
-        onClick={onReject}
-        className="conflict-btn reject"
-        title="Manter edição manual"
-        style={{
-          background: '#f97316',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          width: '24px',
-          height: '24px',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '14px',
-          fontWeight: 'bold'
-        }}
-      >
-        ✗
-      </button>
-    </div>
-  );
-}
-
-// Componente de timestamp para mudanças do portal
-function ChangeTimestamp({ timestamp, color = '#10b981' }) {
-  if (!timestamp) return null;
-
-  const date = new Date(timestamp);
-  const formattedTime = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  const formattedDate = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-
-  return (
-    <span className="change-timestamp no-print" style={{
-      fontSize: '0.85em',
-      color: color,
-      marginLeft: '8px',
-      fontWeight: '600'
-    }}>
-      ({formattedTime} {formattedDate})
-    </span>
-  );
-}
 
 export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const { porEmpresaData, saladaData, acougueData, embalagemData, selectedDayInfo, formatQuantityDisplay, consolidateCustomerItems, recipes, originalOrders } = data;
