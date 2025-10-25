@@ -1631,12 +1631,12 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                       borderRadius: '4px'
                     };
                   } else if (changed) {
-                    // PRIORIDADE 2: Modificado no portal (laranja)
+                    // PRIORIDADE 2: Modificado no portal (verde)
                     const changeType = changeInfo.type === 'modified' ? 'Modificado' : changeInfo.type === 'added' ? 'Adicionado' : 'Removido';
                     tooltipContent = `${changeType} nos pedidos originais`;
                     lineStyles = {
-                      backgroundColor: '#fed7aa',
-                      borderLeft: '3px solid #fb923c',
+                      backgroundColor: '#d1fae5',
+                      borderLeft: '3px solid #10b981',
                       paddingLeft: '8px',
                       borderRadius: '4px'
                     };
@@ -1743,8 +1743,8 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                       key={idx}
                       className="item-line"
                       style={{
-                        backgroundColor: edited ? '#fef3c7' : changed ? '#fed7aa' : 'transparent',
-                        borderLeft: edited ? '3px solid #f59e0b' : changed ? '3px solid #fb923c' : 'none',
+                        backgroundColor: edited ? '#fef3c7' : changed ? '#d1fae5' : 'transparent',
+                        borderLeft: edited ? '3px solid #f59e0b' : changed ? '3px solid #10b981' : 'none',
                         paddingLeft: (edited || changed) ? '8px' : '2px',
                         borderRadius: '4px'
                       }}
@@ -1827,8 +1827,8 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                       key={idx}
                       className="item-line"
                       style={{
-                        backgroundColor: edited ? '#fef3c7' : changed ? '#fed7aa' : 'transparent',
-                        borderLeft: edited ? '3px solid #f59e0b' : changed ? '3px solid #fb923c' : 'none',
+                        backgroundColor: edited ? '#fef3c7' : changed ? '#d1fae5' : 'transparent',
+                        borderLeft: edited ? '3px solid #f59e0b' : changed ? '3px solid #10b981' : 'none',
                         paddingLeft: (edited || changed) ? '8px' : '2px',
                         borderRadius: '4px'
                       }}
