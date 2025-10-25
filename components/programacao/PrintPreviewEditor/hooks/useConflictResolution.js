@@ -49,40 +49,63 @@ export function useConflictResolution(
     }
   }, [originalOrders, weekNumber, year, dayNumber]);
 
+  // Ref para rastrear último snapshot processado
+  const lastProcessedSnapshotRef = useRef(null);
+
   // Detectar mudanças comparando originalOrders atual com snapshot inicial
+  // Usa polling interval para garantir detecção mesmo se referência do array não mudar
   useEffect(() => {
-    if (!initialOrdersRef.current || !originalOrders) return;
+    const checkForChanges = () => {
+      if (!initialOrdersRef.current || !originalOrders) return;
 
-    const changes = {};
+      // Criar snapshot atual usando utilitário
+      const currentSnapshot = createOrdersSnapshot(originalOrders);
+      const currentSnapshotStr = JSON.stringify(currentSnapshot);
 
-    // Criar snapshot atual usando utilitário
-    const currentSnapshot = createOrdersSnapshot(originalOrders);
-
-    // Comparar com snapshot inicial
-    Object.entries(currentSnapshot).forEach(([itemKey, current]) => {
-      const initial = initialOrdersRef.current[itemKey];
-      if (initial && (initial.quantity !== current.quantity || initial.unit_type !== current.unit_type)) {
-        changes[itemKey] = {
-          type: 'modified',
-          previousQuantity: initial.quantity,
-          currentQuantity: current.quantity,
-          previousUnit: initial.unit_type,
-          currentUnit: current.unit_type,
-          detectedAt: new Date().toISOString()
-        };
+      // Verificar se snapshot mudou desde última verificação
+      if (lastProcessedSnapshotRef.current === currentSnapshotStr) {
+        return; // Sem mudanças
       }
-    });
 
-    if (Object.keys(changes).length > 0) {
-      console.log('[useConflictResolution] Mudanças detectadas:', changes);
-      setChangedItems(changes);
-    } else {
-      // Limpar mudanças se não houver mais (caso os dados voltem ao normal)
-      if (Object.keys(changedItems).length > 0) {
-        console.log('[useConflictResolution] Limpando mudanças (dados voltaram ao normal)');
-        setChangedItems({});
+      lastProcessedSnapshotRef.current = currentSnapshotStr;
+
+      const changes = {};
+
+      // Comparar com snapshot inicial
+      Object.entries(currentSnapshot).forEach(([itemKey, current]) => {
+        const initial = initialOrdersRef.current[itemKey];
+        if (initial && (initial.quantity !== current.quantity || initial.unit_type !== current.unit_type)) {
+          changes[itemKey] = {
+            type: 'modified',
+            previousQuantity: initial.quantity,
+            currentQuantity: current.quantity,
+            previousUnit: initial.unit_type,
+            currentUnit: current.unit_type,
+            detectedAt: new Date().toISOString()
+          };
+        }
+      });
+
+      if (Object.keys(changes).length > 0) {
+        console.log('[useConflictResolution] Mudanças detectadas:', changes);
+        setChangedItems(changes);
+      } else {
+        // Limpar mudanças se não houver mais (caso os dados voltem ao normal)
+        if (Object.keys(changedItems).length > 0) {
+          console.log('[useConflictResolution] Limpando mudanças (dados voltaram ao normal)');
+          setChangedItems({});
+        }
       }
-    }
+    };
+
+    // Verificar imediatamente
+    checkForChanges();
+
+    // Verificar periodicamente (a cada 2 segundos) para capturar mudanças
+    // mesmo que a referência do array não mude
+    const interval = setInterval(checkForChanges, 2000);
+
+    return () => clearInterval(interval);
   }, [originalOrders, changedItems]);
 
   // Funções helper
