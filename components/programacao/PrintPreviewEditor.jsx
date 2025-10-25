@@ -257,7 +257,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     });
 
     if (Object.keys(changes).length > 0) {
-      console.log('🔍 Mudanças detectadas:', changes);
       setChangedItems(changes);
     }
   }, [originalOrders]);
@@ -278,7 +277,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   // Wrappers para rastrear resolução de conflitos
   const handleAcceptPortalChange = useCallback((itemKey, newValue, portalQuantity, portalUnit) => {
     const portalValue = `${portalQuantity}_${portalUnit}`;
-    console.log('✅ Aceitando mudança:', itemKey, '→', portalValue);
 
     setResolvedConflicts(prev => ({
       ...prev,
@@ -295,8 +293,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   }, [markItemAsEdited]);
 
   const handleRejectPortalChange = useCallback((itemKey, currentValue) => {
-    console.log('❌ Rejeitando mudança:', itemKey, '→', currentValue);
-
     setResolvedConflicts(prev => ({
       ...prev,
       [itemKey]: {
@@ -322,11 +318,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   // Limpar conflitos resolvidos se o valor do portal mudou novamente
   useEffect(() => {
     if (!changedItems || Object.keys(changedItems).length === 0) return;
-
-    console.log('🔄 Verificando resoluções:', {
-      resolvedConflicts: Object.keys(resolvedConflicts),
-      changedItems: Object.keys(changedItems)
-    });
 
     setResolvedConflicts(prev => {
       const updated = { ...prev };
@@ -359,14 +350,11 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         const changeKey = `${recipeName}_${companyName}`;
         const changeInfo = changedItems[changeKey];
 
-        console.log('🔍 Mapeando:', resolvedItemKey, '→', changeKey, changeInfo ? '✅ encontrado' : '❌ não encontrado');
-
         if (changeInfo) {
           const currentPortalValue = `${changeInfo.currentQuantity}_${changeInfo.currentUnit}`;
 
           // Se o valor do portal mudou, limpar resolução (aceito OU rejeitado)
           if (currentPortalValue !== resolution.portalValueAtResolution) {
-            console.log('🔄 Limpando resolução:', resolvedItemKey, 'mudou de', resolution.portalValueAtResolution, 'para', currentPortalValue);
             delete updated[resolvedItemKey];
             hasChanges = true;
           }
