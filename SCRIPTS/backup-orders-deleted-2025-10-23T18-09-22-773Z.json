@@ -1,0 +1,626 @@
+[
+  {
+    "id": "1Y5oXKyg345Namz8n1t3",
+    "customer_name": "Museu",
+    "day_of_week": 1,
+    "week_number": 34,
+    "year": 2025,
+    "items_count": 10
+  },
+  {
+    "id": "07Baw5xRk9pYT4LD7Xs9",
+    "customer_name": "Museu",
+    "day_of_week": 1,
+    "week_number": 34,
+    "year": 2025,
+    "items_count": 10
+  },
+  {
+    "id": "Y5pVU58gZiEAMpC12FbO",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "XbEUHahXEvuOP9YQRAJA",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "UqsLAg2dA0B2GVUIAjFV",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "ufnDWMWeGHmMkQ8UL9jT",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "tQ7wbYbR1o10ZrKvN8CB",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "tBhQnQdHCtAjTC3hoGcP",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "sZ40OIZEeQdgornPjndy",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "RWQVu9qNdrprotTwZPLL",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "r0tLGhMPJQqfldWFgkn4",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "QqWPLAbPriRV4bg1TjRZ",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "q6wxFd7544XH4WZ8C5yN",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "PSsdnxfdyFSo7Wm8zLnw",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "jty2i6gODqwIjHK4MQ6X",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "idIrbiBaaiHtM5qAhqUr",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "gAxyphDWVuaniGqSumXn",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "eCgMdYX5GCwhgsP0yueQ",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "DpOQR8ovHI8kxHSSxp3a",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "Bf4R32gqmyFQpWsXOJnC",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "b0rTuCkxZiOGaWNCMHEd",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "61auVEuDpL5TD9GJDxpx",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "4kzOFJ8ciZ7J33ioi9Wj",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "0CH6Qy1iAidjcuwEasTp",
+    "customer_name": "Itamarati",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 9
+  },
+  {
+    "id": "2NTV9zGA7mD2sYqAqmaJ",
+    "customer_name": "Faap",
+    "day_of_week": 5,
+    "week_number": 36,
+    "year": 2025,
+    "items_count": 14
+  },
+  {
+    "id": "x1ALbpal52r7XeRLITuS",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 39,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "UZnOfrTIJrxviX2OhMHT",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 39,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "MowfH3mPZy5Mru3uXnLs",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 39,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "JabOT2xbkZpe11cxJbUs",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 39,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "d6j2scMkHQuK900UMVnh",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 39,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "2gRrdzvi570jkJ2QrQzY",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 39,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "T1rcnSvwXUkw6FtGP2h9",
+    "customer_name": "Faap",
+    "day_of_week": 3,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "s8Vowj00eRtO9xRDyEtG",
+    "customer_name": "Faap",
+    "day_of_week": 3,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "5iUXHJ0VeyOLvZaCo58b",
+    "customer_name": "Faap",
+    "day_of_week": 3,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "41Mz0ts9sNt2rPSsZCrD",
+    "customer_name": "Faap",
+    "day_of_week": 3,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "4DNkKJKhVSGKGaR1jqgQ",
+    "customer_name": "Faap",
+    "day_of_week": 3,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 14
+  },
+  {
+    "id": "4XIEjnpySWNk8vg8v8Y4",
+    "customer_name": "Einstein",
+    "day_of_week": 5,
+    "week_number": 40,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "ShLzhCpb7TUVmqnlLDZv",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 43,
+    "year": 2025,
+    "items_count": 14
+  },
+  {
+    "id": "NWlmOak2B3jpz0viO7bQ",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 43,
+    "year": 2025,
+    "items_count": 14
+  },
+  {
+    "id": "jJk5oM7rL1U94z1TXfV3",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 43,
+    "year": 2025,
+    "items_count": 14
+  },
+  {
+    "id": "4YibUEL5k7zJeCbL5Oir",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 43,
+    "year": 2025,
+    "items_count": 14
+  },
+  {
+    "id": "4ye0StcwyluznfUmGdgl",
+    "customer_name": "Nestlé",
+    "day_of_week": 3,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "NnRrv3cWmcj14J2BkmTD",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 42,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "keoqDIDWJFnrCKmSdmaG",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 42,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "ihtpXyXnlZ552LkuGUZJ",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 42,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "cOzzPN6HhoMp5PPugjyl",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 42,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "6MNa2LrVDddeMVC1mmO6",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 42,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "6V10P0hNvpwHWRkfEkXo",
+    "customer_name": "Museu",
+    "day_of_week": 3,
+    "week_number": 43,
+    "year": 2025,
+    "items_count": 10
+  },
+  {
+    "id": "8CA3QaD9wAqJwO0CuFzV",
+    "customer_name": "Nestlé",
+    "day_of_week": 1,
+    "week_number": 39,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "S6s2zOkMdIOIaBLMf8ny",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "rOLOiN48WjaJbfJ6G6hJ",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "ONkTmHF3VUJbT3tzNewX",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "MQtObiDVDIVks9jbr5rZ",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "mIfJVsNO9l4fFVT3QwqU",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "KutnyJrUWLpbkOKvHTxU",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "HaHpErOawCdyTQiXKQsR",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "E7CnJuY4v4a8lL9LF45h",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "E6hq7ik3EnnlQq7d64kM",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "dKlOVbdun2Kg9oY5aQmf",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "C3ogfNm2shi6mv7SvqwD",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "95EpU6d824sbYEVvAOdL",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "ANhuSqiuJTXLIdiiCeW4",
+    "customer_name": "Faap",
+    "day_of_week": 2,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 14
+  },
+  {
+    "id": "B5UHC6kqcNsr9W6kiOmD",
+    "customer_name": "Faap",
+    "day_of_week": 5,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "aySQ8nDiijFkOTKFC0b2",
+    "customer_name": "Faap",
+    "day_of_week": 5,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 15
+  },
+  {
+    "id": "hUEfsRhaWmFUqLioOdWo",
+    "customer_name": "Faap",
+    "day_of_week": 5,
+    "week_number": 43,
+    "year": 2025,
+    "items_count": 14
+  },
+  {
+    "id": "CC7lN9RqxjlKj1HNmYCd",
+    "customer_name": "Faap",
+    "day_of_week": 5,
+    "week_number": 43,
+    "year": 2025,
+    "items_count": 14
+  },
+  {
+    "id": "Gf2e9LcqUmTErD6RlGbo",
+    "customer_name": "Museu",
+    "day_of_week": 1,
+    "week_number": 32,
+    "year": 2025,
+    "items_count": 10
+  },
+  {
+    "id": "nfPsQuCF2k92VyYAyMAG",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 42,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "Gq3XrTX168Wwc0pTbSdZ",
+    "customer_name": "Faap",
+    "day_of_week": 4,
+    "week_number": 42,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "KUsY0u3c0O4mpVN8Ry0b",
+    "customer_name": "Faap",
+    "day_of_week": 1,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "H9K7562utJiZbIU2h6qX",
+    "customer_name": "Faap",
+    "day_of_week": 1,
+    "week_number": 44,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "nrkTt0dbJ5nAM00Vmo2e",
+    "customer_name": "Nestlé",
+    "day_of_week": 5,
+    "week_number": 39,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "bWqAJJndxUVq1qJG7nl4",
+    "customer_name": "Faap",
+    "day_of_week": 1,
+    "week_number": 39,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "egjjXfsBWeZj5ToDrnWq",
+    "customer_name": "Faap",
+    "day_of_week": 3,
+    "week_number": 37,
+    "year": 2025,
+    "items_count": 14
+  },
+  {
+    "id": "iBRr5T4WKQAzhMfo2hoz",
+    "customer_name": "Museu",
+    "day_of_week": 4,
+    "week_number": 32,
+    "year": 2025,
+    "items_count": 10
+  },
+  {
+    "id": "iqSTblTYzjmOjbn6ntoF",
+    "customer_name": "Faap",
+    "day_of_week": 1,
+    "week_number": 34,
+    "year": 2025,
+    "items_count": 13
+  },
+  {
+    "id": "pLO7C1mamRkLx56ka8AE",
+    "customer_name": "Museu",
+    "day_of_week": 2,
+    "week_number": 42,
+    "year": 2025,
+    "items_count": 10
+  },
+  {
+    "id": "q83rQWunCmpqKQlKm8uf",
+    "customer_name": "Itamarati",
+    "day_of_week": 1,
+    "week_number": 32,
+    "year": 2025,
+    "items_count": 8
+  }
+]
