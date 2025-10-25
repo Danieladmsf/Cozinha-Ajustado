@@ -186,10 +186,23 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const initialOrdersRef = useRef(null);
   const [changedItems, setChangedItems] = useState({});
   const [resolvedConflicts, setResolvedConflicts] = useState({}); // { itemKey: 'accepted' | 'rejected' }
+  const [initialSnapshot, setInitialSnapshot] = useState(null);
 
-  // Criar snapshot inicial apenas uma vez
+  // Carregar snapshot inicial do Firebase ou criar novo
   useEffect(() => {
-    if (originalOrders && !initialOrdersRef.current) {
+    if (!originalOrders) return;
+
+    // Tentar carregar snapshot do localStorage primeiro (persistência local)
+    const savedSnapshotKey = `initial-snapshot-${weekNumber}-${year}-${dayNumber}`;
+    const savedSnapshot = localStorage.getItem(savedSnapshotKey);
+
+    if (savedSnapshot && !initialOrdersRef.current) {
+      // Usar snapshot salvo
+      const parsed = JSON.parse(savedSnapshot);
+      initialOrdersRef.current = parsed;
+      setInitialSnapshot(parsed);
+    } else if (!initialOrdersRef.current) {
+      // Criar novo snapshot
       const snapshot = {};
       originalOrders.forEach(order => {
         if (!order.items) return;
@@ -197,13 +210,17 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
           const itemKey = `${item.recipe_name}_${order.customer_name}`;
           snapshot[itemKey] = {
             quantity: item.quantity,
-            unit_type: item.unit_type
+            unit_type: item.unit_type,
+            createdAt: new Date().toISOString()
           };
         });
       });
       initialOrdersRef.current = snapshot;
+      setInitialSnapshot(snapshot);
+      // Salvar no localStorage
+      localStorage.setItem(savedSnapshotKey, JSON.stringify(snapshot));
     }
-  }, [originalOrders]);
+  }, [originalOrders, weekNumber, year, dayNumber]);
 
   // Detectar mudanças comparando originalOrders atual com snapshot inicial
   useEffect(() => {
@@ -267,6 +284,36 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     setResolvedConflicts(prev => ({ ...prev, [itemKey]: 'rejected' }));
     rejectPortalChange(itemKey);
   }, [rejectPortalChange]);
+
+  // Resetar snapshot (considerar valores atuais como novos valores base)
+  const handleResetSnapshot = useCallback(() => {
+    if (!originalOrders) return;
+
+    const savedSnapshotKey = `initial-snapshot-${weekNumber}-${year}-${dayNumber}`;
+
+    // Criar novo snapshot com valores atuais
+    const snapshot = {};
+    originalOrders.forEach(order => {
+      if (!order.items) return;
+      order.items.forEach(item => {
+        const itemKey = `${item.recipe_name}_${order.customer_name}`;
+        snapshot[itemKey] = {
+          quantity: item.quantity,
+          unit_type: item.unit_type,
+          createdAt: new Date().toISOString()
+        };
+      });
+    });
+
+    // Atualizar refs e state
+    initialOrdersRef.current = snapshot;
+    setInitialSnapshot(snapshot);
+    setChangedItems({});
+    setResolvedConflicts({});
+
+    // Salvar no localStorage
+    localStorage.setItem(savedSnapshotKey, JSON.stringify(snapshot));
+  }, [originalOrders, weekNumber, year, dayNumber]);
 
 
   // Carregar tamanhos salvos do localStorage
@@ -1276,10 +1323,22 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
           {/* Mudanças nos pedidos originais */}
           {hasChanges && (
-            <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold flex items-center gap-1" title="Pedidos originais foram modificados">
-              <AlertTriangle className="w-3 h-3" />
-              Pedidos alterados
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold flex items-center gap-1" title="Pedidos originais foram modificados">
+                <AlertTriangle className="w-3 h-3" />
+                Pedidos alterados
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResetSnapshot}
+                title="Resetar detecção: considerar valores atuais como novos valores base"
+                className="h-6 px-2 text-xs"
+              >
+                <RefreshCw className="w-3 h-3 mr-1" />
+                Resetar detecção
+              </Button>
+            </div>
           )}
         </div>
 
