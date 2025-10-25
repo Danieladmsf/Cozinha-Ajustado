@@ -1894,7 +1894,7 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                   const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(recipe.recipe_name, cliente.customer_name) : null;
 
                   const hasConflict = edited && changed;
-                  const conflictResolution = resolvedConflicts[itemKey];
+                  const conflictResolution = getResolutionStatus ? getResolutionStatus(itemKey) : null;
 
                   let tooltipContent = null;
                   let lineStyles = {};
@@ -2054,7 +2054,7 @@ function EditableBlock({ block, isSelected, onSelect, onFontSizeChange, onAutoFi
                   const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(recipe.recipe_name, cliente.customer_name) : null;
 
                   const hasConflict = edited && changed;
-                  const conflictResolution = resolvedConflicts[itemKey];
+                  const conflictResolution = getResolutionStatus ? getResolutionStatus(itemKey) : null;
 
                   let tooltipContent = null;
                   let lineStyles = {};
