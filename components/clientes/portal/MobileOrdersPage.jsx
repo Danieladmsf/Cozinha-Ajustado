@@ -204,6 +204,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       // Limpar pedidos antigos IMEDIATAMENTE quando mudar de semana
       // Isso evita que pedidos de semanas anteriores apareçam durante o carregamento
       setExistingOrders({});
+      existingOrdersRef.current = {}; // Sincronizar ref imediatamente
       lastLoadedWeekRef.current = { weekNumber, year };
     } else {
     }
@@ -222,9 +223,8 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
         ordersByDay[order.day_of_week] = order;
       });
 
-
-
       setExistingOrders(ordersByDay);
+      existingOrdersRef.current = ordersByDay; // Sincronizar ref imediatamente
 
       // Definir mealsExpected baseado no pedido do dia atual
       const currentDayOrder = ordersByDay[selectedDay];
@@ -832,6 +832,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
           ordersByDay[order.day_of_week] = order;
         });
         setExistingOrders(ordersByDay);
+        existingOrdersRef.current = ordersByDay; // Sincronizar ref imediatamente
       }
       
       toast({
@@ -1472,10 +1473,12 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
 
         // ATUALIZAÇÃO OTIMISTA: Atualizar o estado local com os dados que acabaram de ser salvos
         const updatedOrder = { ...existingOrders[selectedDay], ...orderData };
-        setExistingOrders(prev => ({
-          ...prev,
+        const newOrders = {
+          ...existingOrders,
           [selectedDay]: updatedOrder
-        }));
+        };
+        setExistingOrders(newOrders);
+        existingOrdersRef.current = newOrders; // Sincronizar ref imediatamente
 
       } else {
         // ✅ VERIFICAÇÃO DEFENSIVA para prevenir duplicatas
@@ -1502,20 +1505,24 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
 
           // Atualização otimista da UI
           const updatedOrder = { ...latestOrder, ...orderData };
-          setExistingOrders(prev => ({
-            ...prev,
+          const newOrders = {
+            ...existingOrders,
             [selectedDay]: updatedOrder
-          }));
+          };
+          setExistingOrders(newOrders);
+          existingOrdersRef.current = newOrders; // Sincronizar ref imediatamente
           toast({ description: "Pedido atualizado com sucesso (duplicata evitada)." });
 
         } else {
           // Nenhum pedido encontrado, seguro para criar.
           const newOrder = await Order.create(orderData);
 
-          setExistingOrders(prev => ({
-            ...prev,
+          const newOrders = {
+            ...existingOrders,
             [selectedDay]: newOrder
-          }));
+          };
+          setExistingOrders(newOrders);
+          existingOrdersRef.current = newOrders; // Sincronizar ref imediatamente
           setGeneralNotes(orderData.general_notes);
           toast({ description: "Pedido enviado com sucesso!" });
         }
