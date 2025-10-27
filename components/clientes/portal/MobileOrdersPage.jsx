@@ -364,17 +364,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
 
   // Funções para Recebimento
   const loadReceivingData = useCallback(async () => {
-    console.log('🔵 [loadReceivingData] INICIANDO', {
-      hasCustomer: !!customer,
-      weeklyMenusLength: weeklyMenus.length,
-      recipesLength: recipes.length,
-      weekNumber,
-      year,
-      selectedDay
-    });
-
     if (!customer || !weeklyMenus.length || !recipes.length) {
-      console.log('🔵 [loadReceivingData] ABORTADO - faltam dados');
       return;
     }
 
@@ -389,21 +379,11 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       ]);
 
       const receivingRecord = existingReceivings.length > 0 ? existingReceivings[0] : null;
-      console.log('🔵 [loadReceivingData] Registro encontrado?', !!receivingRecord, {
-        recordId: receivingRecord?.id,
-        hasItems: !!receivingRecord?.items?.length,
-        itemsCount: receivingRecord?.items?.length || 0
-      });
-
       setExistingReceiving(receivingRecord);
       setReceivingNotes(receivingRecord?.general_notes || "");
 
       // Definir modo de edição baseado se já existe dados salvos
       const newEditMode = !receivingRecord;
-      console.log('🔵 [loadReceivingData] Definindo isReceivingEditMode:', newEditMode, {
-        temRegistro: !!receivingRecord,
-        modoEdicao: newEditMode ? 'EDITANDO (sem dados)' : 'VISUALIZANDO (com dados)'
-      });
       setIsReceivingEditMode(newEditMode);
 
       // Criar itens de recebimento baseados no cardápio (como a aba de pedidos)
@@ -413,15 +393,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       // Usar ref para evitar dependência direta no state
       const currentExistingOrders = existingOrdersRef.current;
 
-      console.log('📋 [loadReceivingData] Verificando pedido existente:', {
-        selectedDay,
-        hasExistingOrder: !!currentExistingOrders[selectedDay],
-        existingOrderItems: currentExistingOrders[selectedDay]?.items?.length || 0,
-        allOrdersKeys: Object.keys(currentExistingOrders)
-      });
-
       if (!menuData) {
-        console.log('⚠️ [loadReceivingData] Sem menuData para selectedDay:', selectedDay);
         setReceivingItems([]);
         return;
       }
@@ -467,11 +439,6 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
                   }
 
                   if (orderItem) {
-                    console.log('📦 [loadReceivingData] Item encontrado no pedido:', {
-                      recipe_name: recipe.name,
-                      ordered_quantity: orderItem.quantity,
-                      unit_type: orderItem.unit_type
-                    });
                     receivingItem.ordered_quantity = orderItem.quantity;
                     receivingItem.ordered_unit_type = orderItem.unit_type;
                     receivingItem.received_quantity = orderItem.quantity; // default para quantidade pedida
@@ -511,14 +478,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       });
 
       setReceivingItems(items);
-
-      console.log('🔵 [loadReceivingData] FINALIZADO', {
-        totalItens: items.length,
-        isReceivingEditMode: !receivingRecord,
-        existingReceivingId: receivingRecord?.id
-      });
     } catch (error) {
-      console.log('🔵 [loadReceivingData] ERRO:', error);
       toast({ variant: "destructive", description: "Erro ao carregar dados de recebimento." });
     } finally {
       setReceivingLoading(false);
