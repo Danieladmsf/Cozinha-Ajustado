@@ -107,6 +107,13 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
   const [weeklyMenus, setWeeklyMenus] = useState([]);
   const [currentOrder, setCurrentOrder] = useState(null);
   const [existingOrders, setExistingOrders] = useState({});
+  const existingOrdersRef = useRef(existingOrders); // Ref para evitar re-renders desnecessários
+
+  // Sincronizar ref com state
+  useEffect(() => {
+    existingOrdersRef.current = existingOrders;
+  }, [existingOrders]);
+
   const [hydratedOrders, setHydratedOrders] = useState({}); // Pedidos com preços atualizados
   const [loading, setLoading] = useState(true);
   const [isRefreshingData, setIsRefreshingData] = useState(false);
@@ -403,11 +410,14 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       const menu = weeklyMenus[0];
       const menuData = menu?.menu_data?.[selectedDay];
 
+      // Usar ref para evitar dependência direta no state
+      const currentExistingOrders = existingOrdersRef.current;
+
       console.log('📋 [loadReceivingData] Verificando pedido existente:', {
         selectedDay,
-        hasExistingOrder: !!existingOrders[selectedDay],
-        existingOrderItems: existingOrders[selectedDay]?.items?.length || 0,
-        allOrdersKeys: Object.keys(existingOrders)
+        hasExistingOrder: !!currentExistingOrders[selectedDay],
+        existingOrderItems: currentExistingOrders[selectedDay]?.items?.length || 0,
+        allOrdersKeys: Object.keys(currentExistingOrders)
       });
 
       if (!menuData) {
@@ -421,12 +431,12 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       Object.entries(menuData).forEach(([categoryId, categoryData]) => {
         // Verificar se categoryData é um array direto ou tem propriedade items
         const itemsArray = Array.isArray(categoryData) ? categoryData : categoryData.items;
-        
+
         if (itemsArray && Array.isArray(itemsArray)) {
           itemsArray.forEach((item) => {
             // Verificar se deve incluir este item baseado em locations
             const itemLocations = item.locations;
-            const shouldInclude = !itemLocations || itemLocations.length === 0 || 
+            const shouldInclude = !itemLocations || itemLocations.length === 0 ||
                                  itemLocations.includes(customer.id);
 
             if (shouldInclude) {
@@ -445,9 +455,9 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
                   received_quantity: 0, // padrão
                   notes: ""
                 };
-                
+
                 // Se há pedido existente, usar os dados do pedido
-                const existingOrder = existingOrders[selectedDay];
+                const existingOrder = currentExistingOrders[selectedDay];
                 if (existingOrder?.items) {
                   // Buscar o item correspondente usando unique_id primeiro, depois recipe_id
                   let orderItem = existingOrder.items.find(oi => oi.unique_id === receivingItem.unique_id);
@@ -513,7 +523,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
     } finally {
       setReceivingLoading(false);
     }
-  }, [customer, weeklyMenus, recipes, weekNumber, year, selectedDay, existingOrders, toast]);
+  }, [customer, weeklyMenus, recipes, weekNumber, year, selectedDay, toast]);
 
   const updateReceivingItem = useCallback((index, field, value) => {
     setReceivingItems(prevItems => {
