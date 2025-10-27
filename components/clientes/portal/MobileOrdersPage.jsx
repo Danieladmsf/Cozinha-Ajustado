@@ -402,9 +402,16 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       // Criar itens de recebimento baseados no cardápio (como a aba de pedidos)
       const menu = weeklyMenus[0];
       const menuData = menu?.menu_data?.[selectedDay];
-      
-      
+
+      console.log('📋 [loadReceivingData] Verificando pedido existente:', {
+        selectedDay,
+        hasExistingOrder: !!existingOrders[selectedDay],
+        existingOrderItems: existingOrders[selectedDay]?.items?.length || 0,
+        allOrdersKeys: Object.keys(existingOrders)
+      });
+
       if (!menuData) {
+        console.log('⚠️ [loadReceivingData] Sem menuData para selectedDay:', selectedDay);
         setReceivingItems([]);
         return;
       }
@@ -448,8 +455,13 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
                     // Fallback: buscar por recipe_id (para compatibilidade com dados antigos)
                     orderItem = existingOrder.items.find(oi => oi.recipe_id === item.recipe_id);
                   }
-                  
+
                   if (orderItem) {
+                    console.log('📦 [loadReceivingData] Item encontrado no pedido:', {
+                      recipe_name: recipe.name,
+                      ordered_quantity: orderItem.quantity,
+                      unit_type: orderItem.unit_type
+                    });
                     receivingItem.ordered_quantity = orderItem.quantity;
                     receivingItem.ordered_unit_type = orderItem.unit_type;
                     receivingItem.received_quantity = orderItem.quantity; // default para quantidade pedida
@@ -501,7 +513,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
     } finally {
       setReceivingLoading(false);
     }
-  }, [customer, weeklyMenus, recipes, weekNumber, year, selectedDay, toast]);
+  }, [customer, weeklyMenus, recipes, weekNumber, year, selectedDay, existingOrders, toast]);
 
   const updateReceivingItem = useCallback((index, field, value) => {
     setReceivingItems(prevItems => {
