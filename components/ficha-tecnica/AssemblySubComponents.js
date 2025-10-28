@@ -52,15 +52,26 @@ const AssemblySubComponents = ({
   if (!subComponents || subComponents.length === 0) {
     return (
       <div className="bg-indigo-50 p-6 rounded-lg border border-indigo-100 text-center">
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-4">
           <Layers className="h-10 w-10 text-indigo-500" />
           <h3 className="text-lg font-medium text-indigo-800">
             Adicione Componentes de Montagem
           </h3>
           <p className="text-indigo-600 max-w-md mx-auto">
-            Clique em "+ Adicionar Preparo/Receita" para incluir etapas anteriores 
-            ou receitas externas nesta montagem.
+            Clique no botão abaixo para incluir etapas anteriores ou receitas externas
+            nesta montagem.
           </p>
+          {onAddComponent && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onAddComponent}
+              className={`border-dashed transition-all duration-200 text-sm ${addComponentClassName}`}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {addComponentLabel}
+            </Button>
+          )}
         </div>
       </div>
     );
