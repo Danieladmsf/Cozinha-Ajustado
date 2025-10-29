@@ -68,10 +68,11 @@ const AddAssemblyItemModal = ({
       // Deve ter título
       if (!p.title) return false;
       
-      // Deve ter ingredientes OU sub_components (conteúdo válido)
+      // Deve ter ingredientes OU sub_components OU recipes (conteúdo válido)
       const hasIngredients = p.ingredients && p.ingredients.length > 0;
       const hasSubComponents = p.sub_components && p.sub_components.length > 0;
-      
+      const hasRecipes = p.recipes && p.recipes.length > 0;
+
       // Filtro por termo de pesquisa - aplicar filtro apenas se houver termo
       if (searchTerm) {
         const term = searchTerm.toLowerCase();
@@ -80,8 +81,8 @@ const AddAssemblyItemModal = ({
           return false;
         }
       }
-      
-      return hasIngredients || hasSubComponents;
+
+      return hasIngredients || hasSubComponents || hasRecipes;
     });
 
   // Filtrar ingredientes com busca inteligente

@@ -463,12 +463,10 @@ export default function RecipeTechnical() {
 
   // ==== FUNÇÃO DE RECÁLCULO AUTOMÁTICO ====
   const recalculateRecipeMetrics = useCallback(() => {
-    console.log("[UI] recalculateRecipeMetrics triggered.");
-    const hasValidData = (preparationsData && preparationsData.length > 0) || 
+    const hasValidData = (preparationsData && preparationsData.length > 0) ||
                          (recipeData && (recipeData.name || recipeData.id));
-    
+
     if (!hasValidData) {
-      console.log("[UI] No valid data, skipping recalculation.");
       return;
     }
     
@@ -479,18 +477,14 @@ export default function RecipeTechnical() {
       }
 
       const metricsResult = updateRecipeMetrics(preparationsData, recipeData, recipeData);
-      console.log("[UI] Metrics received from calculator:", JSON.stringify(metricsResult, null, 2));
-      
+
       const newMetrics = metricsResult;
-      const hasSignificantChange = 
+      const hasSignificantChange =
         Math.abs((newMetrics.total_weight || 0) - (recipeData.total_weight || 0)) > 0.001 ||
         Math.abs((newMetrics.total_cost || 0) - (recipeData.total_cost || 0)) > 0.01 ||
         Math.abs((newMetrics.cuba_cost || 0) - (recipeData.cuba_cost || 0)) > 0.01;
 
-      console.log(`[UI] Has significant change? ${hasSignificantChange}`);
-
       if (hasSignificantChange) {
-        console.log("[UI] Significant change detected. Calling setRecipeData with new metrics.");
         setRecipeData(prev => {
           const updatedData = {
             ...prev,
@@ -504,7 +498,6 @@ export default function RecipeTechnical() {
             cuba_weight: newMetrics.cuba_weight,
             cuba_cost: newMetrics.cuba_cost
           };
-          console.log("[UI] New data being set:", JSON.stringify(updatedData, null, 2));
           return updatedData;
         });
         
