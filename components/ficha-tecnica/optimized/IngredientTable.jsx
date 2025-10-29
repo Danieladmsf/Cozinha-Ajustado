@@ -27,16 +27,7 @@ const IngredientTable = ({
   const isPortioningOnly = hasProcess('portioning') &&
     !hasProcess('defrosting') && !hasProcess('cleaning') && !hasProcess('cooking') && !hasProcess('assembly');
 
-  // Verificar se é apenas processo de receita (sem outros processos)
-  const isRecipeOnly = hasProcess('recipe') &&
-    !hasProcess('defrosting') &&
-    !hasProcess('cleaning') &&
-    !hasProcess('cooking') &&
-    !hasProcess('portioning') &&
-    !hasProcess('assembly');
-
-  // Para Assembly, Portioning ou Recipe puros, usar componente de subcomponentes
-  if (isAssemblyOnly || isPortioningOnly || isRecipeOnly) {
+  if (isAssemblyOnly || isPortioningOnly) {
     return (
       <div className="space-y-4">
 
@@ -62,16 +53,8 @@ const IngredientTable = ({
           showAssemblyConfig={true}
           showComponentsTable={true}
           onAddComponent={() => onOpenAddAssemblyItemModal(prepIndex)}
-          addComponentLabel={
-            isAssemblyOnly ? 'Adicionar Preparo/Receita' :
-            isRecipeOnly ? 'Adicionar Item à Receita' :
-            'Adicionar Produto'
-          }
-          addComponentClassName={
-            isAssemblyOnly ? 'border-indigo-300 text-indigo-600 hover:bg-indigo-50' :
-            isRecipeOnly ? 'border-purple-300 text-purple-600 hover:bg-purple-50' :
-            'border-teal-300 text-teal-600 hover:bg-teal-50'
-          }
+          addComponentLabel={isAssemblyOnly ? 'Adicionar Preparo/Receita' : 'Adicionar Produto'}
+          addComponentClassName={isAssemblyOnly ? 'border-indigo-300 text-indigo-600 hover:bg-indigo-50' : 'border-teal-300 text-teal-600 hover:bg-teal-50'}
         />
 
         <div>
@@ -102,6 +85,13 @@ const IngredientTable = ({
 
   const orderedActiveProcesses = ['defrosting', 'cleaning', 'cooking', 'portioning']
     .filter(p => hasProcess(p));
+
+  // Verificar se é apenas processo de receita
+  const isRecipeOnly = hasProcess('recipe') &&
+                      !hasProcess('defrosting') &&
+                      !hasProcess('cleaning') &&
+                      !hasProcess('cooking') &&
+                      !hasProcess('portioning');
 
   if (ingredients.length === 0 && recipes.length === 0 && prep.sub_components?.length === 0) {
     return (
