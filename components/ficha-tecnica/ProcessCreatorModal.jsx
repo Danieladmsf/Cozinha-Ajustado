@@ -11,6 +11,17 @@ import {
 import { processTypes } from "@/lib/recipeConstants";
 import RecipeSelectorModal from "./RecipeSelectorModal";
 
+// Mapeamento de cores para evitar problemas com Tailwind
+const processColorClasses = {
+  'blue': 'text-blue-600',
+  'green': 'text-green-600',
+  'orange': 'text-orange-600',
+  'teal': 'text-teal-600',
+  'indigo': 'text-indigo-600',
+  'emerald': 'text-emerald-600',
+  'purple': 'text-purple-600'
+};
+
 const ProcessCreatorModal = React.memo(({
   isOpen,
   onClose,
@@ -108,14 +119,14 @@ const ProcessCreatorModal = React.memo(({
                   {Object.values(processTypes)
                     .sort((a, b) => a.order - b.order)
                     .map(process => (
-                      <label key={process.id} className="flex items-center space-x-2">
+                      <label key={process.id} className="flex items-center space-x-2 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={selectedProcesses.includes(process.id)}
                           onChange={(e) => handleProcessToggle(process.id, e.target.checked)}
-                          className="rounded border-gray-300"
+                          className="rounded border-gray-300 cursor-pointer"
                         />
-                        <span className={`text-${process.color}-600`}>
+                        <span className={processColorClasses[process.color] || 'text-gray-600'}>
                           {process.label}
                         </span>
                       </label>
