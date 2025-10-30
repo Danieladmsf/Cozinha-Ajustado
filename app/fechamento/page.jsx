@@ -119,10 +119,10 @@ export default function FechamentoPage() {
             const itemsWithCorrectPrices = order.items ? order.items.map(item => {
               const recipe = allRecipes.find(r => r.id === item.recipe_id);
               if (recipe) {
-                const newItem = { ...item };
-                newItem.unit_price = PortalPricingSystem.recalculateItemUnitPrice(item, recipe);
-                newItem.total_price = newItem.unit_price * (item.quantity || 0);
-                return newItem;
+                const syncedItem = PortalDataSync.syncItemSafely(item, recipe);
+                syncedItem.unit_price = PortalPricingSystem.recalculateItemUnitPrice(item, recipe);
+                syncedItem.total_price = syncedItem.unit_price * (item.quantity || 0);
+                return syncedItem;
               }
               return item;
             }) : [];
@@ -188,10 +188,6 @@ export default function FechamentoPage() {
 
     fetchData();
   }, [weekNumber, year]);
-
-  useEffect(() => {
-    console.log("[FechamentoPage] customersData updated:", customersData);
-  }, [customersData]);
 
   if (loading) {
     return (
