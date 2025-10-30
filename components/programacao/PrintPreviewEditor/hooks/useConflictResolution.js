@@ -25,6 +25,7 @@ export function useConflictResolution(
   const [changedItems, setChangedItems] = useState({});
   const [resolvedConflicts, setResolvedConflicts] = useState({}); // { itemKey: { status, portalValueAtResolution } }
   const [initialSnapshot, setInitialSnapshot] = useState(null);
+  const resolvedConflictsKeyRef = useRef(`resolved-conflicts-${weekNumber}-${year}-${dayNumber}`);
 
   // Carregar snapshot inicial do localStorage ou criar novo
   useEffect(() => {
@@ -48,6 +49,26 @@ export function useConflictResolution(
       localStorage.setItem(savedSnapshotKey, JSON.stringify(snapshot));
     }
   }, [originalOrders, weekNumber, year, dayNumber]);
+
+  // Carregar resolvedConflicts do localStorage ao inicializar
+  useEffect(() => {
+    const savedResolvedConflicts = localStorage.getItem(resolvedConflictsKeyRef.current);
+    if (savedResolvedConflicts) {
+      try {
+        const parsed = JSON.parse(savedResolvedConflicts);
+        setResolvedConflicts(parsed);
+      } catch (error) {
+        console.error('[useConflictResolution] Erro ao carregar conflitos resolvidos:', error);
+      }
+    }
+  }, [weekNumber, year, dayNumber]);
+
+  // Salvar resolvedConflicts no localStorage quando mudar
+  useEffect(() => {
+    if (Object.keys(resolvedConflicts).length > 0 || localStorage.getItem(resolvedConflictsKeyRef.current)) {
+      localStorage.setItem(resolvedConflictsKeyRef.current, JSON.stringify(resolvedConflicts));
+    }
+  }, [resolvedConflicts]);
 
   // Ref para rastrear último snapshot processado
   const lastProcessedSnapshotRef = useRef(null);
@@ -229,6 +250,9 @@ export function useConflictResolution(
 
     // Salvar no localStorage
     localStorage.setItem(savedSnapshotKey, JSON.stringify(snapshot));
+
+    // Limpar conflitos resolvidos do localStorage
+    localStorage.removeItem(resolvedConflictsKeyRef.current);
   }, [originalOrders, weekNumber, year, dayNumber]);
 
   return {
