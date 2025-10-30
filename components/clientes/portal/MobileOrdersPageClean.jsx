@@ -119,13 +119,13 @@ const MobileOrdersPage = ({ customerId }) => {
         { field: 'week_number', operator: '==', value: weekNumber },
         { field: 'year', operator: '==', value: year }
       ]);
-      
+
       // Organizar por dia da semana
       const ordersByDay = {};
       orders.forEach(order => {
         ordersByDay[order.day_of_week] = order;
       });
-      
+
       setExistingOrders(ordersByDay);
       
     } catch (error) {

@@ -2151,6 +2151,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
             existingReceivingData={weeklyReceivingData} // NOVO PROP
             recipes={recipes}
             selectedDay={selectedDay}
+            weeklyMenus={weeklyMenus} // ADICIONAR PROP
           />
         )}
       </div>

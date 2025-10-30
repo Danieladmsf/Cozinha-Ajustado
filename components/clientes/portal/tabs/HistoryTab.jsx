@@ -21,7 +21,8 @@ const HistoryTab = ({
   existingWasteData = {},
   existingReceivingData = {}, // NOVO PROP
   recipes = [],
-  selectedDay
+  selectedDay,
+  weeklyMenus = [] // ADICIONAR PROP
 }) => {
   // Calcular totais da semana (FIXO)
   const weeklyTotals = React.useMemo(() => {
@@ -158,9 +159,48 @@ const HistoryTab = ({
     };
   }, [existingOrders, existingWasteData, existingReceivingData, recipes, selectedDay]);
 
+  // Verificar se a semana está completa (todos os dias com cardápio têm pedidos)
+  const weekCompletionStatus = React.useMemo(() => {
+    let daysWithMenus = 0;
+    let daysWithOrders = 0;
+
+    weekDays.forEach(day => {
+      const dayIndex = day.dayNumber;
+      const menu = weeklyMenus.find(m => m.day_of_week === dayIndex);
+      const hasMenu = menu && menu.items && menu.items.length > 0;
+
+      if (hasMenu) {
+        daysWithMenus++;
+        if (existingOrders[dayIndex]) {
+          daysWithOrders++;
+        }
+      }
+    });
+
+    const isComplete = daysWithMenus > 0 && daysWithMenus === daysWithOrders;
+
+    return {
+      daysWithMenus,
+      daysWithOrders,
+      isComplete
+    };
+  }, [weekDays, weeklyMenus, existingOrders]);
+
   const getDayStatus = (dayIndex) => {
     const order = existingOrders[dayIndex];
-    if (!order) return 'empty';
+    const menu = weeklyMenus.find(m => m.day_of_week === dayIndex);
+    const hasMenu = menu && menu.items && menu.items.length > 0;
+
+    // Se não tem cardápio, não mostrar nada (sem status)
+    if (!hasMenu) {
+      return 'no-menu';
+    }
+
+    // Se tem cardápio mas não tem pedido
+    if (!order) {
+      return 'empty';
+    }
+
     return 'completed';
   };
 
@@ -170,6 +210,8 @@ const HistoryTab = ({
         return <CheckCircle className="w-4 h-4 text-green-600" />;
       case 'empty':
         return <Clock className="w-4 h-4 text-gray-400" />;
+      case 'no-menu':
+        return null; // Não mostrar ícone
       default:
         return <AlertCircle className="w-4 h-4 text-yellow-600" />;
     }
@@ -181,6 +223,8 @@ const HistoryTab = ({
         return 'Pedido Realizado';
       case 'empty':
         return 'Sem Pedido';
+      case 'no-menu':
+        return 'Sem Cardápio';
       default:
         return 'Pendente';
     }
@@ -192,6 +236,8 @@ const HistoryTab = ({
         return 'bg-green-100 text-green-800 border-green-200';
       case 'empty':
         return 'bg-gray-100 text-gray-600 border-gray-200';
+      case 'no-menu':
+        return 'bg-gray-50 text-gray-400 border-gray-100';
       default:
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
     }
@@ -425,12 +471,14 @@ const HistoryTab = ({
       </div>
 
       {/* Resumo de fechamento da semana */}
-      {weeklyTotals.ordersCount === 5 && (
+      {weeklyTotals.ordersCount > 0 && (
         <Card className="border-green-200 bg-green-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-800">
               <CheckCircle className="w-5 h-5" />
-              Fechamento da Semana Completo
+              {weekCompletionStatus.isComplete
+                ? 'Fechamento da Semana Completo'
+                : 'Resumo da Semana'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -474,7 +522,12 @@ const HistoryTab = ({
                 <h4 className="font-semibold text-green-800 mb-2">Status</h4>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span className="text-green-700">Semana completa - Todos os pedidos realizados</span>
+                  <span className="text-green-700">
+                    {weekCompletionStatus.isComplete
+                      ? 'Semana completa - Todos os pedidos realizados'
+                      : `Fechamento da semana - ${weeklyTotals.ordersCount} ${weeklyTotals.ordersCount === 1 ? 'pedido realizado' : 'pedidos realizados'}`
+                    }
+                  </span>
                 </div>
               </div>
             </div>
