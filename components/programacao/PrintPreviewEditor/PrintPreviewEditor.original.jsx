@@ -115,29 +115,14 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     rejectPortalChange
   );
 
-  // Debug: Log quando originalOrders muda
-  useEffect(() => {
-    if (originalOrders) {
-      console.log('[PrintPreviewEditor] originalOrders atualizado, total de pedidos:', originalOrders.length);
-    }
-  }, [originalOrders]);
 
   // Atualizar quantidades nos blocos quando originalOrders muda (sem recriar blocos)
   // Isso permite que mudanças do portal sejam refletidas em tempo real
   // preservando edições manuais do usuário
   useEffect(() => {
-    console.log('[PrintPreviewEditor] useEffect atualização - Verificando condições:', {
-      hasOriginalOrders: !!originalOrders,
-      hasInitialized: hasInitializedBlocksRef.current,
-      blocksLength: editableBlocks.length
-    });
-
     if (!originalOrders || !hasInitializedBlocksRef.current || editableBlocks.length === 0) {
-      console.log('[PrintPreviewEditor] Pulando atualização - condições não satisfeitas');
       return;
     }
-
-    console.log('[PrintPreviewEditor] Atualizando quantidades dos blocos com dados do portal...');
 
     // Criar mapa de quantidades atuais do portal
     const currentQuantities = {};
