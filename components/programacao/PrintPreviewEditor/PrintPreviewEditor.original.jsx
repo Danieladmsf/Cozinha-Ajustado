@@ -116,6 +116,9 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   );
 
 
+  // Ref para rastrear última versão de originalOrders processada
+  const lastProcessedOrdersRef = useRef(null);
+
   // Atualizar quantidades nos blocos quando originalOrders muda (sem recriar blocos)
   // Isso permite que mudanças do portal sejam refletidas em tempo real
   // preservando edições manuais do usuário
@@ -123,6 +126,13 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     if (!originalOrders || !hasInitializedBlocksRef.current || editableBlocks.length === 0) {
       return;
     }
+
+    // Evitar processar os mesmos dados repetidamente
+    const ordersHash = JSON.stringify(originalOrders);
+    if (lastProcessedOrdersRef.current === ordersHash) {
+      return;
+    }
+    lastProcessedOrdersRef.current = ordersHash;
 
     // Criar mapa de quantidades atuais do portal
     const currentQuantities = {};
@@ -229,7 +239,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         return updatedBlock;
       });
     });
-  }, [originalOrders, isItemEdited, editableBlocks.length]);
+  }, [originalOrders, isItemEdited]);
 
   // Função para aplicar edições salvas aos blocos
   const applyEditsToBlocks = (blocks, editedItemsMap) => {
