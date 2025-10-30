@@ -13,7 +13,6 @@ import {
   OrderWaste,
   OrderReceiving,
   Recipe,
-  WeeklyMenu,
   AppSettings
 } from '@/app/api/entities';
 import {
@@ -33,7 +32,6 @@ export default function FechamentoPage() {
   const [loading, setLoading] = useState(true);
   const [customersData, setCustomersData] = useState([]);
   const [recipes, setRecipes] = useState([]);
-  const [weeklyMenus, setWeeklyMenus] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const weekNumber = useMemo(() => getWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
@@ -81,29 +79,68 @@ export default function FechamentoPage() {
           await PortalPricingSystem.init(appSettings);
         }
 
-        const customersList = await Customer.list();
-        const allRecipes = await Recipe.list();
-        const allWeeklyMenus = await WeeklyMenu.list();
+        // Carregar dados em paralelo
+        const [customersList, allRecipes] = await Promise.all([
+          Customer.list(),
+          Recipe.list()
+        ]);
+
+        // Criar Map de receitas para lookup O(1)
+        const recipesMap = new Map(allRecipes.map(r => [r.id, r]));
 
         setRecipes(allRecipes);
-        setWeeklyMenus(allWeeklyMenus);
 
-        const processedCustomers = await Promise.all(customersList.map(async customer => {
-          const customerOrders = await Order.query([
-            { field: 'customer_id', operator: '==', value: customer.id },
+        // Fazer todas as queries em batch
+        const [allOrders, allWaste, allReceiving] = await Promise.all([
+          Order.query([
             { field: 'week_number', operator: '==', value: weekNumber },
             { field: 'year', operator: '==', value: year }
-          ]);
-          const customerWaste = await OrderWaste.query([
-            { field: 'customer_id', operator: '==', value: customer.id },
+          ]),
+          OrderWaste.query([
             { field: 'week_number', operator: '==', value: weekNumber },
             { field: 'year', operator: '==', value: year }
-          ]);
-          const customerReceiving = await OrderReceiving.query([
-            { field: 'customer_id', operator: '==', value: customer.id },
+          ]),
+          OrderReceiving.query([
             { field: 'week_number', operator: '==', value: weekNumber },
             { field: 'year', operator: '==', value: year }
-          ]);
+          ])
+        ]);
+
+        // Agrupar por cliente_id
+        const ordersByCustomer = new Map();
+        const wasteByCustomer = new Map();
+        const receivingByCustomer = new Map();
+
+        allOrders.forEach(order => {
+          if (!ordersByCustomer.has(order.customer_id)) {
+            ordersByCustomer.set(order.customer_id, []);
+          }
+          ordersByCustomer.get(order.customer_id).push(order);
+        });
+
+        allWaste.forEach(waste => {
+          if (!wasteByCustomer.has(waste.customer_id)) {
+            wasteByCustomer.set(waste.customer_id, []);
+          }
+          wasteByCustomer.get(waste.customer_id).push(waste);
+        });
+
+        allReceiving.forEach(receiving => {
+          if (!receivingByCustomer.has(receiving.customer_id)) {
+            receivingByCustomer.set(receiving.customer_id, []);
+          }
+          receivingByCustomer.get(receiving.customer_id).push(receiving);
+        });
+
+        // Processar clientes
+        const processedCustomers = customersList.map(customer => {
+          const customerOrders = ordersByCustomer.get(customer.id) || [];
+          const customerWaste = wasteByCustomer.get(customer.id) || [];
+          const customerReceiving = receivingByCustomer.get(customer.id) || [];
+
+          // Criar Maps para lookup rápido por day_of_week
+          const wasteByDay = new Map(customerWaste.map(w => [w.day_of_week, w]));
+          const receivingByDay = new Map(customerReceiving.map(r => [r.day_of_week, r]));
 
           let totalMeals = 0;
           let originalTotalAmount = 0;
@@ -117,7 +154,7 @@ export default function FechamentoPage() {
             ordersCount += 1;
 
             const itemsWithCorrectPrices = order.items ? order.items.map(item => {
-              const recipe = allRecipes.find(r => r.id === item.recipe_id);
+              const recipe = recipesMap.get(item.recipe_id);
               if (recipe) {
                 const syncedItem = PortalDataSync.syncItemSafely(item, recipe);
                 syncedItem.unit_price = PortalPricingSystem.recalculateItemUnitPrice(item, recipe);
@@ -133,24 +170,16 @@ export default function FechamentoPage() {
             const originalDayAmount = utilSumCurrency(itemsWithCorrectPrices.map(item => item.total_price || 0));
             originalTotalAmount += originalDayAmount;
 
-            const wasteDataForOrder = customerWaste.find(waste => 
-              waste.day_of_week === order.day_of_week && waste.week_number === order.week_number && waste.year === order.year
-            );
-            let currentDepreciation = 0;
-            if (wasteDataForOrder && wasteDataForOrder.items && itemsWithCorrectPrices.length > 0) {
+            const wasteDataForOrder = wasteByDay.get(order.day_of_week);
+            if (wasteDataForOrder?.items && itemsWithCorrectPrices.length > 0) {
               const depreciationData = calculateTotalDepreciation(wasteDataForOrder.items, itemsWithCorrectPrices);
-              currentDepreciation = depreciationData.totalDepreciation;
-              totalDepreciation += currentDepreciation;
+              totalDepreciation += depreciationData.totalDepreciation;
             }
 
-            const receivingDataForOrder = customerReceiving.find(receiving => 
-              receiving.day_of_week === order.day_of_week && receiving.week_number === order.week_number && receiving.year === order.year
-            );
-            let currentNonReceivedDiscount = 0;
-            if (receivingDataForOrder && receivingDataForOrder.items && itemsWithCorrectPrices.length > 0) {
+            const receivingDataForOrder = receivingByDay.get(order.day_of_week);
+            if (receivingDataForOrder?.items && itemsWithCorrectPrices.length > 0) {
               const nonReceivedDiscountsData = calculateNonReceivedDiscounts(receivingDataForOrder.items, itemsWithCorrectPrices);
-              currentNonReceivedDiscount = nonReceivedDiscountsData.totalNonReceivedDiscount;
-              totalNonReceivedDiscount += currentNonReceivedDiscount;
+              totalNonReceivedDiscount += nonReceivedDiscountsData.totalNonReceivedDiscount;
             }
           });
 
@@ -162,7 +191,7 @@ export default function FechamentoPage() {
 
           const averageMealCost = totalMeals > 0 ? finalTotalAmount / totalMeals : 0;
 
-          const processedCustomer = {
+          return {
             ...customer,
             totalMeals,
             originalTotalAmount,
@@ -174,8 +203,7 @@ export default function FechamentoPage() {
             averageMealCost,
             hasReturns: totalDepreciation > 0 || totalNonReceivedDiscount > 0
           };
-          return processedCustomer;
-        }));
+        });
 
         setCustomersData(processedCustomers);
       } catch (error) {
