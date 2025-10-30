@@ -116,6 +116,34 @@ export function useRecipeOperations() {
     });
   }, []);
 
+  // Operações de receitas (adicionadas em etapas)
+  const updateRecipe = useCallback((preparationsData, setPreparationsData, prepIndex, recipeIndex, field, value) => {
+    setPreparationsData(prev => {
+      const newPreparations = [...prev];
+      if (newPreparations[prepIndex]?.recipes?.[recipeIndex]) {
+        // Converter strings vazias para 0 em campos de peso (mesmo comportamento do updateIngredient)
+        const isWeightField = field === 'used_weight' || field.startsWith('weight_');
+        const normalizedValue = isWeightField && value === '' ? 0 : value;
+
+        newPreparations[prepIndex].recipes[recipeIndex] = {
+          ...newPreparations[prepIndex].recipes[recipeIndex],
+          [field]: normalizedValue
+        };
+      }
+      return newPreparations;
+    });
+  }, []);
+
+  const removeRecipe = useCallback((preparationsData, setPreparationsData, prepIndex, recipeIndex) => {
+    setPreparationsData(prev => {
+      const newPreparations = [...prev];
+      if (newPreparations[prepIndex]?.recipes) {
+        newPreparations[prepIndex].recipes.splice(recipeIndex, 1);
+      }
+      return newPreparations;
+    });
+  }, []);
+
   // Operações de sub-componentes
   const addSubComponent = useCallback((preparationsData, setPreparationsData, prepIndex, subComponent) => {
     setPreparationsData(prev => {
@@ -237,6 +265,8 @@ export function useRecipeOperations() {
     addIngredientToPreparation,
     updateIngredient,
     removeIngredient,
+    updateRecipe,
+    removeRecipe,
     addSubComponent,
     updateSubComponent,
     removeSubComponent,

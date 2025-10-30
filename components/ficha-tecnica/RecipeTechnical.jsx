@@ -147,6 +147,8 @@ export default function RecipeTechnical() {
     addIngredientToPreparation,
     updateIngredient,
     removeIngredient,
+    updateRecipe,
+    removeRecipe,
     addSubComponent,
     updateSubComponent,
     removeSubComponent,
@@ -321,39 +323,84 @@ export default function RecipeTechnical() {
       let finalPreparationsData = JSON.parse(JSON.stringify(preparationsData));
       let recipeDataToSave = { ...recipeData };
 
+      // AUTO-ESCALA: Aplicar escalonamento automático se houver etapa de assembly/portioning
       const finalAssemblyStep = finalPreparationsData.slice().reverse().find(p => p.processes?.some(pr => ['assembly', 'portioning'].includes(pr)));
 
-      if (finalAssemblyStep && finalAssemblyStep.sub_components && finalAssemblyStep.sub_components.length > 0) {
-        const scaledPreparations = JSON.parse(JSON.stringify(finalPreparationsData));
-        const weightFields = ['weight_frozen', 'weight_thawed', 'weight_raw', 'weight_clean', 'weight_pre_cooking', 'weight_cooked', 'weight_portioned', 'assembly_weight_kg'];
+      if (finalAssemblyStep && finalAssemblyStep.sub_components && finalAssemblyStep.sub_components.length > 0 && finalAssemblyStep.assembly_config) {
+        // Calcular peso alvo baseado na configuração
+        const totalAssemblyWeight = finalAssemblyStep.sub_components.reduce((total, sc) => {
+          return total + (parseNumericValue(sc.assembly_weight_kg) || 0);
+        }, 0);
 
-        for (const subComponent of finalAssemblyStep.sub_components) {
-          const targetWeight = parseNumericValue(subComponent.assembly_weight_kg);
-          const sourcePrep = scaledPreparations.find(p => p.id === subComponent.source_id);
+        const unitsQuantity = parseNumericValue(finalAssemblyStep.assembly_config.units_quantity) || 1;
+        const targetWeight = totalAssemblyWeight * unitsQuantity;
 
-          if (sourcePrep && targetWeight > 0) {
-            const sourceMetrics = updateRecipeMetrics([sourcePrep], {}, {}).yield_weight;
-            const currentYield = sourceMetrics;
+        // Calcular peso REAL atual (baseado no rendimento das etapas anteriores)
+        let currentWeight = 0;
+        finalAssemblyStep.sub_components.forEach(sc => {
+          if (sc.type === 'recipe') {
+            currentWeight += parseNumericValue(sc.used_weight || sc.yield_weight || 0);
+          } else {
+            const sourcePrep = finalPreparationsData.find(p => p.id === sc.source_id);
+            if (sourcePrep) {
+              currentWeight += sourcePrep.total_yield_weight_prep || 0;
+            }
+          }
+        });
 
-            if (currentYield > 0 && Math.abs(targetWeight - currentYield) > 0.001) {
-              const scalingFactor = targetWeight / currentYield;
-              toast({ title: "Aplicando Auto-Escala", description: `Ajustando ingredientes de "${subComponent.name}" com fator ${scalingFactor.toFixed(2)}.` });
+        // Aplicar escala se necessário
+        if (currentWeight > 0 && targetWeight > 0 && Math.abs(targetWeight - currentWeight) > 0.001) {
+          const scalingFactor = targetWeight / currentWeight;
+          toast({
+            title: "Aplicando Auto-Escala",
+            description: `Fator: ${scalingFactor.toFixed(3)}x (${currentWeight.toFixed(3)}kg → ${targetWeight.toFixed(3)}kg)`
+          });
 
-              sourcePrep.ingredients.forEach(ing => {
-                weightFields.forEach(field => {
-                  if (ing[field]) {
-                    const originalValue = parseNumericValue(ing[field]);
-                    if (originalValue > 0) {
-                      const scaledValue = originalValue * scalingFactor;
-                      ing[field] = scaledValue.toFixed(3).replace('.', ',');
+          const weightFields = ['weight_frozen', 'weight_thawed', 'weight_raw', 'weight_clean', 'weight_pre_cooking', 'weight_cooked', 'weight_portioned'];
+
+          // Escalar cada sub-component
+          finalAssemblyStep.sub_components.forEach(sc => {
+            // NÃO escalar assembly_weight_kg - ele é o peso ALVO, não o peso atual
+            // Escalar apenas os ingredientes/receitas da etapa anterior
+
+            if (sc.type !== 'recipe') {
+              // Escalar ingredientes da etapa anterior
+              const sourcePrep = finalPreparationsData.find(p => p.id === sc.source_id);
+
+              if (sourcePrep) {
+                // Escalar INGREDIENTES
+                if (sourcePrep.ingredients) {
+                  sourcePrep.ingredients = sourcePrep.ingredients.map(ing => {
+                    const scaledIng = { ...ing };
+                    weightFields.forEach(field => {
+                      if (scaledIng[field]) {
+                        const value = parseNumericValue(scaledIng[field]);
+                        if (value > 0) {
+                          scaledIng[field] = String((value * scalingFactor).toFixed(3)).replace('.', ',');
+                        }
+                      }
+                    });
+                    return scaledIng;
+                  });
+                }
+
+                // Escalar RECEITAS
+                if (sourcePrep.recipes) {
+                  sourcePrep.recipes = sourcePrep.recipes.map(recipe => {
+                    const scaledRecipe = { ...recipe };
+                    if (scaledRecipe.used_weight) {
+                      const value = parseNumericValue(scaledRecipe.used_weight);
+                      if (value > 0) {
+                        scaledRecipe.used_weight = String((value * scalingFactor).toFixed(3)).replace('.', ',');
+                      }
                     }
-                  }
-                });
-              });
-            } 
-          } 
+                    return scaledRecipe;
+                  });
+                }
+              }
+            }
+          });
         }
-        finalPreparationsData = scaledPreparations;
       }
 
       const newMetrics = updateRecipeMetrics(finalPreparationsData, recipeDataToSave, recipeDataToSave);
@@ -2018,13 +2065,14 @@ export default function RecipeTechnical() {
                               setIsDirty(true);
                             }}
                             onUpdateRecipe={(prepIdx, recIdx, field, value) => {
-                              setPreparationsData(prev => {
-                                const newData = [...prev];
-                                if (newData[prepIdx]?.recipes?.[recIdx]) {
-                                  newData[prepIdx].recipes[recIdx][field] = value;
-                                }
-                                return newData;
-                              });
+                              updateRecipe(
+                                preparationsData,
+                                setPreparationsData,
+                                prepIdx,
+                                recIdx,
+                                field,
+                                value
+                              );
                               setIsDirty(true);
                             }}
                             onRemoveIngredient={(prepIdx, ingIdx) => {
@@ -2037,13 +2085,12 @@ export default function RecipeTechnical() {
                               setIsDirty(true);
                             }}
                             onRemoveRecipe={(prepIdx, recIdx) => {
-                              setPreparationsData(prev => {
-                                const newData = [...prev];
-                                if (newData[prepIdx]?.recipes) {
-                                  newData[prepIdx].recipes.splice(recIdx, 1);
-                                }
-                                return newData;
-                              });
+                              removeRecipe(
+                                preparationsData,
+                                setPreparationsData,
+                                prepIdx,
+                                recIdx
+                              );
                               setIsDirty(true);
                               toast({
                                 title: "Receita removida",

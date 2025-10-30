@@ -223,17 +223,17 @@ const AssemblySubComponents = ({
               </tr>
             ))}
           </tbody>
-          <tfoot class="bg-gray-50">
-            <tr class="border-t-2 border-gray-200">
-              <td class="px-3 py-2 font-semibold text-gray-800 text-right">Total</td>
-              <td class="px-3 py-2 text-center font-bold text-indigo-700">
+          <tfoot className="bg-gray-50">
+            <tr className="border-t-2 border-gray-200">
+              <td className="px-3 py-2 font-semibold text-gray-800 text-right">Total</td>
+              <td className="px-3 py-2 text-center font-bold text-indigo-700">
                 {formatWeight(totalAssemblyWeight * 1000)}
               </td>
-              <td class="px-3 py-2 text-center font-semibold text-gray-700">100,0%</td>
-              <td class="px-3 py-2 text-center font-bold text-green-700">
+              <td className="px-3 py-2 text-center font-semibold text-gray-700">100,0%</td>
+              <td className="px-3 py-2 text-center font-bold text-green-700">
                 {formatCurrency(totalCost)}
               </td>
-              <td class="px-3 py-2"></td>
+              <td className="px-3 py-2"></td>
             </tr>
           </tfoot>
         </table>
