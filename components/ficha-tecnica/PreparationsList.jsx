@@ -47,7 +47,7 @@ export default function PreparationsList() {
                 value={prep.instructions || ''}
                 onChange={(e) => actions.updatePreparation(prep.id, { instructions: e.target.value })}
                 placeholder="Descreva o modo de preparo desta etapa..."
-                className="w-full p-2 border border-gray-200 rounded-lg resize-y min-h-[80px] focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-2 border border-gray-200 rounded-lg resize-y min-h-[400px] focus:ring-1 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </CardContent>

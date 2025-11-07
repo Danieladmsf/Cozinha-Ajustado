@@ -1138,19 +1138,8 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
 
   // Carregar dados de recebimento automaticamente para cálculo de descontos
   useEffect(() => {
-    console.log('🟢 [useEffect loadReceivingData] Disparado', {
-      hasCustomer: !!customer,
-      hasInitializedDay,
-      selectedDay,
-      weekNumber,
-      year
-    });
-
     if (customer && hasInitializedDay) {
-      console.log('🟢 [useEffect loadReceivingData] Chamando loadReceivingData()');
       loadReceivingData();
-    } else {
-      console.log('🟢 [useEffect loadReceivingData] Não executou - condições não atendidas');
     }
   }, [customer, selectedDay, hasInitializedDay, weekNumber, year, loadReceivingData]);
 
@@ -1892,28 +1881,12 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
 
   // Resetar modos de edição e efeitos visuais quando mudar de semana ou dia
   useEffect(() => {
-    console.log('🟣 [useEffect Reset] RESETANDO estados de edição', {
-      weekNumber,
-      year,
-      selectedDay
-    });
     setIsEditMode(false);
     setShowSuccessEffect(false);
     setShowReceivingSuccessEffect(false);
     setShowWasteSuccessEffect(false);
-    console.log('🟣 [useEffect Reset] Estados resetados (isReceivingEditMode será definido por loadReceivingData)');
     // Nota: isReceivingEditMode e isWasteEditMode são controlados por loadReceivingData e loadWasteData
   }, [weekNumber, year, selectedDay]);
-
-  // Monitor de mudanças no isReceivingEditMode
-  useEffect(() => {
-    console.log('🟡 [Monitor isReceivingEditMode] Mudou para:', isReceivingEditMode, {
-      weekNumber,
-      year,
-      selectedDay,
-      existingReceivingId: existingReceiving?.id
-    });
-  }, [isReceivingEditMode, weekNumber, year, selectedDay, existingReceiving]);
 
   if (!customerId) {
     return (

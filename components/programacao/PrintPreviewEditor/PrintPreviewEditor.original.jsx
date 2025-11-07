@@ -123,7 +123,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   // Isso permite que mudanças do portal sejam refletidas em tempo real
   // preservando edições manuais do usuário
   useEffect(() => {
-    if (!originalOrders || !hasInitializedBlocksRef.current || editableBlocks.length === 0) {
+    if (!originalOrders || !hasInitializedBlocksRef.current || editableBlocks.length === 0 || !hasLoadedFromFirebaseRef.current || isSyncingRef.current) {
       return;
     }
 
@@ -146,6 +146,9 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         };
       });
     });
+
+    // Marcar como sincronizando para evitar loops
+    isSyncingRef.current = true;
 
     // Atualizar blocos preservando estrutura e edições
     setEditableBlocks(prevBlocks => {
@@ -239,6 +242,11 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         return updatedBlock;
       });
     });
+
+    // Liberar após um pequeno delay
+    setTimeout(() => {
+      isSyncingRef.current = false;
+    }, 100);
   }, [originalOrders, isItemEdited]);
 
   // Função para aplicar edições salvas aos blocos
@@ -552,17 +560,24 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
   // Salvar automaticamente quando fontSize ou ordem mudar
   useEffect(() => {
-    if (editableBlocks.length > 0 && !isSyncingRef.current && hasLoadedFromFirebaseRef.current) {
+    if (editableBlocks.length > 0 && !isSyncingRef.current && hasLoadedFromFirebaseRef.current && hasInitializedBlocksRef.current) {
       // Verificar se realmente mudou
       const currentSerialized = JSON.stringify(editableBlocks);
       const lastSerialized = lastSavedBlocksRef.current;
 
       if (currentSerialized !== lastSerialized) {
+        isSyncingRef.current = true;
+
         saveFontSizes(editableBlocks);
         savePageOrder(editableBlocks);
         // Sincronizar com Firebase
         updateFirebaseBlocks(editableBlocks);
         lastSavedBlocksRef.current = currentSerialized;
+
+        // Liberar após um pequeno delay
+        setTimeout(() => {
+          isSyncingRef.current = false;
+        }, 100);
       }
     }
   }, [editableBlocks, updateFirebaseBlocks]);
@@ -589,9 +604,15 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   // Aplicar edições quando editedItems for carregado DEPOIS dos blocos
   const hasAppliedEditedItemsRef = useRef(false);
   useEffect(() => {
-    if (hasLoadedFromFirebaseRef.current && editedItems && Object.keys(editedItems).length > 0 && !hasAppliedEditedItemsRef.current) {
+    if (hasLoadedFromFirebaseRef.current && editedItems && Object.keys(editedItems).length > 0 && !hasAppliedEditedItemsRef.current && !isSyncingRef.current) {
+      isSyncingRef.current = true;
       setEditableBlocks(prevBlocks => applyEditsToBlocks(prevBlocks, editedItems));
       hasAppliedEditedItemsRef.current = true;
+
+      // Liberar após um pequeno delay
+      setTimeout(() => {
+        isSyncingRef.current = false;
+      }, 100);
     }
   }, [editedItems]);
 

@@ -7,7 +7,13 @@ export { Input } from "./input";
 export { Label } from "./label";
 
 // Componentes de card
-export { Card, CardContent, CardHeader, CardTitle } from "./card";
+export { Card, CardContent, CardHeader, CardTitle, CardFooter } from "./card";
+
+// Componentes de badge
+export { Badge } from "./badge";
+
+// Componentes de textarea
+export { Textarea } from "./textarea";
 
 // Componentes de select
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";

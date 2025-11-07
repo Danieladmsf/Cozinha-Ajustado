@@ -149,8 +149,14 @@ export function useRecipeConfig() {
   // Salvar receita completa (dados básicos + preparações)
   const saveRecipe = useCallback(async (recipeData, preparationsData = []) => {
     setConfigSaving(true);
-    
+
     try {
+      console.log('🟣 [useRecipeConfig] Preparações recebidas:', JSON.stringify(preparationsData.map(p => ({
+        id: p.id,
+        title: p.title,
+        notes: p.notes
+      })), null, 2));
+
       // Preparar dados da receita para salvamento (sanitizar undefined values)
       const recipeToSave = {
         name: recipeData.name || '',
@@ -172,6 +178,12 @@ export function useRecipeConfig() {
 
       // Recursively remove undefined values to prevent Firebase errors
       const sanitizedRecipe = removeUndefined(recipeToSave);
+
+      console.log('🟠 [useRecipeConfig] Receita sanitizada (preparations):', JSON.stringify(sanitizedRecipe.preparations.map(p => ({
+        id: p.id,
+        title: p.title,
+        notes: p.notes
+      })), null, 2));
 
       let result;
       

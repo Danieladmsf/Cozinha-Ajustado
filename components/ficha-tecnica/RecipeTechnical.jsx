@@ -1,14 +1,17 @@
 'use client';
 
 import React, { useCallback, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Button,
-  Card, CardContent, CardHeader, CardTitle,
+  Card, CardContent, CardHeader, CardTitle, CardFooter,
   Input,
   Label,
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
   Tabs, TabsContent, TabsList, TabsTrigger,
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Textarea,
+  Badge,
   useToast
 } from "@/components/ui";
 import {
@@ -29,7 +32,8 @@ import {
   ChevronDown,
   ChevronUp,
   Check,
-  X
+  X,
+  StickyNote
 } from "lucide-react";
 
 // Componente de refresh
@@ -62,13 +66,10 @@ import {
   updatePreparationsMetrics
 } from "@/lib/recipeMetricsCalculator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 
 // Componentes organizados
 import AddAssemblyItemModal from "./AddAssemblyItemModal";
 import AssemblySubComponents from "./AssemblySubComponents";
-import RecipeQuickEditor from "./RecipeQuickEditor";
 import RecipeSelectorModal from "./RecipeSelectorModal";
 import IngredientTable from "./optimized/IngredientTable";
 
@@ -256,6 +257,13 @@ export default function RecipeTechnical() {
   const [editingTitle, setEditingTitle] = useState(null);
   const [tempTitle, setTempTitle] = useState('');
 
+  // Estados para notas de processo (inline editing)
+  const [editingNote, setEditingNote] = useState(null); // { prepIndex, noteIndex } ou null
+  const [noteTitle, setNoteTitle] = useState('');
+  const [noteContent, setNoteContent] = useState('');
+  const [editingNoteTitle, setEditingNoteTitle] = useState(false);
+  const [tempNoteTitle, setTempNoteTitle] = useState('');
+
   // ==== FUNÇÕES DE CARREGAMENTO (como no Editar Cliente) ====
   const loadRecipeById = async (recipeId) => {
     if (!recipeId) return;
@@ -264,8 +272,19 @@ export default function RecipeTechnical() {
       setLoading(true);
       
       const result = await loadRecipe(recipeId);
+
+      console.log('🔴 [LOAD] Receita carregada do Firebase:', {
+        recipeId,
+        success: result.success,
+        preparations: result.preparations?.map(p => ({
+          id: p.id,
+          title: p.title,
+          notes: p.notes
+        }))
+      });
+
       if (result.success) {
-        
+
         // Atualizar estados com os dados da receita (como no Editar Cliente)
         setRecipeData(result.recipe);
         setPreparationsData(result.preparations || []);
@@ -320,7 +339,19 @@ export default function RecipeTechnical() {
     setSaving(true);
 
     try {
-      let finalPreparationsData = JSON.parse(JSON.stringify(preparationsData));
+      // Limpar notas vazias antes de salvar (apenas notas sem conteúdo)
+      const cleanedPreparations = preparationsData.map(prep => ({
+        ...prep,
+        notes: (prep.notes || []).filter(note => note.content && note.content.trim())
+      }));
+
+      console.log('🔵 [SAVE] Preparações limpas antes de salvar:', JSON.stringify(cleanedPreparations.map(p => ({
+        id: p.id,
+        title: p.title,
+        notes: p.notes
+      })), null, 2));
+
+      let finalPreparationsData = JSON.parse(JSON.stringify(cleanedPreparations));
       let recipeDataToSave = { ...recipeData };
 
       // AUTO-ESCALA: Aplicar escalonamento automático se houver etapa de assembly/portioning
@@ -410,7 +441,15 @@ export default function RecipeTechnical() {
         ...newMetrics
       };
       
+      console.log('🟢 [SAVE] Enviando para saveRecipeConfig:', JSON.stringify(finalPreparationsData.map(p => ({
+        id: p.id,
+        title: p.title,
+        notes: p.notes
+      })), null, 2));
+
       const result = await saveRecipeConfig(recipeDataToSave, finalPreparationsData);
+
+      console.log('🟡 [SAVE] Resultado do saveRecipeConfig:', result.success);
 
       if (result.success) {
         setIsDirty(false);
@@ -599,6 +638,20 @@ export default function RecipeTechnical() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // ==== EFFECT PARA CARREGAR RECEITA DA URL ====
+  const searchParams = useSearchParams();
+  const hasLoadedFromUrl = React.useRef(false);
+
+  useEffect(() => {
+    const recipeId = searchParams.get('id');
+
+    // Só carrega uma vez quando há ID na URL e ainda não carregou
+    if (recipeId && !hasLoadedFromUrl.current) {
+      hasLoadedFromUrl.current = true;
+      loadRecipeById(recipeId);
+    }
+  }, [searchParams]);
 
   const handleOpenProcessModal = () => {
     openProcessCreatorModal(setIsProcessCreatorOpen, setSelectedProcesses);
@@ -911,6 +964,146 @@ export default function RecipeTechnical() {
     }
     setEditingTitle(null);
     setTempTitle('');
+  };
+
+  // ==== FUNÇÕES AUXILIARES PARA NOTAS ====
+  const getAutoNoteTitle = (noteIndex) => {
+    return `${noteIndex + 1}º Passo`;
+  };
+
+  const getFullNoteTitle = (noteIndex, complement) => {
+    const prefix = getAutoNoteTitle(noteIndex);
+    return complement ? `${prefix} - ${complement}` : prefix;
+  };
+
+  // ==== FUNÇÕES PARA GERENCIAR NOTAS DE PROCESSO (INLINE) ====
+  const startEditingNote = (prepIndex, noteIndex = null) => {
+    // Antes de editar/criar uma nova nota, limpar a nota anterior se estiver completamente vazia
+    if (editingNote && !noteContent.trim()) {
+      setPreparationsData(prev => {
+        const newData = [...prev];
+        const prevPrep = newData[editingNote.prepIndex];
+        if (prevPrep?.notes?.[editingNote.noteIndex]) {
+          // Remover apenas se conteúdo estiver vazio
+          const prevNote = prevPrep.notes[editingNote.noteIndex];
+          if (!prevNote.content?.trim()) {
+            prevPrep.notes.splice(editingNote.noteIndex, 1);
+          }
+        }
+        return newData;
+      });
+    }
+
+    if (noteIndex !== null) {
+      // Editando nota existente
+      const prep = preparationsData[prepIndex];
+      const note = prep.notes?.[noteIndex];
+      if (note) {
+        // noteTitle agora armazena apenas o complemento (sem o prefixo)
+        setNoteTitle(note.title || '');
+        setNoteContent(note.content || '');
+        setEditingNote({ prepIndex, noteIndex });
+      }
+    } else {
+      // Nova nota - criar imediatamente
+      setPreparationsData(prev => {
+        const newData = [...prev];
+        if (!newData[prepIndex].notes) {
+          newData[prepIndex].notes = [];
+        }
+
+        // Calcular o índice correto ANTES de adicionar a nova nota
+        const newNoteIndex = newData[prepIndex].notes.length;
+
+        newData[prepIndex].notes.push({
+          title: '', // Armazenar apenas o complemento (vazio inicialmente)
+          content: '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+
+        // Atualizar o estado de edição dentro do callback para usar o índice correto
+        setNoteTitle('');
+        setNoteContent('');
+        setEditingNote({ prepIndex, noteIndex: newNoteIndex });
+
+        return newData;
+      });
+
+      setIsDirty(true);
+    }
+  };
+
+  const startEditingNoteTitle = () => {
+    setEditingNoteTitle(true);
+    // Editar apenas o complemento (sem o prefixo)
+    setTempNoteTitle(noteTitle || '');
+  };
+
+  const cancelEditingNoteTitle = () => {
+    setEditingNoteTitle(false);
+    setTempNoteTitle('');
+  };
+
+  const saveNoteTitle = () => {
+    // Armazenar apenas o complemento (sem o prefixo)
+    const trimmedComplement = tempNoteTitle.trim();
+
+    setNoteTitle(trimmedComplement);
+
+    // Atualizar diretamente no preparationsData
+    if (editingNote) {
+      setPreparationsData(prev => {
+        const newData = [...prev];
+        if (newData[editingNote.prepIndex]?.notes?.[editingNote.noteIndex]) {
+          newData[editingNote.prepIndex].notes[editingNote.noteIndex].title = trimmedComplement;
+          newData[editingNote.prepIndex].notes[editingNote.noteIndex].updatedAt = new Date().toISOString();
+        }
+        return newData;
+      });
+      setIsDirty(true);
+    }
+
+    setEditingNoteTitle(false);
+    setTempNoteTitle('');
+  };
+
+  const updateNoteContent = (prepIndex, noteIndex, content) => {
+    setNoteContent(content);
+
+    // Atualizar diretamente no preparationsData
+    setPreparationsData(prev => {
+      const newData = [...prev];
+      if (newData[prepIndex]?.notes?.[noteIndex]) {
+        newData[prepIndex].notes[noteIndex].content = content;
+        newData[prepIndex].notes[noteIndex].updatedAt = new Date().toISOString();
+      }
+      return newData;
+    });
+    setIsDirty(true);
+  };
+
+  const deleteNote = (prepIndex, noteIndex) => {
+    setPreparationsData(prev => {
+      const newData = [...prev];
+      if (newData[prepIndex]?.notes) {
+        newData[prepIndex].notes.splice(noteIndex, 1);
+      }
+      return newData;
+    });
+    setIsDirty(true);
+    toast({
+      title: "Nota removida",
+      description: "A nota foi removida com sucesso."
+    });
+  };
+
+  const cancelEditingNote = () => {
+    setEditingNote(null);
+    setNoteTitle('');
+    setNoteContent('');
+    setEditingNoteTitle(false);
+    setTempNoteTitle('');
   };
 
   // Handler para quando uma receita é selecionada na busca
@@ -1874,7 +2067,7 @@ export default function RecipeTechnical() {
             className="w-full"
           >
             <div className="border-b border-gray-200 px-6 pt-6">
-              <TabsList className="grid w-full grid-cols-3 bg-gray-100">
+              <TabsList className="grid w-full grid-cols-2 bg-gray-100">
                 <TabsTrigger
                   value="ficha-tecnica"
                   className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
@@ -1888,13 +2081,6 @@ export default function RecipeTechnical() {
                 >
                   <CookingPot className="h-4 w-4 mr-2" />
                   Pré Preparo
-                </TabsTrigger>
-                <TabsTrigger
-                  value="edicao-rapida"
-                  className="data-[state=active]:bg-white data-[state=active]:text-green-600 data-[state=active]:shadow-sm"
-                >
-                  <List className="h-4 w-4 mr-2" />
-                  Edição Rápida
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -2034,73 +2220,265 @@ export default function RecipeTechnical() {
                         </CardHeader>
 
                         {isExpanded && (
-                          <CardContent className="p-6">
-                        <div className="space-y-4">
-                          {/* Tabela de Ingredientes com Processos */}
-                          <IngredientTable
-                            prep={prep}
-                            prepIndex={index}
-                            onOpenIngredientModal={handleOpenIngredientModal}
-                            onOpenRecipeModal={handleOpenRecipeModal}
-                            onOpenAddAssemblyItemModal={openAddAssemblyItemModal}
-                            onUpdatePreparation={(prepIdx, field, value) => {
-                              setPreparationsData(prev => {
-                                const newData = [...prev];
-                                if (newData[prepIdx]) {
-                                  newData[prepIdx][field] = value;
-                                }
-                                return newData;
-                              });
-                              setIsDirty(true);
-                            }}
-                            onUpdateIngredient={(prepIdx, ingIdx, field, value) => {
-                              updateIngredient(
-                                preparationsData,
-                                setPreparationsData,
-                                prepIdx,
-                                ingIdx,
-                                field,
-                                value
-                              );
-                              setIsDirty(true);
-                            }}
-                            onUpdateRecipe={(prepIdx, recIdx, field, value) => {
-                              updateRecipe(
-                                preparationsData,
-                                setPreparationsData,
-                                prepIdx,
-                                recIdx,
-                                field,
-                                value
-                              );
-                              setIsDirty(true);
-                            }}
-                            onRemoveIngredient={(prepIdx, ingIdx) => {
-                              removeIngredient(
-                                preparationsData,
-                                setPreparationsData,
-                                prepIdx,
-                                ingIdx
-                              );
-                              setIsDirty(true);
-                            }}
-                            onRemoveRecipe={(prepIdx, recIdx) => {
-                              removeRecipe(
-                                preparationsData,
-                                setPreparationsData,
-                                prepIdx,
-                                recIdx
-                              );
-                              setIsDirty(true);
-                              toast({
-                                title: "Receita removida",
-                                description: "A receita foi removida da preparação."
-                              });
-                            }}
-                            preparations={preparationsData}
-                          />
-                        </div>
-                          </CardContent>
+                          <>
+                            <CardContent className="p-6">
+                              <div className="space-y-4">
+                                {/* Tabela de Ingredientes com Processos */}
+                                <IngredientTable
+                                  prep={prep}
+                                  prepIndex={index}
+                                  onOpenIngredientModal={handleOpenIngredientModal}
+                                  onOpenRecipeModal={handleOpenRecipeModal}
+                                  onOpenAddAssemblyItemModal={openAddAssemblyItemModal}
+                                  onUpdatePreparation={(prepIdx, field, value) => {
+                                    setPreparationsData(prev => {
+                                      const newData = [...prev];
+                                      if (newData[prepIdx]) {
+                                        newData[prepIdx][field] = value;
+                                      }
+                                      return newData;
+                                    });
+                                    setIsDirty(true);
+                                  }}
+                                  onUpdateIngredient={(prepIdx, ingIdx, field, value) => {
+                                    updateIngredient(
+                                      preparationsData,
+                                      setPreparationsData,
+                                      prepIdx,
+                                      ingIdx,
+                                      field,
+                                      value
+                                    );
+                                    setIsDirty(true);
+                                  }}
+                                  onUpdateRecipe={(prepIdx, recIdx, field, value) => {
+                                    updateRecipe(
+                                      preparationsData,
+                                      setPreparationsData,
+                                      prepIdx,
+                                      recIdx,
+                                      field,
+                                      value
+                                    );
+                                    setIsDirty(true);
+                                  }}
+                                  onRemoveIngredient={(prepIdx, ingIdx) => {
+                                    removeIngredient(
+                                      preparationsData,
+                                      setPreparationsData,
+                                      prepIdx,
+                                      ingIdx
+                                    );
+                                    setIsDirty(true);
+                                  }}
+                                  onRemoveRecipe={(prepIdx, recIdx) => {
+                                    removeRecipe(
+                                      preparationsData,
+                                      setPreparationsData,
+                                      prepIdx,
+                                      recIdx
+                                    );
+                                    setIsDirty(true);
+                                    toast({
+                                      title: "Receita removida",
+                                      description: "A receita foi removida da preparação."
+                                    });
+                                  }}
+                                  preparations={preparationsData}
+                                />
+                              </div>
+                            </CardContent>
+
+                            {/* Rodapé com Notas */}
+                            <CardFooter className="bg-gray-50 border-t flex flex-col gap-3 p-4">
+                              {/* Formulário Inline de Edição */}
+                              {editingNote?.prepIndex === index ? (
+                                <div className="w-full space-y-3 p-4 border-l-4 border-l-orange-400 bg-white rounded">
+                                  {/* Título com prefixo fixo + complemento editável */}
+                                  <div className="flex items-center gap-2 mb-2">
+                                    {editingNoteTitle ? (
+                                      <>
+                                        <div className="flex items-center gap-2 flex-1">
+                                          <span className="text-sm font-semibold text-orange-700 whitespace-nowrap">
+                                            {editingNote ? getAutoNoteTitle(editingNote.noteIndex) : '1º Passo'}
+                                          </span>
+                                          <span className="text-sm font-medium text-gray-500">-</span>
+                                          <Input
+                                            value={tempNoteTitle}
+                                            onChange={(e) => setTempNoteTitle(e.target.value)}
+                                            onKeyDown={(e) => {
+                                              if (e.key === 'Enter') {
+                                                saveNoteTitle();
+                                              } else if (e.key === 'Escape') {
+                                                cancelEditingNoteTitle();
+                                              }
+                                            }}
+                                            placeholder="adicione um complemento (opcional)"
+                                            className="text-sm font-medium flex-1"
+                                            autoFocus
+                                          />
+                                        </div>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            saveNoteTitle();
+                                          }}
+                                          className="text-green-600 hover:bg-green-50 h-7 w-7 p-0"
+                                        >
+                                          <Check className="h-3 w-3" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            cancelEditingNoteTitle();
+                                          }}
+                                          className="text-gray-600 hover:bg-gray-100 h-7 w-7 p-0"
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </Button>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Label className="text-sm font-medium text-gray-700 flex-1">
+                                          <span className="font-semibold text-orange-700">
+                                            {editingNote ? getAutoNoteTitle(editingNote.noteIndex) : '1º Passo'}
+                                          </span>
+                                          {noteTitle && (
+                                            <span className="text-gray-700"> - {noteTitle}</span>
+                                          )}
+                                        </Label>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            startEditingNoteTitle();
+                                          }}
+                                          className="text-orange-600 hover:bg-orange-50 h-7 w-7 p-0"
+                                        >
+                                          <Edit className="h-3 w-3" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (confirm('Deseja excluir esta nota?')) {
+                                              deleteNote(index, editingNote.noteIndex);
+                                              cancelEditingNote();
+                                            }
+                                          }}
+                                          className="text-red-500 hover:bg-red-50 h-7 w-7 p-0"
+                                        >
+                                          <Trash2 className="h-3 w-3" />
+                                        </Button>
+                                      </>
+                                    )}
+                                  </div>
+
+                                  <div className="space-y-2">
+                                    <Textarea
+                                      placeholder="Descreva as informações importantes desta etapa..."
+                                      value={noteContent}
+                                      onChange={(e) => updateNoteContent(index, editingNote.noteIndex, e.target.value)}
+                                      rows={4}
+                                      className="border-gray-200 focus:border-orange-400 resize-none"
+                                    />
+
+                                    {/* Botão para Concluir Edição */}
+                                    <div className="flex justify-end">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          // Fechar edição apenas se a nota tiver algum conteúdo
+                                          if (noteContent.trim()) {
+                                            cancelEditingNote();
+                                            toast({
+                                              title: "Nota salva",
+                                              description: "A nota foi salva com sucesso."
+                                            });
+                                          } else {
+                                            // Se não tiver conteúdo, deletar e fechar
+                                            deleteNote(index, editingNote.noteIndex);
+                                            cancelEditingNote();
+                                          }
+                                        }}
+                                        className="text-green-600 border-green-300 hover:bg-green-50 hover:text-green-700"
+                                      >
+                                        <Check className="h-4 w-4 mr-2" />
+                                        Concluir Edição
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  {/* Notas Existentes */}
+                                  {Array.isArray(prep.notes) && prep.notes.filter(note => note.content).length > 0 && (
+                                    <div className="w-full space-y-2">
+                                      {prep.notes
+                                        .map((note, noteIndex) => ({ note, noteIndex }))
+                                        .filter(({ note }) => note.content)
+                                        .map(({ note, noteIndex }) => (
+                                          <div
+                                            key={noteIndex}
+                                            className="bg-amber-50 border border-amber-200 rounded-lg p-3 cursor-pointer hover:shadow-md transition-shadow"
+                                            onClick={() => startEditingNote(index, noteIndex)}
+                                          >
+                                            <h4 className="font-semibold text-amber-900 text-sm mb-1">
+                                              <span className="text-orange-700">{getAutoNoteTitle(noteIndex)}</span>
+                                              {note.title && (
+                                                <span className="text-amber-900"> - {note.title}</span>
+                                              )}
+                                            </h4>
+                                            {note.content && (
+                                              <p className="text-amber-800 text-xs whitespace-pre-wrap">
+                                                {note.content}
+                                              </p>
+                                            )}
+                                            <div className="flex justify-end items-center mt-2">
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  if (confirm('Deseja remover esta nota?')) {
+                                                    deleteNote(index, noteIndex);
+                                                  }
+                                                }}
+                                                className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                              >
+                                                <Trash2 className="h-3 w-3" />
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        ))}
+                                    </div>
+                                  )}
+
+                                  {/* Botão para Adicionar Nota */}
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      startEditingNote(index);
+                                    }}
+                                    className="w-full text-orange-600 border-orange-300 hover:bg-orange-50 hover:text-orange-700"
+                                  >
+                                    <StickyNote className="h-4 w-4 mr-2" />
+                                    Adicionar Nota
+                                  </Button>
+                                </>
+                              )}
+                            </CardFooter>
+                          </>
                         )}
                       </Card>
                     </div>
@@ -2126,9 +2504,6 @@ export default function RecipeTechnical() {
                   </p>
                 </div>
               </div>
-            </TabsContent>
-            <TabsContent value="edicao-rapida" className="p-6 bg-gray-50 rounded-b-lg">
-                <RecipeQuickEditor />
             </TabsContent>
           </Tabs>
         </Card>

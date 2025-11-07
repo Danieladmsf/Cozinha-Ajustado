@@ -52,7 +52,7 @@ const PreparationCard = ({
                 e.target.value
               )}
               placeholder="Descreva o modo de preparo desta etapa..."
-              className="w-full p-3 border border-gray-200 rounded-lg resize-none min-h-[100px] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 border border-gray-200 rounded-lg resize-y min-h-[400px] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         </div>

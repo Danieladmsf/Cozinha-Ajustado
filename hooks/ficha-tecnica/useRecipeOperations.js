@@ -212,9 +212,16 @@ export function useRecipeOperations() {
         throw new Error('Receita não encontrada');
       }
 
+      console.log('🔵 [useRecipeOperations] Receita bruta do Firebase:', JSON.stringify(recipe.preparations?.map(p => ({
+        id: p.id,
+        title: p.title,
+        notes: p.notes
+      })), null, 2));
+
       // CORRIGIDO: Normalizar campos de peso vazios em ingredientes (Firestore omite strings vazias)
       const normalizedPreparations = (recipe.preparations || []).map(prep => ({
         ...prep,
+        notes: prep.notes || [], // Preservar notas
         ingredients: (prep.ingredients || []).map(ing => ({
           ...ing,
           weight_raw: ing.weight_raw || 0,
@@ -226,6 +233,12 @@ export function useRecipeOperations() {
           weight_pre_cooking: ing.weight_pre_cooking || 0,
         }))
       }));
+
+      console.log('🟢 [useRecipeOperations] Preparações normalizadas:', JSON.stringify(normalizedPreparations.map(p => ({
+        id: p.id,
+        title: p.title,
+        notes: p.notes
+      })), null, 2));
 
       return {
         success: true,

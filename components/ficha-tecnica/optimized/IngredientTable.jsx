@@ -57,21 +57,6 @@ const IngredientTable = ({
           addComponentClassName={isAssemblyOnly ? 'border-indigo-300 text-indigo-600 hover:bg-indigo-50' : 'border-teal-300 text-teal-600 hover:bg-teal-50'}
         />
 
-        <div>
-          <label className="text-sm font-medium mb-2 block text-gray-700">
-            Modo de Preparo desta Etapa
-          </label>
-          <textarea
-            value={prep.instructions || ''}
-            onChange={(e) => {
-              onUpdatePreparation(prepIndex, 'instructions', e.target.value);
-            }}
-            placeholder="Descreva o modo de preparo desta etapa..."
-            className="w-full p-3 border border-gray-200 rounded-lg resize-none min-h-[100px] focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-
-
       </div>
     );
   }

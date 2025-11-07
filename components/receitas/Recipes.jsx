@@ -769,15 +769,8 @@ export default function Recipes() {
     });
   }, []);
 
-    const createPageUrl = (pathname) => {
-    if (pathname.startsWith("RecipeTechnical?id=")) {
-      return pathname;
-    }
-    return pathname;
-  };
-
   const handleEdit = useCallback((recipeData) => {
-    window.location.href = createPageUrl(`RecipeTechnical?id=${recipeData.id}`);
+    window.location.href = `/ficha-tecnica?id=${recipeData.id}`;
   }, []);
 
   const handlePrintSimpleRecipe = (recipe) => {
