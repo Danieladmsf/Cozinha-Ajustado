@@ -1,25 +1,5 @@
 @import "tailwindcss";
 
-/* Formatação de texto com capitalização forçada */
-.text-formatted {
-  text-transform: lowercase;
-}
-
-.text-formatted::first-letter,
-.text-formatted::first-line {
-  text-transform: capitalize;
-}
-
-/* Classe para capitalizar cada palavra corretamente */
-.capitalize-all {
-  text-transform: capitalize;
-}
-
-.capitalize-all::before {
-  content: '';
-  text-transform: lowercase;
-}
-
 /* Sidebar Navigation Styles */
 .sidebar-nav-item {
   position: relative;
