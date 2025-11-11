@@ -1,35 +1,67 @@
 import { Ingredient, Recipe } from '@/app/api/entities';
 import { RecipeCalculator } from '@/lib/recipeCalculator';
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
+import { isValidId } from '@/lib/validators';
 
 // GET /api/ingredients - Buscar ingredientes
 export async function GET(request) {
   try {
-    
+
     const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
     const search = searchParams.get('search');
     const active = searchParams.get('active');
-    
+
+    // Se um ID foi fornecido, buscar apenas esse ingrediente
+    if (id) {
+      logger.debug('Buscando ingrediente por ID:', id);
+      const ingredient = await Ingredient.getById(id);
+
+      if (!ingredient) {
+        logger.warn('Ingrediente não encontrado:', id);
+        return NextResponse.json(
+          { error: 'Ingredient not found', details: `Ingrediente com ID ${id} não existe` },
+          { status: 404 }
+        );
+      }
+
+      logger.debug('Ingrediente encontrado:', ingredient.name);
+      return NextResponse.json(ingredient);
+    }
+
     let ingredients = await Ingredient.getAll();
-    
+
+    // Lista de IDs antigos problemáticos que devem ser ignorados
+    const BLACKLISTED_IDS = [
+      '684bfe20b60fe3a1a47dfce7', '684bfe28943203651ae5a922',
+      '684bfe2b60647d247b5533be', '684bfe32767c7d82725a74d5',
+      '684bfe39ce1a5c4bb28d47a2', '684bfe3cce1a5c4bb28d47bc',
+      '684bfe3cfede6d0d2bb1ef16', '684bfe3d8e7a40c69f0fe67e',
+      '684bfe40ce1a5c4bb28d47d9', '684bfe3760647d247b5533f5'
+    ];
+
+    // Filtrar IDs problemáticos
+    ingredients = ingredients.filter(ing => !BLACKLISTED_IDS.includes(ing.id));
+
     // Filtrar apenas ativos se especificado
     if (active === 'true') {
       ingredients = ingredients.filter(ing => ing.active !== false);
     }
-    
+
     // Filtrar por busca se especificado
     if (search) {
       const searchTerm = search.toLowerCase();
-      ingredients = ingredients.filter(ing => 
+      ingredients = ingredients.filter(ing =>
         ing.name?.toLowerCase().includes(searchTerm) ||
         ing.brand?.toLowerCase().includes(searchTerm) ||
         ing.category?.toLowerCase().includes(searchTerm)
       );
     }
-    
-    
+
+
     return NextResponse.json(ingredients);
-    
+
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to get ingredients', details: error.message },
@@ -57,65 +89,55 @@ export async function POST(request) {
 
 // PUT /api/ingredients?id=... - Atualizar ingrediente
 export async function PUT(request) {
-  console.log('--- INGREDIENT PUT: INÍCIO DA REQUISIÇÃO ---');
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
-    if (!id) {
-      console.error('PUT ERROR: ID do ingrediente não fornecido.');
+
+    // Validar ID usando função centralizada
+    if (!isValidId(id)) {
+      logger.error('ID do ingrediente inválido:', id);
       return NextResponse.json(
-        { error: 'Ingredient ID is required' },
+        { error: 'Ingredient ID is required and must be valid' },
         { status: 400 }
       );
     }
-    
+
     const ingredientData = await request.json();
-    console.log(`ID do Ingrediente a ser atualizado: ${id}`);
-    console.log('Dados recebidos para atualização:', ingredientData);
+    logger.debug('Atualizando ingrediente:', id);
 
     // Verificar se o ingrediente existe antes de tentar atualizar
     const existingIngredient = await Ingredient.getById(id);
+
     if (!existingIngredient) {
-      console.error(`PUT ERROR: Ingrediente com ID ${id} não encontrado.`);
+      logger.warn('Ingrediente não encontrado para atualização:', id);
       return NextResponse.json(
-        { error: 'Ingredient not found' },
+        { error: 'Ingredient not found', details: `Ingrediente com ID ${id} não existe no banco de dados` },
         { status: 404 }
       );
     }
-    
+
     const updatedIngredient = await Ingredient.update(id, ingredientData);
-    console.log('Ingrediente atualizado no banco:', updatedIngredient);
+    logger.debug('Ingrediente atualizado:', updatedIngredient.name);
 
     // Se o preço foi atualizado, propaga a mudança para as receitas
     if (ingredientData.current_price !== undefined) {
-      console.log('Detectada atualização de preço. Iniciando propagação para receitas...');
-      
+      logger.info('Propagando atualização de preço para receitas');
+
       const allRecipes = await Recipe.getAll();
-      console.log(`Total de receitas encontradas: ${allRecipes.length}`);
-      
-      const affectedRecipes = allRecipes.filter(recipe => 
-        recipe.preparations?.some(prep => 
-          prep.ingredients?.some(ing => {
-            // CORREÇÃO: O ID do ingrediente na receita parece ser um ID composto.
-            const match = ing.id?.startsWith(id);
-            if (match) {
-              console.log(`Encontrado ingrediente correspondente na receita ${recipe.id} (${recipe.name})`);
-            }
-            return match;
-          })
+      const affectedRecipes = allRecipes.filter(recipe =>
+        recipe.preparations?.some(prep =>
+          prep.ingredients?.some(ing => ing.id?.startsWith(id))
         )
       );
-      console.log(`Total de receitas afetadas encontradas: ${affectedRecipes.length}`);
+
+      logger.debug(`${affectedRecipes.length} receitas afetadas encontradas`);
 
       if (affectedRecipes.length > 0) {
         await Promise.all(affectedRecipes.map(async (recipe) => {
-          console.log(`Processando receita afetada: ${recipe.id} (${recipe.name})`);
           let needsUpdate = false;
           recipe.preparations.forEach(prep => {
             prep.ingredients?.forEach(ing => {
               if (ing.id?.startsWith(id)) {
-                console.log(`Atualizando preço do ingrediente ${ing.name} dentro da receita ${recipe.id}`);
                 ing.current_price = updatedIngredient.current_price;
                 ing.raw_price_kg = updatedIngredient.raw_price_kg;
                 needsUpdate = true;
@@ -124,27 +146,22 @@ export async function PUT(request) {
           });
 
           if (needsUpdate) {
-            console.log(`Recalculando métricas para a receita ${recipe.id}`);
             const updatedMetrics = RecipeCalculator.calculateRecipeMetrics(recipe.preparations, recipe);
-            
             const finalUpdatedRecipe = {
               ...recipe,
               ...updatedMetrics
             };
-
             await Recipe.update(recipe.id, finalUpdatedRecipe);
-            console.log(`Receita ${recipe.id} atualizada com sucesso no banco.`);
+            logger.debug(`Receita ${recipe.name} atualizada`);
           }
         }));
       }
     }
-    
-    console.log('--- INGREDIENT PUT: FIM DA REQUISIÇÃO ---');
+
     return NextResponse.json(updatedIngredient);
-    
+
   } catch (error) {
-    console.error('--- ERRO FATAL NA API PUT DE INGREDIENTES ---');
-    console.error(error);
+    logger.error('Erro ao atualizar ingrediente:', error);
     return NextResponse.json(
       { error: 'Failed to update ingredient', details: error.message },
       { status: 500 }
