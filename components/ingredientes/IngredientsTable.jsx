@@ -128,87 +128,87 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
             <thead>
               <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-300">
                 <th
-                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="text-left px-3 py-2 text-xs font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors whitespace-nowrap"
                   onClick={() => handleSort('name')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <span>Nome</span>
                     <SortIcon columnKey="name" />
                   </div>
                 </th>
                 <th
-                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="text-left px-3 py-2 text-xs font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors whitespace-nowrap"
                   onClick={() => handleSort('unit')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <span>Unidade</span>
                     <SortIcon columnKey="unit" />
                   </div>
                 </th>
                 <th
-                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="text-left px-3 py-2 text-xs font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors whitespace-nowrap"
                   onClick={() => handleSort('category')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <span>Categoria</span>
                     <SortIcon columnKey="category" />
                   </div>
                 </th>
                 <th
-                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="text-left px-3 py-2 text-xs font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors whitespace-nowrap"
                   onClick={() => handleSort('displayBrand')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <span>Marca</span>
                     <SortIcon columnKey="displayBrand" />
                   </div>
                 </th>
                 <th
-                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="text-left px-3 py-2 text-xs font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors whitespace-nowrap"
                   onClick={() => handleSort('displayPrice')}
                 >
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-slate-400" />
+                  <div className="flex items-center gap-1">
+                    <DollarSign className="w-3 h-3 text-slate-400" />
                     <span>Preço Atual</span>
                     <SortIcon columnKey="displayPrice" />
                   </div>
                 </th>
                 <th
-                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="text-left px-3 py-2 text-xs font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors whitespace-nowrap"
                   onClick={() => handleSort('displaySupplier')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <span>Fornecedor</span>
                     <SortIcon columnKey="displaySupplier" />
                   </div>
                 </th>
                 <th
-                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="text-left px-3 py-2 text-xs font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors whitespace-nowrap"
                   onClick={() => handleSort('last_update')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <span>Última Atualização</span>
                     <SortIcon columnKey="last_update" />
                   </div>
                 </th>
                 <th
-                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="text-left px-3 py-2 text-xs font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors whitespace-nowrap"
                   onClick={() => handleSort('active')}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <span>Status</span>
                     <SortIcon columnKey="active" />
                   </div>
                 </th>
-                <th className="text-center p-4 text-sm font-semibold text-slate-600">Ações</th>
+                <th className="text-center px-3 py-2 text-xs font-semibold text-slate-600 whitespace-nowrap">Ações</th>
               </tr>
             </thead>
             <tbody>
               {sortedIngredients.map((ingredient, index) => (
                 <tr key={ingredient.id || `ingredient-${index}`} className="border-b border-slate-100 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-emerald-50/50 group transition-all duration-200">
-                  <td className="p-4 font-mono">
-                    <div className="space-y-2">
-                      <div className="font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors duration-200">
+                  <td className="px-3 py-2 font-mono text-xs">
+                    <div className="space-y-1">
+                      <div className="font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors duration-200 whitespace-nowrap">
                         {ingredient.name}
                       </div>
                       {ingredient.taco_variations && ingredient.taco_variations.length > 0 && (
@@ -219,13 +219,13 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                       )}
                     </div>
                   </td>
-                  <td className="p-4 font-mono">
-                    <span className="inline-flex items-center px-2 py-1 rounded-lg bg-slate-100 text-slate-700 text-sm font-medium">
+                  <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
+                    <span className="inline-flex items-center px-2 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium">
                       {ingredient.unit}
                     </span>
                   </td>
-                  <td className="p-4 font-mono">
-                    <Badge className="bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800 border-purple-300 font-medium">
+                  <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
+                    <Badge className="bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800 border-purple-300 font-medium text-xs">
                       {ingredient.category || (
                         <span className="flex items-center gap-1">
                           <Package className="w-3 h-3" />
@@ -234,23 +234,23 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                       )}
                     </Badge>
                   </td>
-                  <td className="p-4 font-mono">
+                  <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
                     <span className="text-slate-600 font-medium">{ingredient.displayBrand}</span>
                   </td>
-                  <td className="p-4 font-mono">
+                  <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
                     <PriceEditor
                       ingredient={ingredient}
                       onEdit={() => setSelectedIngredientForPriceUpdate(ingredient)}
                     />
                   </td>
-                  <td className="p-4 font-mono">
+                  <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                       <span className="text-slate-600 font-medium">{ingredient.displaySupplier}</span>
                     </div>
                   </td>
-                  <td className="p-4 font-mono">
-                    <span className="text-slate-500 text-sm font-medium flex items-center gap-1">
+                  <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
+                    <span className="text-slate-500 text-xs font-medium flex items-center gap-1">
                       {ingredient.last_update ? (
                         <>
                           <Calendar className="w-3 h-3" />
@@ -264,11 +264,11 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                       )}
                     </span>
                   </td>
-                  <td className="p-4 font-mono">
+                  <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
                     <Badge
                       className={ingredient.active
-                        ? "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-300 font-semibold flex items-center gap-1 w-fit"
-                        : "bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border-red-300 font-semibold flex items-center gap-1 w-fit"
+                        ? "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-300 font-semibold flex items-center gap-1 w-fit text-xs"
+                        : "bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border-red-300 font-semibold flex items-center gap-1 w-fit text-xs"
                       }
                     >
                       {ingredient.active ? (
@@ -284,15 +284,15 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                       )}
                     </Badge>
                   </td>
-                  <td className="p-4 text-center">
+                  <td className="px-3 py-2 text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="icon"
-                          className="hover:bg-slate-100 rounded-lg opacity-60 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
+                          className="hover:bg-slate-100 rounded-lg opacity-60 group-hover:opacity-100 transition-all duration-200 hover:scale-110 h-7 w-7"
                         >
-                          <MoreHorizontal className="h-4 w-4 text-slate-600" />
+                          <MoreHorizontal className="h-3 w-3 text-slate-600" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="rounded-xl shadow-xl border-0 bg-white/95 backdrop-blur-sm">
