@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, DollarSign, Trash2, Package, Plus, TrendingUp } from "lucide-react";
+import { MoreHorizontal, Edit, DollarSign, Trash2, Package, Plus, TrendingUp, Search, X } from "lucide-react";
 import PriceEditor from "./PriceEditor";
 import PriceHistoryViewer from "./PriceHistoryViewer";
 import PriceUpdateModal from "./PriceUpdateModal";
@@ -18,6 +19,61 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
   const router = useRouter();
   const [selectedIngredientForHistory, setSelectedIngredientForHistory] = useState(null);
   const [selectedIngredientForPriceUpdate, setSelectedIngredientForPriceUpdate] = useState(null);
+
+  // Estados dos filtros
+  const [filters, setFilters] = useState({
+    name: '',
+    unit: '',
+    category: '',
+    brand: '',
+    supplier: '',
+    status: ''
+  });
+
+  // Lista de IDs problemáticos para filtrar (blacklist)
+  const BLACKLISTED_IDS = [
+    '684bfe20b60fe3a1a47dfce7', '684bfe28943203651ae5a922',
+    '684bfe2b60647d247b5533be', '684bfe32767c7d82725a74d5',
+    '684bfe39ce1a5c4bb28d47a2', '684bfe3cce1a5c4bb28d47bc',
+    '684bfe3cfede6d0d2bb1ef16', '684bfe3d8e7a40c69f0fe67e',
+    '684bfe40ce1a5c4bb28d47d9', '684bfe3760647d247b5533f5'
+  ];
+
+  // Filtrar ingredientes
+  const filteredIngredients = useMemo(() => {
+    return ingredients.filter(ingredient => {
+      // Filtrar IDs problemáticos da blacklist
+      if (BLACKLISTED_IDS.includes(ingredient.id)) {
+        return false;
+      }
+
+      const matchName = !filters.name || ingredient.name?.toLowerCase().includes(filters.name.toLowerCase());
+      const matchUnit = !filters.unit || ingredient.unit?.toLowerCase().includes(filters.unit.toLowerCase());
+      const matchCategory = !filters.category || ingredient.category?.toLowerCase().includes(filters.category.toLowerCase());
+      const matchBrand = !filters.brand || ingredient.displayBrand?.toLowerCase().includes(filters.brand.toLowerCase());
+      const matchSupplier = !filters.supplier || ingredient.displaySupplier?.toLowerCase().includes(filters.supplier.toLowerCase());
+      const matchStatus = !filters.status || (filters.status === 'ativo' ? ingredient.active : !ingredient.active);
+
+      return matchName && matchUnit && matchCategory && matchBrand && matchSupplier && matchStatus;
+    });
+  }, [ingredients, filters]);
+
+  const updateFilter = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      name: '',
+      unit: '',
+      category: '',
+      brand: '',
+      supplier: '',
+      status: ''
+    });
+  };
+
+  const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
   if (ingredients.length === 0) {
     return (
@@ -48,33 +104,131 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
     <>
     <Card className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200/60 p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-            <Package className="w-4 h-4 text-white" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+              <Package className="w-4 h-4 text-white" />
+            </div>
+            <CardTitle className="text-xl text-slate-700">
+              Lista de Ingredientes ({filteredIngredients.length.toLocaleString()} {filteredIngredients.length !== ingredients.length && `de ${ingredients.length.toLocaleString()}`})
+            </CardTitle>
           </div>
-          <CardTitle className="text-xl text-slate-700">
-            Lista de Ingredientes ({ingredients.length.toLocaleString()})
-          </CardTitle>
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Limpar Filtros
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">Nome</th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">Unidade</th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">Categoria</th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">Marca</th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">Preço Atual</th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">Fornecedor</th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">Última Atualização</th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">Status</th>
+              <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-300">
+                <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Search className="w-4 h-4 text-slate-400" />
+                      <span>Nome</span>
+                    </div>
+                    <Input
+                      placeholder="Filtrar nome..."
+                      value={filters.name}
+                      onChange={(e) => updateFilter('name', e.target.value)}
+                      className="h-8 text-xs bg-white border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                  </div>
+                </th>
+                <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Search className="w-4 h-4 text-slate-400" />
+                      <span>Unidade</span>
+                    </div>
+                    <Input
+                      placeholder="Filtrar..."
+                      value={filters.unit}
+                      onChange={(e) => updateFilter('unit', e.target.value)}
+                      className="h-8 text-xs bg-white border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                  </div>
+                </th>
+                <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Search className="w-4 h-4 text-slate-400" />
+                      <span>Categoria</span>
+                    </div>
+                    <Input
+                      placeholder="Filtrar..."
+                      value={filters.category}
+                      onChange={(e) => updateFilter('category', e.target.value)}
+                      className="h-8 text-xs bg-white border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                  </div>
+                </th>
+                <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Search className="w-4 h-4 text-slate-400" />
+                      <span>Marca</span>
+                    </div>
+                    <Input
+                      placeholder="Filtrar..."
+                      value={filters.brand}
+                      onChange={(e) => updateFilter('brand', e.target.value)}
+                      className="h-8 text-xs bg-white border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                  </div>
+                </th>
+                <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-slate-400" />
+                    <span>Preço Atual</span>
+                  </div>
+                </th>
+                <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Search className="w-4 h-4 text-slate-400" />
+                      <span>Fornecedor</span>
+                    </div>
+                    <Input
+                      placeholder="Filtrar..."
+                      value={filters.supplier}
+                      onChange={(e) => updateFilter('supplier', e.target.value)}
+                      className="h-8 text-xs bg-white border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                    />
+                  </div>
+                </th>
+                <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                  Última Atualização
+                </th>
+                <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                  <div className="space-y-2">
+                    <span>Status</span>
+                    <select
+                      value={filters.status}
+                      onChange={(e) => updateFilter('status', e.target.value)}
+                      className="h-8 w-full text-xs bg-white border border-slate-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500"
+                    >
+                      <option value="">Todos</option>
+                      <option value="ativo">Ativo</option>
+                      <option value="inativo">Inativo</option>
+                    </select>
+                  </div>
+                </th>
                 <th className="text-center p-4 text-sm font-semibold text-slate-600">Ações</th>
               </tr>
             </thead>
             <tbody>
-              {ingredients.map((ingredient, index) => (
+              {filteredIngredients.map((ingredient, index) => (
                 <tr key={ingredient.id || `ingredient-${index}`} className="border-b border-slate-100 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-emerald-50/50 group transition-all duration-200">
                   <td className="p-4">
                     <div className="space-y-2">
