@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Layers, Plus, Search, Package2 } from "lucide-react";
 import { formatWeight, formatCurrency, parseNumericValue } from "@/lib/formatUtils";
+import { formatCapitalize } from '@/lib/textUtils';
 
 // Constantes para categorias e cores
 const CATEGORY_COLORS = {
@@ -181,7 +182,7 @@ const AddAssemblyItemModal = ({
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${CATEGORY_COLORS[ingredient.category] || CATEGORY_COLORS['Sem categoria']} flex-shrink-0`}></div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm">{ingredient.commercial_name || ingredient.name}</div>
+                        <div className="font-medium text-sm font-mono">{formatCapitalize(ingredient.commercial_name || ingredient.name)}</div>
                         <div className="text-xs text-gray-500">
                           <span className="text-gray-600">{ingredient.category}</span> • 
                           <span className="font-medium">{formatCurrency(parseNumericValue(ingredient.current_price))} / {ingredient.unit}</span>

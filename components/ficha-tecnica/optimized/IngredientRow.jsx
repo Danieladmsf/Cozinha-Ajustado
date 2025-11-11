@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Edit, Trash2 } from "lucide-react";
 import { formatCurrency } from '@/lib/formatUtils';
+import { formatCapitalize } from '@/lib/textUtils';
 
 const IngredientRow = ({
   ingredient,
@@ -159,8 +160,8 @@ const IngredientRow = ({
 
   return (
     <TableRow className="border-b border-gray-50 hover:bg-gray-50/50">
-      <TableCell className="font-medium px-4 py-2">
-        {ingredient.name}
+      <TableCell className="font-medium px-4 py-2 font-mono">
+        {formatCapitalize(ingredient.name)}
       </TableCell>
 
       <TableCell className="text-center px-4 py-2">

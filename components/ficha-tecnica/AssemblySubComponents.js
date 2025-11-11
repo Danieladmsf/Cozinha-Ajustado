@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import RecipeCalculator from '@/lib/recipeCalculator';
+import { formatCapitalize } from '@/lib/textUtils';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -171,9 +172,9 @@ const AssemblySubComponents = ({
           <tbody>
             {componentsWithCalculations.map((sc, index) => (
               <tr key={sc.id || index} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="px-3 py-2">
+                <td className="px-3 py-2 font-mono">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-900">{sc.displayName}</span>
+                    <span className="font-medium text-gray-900">{formatCapitalize(sc.displayName)}</span>
                     <Badge
                       variant="outline"
                       className={`text-[10px] px-1.5 py-0 h-4 ${
