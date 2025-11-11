@@ -5,12 +5,9 @@ import { formatCurrency } from "@/lib/formatUtils";
 export default function PriceEditor({ ingredient, onEdit }) {
   return (
     <div className="flex items-center gap-1 group/price font-mono text-xs">
-      <div className="flex items-center gap-1">
-        <span className="text-xs text-slate-500 font-medium">R$</span>
-        <span className="font-bold text-green-700 bg-gradient-to-r from-green-50 to-emerald-50 px-2 py-0.5 rounded text-xs border border-green-200">
-          {formatCurrency(ingredient.displayPrice || 0).replace('R$ ', '').replace('R$', '')}
-        </span>
-      </div>
+      <span className="font-bold text-green-700">
+        R$ {formatCurrency(ingredient.displayPrice || 0).replace('R$ ', '').replace('R$', '')}
+      </span>
       <Button
         size="sm"
         variant="ghost"
