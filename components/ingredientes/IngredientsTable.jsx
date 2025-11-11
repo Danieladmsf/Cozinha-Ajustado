@@ -206,7 +206,7 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
             <tbody>
               {sortedIngredients.map((ingredient, index) => (
                 <tr key={ingredient.id || `ingredient-${index}`} className="border-b border-slate-100 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-emerald-50/50 group transition-all duration-200">
-                  <td className="p-4">
+                  <td className="p-4 font-mono">
                     <div className="space-y-2">
                       <div className="font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors duration-200">
                         {ingredient.name}
@@ -219,12 +219,12 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                       )}
                     </div>
                   </td>
-                  <td className="p-4">
+                  <td className="p-4 font-mono">
                     <span className="inline-flex items-center px-2 py-1 rounded-lg bg-slate-100 text-slate-700 text-sm font-medium">
                       {ingredient.unit}
                     </span>
                   </td>
-                  <td className="p-4">
+                  <td className="p-4 font-mono">
                     <Badge className="bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800 border-purple-300 font-medium">
                       {ingredient.category || (
                         <span className="flex items-center gap-1">
@@ -234,22 +234,22 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                       )}
                     </Badge>
                   </td>
-                  <td className="p-4">
+                  <td className="p-4 font-mono">
                     <span className="text-slate-600 font-medium">{ingredient.displayBrand}</span>
                   </td>
-                  <td className="p-4">
+                  <td className="p-4 font-mono">
                     <PriceEditor
                       ingredient={ingredient}
                       onEdit={() => setSelectedIngredientForPriceUpdate(ingredient)}
                     />
                   </td>
-                  <td className="p-4">
+                  <td className="p-4 font-mono">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                       <span className="text-slate-600 font-medium">{ingredient.displaySupplier}</span>
                     </div>
                   </td>
-                  <td className="p-4">
+                  <td className="p-4 font-mono">
                     <span className="text-slate-500 text-sm font-medium flex items-center gap-1">
                       {ingredient.last_update ? (
                         <>
@@ -264,7 +264,7 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                       )}
                     </span>
                   </td>
-                  <td className="p-4">
+                  <td className="p-4 font-mono">
                     <Badge
                       className={ingredient.active
                         ? "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-300 font-semibold flex items-center gap-1 w-fit"
