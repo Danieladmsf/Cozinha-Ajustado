@@ -3,18 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Minus, 
-  AlertTriangle, 
-  Info, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  AlertTriangle,
+  Info,
   Clock,
   Calendar,
   DollarSign,
   Target,
   Activity,
-  RefreshCw
+  RefreshCw,
+  Package,
+  Tag,
+  Users
 } from "lucide-react";
 import { usePriceAnalytics } from "@/hooks/ingredientes/usePriceAnalytics";
 import { format, parseISO } from "date-fns";
@@ -104,27 +107,27 @@ export default function PriceHistoryViewer({
     const changeType = record.change_type;
     
     let description = [];
-    
+
     // Mudança de preço
     if (Math.abs(newPrice - oldPrice) >= 0.01) {
-      description.push(`💰 ${oldPrice.toFixed(2)} → ${newPrice.toFixed(2)}`);
+      description.push(`${oldPrice.toFixed(2)} → ${newPrice.toFixed(2)}`);
     }
-    
+
     // Informações de fornecedor e marca
     if (hasSupplier) {
-      description.push(`📦 ${hasSupplier}`);
+      description.push(`${hasSupplier}`);
     }
     if (hasBrand) {
-      description.push(`🏷️ ${hasBrand}`);
+      description.push(`${hasBrand}`);
     }
-    
+
     // Tipo de mudança específica
     if (changeType === 'supplier_change') {
-      description.push('👥 Troca de fornecedor');
+      description.push('Troca de fornecedor');
     } else if (changeType === 'brand_change') {
-      description.push('🏷️ Troca de marca');
+      description.push('Troca de marca');
     } else if (changeType === 'supplier_brand_change') {
-      description.push('👥🏷️ Troca de fornecedor e marca');
+      description.push('Troca de fornecedor e marca');
     }
     
     return description.length > 0 ? description.join(' • ') : 'Atualização';
@@ -390,21 +393,38 @@ export default function PriceHistoryViewer({
                             </div>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {record.supplier && (
-                                <Badge variant="outline" className="text-xs">
-                                  📦 {record.supplier}
+                                <Badge variant="outline" className="text-xs flex items-center gap-1">
+                                  <Package className="w-3 h-3" />
+                                  {record.supplier}
                                 </Badge>
                               )}
                               {record.brand && (
-                                <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
-                                  🏷️ {record.brand}
+                                <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200 flex items-center gap-1">
+                                  <Tag className="w-3 h-3" />
+                                  {record.brand}
                                 </Badge>
                               )}
                               {record.change_type && record.change_type !== 'manual_update' && (
-                                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                                  {record.change_type === 'supplier_change' ? '👥 Fornecedor' :
-                                   record.change_type === 'brand_change' ? '🏷️ Marca' :
-                                   record.change_type === 'supplier_brand_change' ? '👥🏷️ Fornecedor+Marca' :
-                                   record.change_type === 'ingredient_editor_update' ? '📝 Editor' : record.change_type}
+                                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1">
+                                  {record.change_type === 'supplier_change' ? (
+                                    <>
+                                      <Users className="w-3 h-3" />
+                                      Fornecedor
+                                    </>
+                                  ) : record.change_type === 'brand_change' ? (
+                                    <>
+                                      <Tag className="w-3 h-3" />
+                                      Marca
+                                    </>
+                                  ) : record.change_type === 'supplier_brand_change' ? (
+                                    <>
+                                      <Users className="w-3 h-3" />
+                                      <Tag className="w-3 h-3" />
+                                      Fornecedor+Marca
+                                    </>
+                                  ) : record.change_type === 'ingredient_editor_update' ? (
+                                    'Editor'
+                                  ) : record.change_type}
                                 </Badge>
                               )}
                             </div>

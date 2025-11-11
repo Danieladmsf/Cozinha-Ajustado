@@ -248,7 +248,7 @@ export default function PriceUpdateModal({
       const percentText = `${priceCalc.percentChange > 0 ? '+' : ''}${priceCalc.percentChange.toFixed(1)}%`;
 
       toast({
-        title: "💰 Preço atualizado com sucesso!",
+        title: "Preço atualizado com sucesso!",
         description: `${ingredient.name}: R$ ${priceCalc.oldPrice.toFixed(2).replace('.', ',')} → R$ ${priceCalc.newPrice.toFixed(2).replace('.', ',')} (${changeText} / ${percentText})`
       });
 

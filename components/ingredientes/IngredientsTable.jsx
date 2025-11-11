@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, DollarSign, Trash2, Package, Plus, TrendingUp, Search, X } from "lucide-react";
+import { MoreHorizontal, Edit, DollarSign, Trash2, Package, Plus, TrendingUp, Search, X, Leaf, Calendar, Check } from "lucide-react";
 import PriceEditor from "./PriceEditor";
 import PriceHistoryViewer from "./PriceHistoryViewer";
 import PriceUpdateModal from "./PriceUpdateModal";
@@ -236,8 +236,9 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                         {ingredient.name}
                       </div>
                       {ingredient.taco_variations && ingredient.taco_variations.length > 0 && (
-                        <Badge className="bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 border-emerald-300 font-medium text-xs">
-                          {ingredient.taco_variations.length} 🥗 TACO
+                        <Badge className="bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 border-emerald-300 font-medium text-xs flex items-center gap-1 w-fit">
+                          <Leaf className="w-3 h-3" />
+                          {ingredient.taco_variations.length} TACO
                         </Badge>
                       )}
                     </div>
@@ -249,7 +250,12 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                   </td>
                   <td className="p-4">
                     <Badge className="bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800 border-purple-300 font-medium">
-                      {ingredient.category || '📦 N/A'}
+                      {ingredient.category || (
+                        <span className="flex items-center gap-1">
+                          <Package className="w-3 h-3" />
+                          N/A
+                        </span>
+                      )}
                     </Badge>
                   </td>
                   <td className="p-4">
@@ -268,20 +274,38 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                     </div>
                   </td>
                   <td className="p-4">
-                    <span className="text-slate-500 text-sm font-medium">
-                      {ingredient.last_update ?
-                        new Date(ingredient.last_update).toLocaleDateString('pt-BR') :
-                        '📅 N/A'}
+                    <span className="text-slate-500 text-sm font-medium flex items-center gap-1">
+                      {ingredient.last_update ? (
+                        <>
+                          <Calendar className="w-3 h-3" />
+                          {new Date(ingredient.last_update).toLocaleDateString('pt-BR')}
+                        </>
+                      ) : (
+                        <>
+                          <Calendar className="w-3 h-3" />
+                          N/A
+                        </>
+                      )}
                     </span>
                   </td>
                   <td className="p-4">
-                    <Badge 
-                      className={ingredient.active 
-                        ? "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-300 font-semibold" 
-                        : "bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border-red-300 font-semibold"
+                    <Badge
+                      className={ingredient.active
+                        ? "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-300 font-semibold flex items-center gap-1 w-fit"
+                        : "bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border-red-300 font-semibold flex items-center gap-1 w-fit"
                       }
                     >
-                      {ingredient.active ? "✅ Ativo" : "❌ Inativo"}
+                      {ingredient.active ? (
+                        <>
+                          <Check className="w-3 h-3" />
+                          Ativo
+                        </>
+                      ) : (
+                        <>
+                          <X className="w-3 h-3" />
+                          Inativo
+                        </>
+                      )}
                     </Badge>
                   </td>
                   <td className="p-4 text-center">

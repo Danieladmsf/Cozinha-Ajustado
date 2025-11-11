@@ -39,6 +39,8 @@ import {
   Filter,
   Eye,
   EyeOff,
+  Search,
+  Folder,
 } from "lucide-react";
 import { format, subDays, parseISO, differenceInDays, startOfMonth, endOfMonth, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -608,9 +610,9 @@ export default function IngredientAnalysis() {
               <div className="text-sm">
                 <p className="font-semibold text-blue-800 mb-2">Como funcionam estes filtros:</p>
                 <div className="space-y-1 text-blue-700">
-                  <p><strong>📊 Histórico:</strong> Afetam qual histórico de preços é usado para cálculos (variação, volatilidade, melhor fornecedor)</p>
-                  <p><strong>🔍 Ingredientes:</strong> Também filtram quais ingredientes são exibidos na lista</p>
-                  <p><strong>📂 Categoria:</strong> O filtro de categoria acima funciona independentemente</p>
+                  <p className="flex items-center gap-1"><BarChart3 className="w-3 h-3" /><strong>Histórico:</strong> Afetam qual histórico de preços é usado para cálculos (variação, volatilidade, melhor fornecedor)</p>
+                  <p className="flex items-center gap-1"><Search className="w-3 h-3" /><strong>Ingredientes:</strong> Também filtram quais ingredientes são exibidos na lista</p>
+                  <p className="flex items-center gap-1"><Folder className="w-3 h-3" /><strong>Categoria:</strong> O filtro de categoria acima funciona independentemente</p>
                 </div>
               </div>
             </div>
@@ -943,8 +945,8 @@ export default function IngredientAnalysis() {
                       </div>
                       <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                          <div><span className="font-medium text-blue-700">📅 Filtro Aplicado:</span><br /><span className="text-blue-600">{format(dateRange.start, 'dd/MM/yyyy')} até {format(dateRange.end, 'dd/MM/yyyy')}</span><div className="text-xs text-blue-500 mt-1">(Período que você selecionou para análise)</div></div>
-                          <div><span className="font-medium text-blue-700">📊 Dados Disponíveis (Total):</span><br /><span className="text-blue-600">{(() => { const fullHistory = priceHistory.filter(h => h.ingredient_id === selectedIngredient); if(fullHistory.length === 0) return 'N/A'; const dates = fullHistory.map(h => new Date(h.date + 'T00:00:00')).sort((a,b)=>a-b); return `${format(dates[0], 'dd/MM/yyyy')} até ${format(dates[dates.length - 1], 'dd/MM/yyyy')}`; })()}</span><div className="text-xs text-blue-500 mt-1">(Período real dos registros de preços para este ingrediente)</div></div>
+                          <div><span className="font-medium text-blue-700 flex items-center gap-1"><Calendar className="w-3 h-3" />Filtro Aplicado:</span><br /><span className="text-blue-600">{format(dateRange.start, 'dd/MM/yyyy')} até {format(dateRange.end, 'dd/MM/yyyy')}</span><div className="text-xs text-blue-500 mt-1">(Período que você selecionou para análise)</div></div>
+                          <div><span className="font-medium text-blue-700 flex items-center gap-1"><BarChart3 className="w-3 h-3" />Dados Disponíveis (Total):</span><br /><span className="text-blue-600">{(() => { const fullHistory = priceHistory.filter(h => h.ingredient_id === selectedIngredient); if(fullHistory.length === 0) return 'N/A'; const dates = fullHistory.map(h => new Date(h.date + 'T00:00:00')).sort((a,b)=>a-b); return `${format(dates[0], 'dd/MM/yyyy')} até ${format(dates[dates.length - 1], 'dd/MM/yyyy')}`; })()}</span><div className="text-xs text-blue-500 mt-1">(Período real dos registros de preços para este ingrediente)</div></div>
                         </div>
                         <div className="mt-3 pt-2 border-t border-blue-200">
                           {selectedIngredientData.history?.length > 0 ? <div className="flex items-center gap-2"><div className="w-2 h-2 bg-green-500 rounded-full"></div><span className="text-sm text-green-700"><strong>Exibindo {selectedIngredientData.history.length} registros</strong> de {selectedIngredientData.name} que estão dentro do período selecionado e filtros de fornecedor/marca.</span></div> : <div className="flex flex-col items-center gap-2"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-sm text-gray-600">Nenhum registro encontrado para este ingrediente com os filtros atuais.</span></div>}

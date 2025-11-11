@@ -36,6 +36,8 @@ import {
   Filter,
   Eye,
   EyeOff,
+  Search,
+  Folder,
 } from "lucide-react";
 import { format, subDays, parseISO, differenceInDays, startOfMonth, endOfMonth, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -604,9 +606,9 @@ export default function AnalysisManager() {
             <div className="text-sm">
               <p className="font-semibold text-blue-800 mb-2">Como funcionam estes filtros:</p>
               <div className="space-y-1 text-blue-700">
-                <p><strong>📊 Histórico:</strong> Afetam qual histórico de preços é usado para cálculos (variação, volatilidade, melhor fornecedor)</p>
-                <p><strong>🔍 Ingredientes:</strong> Também filtram quais ingredientes são exibidos na lista</p>
-                <p><strong>📂 Categoria:</strong> O filtro de categoria no header funciona independentemente</p>
+                <p className="flex items-center gap-1"><BarChart3 className="w-3 h-3" /><strong>Histórico:</strong> Afetam qual histórico de preços é usado para cálculos (variação, volatilidade, melhor fornecedor)</p>
+                <p className="flex items-center gap-1"><Search className="w-3 h-3" /><strong>Ingredientes:</strong> Também filtram quais ingredientes são exibidos na lista</p>
+                <p className="flex items-center gap-1"><Folder className="w-3 h-3" /><strong>Categoria:</strong> O filtro de categoria no header funciona independentemente</p>
               </div>
             </div>
           </div>
