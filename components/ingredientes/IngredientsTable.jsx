@@ -208,7 +208,7 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                   <td className="px-3 py-2 font-mono text-xs max-w-[200px]">
                     <div className="space-y-1">
                       <div
-                        className="font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors duration-200 truncate"
+                        className="font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors duration-200 truncate capitalize"
                         title={ingredient.name}
                       >
                         {ingredient.name}
@@ -228,7 +228,7 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                   </td>
                   <td className="px-3 py-2 font-mono text-xs max-w-[150px]">
                     <span
-                      className="text-purple-700 font-medium truncate block"
+                      className="text-purple-700 font-medium truncate block capitalize"
                       title={ingredient.category || 'N/A'}
                     >
                       {ingredient.category || (
@@ -241,7 +241,7 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                   </td>
                   <td className="px-3 py-2 font-mono text-xs max-w-[150px]">
                     <span
-                      className="text-slate-600 font-medium truncate block"
+                      className="text-slate-600 font-medium truncate block capitalize"
                       title={ingredient.displayBrand}
                     >
                       {ingredient.displayBrand}
@@ -257,7 +257,7 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
                       <span
-                        className="text-slate-600 font-medium truncate"
+                        className="text-slate-600 font-medium truncate capitalize"
                         title={ingredient.displaySupplier}
                       >
                         {ingredient.displaySupplier}

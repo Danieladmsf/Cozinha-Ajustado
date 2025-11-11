@@ -501,9 +501,9 @@ export default function Customers() {
                     </Avatar>
                   </TableCell>
                   {/* Name */}
-                  <TableCell className="font-medium font-mono">{customer.name || "-"}</TableCell>
+                  <TableCell className="font-medium font-mono capitalize">{customer.name || "-"}</TableCell>
                   {/* Company */}
-                  <TableCell className="font-mono">{customer.company || "-"}</TableCell>
+                  <TableCell className="font-mono capitalize">{customer.company || "-"}</TableCell>
                   {/* CNPJ */}
                   <TableCell className="font-mono">{customer.cnpj || "-"}</TableCell>
                   {/* Phone (Clickable for WhatsApp) */}

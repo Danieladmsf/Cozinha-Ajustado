@@ -23,7 +23,7 @@ const IngredientRow = ({ prep, ingredient, prepIndex, ingredientIndex }) => {
 
   return (
     <TableRow>
-      <TableCell className="font-medium font-mono">{ingredient.name}</TableCell>
+      <TableCell className="font-medium font-mono capitalize">{ingredient.name}</TableCell>
       <TableCell className="text-center font-mono">{formatCurrency(ingredient.price_per_kg_bruto)}</TableCell>
       <TableCell className="text-center font-semibold text-green-700 font-mono">{formatCurrency(getCleanCost(ingredient))}</TableCell>
 

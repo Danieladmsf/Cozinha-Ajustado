@@ -1482,7 +1482,7 @@ export default function Recipes() {
                                                 <TableBody>
                                                   {ingredientsWithVariations.map((ing, idx) => (
                                                     <TableRow key={idx}>
-                                                      <TableCell className="font-mono">{getIngredientName(ing.ingredient_id)}</TableCell>
+                                                      <TableCell className="font-mono capitalize">{getIngredientName(ing.ingredient_id)}</TableCell>
                                                       <TableCell className="text-right font-mono">
                                                         {formatCurrency(ing.previousPrice)}/{ing.unit}
                                                       </TableCell>

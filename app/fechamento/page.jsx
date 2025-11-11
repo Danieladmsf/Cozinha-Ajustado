@@ -359,7 +359,7 @@ export default function FechamentoPage() {
                       key={customer.id}
                       className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
                     >
-                      <TableCell className="font-semibold text-gray-900 font-mono">
+                      <TableCell className="font-semibold text-gray-900 font-mono capitalize">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                           {customer.name}

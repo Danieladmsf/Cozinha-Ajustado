@@ -394,9 +394,9 @@ export default function Suppliers() {
                     )}
                   </Avatar>
                 </TableCell>
-                <TableCell className="font-medium font-mono">{supplier.company_name}</TableCell>
+                <TableCell className="font-medium font-mono capitalize">{supplier.company_name}</TableCell>
                 <TableCell className="font-mono">{supplier.cnpj}</TableCell>
-                <TableCell className="font-mono">{supplier.vendor_name}</TableCell>
+                <TableCell className="font-mono capitalize">{supplier.vendor_name}</TableCell>
                 <TableCell className="font-mono">{supplier.vendor_phone}</TableCell>
                 <TableCell>
                   <DropdownMenu>

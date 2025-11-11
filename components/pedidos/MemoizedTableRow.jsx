@@ -70,8 +70,8 @@ const MemoizedTableRow = ({
   
   return (
     <TableRow className="hover:bg-gray-50">
-      <TableCell className="font-mono">{item.recipe_name}</TableCell>
-      <TableCell className="font-mono">{item.category}</TableCell>
+      <TableCell className="font-mono capitalize">{item.recipe_name}</TableCell>
+      <TableCell className="font-mono capitalize">{item.category}</TableCell>
       <TableCell className="font-mono">
         <span className="text-sm text-gray-500">
           {item.suggested_quantity ? item.suggested_quantity.toFixed(1).replace('.', ',') : '0'}
