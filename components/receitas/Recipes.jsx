@@ -79,6 +79,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ptBR } from "date-fns/locale";
 import BulkRecipeCreator from "@/components/receitas/BulkRecipeCreator";
 
+import { formatCapitalize } from "@/lib/textUtils";
+
 // Funções utilitárias para formatação e cálculo
 const formatWeight = (weightInKg) => {
   if (!weightInKg) return "0,000 kg";
@@ -1482,7 +1484,7 @@ export default function Recipes() {
                                                 <TableBody>
                                                   {ingredientsWithVariations.map((ing, idx) => (
                                                     <TableRow key={idx}>
-                                                      <TableCell className="font-mono capitalize">{getIngredientName(ing.ingredient_id)}</TableCell>
+                                                      <TableCell className="font-mono">{formatCapitalize(getIngredientName(ing.ingredient_id))}</TableCell>
                                                       <TableCell className="text-right font-mono capitalize">
                                                         {formatCurrency(ing.previousPrice)}/{ing.unit}
                                                       </TableCell>

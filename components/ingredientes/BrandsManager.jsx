@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Brand } from "@/app/api/entities";
+import { formatCapitalize } from "@/lib/textUtils";
 import { Supplier } from "@/app/api/entities";
 import { Button } from "@/components/ui/button";
 import {
@@ -209,8 +210,8 @@ export default function BrandsManager() {
               <TableBody>
                 {filteredBrands.map((brand) => (
                   <TableRow key={brand.id}>
-                    <TableCell className="font-medium font-mono capitalize">{brand.name}</TableCell>
-                    <TableCell className="font-mono capitalize">{brand.manufacturer || "-"}</TableCell>
+                    <TableCell className="font-medium font-mono">{formatCapitalize(brand.name)}</TableCell>
+                    <TableCell className="font-mono">{formatCapitalize(brand.manufacturer || "-")}</TableCell>
                     <TableCell className="font-mono capitalize">
                       <span className={brand.active ? "text-green-700 font-semibold" : "text-gray-500 font-semibold"}>
                         {brand.active ? "Ativa" : "Inativa"}

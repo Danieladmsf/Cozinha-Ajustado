@@ -2,7 +2,8 @@
 
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Customer } from "@/app/api/entities"; 
+import { Customer } from "@/app/api/entities";
+import { formatCapitalize } from "@/lib/textUtils"; 
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -501,27 +502,27 @@ export default function Customers() {
                     </Avatar>
                   </TableCell>
                   {/* Name */}
-                  <TableCell className="font-medium font-mono capitalize">{customer.name || "-"}</TableCell>
+                  <TableCell className="font-medium font-mono">{formatCapitalize(customer.name || "-")}</TableCell>
                   {/* Company */}
-                  <TableCell className="font-mono capitalize">{customer.company || "-"}</TableCell>
+                  <TableCell className="font-mono">{formatCapitalize(customer.company || "-")}</TableCell>
                   {/* CNPJ */}
-                  <TableCell className="font-mono capitalize">{customer.cnpj || "-"}</TableCell>
+                  <TableCell className="font-mono">{formatCapitalize(customer.cnpj || "-")}</TableCell>
                   {/* Phone (Clickable for WhatsApp) */}
-                  <TableCell className="font-mono capitalize">
+                  <TableCell className="font-mono">
                     {customer.phone ? (
                       <span
                         className="cursor-pointer text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"
                         onClick={() => handleWhatsAppClick(customer.phone, customer.name)}
                         title="Abrir no WhatsApp"
                       >
-                        {customer.phone}
+                        {formatCapitalize(customer.phone)}
                       </span>
                     ) : (
                       "-"
                     )}
                   </TableCell>
                   {/* Email */}
-                  <TableCell className="font-mono capitalize">{customer.email || "-"}</TableCell>
+                  <TableCell className="font-mono">{formatCapitalize(customer.email || "-")}</TableCell>
                   {/* Billing Period */}
                   <TableCell className="font-mono capitalize">
                     {customer.billing_period ? (

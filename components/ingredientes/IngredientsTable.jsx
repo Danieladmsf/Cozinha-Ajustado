@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { formatCapitalize } from "@/lib/textUtils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -208,10 +209,10 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                   <td className="px-3 py-2 font-mono text-xs max-w-[200px]">
                     <div className="space-y-1">
                       <div
-                        className="font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors duration-200 truncate capitalize"
+                        className="font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors duration-200 truncate"
                         title={ingredient.name}
                       >
-                        {ingredient.name}
+                        {formatCapitalize(ingredient.name)}
                       </div>
                       {ingredient.taco_variations && ingredient.taco_variations.length > 0 && (
                         <span className="text-emerald-700 font-medium text-xs flex items-center gap-1">
@@ -222,16 +223,16 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                     </div>
                   </td>
                   <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
-                    <span className="text-slate-600 font-medium capitalize">
-                      {ingredient.unit}
+                    <span className="text-slate-600 font-medium">
+                      {formatCapitalize(ingredient.unit)}
                     </span>
                   </td>
                   <td className="px-3 py-2 font-mono text-xs max-w-[150px]">
                     <span
-                      className="text-purple-700 font-medium truncate block capitalize"
+                      className="text-purple-700 font-medium truncate block"
                       title={ingredient.category || 'N/A'}
                     >
-                      {ingredient.category || (
+                      {ingredient.category ? formatCapitalize(ingredient.category) : (
                         <span className="flex items-center gap-1 text-slate-500">
                           <Package className="w-3 h-3" />
                           N/A
@@ -241,10 +242,10 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                   </td>
                   <td className="px-3 py-2 font-mono text-xs max-w-[150px]">
                     <span
-                      className="text-slate-600 font-medium truncate block capitalize"
+                      className="text-slate-600 font-medium truncate block"
                       title={ingredient.displayBrand}
                     >
-                      {ingredient.displayBrand}
+                      {formatCapitalize(ingredient.displayBrand)}
                     </span>
                   </td>
                   <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
@@ -257,15 +258,15 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
                       <span
-                        className="text-slate-600 font-medium truncate capitalize"
+                        className="text-slate-600 font-medium truncate"
                         title={ingredient.displaySupplier}
                       >
-                        {ingredient.displaySupplier}
+                        {formatCapitalize(ingredient.displaySupplier)}
                       </span>
                     </div>
                   </td>
                   <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
-                    <span className="text-slate-500 text-xs font-medium flex items-center gap-1 capitalize">
+                    <span className="text-slate-500 text-xs font-medium flex items-center gap-1">
                       {ingredient.last_update ? (
                         <>
                           <Calendar className="w-3 h-3" />
@@ -282,8 +283,8 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                   <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
                     <span
                       className={ingredient.active
-                        ? "text-green-700 font-semibold flex items-center gap-1 capitalize"
-                        : "text-red-700 font-semibold flex items-center gap-1 capitalize"
+                        ? "text-green-700 font-semibold flex items-center gap-1"
+                        : "text-red-700 font-semibold flex items-center gap-1"
                       }
                     >
                       {ingredient.active ? (

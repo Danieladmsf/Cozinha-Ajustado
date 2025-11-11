@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, startOfWeek, getWeek, getYear, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { formatCapitalize } from '@/lib/textUtils';
 import { Loader2, DollarSign, Users, Package, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -359,10 +360,10 @@ export default function FechamentoPage() {
                       key={customer.id}
                       className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
                     >
-                      <TableCell className="font-semibold text-gray-900 font-mono capitalize">
+                      <TableCell className="font-semibold text-gray-900 font-mono">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                          {customer.name}
+                          {formatCapitalize(customer.name)}
                         </div>
                       </TableCell>
                       <TableCell className="text-right text-gray-700 font-mono capitalize">

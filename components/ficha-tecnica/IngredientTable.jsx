@@ -1,5 +1,6 @@
 import React from 'react';
 import { useRecipeStore } from '@/hooks/ficha-tecnica/useRecipeStore';
+import { formatCapitalize } from '@/lib/textUtils';
 import { Button, Input, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Badge, Textarea } from "@/components/ui";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import AssemblySubComponents from './AssemblySubComponents';
@@ -23,7 +24,7 @@ const IngredientRow = ({ prep, ingredient, prepIndex, ingredientIndex }) => {
 
   return (
     <TableRow>
-      <TableCell className="font-medium font-mono capitalize">{ingredient.name}</TableCell>
+      <TableCell className="font-medium font-mono">{formatCapitalize(ingredient.name)}</TableCell>
       <TableCell className="text-center font-mono capitalize">{formatCurrency(ingredient.price_per_kg_bruto)}</TableCell>
       <TableCell className="text-center font-semibold text-green-700 font-mono capitalize">{formatCurrency(getCleanCost(ingredient))}</TableCell>
 

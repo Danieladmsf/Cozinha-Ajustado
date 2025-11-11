@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Supplier } from "@/app/api/entities";
+import { formatCapitalize } from "@/lib/textUtils";
 import { CategoryTree } from "@/app/api/entities";
 import { CategoryType } from "@/app/api/entities";
 import { Button } from "@/components/ui/button";
@@ -394,10 +395,10 @@ export default function Suppliers() {
                     )}
                   </Avatar>
                 </TableCell>
-                <TableCell className="font-medium font-mono capitalize">{supplier.company_name}</TableCell>
-                <TableCell className="font-mono capitalize">{supplier.cnpj}</TableCell>
-                <TableCell className="font-mono capitalize">{supplier.vendor_name}</TableCell>
-                <TableCell className="font-mono capitalize">{supplier.vendor_phone}</TableCell>
+                <TableCell className="font-medium font-mono">{formatCapitalize(supplier.company_name)}</TableCell>
+                <TableCell className="font-mono">{formatCapitalize(supplier.cnpj)}</TableCell>
+                <TableCell className="font-mono">{formatCapitalize(supplier.vendor_name)}</TableCell>
+                <TableCell className="font-mono">{formatCapitalize(supplier.vendor_phone)}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
