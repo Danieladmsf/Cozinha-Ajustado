@@ -212,7 +212,7 @@ export default function BrandsManager() {
                   <TableRow key={brand.id}>
                     <TableCell className="font-medium font-mono">{formatCapitalize(brand.name)}</TableCell>
                     <TableCell className="font-mono">{formatCapitalize(brand.manufacturer || "-")}</TableCell>
-                    <TableCell className="font-mono capitalize">
+                    <TableCell className="font-mono">
                       <span className={brand.active ? "text-green-700 font-semibold" : "text-gray-500 font-semibold"}>
                         {brand.active ? "Ativa" : "Inativa"}
                       </span>

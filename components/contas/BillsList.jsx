@@ -280,7 +280,7 @@ const BillsList = React.memo(function BillsList({
                     {bill.category && (
                       <Badge 
                         variant="outline"
-                        className={`text-sm px-3 py-1 capitalize
+                        className={`text-sm px-3 py-1
                           ${isPaidBill ? "bg-gray-100 text-gray-600" : "bg-blue-50 text-blue-700 border-blue-200"}
                         `}
                       >

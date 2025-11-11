@@ -73,12 +73,12 @@ const MemoizedTableRow = ({
     <TableRow className="hover:bg-gray-50">
       <TableCell className="font-mono">{formatCapitalize(item.recipe_name)}</TableCell>
       <TableCell className="font-mono">{formatCapitalize(item.category)}</TableCell>
-      <TableCell className="font-mono capitalize">
+      <TableCell className="font-mono">
         <span className="text-sm text-gray-500">
           {item.suggested_quantity ? item.suggested_quantity.toFixed(1).replace('.', ',') : '0'}
         </span>
       </TableCell>
-      <TableCell className="font-mono capitalize">
+      <TableCell className="font-mono">
         <Select
           value={item.unit_type}
           onValueChange={(value) => handleUnitTypeChange(index, value)}
@@ -92,7 +92,7 @@ const MemoizedTableRow = ({
           </SelectContent>
         </Select>
       </TableCell>
-      <TableCell className="font-mono capitalize">
+      <TableCell className="font-mono">
         <Input
           data-quantity-input
           ref={inputRef}
@@ -105,18 +105,18 @@ const MemoizedTableRow = ({
           onKeyDown={onQuantityKeyDown}
         />
       </TableCell>
-      <TableCell className="font-mono capitalize">
+      <TableCell className="font-mono">
         {formatWeight(calculateTotalWeight(item))}
       </TableCell>
-      <TableCell className="font-mono capitalize">
+      <TableCell className="font-mono">
         {formatCurrency(item.unit_price || 0)}
       </TableCell>
-      <TableCell className="font-mono capitalize">
+      <TableCell className="font-mono">
         {formatCurrency(item.total_price || 0)}
       </TableCell>
-      <TableCell className="font-mono capitalize">
+      <TableCell className="font-mono">
         <Textarea
-          className="min-h-[35px] resize-none capitalize"
+          className="min-h-[35px] resize-none"
           placeholder="Observações do item"
           value={item.notes || ""}
           onChange={(e) => handleItemNotesChange(index, e.target.value)}

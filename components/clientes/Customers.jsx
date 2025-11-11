@@ -524,7 +524,7 @@ export default function Customers() {
                   {/* Email */}
                   <TableCell className="font-mono">{formatCapitalize(customer.email || "-")}</TableCell>
                   {/* Billing Period */}
-                  <TableCell className="font-mono capitalize">
+                  <TableCell className="font-mono">
                     {customer.billing_period ? (
                       <span className="text-purple-700 font-semibold">
                         {customer.billing_period === "diario" ? "Diário" :
@@ -539,14 +539,14 @@ export default function Customers() {
                     )}
                   </TableCell>
                   {/* Payment Day/Term */}
-                  <TableCell className="text-center font-mono capitalize">
+                  <TableCell className="text-center font-mono">
                     {customer.billing_period === 'mensal' && customer.payment_day ? `Dia ${customer.payment_day}` :
                      (customer.billing_period === 'semanal' || customer.billing_period === 'quinzenal') && customer.payment_day ? `${customer.payment_day} dias` :
                      customer.billing_period === 'diario' ? 'Na entrega' : // Example for daily
                      '-'}
                   </TableCell>
                   {/* Status */}
-                  <TableCell className="font-mono capitalize">
+                  <TableCell className="font-mono">
                     <span className={customer.pending_registration ? "text-orange-600 font-semibold" : (customer.active ? "text-green-700 font-semibold" : "text-gray-500 font-semibold")}>
                       {customer.pending_registration ? "Aguardando" : (customer.active ? "Ativo" : "Inativo")}
                     </span>
