@@ -47,6 +47,7 @@ export function useRecipeState() {
   const [isDetailedProcessDialogOpen, setDetailedProcessDialogOpen] = useState(false);
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
   const [isPrintCollectDialogOpen, setIsPrintCollectDialogOpen] = useState(false);
+  const [isPrintSimpleDialogOpen, setIsPrintSimpleDialogOpen] = useState(false);
 
   // Estados de dados externos
   const [categories, setCategories] = useState([]);
@@ -109,6 +110,7 @@ export function useRecipeState() {
     setDetailedProcessDialogOpen(false);
     setIsPrintDialogOpen(false);
     setIsPrintCollectDialogOpen(false);
+    setIsPrintSimpleDialogOpen(false);
   }, []);
 
   return {
@@ -139,6 +141,7 @@ export function useRecipeState() {
     isDetailedProcessDialogOpen, setDetailedProcessDialogOpen,
     isPrintDialogOpen, setIsPrintDialogOpen,
     isPrintCollectDialogOpen, setIsPrintCollectDialogOpen,
+    isPrintSimpleDialogOpen, setIsPrintSimpleDialogOpen,
 
     // Estados de dados externos
     categories, setCategories,

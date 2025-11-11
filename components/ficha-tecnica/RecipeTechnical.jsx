@@ -25,7 +25,6 @@ import {
   ClipboardList,
   ClipboardCheck,
   FilePlus,
-  FileUp,
   Loader2,
   Edit,
   List,
@@ -72,12 +71,13 @@ import AddAssemblyItemModal from "./AddAssemblyItemModal";
 import AssemblySubComponents from "./AssemblySubComponents";
 import RecipeSelectorModal from "./RecipeSelectorModal";
 import IngredientTable from "./optimized/IngredientTable";
+import RecipeTechnicalPrintDialog from "./RecipeTechnicalPrintDialog";
+import RecipeCollectDialog from "./RecipeCollectDialog";
+import RecipeSimplePrintDialog from "./RecipeSimplePrintDialog";
 
 export default function RecipeTechnical() {
   const { toast } = useToast();
-  const fileInputRef = React.useRef(null);
-  const [isUploading, setIsUploading] = useState(false);
-  
+
   // ==== HOOKS DE ESTADO (CONECTADOS) ====
   const {
     // Estados principais
@@ -107,6 +107,7 @@ export default function RecipeTechnical() {
     isDetailedProcessDialogOpen, setDetailedProcessDialogOpen,
     isPrintDialogOpen, setIsPrintDialogOpen,
     isPrintCollectDialogOpen, setIsPrintCollectDialogOpen,
+    isPrintSimpleDialogOpen, setIsPrintSimpleDialogOpen,
     
     // Estados de dados externos
     categories, setCategories,
@@ -492,58 +493,6 @@ export default function RecipeTechnical() {
         description: "Por favor, busque e selecione uma receita para atualizar.",
         variant: "destructive"
       });
-    }
-  };
-
-  // ==== HANDLERS PARA IMPORTAÇÃO DE RECEITA ====
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileSelected = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const fileContent = await file.text();
-      const recipesToUpload = JSON.parse(fileContent);
-
-      const response = await fetch('/api/recipes/upload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ recipes: recipesToUpload }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        toast({
-          title: "Importação Concluída",
-          description: result.message,
-        });
-        if (result.errors && result.errors.length > 0) {
-          console.error("Erros de importação:", result.errors);
-        }
-        await refreshRecipes();
-      } else {
-        throw new Error(result.message || 'Falha ao importar receitas.');
-      }
-    } catch (error) {
-      toast({
-        title: "Erro na Importação",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-      if(fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
   };
 
@@ -1831,14 +1780,31 @@ export default function RecipeTechnical() {
 
             {/* Botões de Ação */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Button variant="outline" className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsPrintDialogOpen(true)}
+                className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 gap-2"
+              >
                 <Printer className="h-4 w-4" />
                 Ficha Técnica Completa
               </Button>
 
-              <Button variant="outline" className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsPrintCollectDialogOpen(true)}
+                className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 gap-2"
+              >
                 <ClipboardCheck className="h-4 w-4" />
                 Ficha de Coleta
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => setIsPrintSimpleDialogOpen(true)}
+                className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 gap-2"
+              >
+                <ClipboardList className="h-4 w-4" />
+                Receita Ajustável
               </Button>
 
               <Button
@@ -1848,20 +1814,6 @@ export default function RecipeTechnical() {
               >
                 <FilePlus className="h-4 w-4" />
                 Nova Ficha
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={handleImportClick}
-                disabled={isUploading}
-                className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 gap-2"
-              >
-                {isUploading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <FileUp className="h-4 w-4" />
-                )}
-                {isUploading ? 'Importando...' : 'Importar Ficha Técnica'}
               </Button>
 
               <div className="flex-grow"></div>
@@ -2683,6 +2635,30 @@ export default function RecipeTechnical() {
         ingredients={availableIngredients || []}
         currentRecipeId={currentRecipeId}
         onAddItem={(itemData) => addItemToPreparation(itemData, currentPrepIndexForAssembly)}
+      />
+
+      {/* Diálogo de Impressão da Ficha Técnica Completa */}
+      <RecipeTechnicalPrintDialog
+        recipe={recipeData}
+        preparations={preparationsData}
+        isOpen={isPrintDialogOpen}
+        onClose={() => setIsPrintDialogOpen(false)}
+      />
+
+      {/* Diálogo de Impressão da Ficha de Coleta */}
+      <RecipeCollectDialog
+        recipe={recipeData}
+        preparations={preparationsData}
+        isOpen={isPrintCollectDialogOpen}
+        onClose={() => setIsPrintCollectDialogOpen(false)}
+      />
+
+      {/* Diálogo de Impressão da Receita Ajustável */}
+      <RecipeSimplePrintDialog
+        recipe={recipeData}
+        preparations={preparationsData}
+        isOpen={isPrintSimpleDialogOpen}
+        onClose={() => setIsPrintSimpleDialogOpen(false)}
       />
     </div>
   );
