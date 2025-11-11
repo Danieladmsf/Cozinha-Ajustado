@@ -43,6 +43,13 @@
 }
 
 @layer base {
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
   html {
     background-color: white;
   }
@@ -129,10 +136,12 @@
   
   /* Ajuste global de escala para uma aparência mais compacta */
   .main-app-container {
+    /* TEMPORARIAMENTE DESABILITADO - estava causando scroll extra
     transform-origin: top left;
     transform: scale(0.9);
     width: 111.11%;
     height: 111.11%;
+    */
   }
   
   /* Reduz espaçamentos em componentes para interface mais compacta */

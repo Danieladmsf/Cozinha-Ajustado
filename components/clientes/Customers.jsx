@@ -501,13 +501,13 @@ export default function Customers() {
                     </Avatar>
                   </TableCell>
                   {/* Name */}
-                  <TableCell className="font-medium">{customer.name || "-"}</TableCell>
+                  <TableCell className="font-medium font-mono">{customer.name || "-"}</TableCell>
                   {/* Company */}
-                  <TableCell>{customer.company || "-"}</TableCell>
+                  <TableCell className="font-mono">{customer.company || "-"}</TableCell>
                   {/* CNPJ */}
-                  <TableCell>{customer.cnpj || "-"}</TableCell>
+                  <TableCell className="font-mono">{customer.cnpj || "-"}</TableCell>
                   {/* Phone (Clickable for WhatsApp) */}
-                  <TableCell>
+                  <TableCell className="font-mono">
                     {customer.phone ? (
                       <span
                         className="cursor-pointer text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"
@@ -521,34 +521,34 @@ export default function Customers() {
                     )}
                   </TableCell>
                   {/* Email */}
-                  <TableCell>{customer.email || "-"}</TableCell>
+                  <TableCell className="font-mono">{customer.email || "-"}</TableCell>
                   {/* Billing Period */}
-                  <TableCell>
+                  <TableCell className="font-mono">
                     {customer.billing_period ? (
-                      <Badge variant="outline" className="capitalize dark:border-gray-600 dark:text-gray-300">
+                      <span className="capitalize text-purple-700 font-semibold">
                         {customer.billing_period === "diario" ? "Diário" :
                          customer.billing_period === "semanal" ? "Semanal" :
                          customer.billing_period === "quinzenal" ? "Quinzenal" :
                          customer.billing_period === "mensal" ? "Mensal" :
                          customer.billing_period // Fallback
                          }
-                      </Badge>
+                      </span>
                     ) : (
-                       <Badge variant="outline" className="capitalize dark:border-gray-600 dark:text-gray-300">Mensal</Badge> // Default
+                       <span className="capitalize text-purple-700 font-semibold">Mensal</span> // Default
                     )}
                   </TableCell>
                   {/* Payment Day/Term */}
-                  <TableCell className="text-center">
+                  <TableCell className="text-center font-mono">
                     {customer.billing_period === 'mensal' && customer.payment_day ? `Dia ${customer.payment_day}` :
                      (customer.billing_period === 'semanal' || customer.billing_period === 'quinzenal') && customer.payment_day ? `${customer.payment_day} dias` :
                      customer.billing_period === 'diario' ? 'Na entrega' : // Example for daily
                      '-'}
                   </TableCell>
                   {/* Status */}
-                  <TableCell>
-                    <Badge variant={customer.pending_registration ? "outline" : (customer.active ? "success" : "secondary")}>
+                  <TableCell className="font-mono">
+                    <span className={customer.pending_registration ? "text-orange-600 font-semibold" : (customer.active ? "text-green-700 font-semibold" : "text-gray-500 font-semibold")}>
                       {customer.pending_registration ? "Aguardando" : (customer.active ? "Ativo" : "Inativo")}
-                    </Badge>
+                    </span>
                   </TableCell>
                   {/* Link Portal */}
                   <TableCell className="text-center">

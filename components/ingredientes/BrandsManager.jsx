@@ -209,12 +209,12 @@ export default function BrandsManager() {
               <TableBody>
                 {filteredBrands.map((brand) => (
                   <TableRow key={brand.id}>
-                    <TableCell className="font-medium">{brand.name}</TableCell>
-                    <TableCell>{brand.manufacturer || "-"}</TableCell>
-                    <TableCell>
-                      <Badge variant={brand.active ? "success" : "secondary"}>
+                    <TableCell className="font-medium font-mono">{brand.name}</TableCell>
+                    <TableCell className="font-mono">{brand.manufacturer || "-"}</TableCell>
+                    <TableCell className="font-mono">
+                      <span className={brand.active ? "text-green-700 font-semibold" : "text-gray-500 font-semibold"}>
                         {brand.active ? "Ativa" : "Inativa"}
-                      </Badge>
+                      </span>
                     </TableCell>
                     <TableCell>
                       {brand.preferred ? (

@@ -63,14 +63,14 @@ export default function RootLayout({ children }) {
 
   useEffect(() => {
     setSidebarOpen(false);
-    
+
     // Only access window on client side to avoid hydration issues
     if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
       setSidebarCollapsed(true);
     }
-    
+
     setActiveItem(currentPageName);
-    
+
     // Configurar filtros de console apenas em desenvolvimento
     if (process.env.NODE_ENV === 'development') {
       setupConsoleFilters();
@@ -149,7 +149,7 @@ export default function RootLayout({ children }) {
         <title>Cozinha Afeto - Sistema de Gestão para Restaurantes</title>
       </head>
       <body>
-        <div className="flex h-screen bg-gray-100 main-app-container">
+        <div className="flex h-full bg-gray-100 main-app-container">
 
           {sidebarOpen && (
             <div
@@ -170,7 +170,7 @@ export default function RootLayout({ children }) {
             handleMouseLeave={handleMouseLeave}
           />
 
-          <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden">
             <header className="lg:hidden bg-white border-b px-4 py-3">
               <Button
                 variant="ghost"
@@ -181,7 +181,7 @@ export default function RootLayout({ children }) {
               </Button>
             </header>
 
-            <main className="flex-1 overflow-auto bg-gray-100 compact-ui">
+            <main className="flex-1 overflow-y-auto bg-gray-100 compact-ui">
               {children}
             </main>
           </div>

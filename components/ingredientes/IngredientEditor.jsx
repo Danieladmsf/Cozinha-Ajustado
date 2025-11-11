@@ -80,6 +80,8 @@ export default function IngredientEditor() {
   const [currentIngredientId, setCurrentIngredientId] = useState(null);
   const [activeTab, setActiveTab] = useState("general");
   const [tacoSearchTerm, setTacoSearchTerm] = useState("");
+  const [loadingTaco, setLoadingTaco] = useState(false); // ✅ Novo estado para loading TACO
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -126,36 +128,48 @@ export default function IngredientEditor() {
     }
   };
 
+  // ✅ OTIMIZAÇÃO: Lazy loading - só carrega quando necessário
   const loadTacoFoods = async () => {
+    // Se já carregou, não carregar novamente
+    if (tacoFoods.length > 0 || loadingTaco) return;
+
     try {
+      setLoadingTaco(true);
       const tacoData = await NutritionFood.list();
       setTacoFoods(Array.isArray(tacoData) ? tacoData.filter(f => f.active) : []);
     } catch (err) {
+      toast({ variant: "destructive", title: "Erro ao carregar TACO", description: err.message });
+    } finally {
+      setLoadingTaco(false);
     }
   };
 
   const loadCategories = async () => {
     try {
-      // Carregar categorias dos ingredientes existentes
-      const ingredientsData = await Ingredient.list();
-      const ingredientCategories = [...new Set(
-        ingredientsData
-          .map(ing => ing.category)
-          .filter(cat => cat && cat.trim() !== "" && cat !== "null")
-      )];
-
-      // Carregar categorias da entidade Category
+      // ✅ OTIMIZAÇÃO: Carregar apenas da entidade Category (não precisa de todos os ingredientes)
       const categoryData = await Category.list();
-      const entityCategories = categoryData
+      const categories = categoryData
         .filter(cat => cat.type === "ingredient" && cat.active)
-        .map(cat => cat.name);
+        .map(cat => cat.name)
+        .sort();
 
-      // Combinar e remover duplicatas
-      const allCategories = [...new Set([...ingredientCategories, ...entityCategories])].sort();
-      
-      setCategories(allCategories);
-      setCategoryOptions(allCategories.map(cat => ({ value: cat, label: cat })));
+      setCategories(categories);
+      setCategoryOptions(categories.map(cat => ({ value: cat, label: cat })));
     } catch (err) {
+      // Se falhar, tentar carregar do localStorage como fallback
+      const cachedCategories = localStorage.getItem('ingredient_categories');
+      if (cachedCategories) {
+        try {
+          const parsed = JSON.parse(cachedCategories);
+          setCategories(parsed);
+          setCategoryOptions(parsed.map(cat => ({ value: cat, label: cat })));
+        } catch (e) {
+          // Usar categorias padrão
+          const defaultCategories = ['Laticínios', 'Carnes', 'Vegetais', 'Frutas', 'Grãos', 'Temperos'];
+          setCategories(defaultCategories);
+          setCategoryOptions(defaultCategories.map(cat => ({ value: cat, label: cat })));
+        }
+      }
     }
   };
 
@@ -259,13 +273,30 @@ export default function IngredientEditor() {
     try {
       setLoading(true);
       setError(null);
-      
+
+      // Validar ID antes de buscar
+      if (!id || id.trim() === '' || id === 'undefined' || id === 'null') {
+        console.error('❌ ID inválido detectado:', id);
+        setError("ID do ingrediente é inválido. Este item pode ter sido deletado ou está corrompido.");
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar ingrediente",
+          description: "O ingrediente que você tentou editar não existe mais ou está com ID inválido.",
+        });
+        setTimeout(() => router.push('/ingredientes'), 2000);
+        return;
+      }
+
       const ingredient = await Ingredient.get(id);
-      
+
       if (!ingredient) {
-        setError("Ingrediente não encontrado. Redirecionando para criação de novo ingrediente.");
-        router.push('/ingredientes/editor?id=new');
-        resetFormForNewIngredient();
+        setError("Ingrediente não encontrado no banco de dados. Ele pode ter sido deletado.");
+        toast({
+          variant: "destructive",
+          title: "Ingrediente não encontrado",
+          description: "O ingrediente que você tentou editar não existe mais no banco de dados. Retornando para a lista...",
+        });
+        setTimeout(() => router.push('/ingredientes'), 2000);
         return;
       }
 
@@ -304,7 +335,6 @@ export default function IngredientEditor() {
         ingredient_type: ingredient.ingredient_type || 'both'
       };
 
-      
       setFormData(mappedData);
       setCurrentIngredientId(id);
 
@@ -357,21 +387,22 @@ export default function IngredientEditor() {
   // Verificar se categoria deve ser somente leitura
   const isCategoryReadOnly = formData.taco_variations.length > 0;
 
+  // ✅ OTIMIZAÇÃO: Carregar dados essenciais primeiro, TACO sob demanda
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const ingredientId = urlParams.get('id');
-    
-    
     const loadInitialData = async () => {
       setLoading(true);
       try {
+        // ✅ Carregar apenas dados essenciais (SEM TACO - lazy load)
         await Promise.all([
           loadSuppliers(),
           loadBrands(),
-          loadTacoFoods(),
           loadCategories()
         ]);
-        
+
+        // Obter ingredientId da URL usando window.location.search (client-side)
+        const urlParams = new URLSearchParams(window.location.search);
+        const ingredientId = urlParams.get('id');
+
         if (ingredientId && ingredientId !== 'new') {
           setIsEditing(true);
           await loadIngredient(ingredientId);
@@ -385,9 +416,16 @@ export default function IngredientEditor() {
         setLoading(false);
       }
     };
-    
+
     loadInitialData();
-  }, [window.location.search]);
+  }, []); // ✅ Array vazio - carrega apenas uma vez ao montar
+
+  // ✅ LAZY LOADING: Carregar TACO apenas quando usuário acessar aba TACO
+  useEffect(() => {
+    if (activeTab === 'taco') {
+      loadTacoFoods();
+    }
+  }, [activeTab]);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -452,11 +490,17 @@ export default function IngredientEditor() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600 mx-auto mb-4"></div>
-          <p className="mt-2 text-gray-600">
-            {isEditing ? 'Carregando ingrediente...' : 'Carregando dados...'}
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 to-white">
+        <div className="text-center max-w-md">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-600 mx-auto mb-4"></div>
+            <Package className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-blue-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+            {isEditing ? 'Carregando ingrediente' : 'Preparando formulário'}
+          </h3>
+          <p className="text-sm text-gray-600">
+            Carregando fornecedores, marcas e categorias...
           </p>
         </div>
       </div>
@@ -469,68 +513,39 @@ export default function IngredientEditor() {
   );
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col bg-gray-50">
-      {/* Header fixo */}
-      <div className="flex-shrink-0 bg-white border-b px-4 sm:px-6 lg:px-8 py-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center mb-4">
-            <Button 
-              variant="outline" 
-              onClick={() => router.push('/ingredientes')}
-              className="mr-4"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar para Ingredientes
-            </Button>
-          </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              {isEditing ? `Editar Ingrediente: ${formData.name || formData.commercial_name}` : 'Novo Ingrediente'}
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Gerencie os detalhes do seu ingrediente consolidado.
-            </p>
-          </div>
+    <div>
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center mb-4">
+          <Button
+            variant="outline"
+            onClick={() => router.push('/ingredientes')}
+            size="sm"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
+        </div>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            {isEditing ? `Editar Ingrediente: ${formData.name || formData.commercial_name}` : 'Novo Ingrediente'}
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Gerencie os detalhes do seu ingrediente consolidado.
+          </p>
         </div>
       </div>
 
-      {/* Conteúdo com scroll */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          {/* Debug Card - apenas se em edição */}
-          {isEditing && (
-            <Card className="mb-6 bg-gray-50 border-gray-300">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm text-gray-800 flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4" />
-                  Debug - Dados Carregados
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-xs text-gray-700 pt-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  <div><strong>Nome:</strong> "{formData.name}"</div>
-                  <div><strong>Categoria:</strong> "{formData.category}"</div>
-                  <div><strong>Fornecedor:</strong> "{formData.main_supplier}"</div>
-                  <div><strong>Preço:</strong> "R$ {formData.current_price}"</div>
-                </div>
-                <div className="mt-3 p-2 bg-gray-100 rounded text-xs">
-                  <strong>Esperado para Muçarela (Exemplo):</strong><br/>
-                  Fornecedor: "NOVA MEGA G ATACADISTA DE ALIMENTOS SA", Categoria: "Laticínios", Preço: "34.9"
-                </div>
-              </CardContent>
-            </Card>
-          )}
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-          {/* Error Alert */}
-          {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {/* Formulário principal */}
-          <form onSubmit={handleSave} className="space-y-6">
+      {/* Formulário principal */}
+      <form onSubmit={handleSave} className="space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-6">
                 <TabsTrigger value="general" className="flex items-center gap-2 text-xs sm:text-sm">
@@ -705,7 +720,7 @@ export default function IngredientEditor() {
                     </div>
 
                     {/* Unidade, Preços */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label className="text-sm font-medium">Unidade de Compra *</Label>
                         <Select 
@@ -755,7 +770,7 @@ export default function IngredientEditor() {
                     </div>
 
                     {/* Marca, Código Fornecedor, Data */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Marca - Combobox Inteligente */}
                       <div>
                         <Label className="text-sm font-medium">Marca</Label>
@@ -872,19 +887,31 @@ export default function IngredientEditor() {
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* Busca de alimentos TACO */}
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Buscar alimentos TACO..."
-                        value={tacoSearchTerm}
-                        onChange={(e) => setTacoSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
+                    {/* ✅ Loading state para TACO */}
+                    {loadingTaco ? (
+                      <div className="flex items-center justify-center py-12">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-blue-600 mx-auto mb-3"></div>
+                          <p className="text-sm text-gray-600">Carregando alimentos TACO...</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Busca de alimentos TACO */}
+                        <div className="relative">
+                          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input
+                            placeholder="Buscar alimentos TACO..."
+                            value={tacoSearchTerm}
+                            onChange={(e) => setTacoSearchTerm(e.target.value)}
+                            className="pl-10"
+                          />
+                        </div>
+                      </>
+                    )}
 
                     {/* Lista de alimentos TACO para adicionar */}
-                    {tacoSearchTerm && (
+                    {!loadingTaco && tacoSearchTerm && (
                       <div className="max-h-40 overflow-y-auto border rounded-lg">
                         {filteredTacoFoods.slice(0, 5).map(food => (
                           <div key={food.id} className="p-3 border-b hover:bg-gray-50 cursor-pointer"
@@ -901,34 +928,36 @@ export default function IngredientEditor() {
                     )}
 
                     {/* Variações TACO vinculadas */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Variações Vinculadas</Label>
-                      {formData.taco_variations.length === 0 ? (
-                        <p className="text-sm text-gray-500">Nenhuma variação TACO vinculada ainda.</p>
-                      ) : (
-                        <div className="space-y-2">
-                          {formData.taco_variations.map((variation, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <div className="font-medium">{variation.taco_name}</div>
-                                <div className="text-sm text-gray-500">
-                                  Variação: {variation.variation_name} | Perda: {variation.loss_percentage}%
+                    {!loadingTaco && (
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Variações Vinculadas</Label>
+                        {formData.taco_variations.length === 0 ? (
+                          <p className="text-sm text-gray-500">Nenhuma variação TACO vinculada ainda.</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {formData.taco_variations.map((variation, index) => (
+                              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                                <div>
+                                  <div className="font-medium">{variation.taco_name}</div>
+                                  <div className="text-sm text-gray-500">
+                                    Variação: {variation.variation_name} | Perda: {variation.loss_percentage}%
+                                  </div>
+                                  {variation.is_base && <Badge variant="outline" className="mt-1 text-gray-700">Base</Badge>}
                                 </div>
-                                {variation.is_base && <Badge variant="outline" className="mt-1 text-gray-700">Base</Badge>}
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeTacoVariation(index)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
                               </div>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeTacoVariation(index)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -966,27 +995,26 @@ export default function IngredientEditor() {
               </TabsContent>
             </Tabs>
 
-            {/* Botões de ação - fixos na parte inferior */}
-            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t bg-gray-50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push('/ingredientes')}
-                className="w-full sm:w-auto"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={saving || loading}
-                className="bg-gray-800 hover:bg-gray-900 w-full sm:w-auto"
-              >
-                {saving ? "Salvando..." : (isEditing ? "Atualizar Ingrediente" : "Criar Ingrediente")}
-              </Button>
-            </div>
-          </form>
+        {/* Botões de ação */}
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t mt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push('/ingredientes')}
+            className="w-full sm:w-auto"
+            disabled={saving}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            disabled={saving || loading}
+            className="bg-gray-800 hover:bg-gray-900 w-full sm:w-auto"
+          >
+            {saving ? "Salvando..." : (isEditing ? "Atualizar Ingrediente" : "Criar Ingrediente")}
+          </Button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

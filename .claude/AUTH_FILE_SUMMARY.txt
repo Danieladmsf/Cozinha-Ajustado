@@ -1,0 +1,453 @@
+================================================================================
+COZINHA AFETO - AUTHENTICATION SYSTEM - FILE SUMMARY
+================================================================================
+
+ABSOLUTE FILE PATHS & DESCRIPTIONS
+================================================================================
+
+1. FIREBASE CONFIGURATION
+================================================================================
+File: /home/user/studio/lib/firebase.js
+
+- Initializes Firebase app with config
+- Exports: db (Firestore), auth (Firebase Auth), storage
+- Uses persistent local cache for Firestore
+- Multi-tab synchronization enabled
+- Status: Fully implemented, not enforced
+
+Key Imports:
+  - import { initializeApp } from "firebase/app"
+  - import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore"
+  - import { getAuth } from "firebase/auth"
+  - import { getStorage } from "firebase/storage"
+
+
+2. MIDDLEWARE (SECURITY HEADERS ONLY)
+================================================================================
+File: /home/user/studio/middleware.js
+
+- Sets security headers (X-XSS-Protection, Referrer-Policy, etc)
+- Applies to all routes except api, _next, favicon, robots.txt
+- Does NOT implement authentication checks
+- Does NOT protect routes
+- Status: Partial - headers only, no auth
+
+Current Implementation:
+  - response.headers.set('X-DNS-Prefetch-Control', 'on')
+  - response.headers.set('X-XSS-Protection', '1; mode=block')
+  - response.headers.set('Referrer-Policy', 'origin-when-cross-origin')
+  - response.headers.set('Feature-Policy', 'camera \'none\'; microphone \'none\'...')
+
+TODO: Add route protection and auth checks
+
+
+3. ROOT LAYOUT (ADMIN PANEL - NO AUTH)
+================================================================================
+File: /home/user/studio/app/layout.jsx
+
+- Client component (uses 'use client')
+- Renders sidebar navigation with 14 menu items
+- Conditional layout for portal routes (/portal/*)
+- No authentication checks or user context
+- Status: NO authentication implemented
+
+Key Features:
+  - SidebarNav component with navigation items
+  - Sidebar collapse/expand functionality
+  - Portal route detection (isPortalRoute = pathname.startsWith('/portal'))
+  - Security headers in HTML meta tags
+  - Toaster component for notifications
+
+Routes Defined:
+  - Dashboard, Receitas, Ficha Técnica, Análise de Receitas, Cardápio,
+  - Programação, Pedidos, Ingredientes, Categorias, Fornecedores e Serviços,
+  - Clientes, Contas, Fechamento, Tabela Nutricional
+
+Authentication: NONE
+
+
+4. HOME PAGE
+================================================================================
+File: /home/user/studio/app/page.jsx
+
+- Imports Dashboard component
+- No authentication
+- Simply renders Dashboard
+
+Content:
+  import Dashboard from '@/components/dashboard/Dashboard';
+  export default function HomePage() { return <Dashboard />; }
+
+
+5. NAVIGATION COMPONENT
+================================================================================
+File: /home/user/studio/components/shared/navigation.jsx
+
+- Sidebar navigation component
+- Renders menu items with icons
+- Collapse/hover functionality
+- No authentication buttons or user profile
+- No logout functionality
+- Status: NO authentication features
+
+Features:
+  - Navigation items with icons and labels
+  - Collapse/expand sidebar
+  - Hover expansion when collapsed
+  - Active item highlighting
+  - Mobile hamburger menu
+
+Missing:
+  - User profile button
+  - Logout button
+  - User menu
+  - Auth status display
+
+
+6. USER API ENDPOINT
+================================================================================
+File: /home/user/studio/app/api/user/route.js
+
+Endpoints:
+  - GET /api/user - Get user data
+  - PUT /api/user - Update user data
+  - POST /api/user?type=recipe-config - Save recipe config
+
+Implementation:
+  - Uses User.getMyUserData() - returns mock data
+  - Uses User.updateMyUserData() - saves to Firestore with mock user ID
+  - No actual auth checks
+  - Hardcoded user ID: 'mock-user-id'
+  - Status: Mock implementation only
+
+GET /api/user:
+  const userData = await User.getMyUserData();
+  return NextResponse.json(userData || {});
+
+PUT /api/user:
+  const userData = await request.json();
+  const result = await User.updateMyUserData(userData);
+  return NextResponse.json(result);
+
+POST /api/user?type=recipe-config:
+  Saves recipe configuration to user document
+
+
+7. FIRESTORE ENTITIES (User Entity)
+================================================================================
+File: /home/user/studio/app/api/entities.js
+
+User Entity Methods:
+
+  User.me()
+    - Returns mock user data
+    - No authentication check
+    - Development only
+    - Returns: { id: 'mock-user-id', email: 'dev@cozinhaafeto.com', ... }
+
+  User.getMyUserData()
+    - Loads from Firestore collection 'User' with ID 'mock-user-id'
+    - No actual auth
+    - Returns: User document from Firestore or null
+
+  User.updateMyUserData(userData)
+    - Updates/creates Firestore document with ID 'mock-user-id'
+    - No actual auth
+    - Adds createdAt/updatedAt timestamps
+
+  User.createWithId(userId, userData)
+    - Creates user with specific ID
+    - No auth required
+
+Status: Mock implementation with hardcoded user ID
+
+
+8. PORTAL ENTRY PAGE
+================================================================================
+File: /home/user/studio/app/portal/page.jsx
+
+- Entry point for client portal
+- Manual customer ID input form
+- No pre-authorization required
+- Routes to /portal/[customerId]
+
+Features:
+  - Input field for Customer ID
+  - Basic validation (length > 3)
+  - Error display
+  - Development mode test IDs example
+
+Authentication: Customer ID-based (see ClientAuthMiddleware)
+
+
+9. PORTAL PAGE WRAPPER
+================================================================================
+File: /home/user/studio/components/clientes/portal/PortalPageWrapper.jsx
+
+- Loads customer data from Firestore
+- Routes based on registration status
+- Shows loading/error states
+
+Flow:
+  1. Receives customerId as prop
+  2. Fetches Customer document from Firestore
+  3. If pending_registration = true → Show CustomerRegistrationForm
+  4. Else → Show MobileOrdersPage
+
+Features:
+  - Async customer data loading
+  - Error handling
+  - Toast notifications
+
+Authentication: Validates customer exists in Firestore
+
+
+10. CLIENT AUTH MIDDLEWARE (PRIMARY AUTH COMPONENT)
+================================================================================
+File: /home/user/studio/components/clientes/portal/ClientAuthMiddleware.jsx
+
+Components Exported:
+
+  1. ClientAuthMiddleware (default)
+     - Validates customer access
+     - Determines access level
+     - Renders children with context
+
+  2. useClientAuth()
+     - Hook to get customer ID from URL
+     - Extract from browser URL or router.query
+     - Returns: customerId, isValidId, isTemporaryId, redirectToOrders(), redirectToProfile()
+
+  3. ProtectedPortalRoute
+     - Wrapper component for protected portal routes
+     - Checks valid customer ID
+     - Shows error if invalid
+
+  4. AccessUtils
+     - canMakeOrders(customer, accessLevel)
+     - canEditProfile(customer, accessLevel)
+     - canViewHistory(customer, accessLevel)
+     - getPermissions(customer, accessLevel)
+
+Access Levels Hierarchy:
+  - temp (1): Temporary customer (ID format: temp-xxx)
+  - pending (2): Awaiting registration
+  - basic (3): Standard customer
+  - full (4): Fully registered, active
+  - vip (5): VIP customer
+
+Validation Checks:
+  OK ID format validation
+  OK Customer existence (Firestore query)
+  OK Blocked/suspended status
+  OK Active or pending registration status
+  OK Access level hierarchy matching
+
+Status: FULLY IMPLEMENTED for client portal
+
+
+11. CUSTOMER REGISTRATION FORM
+================================================================================
+File: /home/user/studio/components/clientes/portal/CustomerRegistrationForm.jsx
+
+- Shows registration form for pending customers
+- Collects: name, company, address, CNPJ, phone, email, category, notes, photo
+- File upload for photo to Firebase Storage
+
+Features:
+  - Form validation (required fields)
+  - Image upload with preview
+  - Update customer document
+  - Sets pending_registration = false on submit
+  - Toast notifications
+
+Flow:
+  1. User fills form
+  2. Optional image upload to Firebase Storage
+  3. Submit updates Customer document
+  4. Sets pending_registration: false
+  5. Callback re-validates and shows orders page
+
+
+12. MOBILE ORDERS PAGE
+================================================================================
+File: /home/user/studio/components/clientes/portal/MobileOrdersPage.jsx
+
+- Shows customer orders
+- Mobile-optimized interface
+- Requires: customerId prop
+
+Status: Portal page (see ClientAuthMiddleware for auth)
+
+
+13. FIRESTORE SECURITY RULES
+================================================================================
+File: /home/user/studio/firestore.rules
+
+Current Rules (Development Mode):
+  - impressaoProgramacao collection:
+    OK allow read: if true (anyone)
+    OK allow create, update: if true (anyone)
+    NO allow delete: if false (no one)
+
+  - pedidos collection:
+    OK allow read: if true (anyone)
+    OK allow write: if true (anyone)
+
+Status: NO AUTHENTICATION ENFORCED - Development mode only
+
+TODO for Production:
+  - Add request.auth != null checks
+  - Implement user-based access control
+  - Validate user ownership of resources
+  - Protect admin collections
+  - Add role-based rules
+
+
+14. PORTAL ROUTES
+================================================================================
+File: /home/user/studio/app/portal/[customerId]/page.jsx
+  - Renders PortalPageWrapper with customerId param
+  - Static export compatible (empty generateStaticParams)
+
+File: /home/user/studio/app/portal/[customerId]/orders/page.jsx
+  - Renders MobileOrdersPage with customerId param
+  - Static export compatible
+
+File: /home/user/studio/app/portal/[customerId]/cadastro/page.jsx
+  - Renders CustomerRegistrationForm with customerId param
+
+Routes:
+  - GET /portal → Portal entry (ID input)
+  - GET /portal/[customerId] → Portal home/profile
+  - GET /portal/[customerId]/orders → Orders page
+  - GET /portal/[customerId]/cadastro → Registration form
+
+
+15. CUSTOMER ENTITY (in entities.js)
+================================================================================
+File: /home/user/studio/app/api/entities.js
+
+Export: Customer = createEntity('Customer')
+
+Methods:
+  - Customer.getAll()
+  - Customer.getById(customerId)
+  - Customer.create(data)
+  - Customer.update(customerId, data)
+  - Customer.delete(customerId)
+  - Customer.query(filters, orderBy, limit)
+  - Customer.listen(callback, filters, orderBy, limit)
+
+Special Handling:
+  - Temporary IDs (temp-*) return mock customer object
+  - No auth required
+  - Firestore collection: 'Customer'
+
+
+================================================================================
+AUTHENTICATION STATUS SUMMARY
+================================================================================
+
+ADMIN PANEL:
+  NO Login page
+  NO Logout functionality
+  NO Protected routes
+  NO User context/state management
+  NO Session management
+  NO Auth state listener (onAuthStateChanged)
+  NO Firestore rules enforced
+
+CLIENT PORTAL:
+  OK Customer ID validation
+  OK Access level control (5 levels)
+  OK Permission checking
+  OK Customer data validation
+  OK Registration form
+  OK Mobile-optimized interface
+
+
+================================================================================
+DEPENDENCIES
+================================================================================
+
+From package.json:
+  "firebase": "^12.0.0"          - Client SDK (Auth, Firestore, Storage)
+  "firebase-admin": "^13.4.0"    - Server SDK (not actively used)
+  "next": "^14.2.31"             - Framework
+  "zustand": "^5.0.7"            - State management (not used for auth)
+
+
+NOT USED:
+  - NextAuth.js
+  - Context API for auth
+  - Custom session management
+  - Cookies for auth tokens
+
+
+================================================================================
+KEY CODE SNIPPETS
+================================================================================
+
+Firebase Auth Import:
+  import { getAuth } from "firebase/auth";
+  export const auth = getAuth(app);
+
+NOT USED Auth Functions:
+  - signInWithEmailAndPassword(auth, email, password)
+  - signOut(auth)
+  - onAuthStateChanged(auth, callback)
+  - getCurrentUser()
+
+Customer ID-based Access:
+  const customerData = await Customer.getById(customerId);
+  const accessLevel = determineAccessLevel(customerData);
+  if (accessLevel < requiredLevel) throw Error("Access Denied");
+
+
+================================================================================
+PRODUCTION READINESS CHECKLIST
+================================================================================
+
+Admin Panel:
+  [ ] Implement login page with email/password
+  [ ] Add sign-out functionality
+  [ ] Create auth context or Zustand store
+  [ ] Update middleware to protect routes
+  [ ] Add onAuthStateChanged() listener
+  [ ] Update API routes to check auth
+  [ ] Update Firestore rules
+
+Client Portal:
+  [ ] Add email/password login option
+  [ ] Implement password reset
+  [ ] Add session timeout
+  [ ] Improve security rules
+  [ ] Add audit logging
+
+Overall:
+  [ ] Security headers review
+  [ ] CORS configuration
+  [ ] Rate limiting
+  [ ] Input validation
+  [ ] Error handling
+
+
+================================================================================
+DEPLOYMENT NOTES
+================================================================================
+
+Current Environment:
+  - Next.js 14.2.31 (App Router)
+  - Firebase 12.0.0 (Client SDK)
+  - Vercel deployment (from vercel.json)
+
+Before Production Deployment:
+  1. Implement admin authentication
+  2. Update Firestore security rules
+  3. Configure environment variables (.env.local)
+  4. Test auth flows thoroughly
+  5. Implement rate limiting on login attempts
+  6. Set up monitoring and logging
+  7. Review CORS settings
+  8. Test with real users

@@ -1,0 +1,516 @@
+================================================================================
+COZINHA AFETO - AUTHENTICATION ARCHITECTURE DIAGRAM
+================================================================================
+
+1. OVERALL SYSTEM ARCHITECTURE
+================================================================================
+
+                          ┌─────────────────────────┐
+                          │   Firebase Services     │
+                          │  (Firestore + Auth)     │
+                          └─────────────────────────┘
+                                    ▲
+                                    │
+                        ┌───────────┼───────────┐
+                        │           │           │
+                ┌───────▼────┐ ┌───▼────────┐ ┌▼──────────────┐
+                │  Admin App │ │   Portal   │ │  API Routes  │
+                │ (No Auth)  │ │ (ID-based) │ │  (Mock Auth) │
+                └────────────┘ └────────────┘ └──────────────┘
+                     │               │              │
+                     │               │              │
+                ┌────▼────────────────▼──────────────▼─────┐
+                │         Next.js 14 (App Router)         │
+                │                                          │
+                │  lib/firebase.js - Firebase init       │
+                │  middleware.js - Security headers      │
+                │  app/layout.jsx - Root layout (no auth)│
+                │  app/api/* - API routes                │
+                └──────────────────────────────────────────┘
+
+
+2. ADMIN PANEL FLOW (CURRENTLY: NO AUTHENTICATION)
+================================================================================
+
+    User Browser
+         │
+         │ GET /dashboard
+         │
+         ▼
+    ┌─────────────────────────┐
+    │ app/layout.jsx          │
+    │ (Root Layout)           │  NO AUTH CHECK
+    └────────────┬────────────┘
+                 │
+                 ▼
+    ┌─────────────────────────┐
+    │ SidebarNav Component    │
+    │ (navigation.jsx)        │  NO LOGIN/LOGOUT BUTTON
+    └────────────┬────────────┘
+                 │
+                 ▼
+    ┌─────────────────────────┐
+    │ Dashboard Component     │
+    │ (and other pages)       │
+    └─────────────────────────┘
+
+    Result: Everyone can access all admin pages without authentication
+
+
+3. CLIENT PORTAL FLOW (IMPLEMENTED: CUSTOMER ID-BASED)
+================================================================================
+
+    User Browser
+         │
+         │ GET /portal
+         │
+         ▼
+    ┌──────────────────────────────┐
+    │ Portal Entry Page             │
+    │ (/portal/page.jsx)            │
+    │ Manual Customer ID Input      │
+    └──────────┬───────────────────┘
+               │
+               │ Input: customer-123
+               │ Validation: Length > 3
+               │
+               ▼
+    ┌──────────────────────────────┐
+    │ Router.push(/portal/customer-123)
+    └──────────┬───────────────────┘
+               │
+               ▼
+    ┌──────────────────────────────┐
+    │ Dynamic Route                 │
+    │ [customerId]/page.jsx         │
+    │ Renders: PortalPageWrapper    │
+    └──────────┬───────────────────┘
+               │
+               ▼
+    ┌──────────────────────────────┐
+    │ PortalPageWrapper             │
+    │                               │
+    │ Fetch Customer from Firestore │
+    │ const customer =              │
+    │   Customer.getById(customerId)│
+    └──────────┬───────────────────┘
+               │
+         ┌─────┴─────┐
+         │           │
+    ┌────▼──────┐  ┌─▼──────────────┐
+    │ Pending?  │  │ Registered?    │
+    │ YES       │  │ YES            │
+    └────┬──────┘  └─┬──────────────┘
+         │          │
+         ▼          ▼
+    ┌──────────┐  ┌─────────────────┐
+    │ Customer │  │ ClientAuthMiddle│
+    │ Registra │  │ ware Validation │
+    │ tionForm │  └────────┬────────┘
+    └──────────┘           │
+                     ┌─────▼──────────┐
+                     │ Check Status:  │
+                     │ - Valid ID?    │
+                     │ - Exists?      │
+                     │ - Blocked?     │
+                     │ - Access Level?│
+                     └─────┬──────────┘
+                           │
+                      ┌────┴──────┐
+                      │           │
+                   ✓ PASS      ✗ FAIL
+                      │           │
+                      ▼           ▼
+              ┌──────────────┐  ┌─────────────┐
+              │MobileOrders  │  │ Error Page  │
+              │Page          │  │ "Access    │
+              │(with access) │  │  Denied"   │
+              └──────────────┘  └─────────────┘
+
+
+4. CLIENT AUTH MIDDLEWARE - ACCESS LEVEL HIERARCHY
+================================================================================
+
+    Customer Data (Firestore)
+         │
+         ├─ ID Format: temp-123456?
+         │       YES → Access Level: 1 (TEMP)
+         │       NO  ↓
+         │
+         ├─ Blocked or Suspended?
+         │       YES → Access Denied (Error)
+         │       NO  ↓
+         │
+         ├─ Active or Pending Registration?
+         │       NO  → Access Denied (Error)
+         │       YES ↓
+         │
+         ├─ Pending Registration?
+         │       YES → Access Level: 2 (PENDING)
+         │            → Show Registration Form
+         │       NO  ↓
+         │
+         ├─ Active Status?
+         │       YES ↓
+         │
+         └─ Category = VIP?
+                YES → Access Level: 5 (VIP)
+                NO  → Access Level: 4 (FULL)
+                      or Access Level: 3 (BASIC)
+
+
+    Access Levels & Permissions:
+
+    Level 1 (temp):      canMakeOrders=✗  canEditProfile=✗  canViewHistory=✗
+                         temp-xxx IDs only
+
+    Level 2 (pending):   canMakeOrders=✗  canEditProfile=✓  canViewHistory=✗
+                         Must complete registration
+
+    Level 3 (basic):     canMakeOrders=✗  canEditProfile=✗  canViewHistory=✗
+                         (Placeholder, not used currently)
+
+    Level 4 (full):      canMakeOrders=✓  canEditProfile=✓  canViewHistory=✓
+                         Fully registered, active
+
+    Level 5 (vip):       canMakeOrders=✓  canEditProfile=✓  canViewHistory=✓
+                         + Extended features
+
+
+5. API ROUTE AUTHENTICATION
+================================================================================
+
+    Client Browser
+         │
+         │ GET/PUT /api/user
+         │
+         ▼
+    ┌─────────────────────────┐
+    │ app/api/user/route.js   │
+    │                         │
+    │ NO AUTH CHECK           │
+    │ Uses hardcoded ID:      │
+    │ 'mock-user-id'          │
+    └────────────┬────────────┘
+                 │
+                 ▼
+    ┌─────────────────────────┐
+    │ User Entity Methods     │
+    │                         │
+    │ User.getMyUserData()   │ → Firestore
+    │ User.updateMyUserData()│ → Firestore
+    └────────────┬────────────┘
+                 │
+                 ▼
+    ┌─────────────────────────┐
+    │ Firestore Database      │
+    │                         │
+    │ Collection: User        │
+    │ Doc ID: mock-user-id    │
+    │ Fields: *               │
+    └─────────────────────────┘
+
+    Issue: All requests use same 'mock-user-id' regardless of who's logged in
+
+
+6. FIRESTORE SECURITY RULES
+================================================================================
+
+    Current Implementation:
+    ┌─────────────────────────────────┐
+    │ firestore.rules                 │
+    │                                 │
+    │ match /impressaoProgramacao/* { │
+    │   allow read: if true;    ✓ OK  │
+    │   allow write: if true;   ⚠ DEV │
+    │   allow delete: if false; ✓ OK  │
+    │ }                               │
+    │                                 │
+    │ match /pedidos/* {              │
+    │   allow read: if true;    ✓ OK  │
+    │   allow write: if true;   ⚠ DEV │
+    │ }                               │
+    └─────────────────────────────────┘
+
+    Status: Development Only - No Authentication Enforced
+
+    Production Needed:
+    ┌─────────────────────────────────────────┐
+    │ match /users/{userId} {                 │
+    │   allow read: if request.auth.uid      │
+    │                   == userId;  ✓ AUTH    │
+    │   allow write: if request.auth.uid     │
+    │                    == userId; ✓ AUTH    │
+    │ }                                       │
+    │                                         │
+    │ match /recipes/{recipeId} {             │
+    │   allow read: if request.auth          │
+    │               != null;        ✓ AUTH    │
+    │   allow write: if request.auth        │
+    │            != null &&                  │
+    │            isAdmin(request.auth.uid);  │
+    │            ✓ ROLE-BASED              │
+    │ }                                       │
+    └─────────────────────────────────────────┘
+
+
+7. FIREBASE AUTH LIFECYCLE (NOT IMPLEMENTED)
+================================================================================
+
+    NOT CURRENTLY IMPLEMENTED - SHOWN FOR REFERENCE
+
+    User Opens App
+         │
+         ▼
+    ┌────────────────────────────┐
+    │ onAuthStateChanged()       │  ← NOT IMPLEMENTED
+    │ Listener Setup             │
+    └────────────┬───────────────┘
+                 │
+         ┌───────┴────────┐
+         │                │
+    User Logged In?   User NOT Logged In?
+         │                │
+         ▼                ▼
+    ┌─────────────┐  ┌──────────────┐
+    │ Set User    │  │ Redirect to  │
+    │ Context     │  │ /login       │
+    │ Allow Access│  │              │
+    └─────────────┘  └──────────────┘
+
+    Available Auth Functions (Not Used):
+    - signInWithEmailAndPassword(auth, email, password)
+    - signOut(auth)
+    - createUserWithEmailAndPassword(auth, email, password)
+    - sendPasswordResetEmail(auth, email)
+    - getCurrentUser()
+
+
+8. COMPONENT HIERARCHY & AUTH FLOW
+================================================================================
+
+    App Root (app/layout.jsx)
+    │
+    ├─ No Authentication Check
+    │  └─ isPortalRoute? YES
+    │     │
+    │     ├─ /portal/page.jsx
+    │     │  └─ Manual ID Input
+    │     │
+    │     └─ /portal/[customerId]/*
+    │        │
+    │        ├─ PortalPageWrapper.jsx
+    │        │  ├─ Load Customer from Firestore
+    │        │  └─ Route by Status
+    │        │
+    │        ├─ ClientAuthMiddleware.jsx ← AUTH HAPPENS HERE
+    │        │  ├─ Validate ID
+    │        │  ├─ Check Status
+    │        │  ├─ Determine Access Level
+    │        │  └─ Allow/Deny Access
+    │        │
+    │        ├─ CustomerRegistrationForm.jsx
+    │        │  └─ pending_registration = true
+    │        │
+    │        └─ MobileOrdersPage.jsx
+    │           └─ pending_registration = false
+    │
+    └─ isPortalRoute? NO
+       ├─ /dashboard - NO AUTH
+       ├─ /receitas - NO AUTH
+       ├─ /ingredientes - NO AUTH
+       └─ ... (all admin pages - NO AUTH)
+
+
+9. AUTHENTICATION STATE MANAGEMENT
+================================================================================
+
+    Current State:
+    ┌──────────────────────────────┐
+    │ NO Global Auth Context       │
+    │ NO Redux/Zustand for auth    │
+    │ NO Auth Provider             │
+    │ NO User Atom/Store           │
+    └──────────────────────────────┘
+
+    Portal State (Local):
+    ┌────────────────────────────────┐
+    │ ClientAuthMiddleware           │
+    │ Local useState:                │
+    │ - customer                     │
+    │ - loading                      │
+    │ - error                        │
+    │ - accessLevel                  │
+    └────────────────────────────────┘
+
+    API User State (Mock):
+    ┌────────────────────────────────┐
+    │ Hardcoded 'mock-user-id'      │
+    │ Loaded from Firestore 'User' │
+    │ Collection when API called    │
+    └────────────────────────────────┘
+
+
+10. SESSION MANAGEMENT
+================================================================================
+
+    Current: NONE
+
+    Missing:
+    ┌──────────────────────────────────┐
+    │ Session Timeout                  │
+    │ Token Refresh                    │
+    │ Session Persistence              │
+    │ Automatic Logout                 │
+    │ Remember Me                      │
+    │ Multi-Device Handling            │
+    │ Session Invalidation             │
+    └──────────────────────────────────┘
+
+
+11. SECURITY ISSUES BY SEVERITY
+================================================================================
+
+    CRITICAL (Prevent Production Deployment)
+    ════════════════════════════════════════
+    [1] Admin Panel: No Login Required
+        Impact: Anyone can access all admin features
+        Fix: Implement Firebase Auth login
+
+    [2] Hardcoded User ID ('mock-user-id')
+        Impact: All users treated as same person
+        Fix: Use actual Firebase Auth user UID
+
+    [3] Open Firestore Rules
+        Impact: Data accessible without authentication
+        Fix: Add request.auth != null checks
+
+    [4] No Route Protection
+        Impact: No middleware preventing unauthorized access
+        Fix: Add auth middleware to /app/layout
+
+
+    HIGH PRIORITY (Implement Before Beta Testing)
+    ════════════════════════════════════════════
+    [5] No Logout Functionality
+        Impact: Users can't sign out
+        Fix: Add signOut() button and handler
+
+    [6] No Session Management
+        Impact: No timeout, token refresh, or expiry
+        Fix: Implement session management
+
+    [7] No User Context/State
+        Impact: Auth state not shared across components
+        Fix: Create AuthContext with Provider
+
+
+    MEDIUM PRIORITY (Implement Before Production)
+    ════════════════════════════════════════════
+    [8] No Password Reset
+        Impact: Users can't recover lost passwords
+        Fix: Implement sendPasswordResetEmail()
+
+    [9] No Email Verification
+        Impact: Unverified emails in database
+        Fix: Implement email verification flow
+
+    [10] No User Registration UI
+         Impact: Can't create new admin accounts easily
+         Fix: Create user management page
+
+
+    LOW PRIORITY (Quality of Life)
+    ═══════════════════════════════════════════
+    [11] No Audit Logging
+         Fix: Log all auth events
+
+    [12] No Rate Limiting
+         Fix: Limit login attempts
+
+    [13] No 2FA/MFA
+         Fix: Implement multi-factor auth
+
+
+12. PRODUCTION DEPLOYMENT CHECKLIST
+================================================================================
+
+    Before Deployment:
+    ┌─────────────────────────────────────────────┐
+    │ [ ] Create login page                       │
+    │ [ ] Implement signInWithEmailAndPassword    │
+    │ [ ] Update firestore.rules with auth checks │
+    │ [ ] Create AuthContext and Provider         │
+    │ [ ] Update middleware for route protection  │
+    │ [ ] Update API routes to check auth         │
+    │ [ ] Implement onAuthStateChanged listener   │
+    │ [ ] Add logout functionality                │
+    │ [ ] Configure environment variables         │
+    │ [ ] Test auth flows with real users         │
+    │ [ ] Set up Firebase Security Audit          │
+    │ [ ] Enable HTTPS only                       │
+    │ [ ] Configure CORS properly                 │
+    │ [ ] Test mobile responsiveness              │
+    │ [ ] Test error handling                     │
+    │ [ ] Set up monitoring and logging           │
+    └─────────────────────────────────────────────┘
+
+
+13. FILE DEPENDENCY GRAPH
+================================================================================
+
+    lib/firebase.js (Exported: auth, db, storage)
+         ▲
+         │
+    ┌────┴─────────────────────────┬────────────┐
+    │                              │            │
+    │                              │            │
+    app/api/entities.js        components/      app/api/
+    (Customer, User)           clientes/        user/route.js
+         │                     portal/
+         │
+    ┌────┴──────────────────────────────┐
+    │                                   │
+    ├─ ClientAuthMiddleware.jsx
+    ├─ PortalPageWrapper.jsx
+    ├─ CustomerRegistrationForm.jsx
+    └─ MobileOrdersPage.jsx
+
+    app/layout.jsx
+         ▲
+         │ Imports
+         │
+    components/shared/navigation.jsx (NO AUTH IMPORTS)
+
+
+14. REQUEST FLOW DIAGRAM
+================================================================================
+
+    User Request
+         │
+         ▼
+    Next.js Router
+         │
+         ├─ /admin/* → /app/layout.jsx → NO AUTH CHECK → Allow
+         │
+         ├─ /api/user → /app/api/user/route.js → HARDCODED USER → Allow
+         │
+         ├─ /portal → /portal/page.jsx → INPUT FORM → Route to ID
+         │
+         └─ /portal/[id]/* → PortalPageWrapper
+                               │
+                               ├─ Fetch Customer
+                               │
+                               ├─ ClientAuthMiddleware
+                               │  │
+                               │  ├─ Validate ID
+                               │  ├─ Check Status
+                               │  └─ Determine Access Level
+                               │
+                               ├─ Valid? → Render Page
+                               └─ Invalid? → Show Error
+
+
+================================================================================
+END OF ARCHITECTURE DIAGRAM
+================================================================================

@@ -1,0 +1,4174 @@
+[2025-10-27T15:17:03.108Z] [INFO][system] Log capture system initialized
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:04.960Z] [INFO][console] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:05.819Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:05.819Z] [LOG][console] [UI] No valid data, skipping recalculation.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:16.453Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:16.454Z] [LOG][console] [UI] No valid data, skipping recalculation.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:16.879Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:16.881Z] [LOG][console] [Calculator] recalculateRecipeMetrics triggered. Preparations count: 1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:16.882Z] [LOG][console] [Calculator] Final assembly step found: None
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:16.882Z] [LOG][console] [Calculator] No final assembly step found. Summing all preparations as fallback.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:16.882Z] [LOG][console] [Calculator] Final calculated values: finalCost=28.4503, finalYieldWeight=2.566, totalRawWeight=2.57, unitsQuantity=1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:16.883Z] [LOG][console] [Calculator] Returning final result object: {
+  "total_weight": 2.57,
+  "yield_weight": 2.566,
+  "cuba_weight": 2.566,
+  "portion_weight_calculated": 2.566,
+  "total_cost": 28.4503,
+  "cost_per_kg_raw": 11.070155642023346,
+  "cost_per_kg_yield": 11.087412314886985,
+  "cuba_cost": 28.4503,
+  "portion_cost": 28.4503,
+  "yield_percentage": 99.8443579766537,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:16.883Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 2.57,
+      "totalYieldWeight": 2.566,
+      "totalCost": 28.4503,
+      "yieldPercentage": 99.8443579766537,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:16.883Z] [LOG][console] [UI] Metrics received from calculator: {
+  "total_weight": 2.57,
+  "yield_weight": 2.566,
+  "cuba_weight": 2.566,
+  "portion_weight_calculated": 2.566,
+  "total_cost": 28.4503,
+  "cost_per_kg_raw": 11.070155642023346,
+  "cost_per_kg_yield": 11.087412314886985,
+  "cuba_cost": 28.4503,
+  "portion_cost": 28.4503,
+  "yield_percentage": 99.8443579766537,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:16.883Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 2.57,
+      "totalYieldWeight": 2.566,
+      "totalCost": 28.4503,
+      "yieldPercentage": 99.8443579766537,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ],
+  "updatedPreparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 2.566,
+      "total_cost_prep": 28.4503,
+      "id": "1761574109922",
+      "yield_percentage_prep": 99.8443579766537,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,385",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": "0,38",
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": "0,796",
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": "0,79",
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 2.57,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:16.884Z] [LOG][console] [UI] Has significant change? false
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:25.989Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:25.989Z] [LOG][console] [Calculator] recalculateRecipeMetrics triggered. Preparations count: 1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:25.990Z] [LOG][console] [Calculator] Final assembly step found: None
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:25.990Z] [LOG][console] [Calculator] No final assembly step found. Summing all preparations as fallback.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:25.990Z] [LOG][console] [Calculator] Final calculated values: finalCost=28.496919999999996, finalYieldWeight=2.566, totalRawWeight=1.7799999999999998, unitsQuantity=1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:25.990Z] [LOG][console] [Calculator] Returning final result object: {
+  "total_weight": 1.7799999999999998,
+  "yield_weight": 2.566,
+  "cuba_weight": 2.566,
+  "portion_weight_calculated": 2.566,
+  "total_cost": 28.496919999999996,
+  "cost_per_kg_raw": 16.009505617977528,
+  "cost_per_kg_yield": 11.105580670303974,
+  "cuba_cost": 28.496919999999996,
+  "portion_cost": 28.496919999999996,
+  "yield_percentage": 144.1573033707865,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:25.990Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1.7799999999999998,
+      "totalYieldWeight": 2.566,
+      "totalCost": 28.496919999999996,
+      "yieldPercentage": 144.1573033707865,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:25.991Z] [LOG][console] [UI] Metrics received from calculator: {
+  "total_weight": 1.7799999999999998,
+  "yield_weight": 2.566,
+  "cuba_weight": 2.566,
+  "portion_weight_calculated": 2.566,
+  "total_cost": 28.496919999999996,
+  "cost_per_kg_raw": 16.009505617977528,
+  "cost_per_kg_yield": 11.105580670303974,
+  "cuba_cost": 28.496919999999996,
+  "portion_cost": 28.496919999999996,
+  "yield_percentage": 144.1573033707865,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:25.990Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1.7799999999999998,
+      "totalYieldWeight": 2.566,
+      "totalCost": 28.496919999999996,
+      "yieldPercentage": 144.1573033707865,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ],
+  "updatedPreparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 2.566,
+      "total_cost_prep": 28.496919999999996,
+      "id": "1761574109922",
+      "yield_percentage_prep": 144.1573033707865,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,385",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": "0,38",
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": "0,796",
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 1.7799999999999998,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:25.991Z] [LOG][console] [UI] Has significant change? true
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:25.991Z] [LOG][console] [UI] Significant change detected. Calling setRecipeData with new metrics.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:25.992Z] [LOG][console] [UI] New data being set: {
+  "id": "Q2IaOBYBe3K8jGDaqFxK",
+  "portion_cost": 28.4503,
+  "cost_per_kg_yield": 11.105580670303974,
+  "preparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 2.566,
+      "total_cost_prep": 28.4503,
+      "id": "1761574109922",
+      "yield_percentage_prep": 99.8443579766537,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,385",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": "0,38",
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": "0,796",
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 2.57,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ],
+  "createdAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1761573963,
+    "nanoseconds": 845000000
+  },
+  "total_weight": 1.7799999999999998,
+  "cost_per_kg_raw": 16.009505617977528,
+  "cuba_weight": 2.566,
+  "name": "Tempero Base",
+  "cuba_cost": 28.496919999999996,
+  "yield_weight": 2.566,
+  "instructions": "",
+  "name_complement": "",
+  "updatedAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1761576934,
+    "nanoseconds": 206000000
+  },
+  "ingredients": [],
+  "total_cost": 28.496919999999996,
+  "prep_time": 30,
+  "active": true,
+  "category": "Temperos",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba"
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:27.019Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:27.020Z] [LOG][console] [Calculator] recalculateRecipeMetrics triggered. Preparations count: 1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:27.020Z] [LOG][console] [Calculator] Final assembly step found: None
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:27.020Z] [LOG][console] [Calculator] No final assembly step found. Summing all preparations as fallback.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:27.020Z] [LOG][console] [Calculator] Final calculated values: finalCost=22.311999999999998, finalYieldWeight=1.77, totalRawWeight=1.7799999999999998, unitsQuantity=1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:27.021Z] [LOG][console] [Calculator] Returning final result object: {
+  "total_weight": 1.7799999999999998,
+  "yield_weight": 1.77,
+  "cuba_weight": 1.77,
+  "portion_weight_calculated": 1.77,
+  "total_cost": 22.311999999999998,
+  "cost_per_kg_raw": 12.534831460674157,
+  "cost_per_kg_yield": 12.605649717514122,
+  "cuba_cost": 22.311999999999998,
+  "portion_cost": 22.311999999999998,
+  "yield_percentage": 99.43820224719101,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:27.021Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1.7799999999999998,
+      "totalYieldWeight": 1.77,
+      "totalCost": 22.311999999999998,
+      "yieldPercentage": 99.43820224719101,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:27.021Z] [LOG][console] [UI] Metrics received from calculator: {
+  "total_weight": 1.7799999999999998,
+  "yield_weight": 1.77,
+  "cuba_weight": 1.77,
+  "portion_weight_calculated": 1.77,
+  "total_cost": 22.311999999999998,
+  "cost_per_kg_raw": 12.534831460674157,
+  "cost_per_kg_yield": 12.605649717514122,
+  "cuba_cost": 22.311999999999998,
+  "portion_cost": 22.311999999999998,
+  "yield_percentage": 99.43820224719101,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:27.021Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1.7799999999999998,
+      "totalYieldWeight": 1.77,
+      "totalCost": 22.311999999999998,
+      "yieldPercentage": 99.43820224719101,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ],
+  "updatedPreparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 1.77,
+      "total_cost_prep": 22.311999999999998,
+      "id": "1761574109922",
+      "yield_percentage_prep": 99.43820224719101,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,385",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": "0,38",
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": 0,
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 1.7799999999999998,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:27.021Z] [LOG][console] [UI] Has significant change? true
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:27.021Z] [LOG][console] [UI] Significant change detected. Calling setRecipeData with new metrics.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:27.022Z] [LOG][console] [UI] New data being set: {
+  "id": "Q2IaOBYBe3K8jGDaqFxK",
+  "portion_cost": 28.4503,
+  "cost_per_kg_yield": 12.605649717514122,
+  "preparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 2.566,
+      "total_cost_prep": 28.4503,
+      "id": "1761574109922",
+      "yield_percentage_prep": 99.8443579766537,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,385",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": "0,38",
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": 0,
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 2.57,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ],
+  "createdAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1761573963,
+    "nanoseconds": 845000000
+  },
+  "total_weight": 1.7799999999999998,
+  "cost_per_kg_raw": 12.534831460674157,
+  "cuba_weight": 1.77,
+  "name": "Tempero Base",
+  "cuba_cost": 22.311999999999998,
+  "yield_weight": 1.77,
+  "instructions": "",
+  "name_complement": "",
+  "updatedAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1761576934,
+    "nanoseconds": 206000000
+  },
+  "ingredients": [],
+  "total_cost": 22.311999999999998,
+  "prep_time": 30,
+  "active": true,
+  "category": "Temperos",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba"
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.000Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.001Z] [LOG][console] [Calculator] recalculateRecipeMetrics triggered. Preparations count: 1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.001Z] [LOG][console] [Calculator] Final assembly step found: None
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.001Z] [LOG][console] [Calculator] No final assembly step found. Summing all preparations as fallback.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.001Z] [LOG][console] [Calculator] Final calculated values: finalCost=22.4465, finalYieldWeight=1.77, totalRawWeight=1.4, unitsQuantity=1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.001Z] [LOG][console] [Calculator] Returning final result object: {
+  "total_weight": 1.4,
+  "yield_weight": 1.77,
+  "cuba_weight": 1.77,
+  "portion_weight_calculated": 1.77,
+  "total_cost": 22.4465,
+  "cost_per_kg_raw": 16.033214285714287,
+  "cost_per_kg_yield": 12.681638418079096,
+  "cuba_cost": 22.4465,
+  "portion_cost": 22.4465,
+  "yield_percentage": 126.42857142857144,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:28.001Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1.4,
+      "totalYieldWeight": 1.77,
+      "totalCost": 22.4465,
+      "yieldPercentage": 126.42857142857144,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.002Z] [LOG][console] [UI] Metrics received from calculator: {
+  "total_weight": 1.4,
+  "yield_weight": 1.77,
+  "cuba_weight": 1.77,
+  "portion_weight_calculated": 1.77,
+  "total_cost": 22.4465,
+  "cost_per_kg_raw": 16.033214285714287,
+  "cost_per_kg_yield": 12.681638418079096,
+  "cuba_cost": 22.4465,
+  "portion_cost": 22.4465,
+  "yield_percentage": 126.42857142857144,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:28.001Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1.4,
+      "totalYieldWeight": 1.77,
+      "totalCost": 22.4465,
+      "yieldPercentage": 126.42857142857144,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ],
+  "updatedPreparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 1.77,
+      "total_cost_prep": 22.4465,
+      "id": "1761574109922",
+      "yield_percentage_prep": 126.42857142857144,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,385",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": 0,
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": 0,
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 1.4,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.002Z] [LOG][console] [UI] Has significant change? true
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.002Z] [LOG][console] [UI] Significant change detected. Calling setRecipeData with new metrics.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.003Z] [LOG][console] [UI] New data being set: {
+  "id": "Q2IaOBYBe3K8jGDaqFxK",
+  "portion_cost": 28.4503,
+  "cost_per_kg_yield": 12.681638418079096,
+  "preparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 2.566,
+      "total_cost_prep": 28.4503,
+      "id": "1761574109922",
+      "yield_percentage_prep": 99.8443579766537,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,385",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": 0,
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": 0,
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 2.57,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ],
+  "createdAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1761573963,
+    "nanoseconds": 845000000
+  },
+  "total_weight": 1.4,
+  "cost_per_kg_raw": 16.033214285714287,
+  "cuba_weight": 1.77,
+  "name": "Tempero Base",
+  "cuba_cost": 22.4465,
+  "yield_weight": 1.77,
+  "instructions": "",
+  "name_complement": "",
+  "updatedAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1761576934,
+    "nanoseconds": 206000000
+  },
+  "ingredients": [],
+  "total_cost": 22.4465,
+  "prep_time": 30,
+  "active": true,
+  "category": "Temperos",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba"
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.559Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.559Z] [LOG][console] [Calculator] recalculateRecipeMetrics triggered. Preparations count: 1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.559Z] [LOG][console] [Calculator] Final assembly step found: None
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.559Z] [LOG][console] [Calculator] No final assembly step found. Summing all preparations as fallback.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.559Z] [LOG][console] [Calculator] Final calculated values: finalCost=22.4465, finalYieldWeight=1.77, totalRawWeight=1.4, unitsQuantity=1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.559Z] [LOG][console] [Calculator] Returning final result object: {
+  "total_weight": 1.4,
+  "yield_weight": 1.77,
+  "cuba_weight": 1.77,
+  "portion_weight_calculated": 1.77,
+  "total_cost": 22.4465,
+  "cost_per_kg_raw": 16.033214285714287,
+  "cost_per_kg_yield": 12.681638418079096,
+  "cuba_cost": 22.4465,
+  "portion_cost": 22.4465,
+  "yield_percentage": 126.42857142857144,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:28.559Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1.4,
+      "totalYieldWeight": 1.77,
+      "totalCost": 22.4465,
+      "yieldPercentage": 126.42857142857144,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.560Z] [LOG][console] [UI] Metrics received from calculator: {
+  "total_weight": 1.4,
+  "yield_weight": 1.77,
+  "cuba_weight": 1.77,
+  "portion_weight_calculated": 1.77,
+  "total_cost": 22.4465,
+  "cost_per_kg_raw": 16.033214285714287,
+  "cost_per_kg_yield": 12.681638418079096,
+  "cuba_cost": 22.4465,
+  "portion_cost": 22.4465,
+  "yield_percentage": 126.42857142857144,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:28.559Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1.4,
+      "totalYieldWeight": 1.77,
+      "totalCost": 22.4465,
+      "yieldPercentage": 126.42857142857144,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ],
+  "updatedPreparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 1.77,
+      "total_cost_prep": 22.4465,
+      "id": "1761574109922",
+      "yield_percentage_prep": 126.42857142857144,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,385",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": 0,
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": 0,
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 1.4,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:28.560Z] [LOG][console] [UI] Has significant change? false
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:29.590Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:29.590Z] [LOG][console] [Calculator] recalculateRecipeMetrics triggered. Preparations count: 1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:29.590Z] [LOG][console] [Calculator] Final assembly step found: None
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:29.590Z] [LOG][console] [Calculator] No final assembly step found. Summing all preparations as fallback.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:29.591Z] [LOG][console] [Calculator] Final calculated values: finalCost=12.09, finalYieldWeight=1.385, totalRawWeight=1.4, unitsQuantity=1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:29.591Z] [LOG][console] [Calculator] Returning final result object: {
+  "total_weight": 1.4,
+  "yield_weight": 1.385,
+  "cuba_weight": 1.385,
+  "portion_weight_calculated": 1.385,
+  "total_cost": 12.09,
+  "cost_per_kg_raw": 8.635714285714286,
+  "cost_per_kg_yield": 8.729241877256317,
+  "cuba_cost": 12.09,
+  "portion_cost": 12.09,
+  "yield_percentage": 98.92857142857143,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:29.591Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1.4,
+      "totalYieldWeight": 1.385,
+      "totalCost": 12.09,
+      "yieldPercentage": 98.92857142857143,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:29.591Z] [LOG][console] [UI] Metrics received from calculator: {
+  "total_weight": 1.4,
+  "yield_weight": 1.385,
+  "cuba_weight": 1.385,
+  "portion_weight_calculated": 1.385,
+  "total_cost": 12.09,
+  "cost_per_kg_raw": 8.635714285714286,
+  "cost_per_kg_yield": 8.729241877256317,
+  "cuba_cost": 12.09,
+  "portion_cost": 12.09,
+  "yield_percentage": 98.92857142857143,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:29.591Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1.4,
+      "totalYieldWeight": 1.385,
+      "totalCost": 12.09,
+      "yieldPercentage": 98.92857142857143,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ],
+  "updatedPreparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 1.385,
+      "total_cost_prep": 12.09,
+      "id": "1761574109922",
+      "yield_percentage_prep": 98.92857142857143,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": 0,
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": 0,
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": 0,
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 1.4,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:29.591Z] [LOG][console] [UI] Has significant change? true
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:29.591Z] [LOG][console] [UI] Significant change detected. Calling setRecipeData with new metrics.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:29.592Z] [LOG][console] [UI] New data being set: {
+  "id": "Q2IaOBYBe3K8jGDaqFxK",
+  "portion_cost": 28.4503,
+  "cost_per_kg_yield": 8.729241877256317,
+  "preparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 2.566,
+      "total_cost_prep": 28.4503,
+      "id": "1761574109922",
+      "yield_percentage_prep": 99.8443579766537,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": 0,
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": 0,
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": 0,
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 2.57,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ],
+  "createdAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1761573963,
+    "nanoseconds": 845000000
+  },
+  "total_weight": 1.4,
+  "cost_per_kg_raw": 8.635714285714286,
+  "cuba_weight": 1.385,
+  "name": "Tempero Base",
+  "cuba_cost": 12.09,
+  "yield_weight": 1.385,
+  "instructions": "",
+  "name_complement": "",
+  "updatedAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1761576934,
+    "nanoseconds": 206000000
+  },
+  "ingredients": [],
+  "total_cost": 12.09,
+  "prep_time": 30,
+  "active": true,
+  "category": "Temperos",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba"
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:30.145Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:30.145Z] [LOG][console] [Calculator] recalculateRecipeMetrics triggered. Preparations count: 1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:30.145Z] [LOG][console] [Calculator] Final assembly step found: None
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:30.146Z] [LOG][console] [Calculator] No final assembly step found. Summing all preparations as fallback.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:30.146Z] [LOG][console] [Calculator] Final calculated values: finalCost=12.09, finalYieldWeight=1.385, totalRawWeight=1.4, unitsQuantity=1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:30.146Z] [LOG][console] [Calculator] Returning final result object: {
+  "total_weight": 1.4,
+  "yield_weight": 1.385,
+  "cuba_weight": 1.385,
+  "portion_weight_calculated": 1.385,
+  "total_cost": 12.09,
+  "cost_per_kg_raw": 8.635714285714286,
+  "cost_per_kg_yield": 8.729241877256317,
+  "cuba_cost": 12.09,
+  "portion_cost": 12.09,
+  "yield_percentage": 98.92857142857143,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:30.146Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1.4,
+      "totalYieldWeight": 1.385,
+      "totalCost": 12.09,
+      "yieldPercentage": 98.92857142857143,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:30.147Z] [LOG][console] [UI] Metrics received from calculator: {
+  "total_weight": 1.4,
+  "yield_weight": 1.385,
+  "cuba_weight": 1.385,
+  "portion_weight_calculated": 1.385,
+  "total_cost": 12.09,
+  "cost_per_kg_raw": 8.635714285714286,
+  "cost_per_kg_yield": 8.729241877256317,
+  "cuba_cost": 12.09,
+  "portion_cost": 12.09,
+  "yield_percentage": 98.92857142857143,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:30.146Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 1.4,
+      "totalYieldWeight": 1.385,
+      "totalCost": 12.09,
+      "yieldPercentage": 98.92857142857143,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ],
+  "updatedPreparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 1.385,
+      "total_cost_prep": 12.09,
+      "id": "1761574109922",
+      "yield_percentage_prep": 98.92857142857143,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": 0,
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": 0,
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": 0,
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 1.4,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:30.147Z] [LOG][console] [UI] Has significant change? false
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:32.442Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:32.442Z] [LOG][console] [Calculator] recalculateRecipeMetrics triggered. Preparations count: 1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:32.442Z] [LOG][console] [Calculator] Final assembly step found: None
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:32.442Z] [LOG][console] [Calculator] No final assembly step found. Summing all preparations as fallback.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:32.443Z] [LOG][console] [Calculator] Final calculated values: finalCost=30.919999999999998, finalYieldWeight=2.165, totalRawWeight=2.0999999999999996, unitsQuantity=1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:32.443Z] [LOG][console] [Calculator] Returning final result object: {
+  "total_weight": 2.0999999999999996,
+  "yield_weight": 2.165,
+  "cuba_weight": 2.165,
+  "portion_weight_calculated": 2.165,
+  "total_cost": 30.919999999999998,
+  "cost_per_kg_raw": 14.723809523809525,
+  "cost_per_kg_yield": 14.281755196304848,
+  "cuba_cost": 30.919999999999998,
+  "portion_cost": 30.919999999999998,
+  "yield_percentage": 103.0952380952381,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:32.443Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 2.0999999999999996,
+      "totalYieldWeight": 2.165,
+      "totalCost": 30.919999999999998,
+      "yieldPercentage": 103.0952380952381,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:32.444Z] [LOG][console] [UI] Metrics received from calculator: {
+  "total_weight": 2.0999999999999996,
+  "yield_weight": 2.165,
+  "cuba_weight": 2.165,
+  "portion_weight_calculated": 2.165,
+  "total_cost": 30.919999999999998,
+  "cost_per_kg_raw": 14.723809523809525,
+  "cost_per_kg_yield": 14.281755196304848,
+  "cuba_cost": 30.919999999999998,
+  "portion_cost": 30.919999999999998,
+  "yield_percentage": 103.0952380952381,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:32.443Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 2.0999999999999996,
+      "totalYieldWeight": 2.165,
+      "totalCost": 30.919999999999998,
+      "yieldPercentage": 103.0952380952381,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ],
+  "updatedPreparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 2.165,
+      "total_cost_prep": 30.919999999999998,
+      "id": "1761574109922",
+      "yield_percentage_prep": 103.0952380952381,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,78",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": "0,7",
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": 0,
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 2.0999999999999996,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:32.444Z] [LOG][console] [UI] Has significant change? true
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:32.444Z] [LOG][console] [UI] Significant change detected. Calling setRecipeData with new metrics.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:32.445Z] [LOG][console] [UI] New data being set: {
+  "id": "Q2IaOBYBe3K8jGDaqFxK",
+  "portion_cost": 28.4503,
+  "cost_per_kg_yield": 14.281755196304848,
+  "preparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 2.566,
+      "total_cost_prep": 28.4503,
+      "id": "1761574109922",
+      "yield_percentage_prep": 99.8443579766537,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,78",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": "0,7",
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": 0,
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 2.57,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ],
+  "createdAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1761573963,
+    "nanoseconds": 845000000
+  },
+  "total_weight": 2.0999999999999996,
+  "cost_per_kg_raw": 14.723809523809525,
+  "cuba_weight": 2.165,
+  "name": "Tempero Base",
+  "cuba_cost": 30.919999999999998,
+  "yield_weight": 2.165,
+  "instructions": "",
+  "name_complement": "",
+  "updatedAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1761576934,
+    "nanoseconds": 206000000
+  },
+  "ingredients": [],
+  "total_cost": 30.919999999999998,
+  "prep_time": 30,
+  "active": true,
+  "category": "Temperos",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba"
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:33.033Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:33.033Z] [LOG][console] [Calculator] recalculateRecipeMetrics triggered. Preparations count: 1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:33.033Z] [LOG][console] [Calculator] Final assembly step found: None
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:33.033Z] [LOG][console] [Calculator] No final assembly step found. Summing all preparations as fallback.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:33.034Z] [LOG][console] [Calculator] Final calculated values: finalCost=30.919999999999998, finalYieldWeight=2.165, totalRawWeight=2.0999999999999996, unitsQuantity=1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:33.034Z] [LOG][console] [Calculator] Returning final result object: {
+  "total_weight": 2.0999999999999996,
+  "yield_weight": 2.165,
+  "cuba_weight": 2.165,
+  "portion_weight_calculated": 2.165,
+  "total_cost": 30.919999999999998,
+  "cost_per_kg_raw": 14.723809523809525,
+  "cost_per_kg_yield": 14.281755196304848,
+  "cuba_cost": 30.919999999999998,
+  "portion_cost": 30.919999999999998,
+  "yield_percentage": 103.0952380952381,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:33.034Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 2.0999999999999996,
+      "totalYieldWeight": 2.165,
+      "totalCost": 30.919999999999998,
+      "yieldPercentage": 103.0952380952381,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:33.034Z] [LOG][console] [UI] Metrics received from calculator: {
+  "total_weight": 2.0999999999999996,
+  "yield_weight": 2.165,
+  "cuba_weight": 2.165,
+  "portion_weight_calculated": 2.165,
+  "total_cost": 30.919999999999998,
+  "cost_per_kg_raw": 14.723809523809525,
+  "cost_per_kg_yield": 14.281755196304848,
+  "cuba_cost": 30.919999999999998,
+  "portion_cost": 30.919999999999998,
+  "yield_percentage": 103.0952380952381,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:33.034Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 2.0999999999999996,
+      "totalYieldWeight": 2.165,
+      "totalCost": 30.919999999999998,
+      "yieldPercentage": 103.0952380952381,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ],
+  "updatedPreparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 2.165,
+      "total_cost_prep": 30.919999999999998,
+      "id": "1761574109922",
+      "yield_percentage_prep": 103.0952380952381,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,780",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": "0,7",
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": 0,
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": 0,
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 2.0999999999999996,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:33.035Z] [LOG][console] [UI] Has significant change? false
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:36.725Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:36.726Z] [LOG][console] [Calculator] recalculateRecipeMetrics triggered. Preparations count: 1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:36.726Z] [LOG][console] [Calculator] Final assembly step found: None
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:36.726Z] [LOG][console] [Calculator] No final assembly step found. Summing all preparations as fallback.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:36.726Z] [LOG][console] [Calculator] Final calculated values: finalCost=33.251, finalYieldWeight=2.545, totalRawWeight=2.3999999999999995, unitsQuantity=1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:36.727Z] [LOG][console] [Calculator] Returning final result object: {
+  "total_weight": 2.3999999999999995,
+  "yield_weight": 2.545,
+  "cuba_weight": 2.545,
+  "portion_weight_calculated": 2.545,
+  "total_cost": 33.251,
+  "cost_per_kg_raw": 13.854583333333336,
+  "cost_per_kg_yield": 13.065225933202356,
+  "cuba_cost": 33.251,
+  "portion_cost": 33.251,
+  "yield_percentage": 106.04166666666669,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:36.726Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 2.3999999999999995,
+      "totalYieldWeight": 2.545,
+      "totalCost": 33.251,
+      "yieldPercentage": 106.04166666666669,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:36.727Z] [LOG][console] [UI] Metrics received from calculator: {
+  "total_weight": 2.3999999999999995,
+  "yield_weight": 2.545,
+  "cuba_weight": 2.545,
+  "portion_weight_calculated": 2.545,
+  "total_cost": 33.251,
+  "cost_per_kg_raw": 13.854583333333336,
+  "cost_per_kg_yield": 13.065225933202356,
+  "cuba_cost": 33.251,
+  "portion_cost": 33.251,
+  "yield_percentage": 106.04166666666669,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:36.726Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 2.3999999999999995,
+      "totalYieldWeight": 2.545,
+      "totalCost": 33.251,
+      "yieldPercentage": 106.04166666666669,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ],
+  "updatedPreparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 2.545,
+      "total_cost_prep": 33.251,
+      "id": "1761574109922",
+      "yield_percentage_prep": 106.04166666666669,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,780",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": "0,7",
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": "0,380",
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": "0,3",
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 2.3999999999999995,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:36.727Z] [LOG][console] [UI] Has significant change? true
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:36.727Z] [LOG][console] [UI] Significant change detected. Calling setRecipeData with new metrics.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:36.728Z] [LOG][console] [UI] New data being set: {
+  "id": "Q2IaOBYBe3K8jGDaqFxK",
+  "portion_cost": 28.4503,
+  "cost_per_kg_yield": 13.065225933202356,
+  "preparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 2.566,
+      "total_cost_prep": 28.4503,
+      "id": "1761574109922",
+      "yield_percentage_prep": 99.8443579766537,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,780",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": "0,7",
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": "0,380",
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": "0,3",
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 2.57,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ],
+  "createdAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1761573963,
+    "nanoseconds": 845000000
+  },
+  "total_weight": 2.3999999999999995,
+  "cost_per_kg_raw": 13.854583333333336,
+  "cuba_weight": 2.545,
+  "name": "Tempero Base",
+  "cuba_cost": 33.251,
+  "yield_weight": 2.545,
+  "instructions": "",
+  "name_complement": "",
+  "updatedAt": {
+    "type": "firestore/timestamp/1.0",
+    "seconds": 1761576934,
+    "nanoseconds": 206000000
+  },
+  "ingredients": [],
+  "total_cost": 33.251,
+  "prep_time": 30,
+  "active": true,
+  "category": "Temperos",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba"
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:37.282Z] [LOG][console] [UI] recalculateRecipeMetrics triggered.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:37.282Z] [LOG][console] [Calculator] recalculateRecipeMetrics triggered. Preparations count: 1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:37.282Z] [LOG][console] [Calculator] Final assembly step found: None
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:37.282Z] [LOG][console] [Calculator] No final assembly step found. Summing all preparations as fallback.
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:37.283Z] [LOG][console] [Calculator] Final calculated values: finalCost=33.251, finalYieldWeight=2.545, totalRawWeight=2.3999999999999995, unitsQuantity=1
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:37.283Z] [LOG][console] [Calculator] Returning final result object: {
+  "total_weight": 2.3999999999999995,
+  "yield_weight": 2.545,
+  "cuba_weight": 2.545,
+  "portion_weight_calculated": 2.545,
+  "total_cost": 33.251,
+  "cost_per_kg_raw": 13.854583333333336,
+  "cost_per_kg_yield": 13.065225933202356,
+  "cuba_cost": 33.251,
+  "portion_cost": 33.251,
+  "yield_percentage": 106.04166666666669,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:37.283Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 2.3999999999999995,
+      "totalYieldWeight": 2.545,
+      "totalCost": 33.251,
+      "yieldPercentage": 106.04166666666669,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:37.283Z] [LOG][console] [UI] Metrics received from calculator: {
+  "total_weight": 2.3999999999999995,
+  "yield_weight": 2.545,
+  "cuba_weight": 2.545,
+  "portion_weight_calculated": 2.545,
+  "total_cost": 33.251,
+  "cost_per_kg_raw": 13.854583333333336,
+  "cost_per_kg_yield": 13.065225933202356,
+  "cuba_cost": 33.251,
+  "portion_cost": 33.251,
+  "yield_percentage": 106.04166666666669,
+  "container_type": "cuba",
+  "weight_field_name": "Peso da Cuba",
+  "cost_field_name": "Custo da Cuba",
+  "last_calculated": "2025-10-27T15:17:37.283Z",
+  "preparation_metrics": [
+    {
+      "totalRawWeight": 2.3999999999999995,
+      "totalYieldWeight": 2.545,
+      "totalCost": 33.251,
+      "yieldPercentage": 106.04166666666669,
+      "averageYield": 0,
+      "preparationIndex": 0,
+      "preparationTitle": "1º Etapa: Limpeza"
+    }
+  ],
+  "updatedPreparations": [
+    {
+      "average_yield_prep": 0,
+      "title": "1º Etapa: Limpeza",
+      "total_yield_weight_prep": 2.545,
+      "total_cost_prep": 33.251,
+      "id": "1761574109922",
+      "yield_percentage_prep": 106.04166666666669,
+      "ingredients": [
+        {
+          "weight_frozen": "",
+          "updatedAt": {
+            "nanoseconds": 313000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1755875609
+          },
+          "updated_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752769713,
+            "nanoseconds": 263000000
+          },
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1752624731,
+            "nanoseconds": 400000000
+          },
+          "category_id": "h4amN5PVgc4JjCQEzeoH",
+          "weight_clean": "0,385",
+          "weight_thawed": "",
+          "current_price": "26",
+          "weight_raw": "0,400",
+          "name": "Alho",
+          "weight_pre_cooking": "",
+          "weight_portioned": "",
+          "id": "GwUU3RL3FZu4l2RYiQPw_1761574115266",
+          "supplier_id": "bUJAAme8wWUjOgmcNqx0",
+          "active": true,
+          "last_update": "2025-07-17",
+          "raw_price_kg": 26,
+          "weight_cooked": "",
+          "ingredient_id": "GwUU3RL3FZu4l2RYiQPw",
+          "unit": "kg"
+        },
+        {
+          "commercial_name": "Sal",
+          "created_by_id": "67db369d572adaa9519c9645",
+          "weight_pre_cooking": "",
+          "id": "JOB097eUBEaZARZHGT9b_1761574122594",
+          "weight_thawed": "",
+          "brand": null,
+          "taco_variations": [],
+          "unit": "kg",
+          "created_date": {
+            "nanoseconds": 390000000,
+            "type": "firestore/timestamp/1.0",
+            "seconds": 1749810749
+          },
+          "ingredient_id": "JOB097eUBEaZARZHGT9b",
+          "supplier_id": null,
+          "category": "Temperos e condimentos",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 50,70 / 30kg (30 unidades de 1kg)",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": {
+            "seconds": 1749168000,
+            "nanoseconds": 0,
+            "type": "firestore/timestamp/1.0"
+          },
+          "weight_frozen": "",
+          "active": true,
+          "base_price": 0,
+          "current_price": "1,69",
+          "weight_cooked": "",
+          "current_stock": 0,
+          "weight_portioned": "",
+          "weight_raw": "1",
+          "name": "Sal",
+          "weight_clean": "1",
+          "supplier_code": "2680",
+          "created_by": "admsfempresas@gmail.com",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "updated_date": {
+            "seconds": 1749811930,
+            "nanoseconds": 57000000,
+            "type": "firestore/timestamp/1.0"
+          },
+          "brand_id": null,
+          "is_sample": false
+        },
+        {
+          "ingredient_type": "both",
+          "base_price": 26.9,
+          "main_supplier": "",
+          "current_price": "26,9",
+          "active": true,
+          "unit": "kg",
+          "name": "Pimenta da Roça",
+          "supplier_id": "",
+          "weight_clean": "0,780",
+          "weight_portioned": "",
+          "weight_thawed": "",
+          "min_stock": 0,
+          "current_stock": 0,
+          "brand": "",
+          "commercial_name": "Pimenta da Roça",
+          "weight_frozen": "",
+          "weight_cooked": "",
+          "last_update": "2025-10-27",
+          "ingredient_id": "VcC4YHId7VvnaNueYXN0",
+          "id": "VcC4YHId7VvnaNueYXN0_1761574128706",
+          "brand_id": "",
+          "category": "",
+          "weight_pre_cooking": "",
+          "createdAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          },
+          "taco_variations": [],
+          "notes": "",
+          "supplier_code": "",
+          "weight_raw": "0,7",
+          "updatedAt": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 340000000,
+            "seconds": 1761574061
+          }
+        },
+        {
+          "created_by": "admsfempresas@gmail.com",
+          "name": "Óleo",
+          "updated_at": {
+            "nanoseconds": 129000000,
+            "seconds": 1752598812,
+            "type": "firestore/timestamp/1.0"
+          },
+          "taco_variations": [],
+          "is_sample": false,
+          "weight_portioned": "",
+          "brand_id": null,
+          "commercial_name": "Óleo",
+          "supplier_code": 11266,
+          "current_stock": 0,
+          "base_price": 0,
+          "supplier_id": null,
+          "updated_date": "2025-06-13T10:52:08.278000",
+          "unit": "kg",
+          "created_date": "2025-06-13T10:32:23.048000",
+          "weight_clean": "0,380",
+          "id": "684bfe37ce1a5c4bb28d4797_1761574193105",
+          "active": true,
+          "weight_cooked": "",
+          "taco_id": null,
+          "main_supplier": "BISPO DIST DE PRODUT ALIMENTICIOS EIRELI",
+          "last_update": "2025-06-11",
+          "created_at": {
+            "type": "firestore/timestamp/1.0",
+            "nanoseconds": 129000000,
+            "seconds": 1752598812
+          },
+          "brand": null,
+          "created_by_id": "67db369d572adaa9519c9645",
+          "category": "Gorduras e óleos",
+          "min_stock": 0,
+          "ingredient_type": "both",
+          "current_price": "7,77",
+          "weight_raw": "0,3",
+          "weight_pre_cooking": "",
+          "weight_thawed": "",
+          "notes": "Criado via importação de nomes em massa | Valor R$ 685,00 / 90l (100 unidades de 900ml) | Valor R$ 576,00 / 72l (80 unidades de 900ml) | Valor R$ 125,82 / 16,2l (18 unidades de 900ml)",
+          "ingredient_id": "684bfe37ce1a5c4bb28d4797",
+          "weight_frozen": ""
+        }
+      ],
+      "sub_components": [],
+      "instructions": "",
+      "total_raw_weight_prep": 2.3999999999999995,
+      "processes": [
+        "cleaning"
+      ]
+    }
+  ]
+}
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica
+
+[2025-10-27T15:17:37.284Z] [LOG][console] [UI] Has significant change? false
+  URL: https://9000-firebase-studio-1754270319570.cluster-duylic2g3fbzerqpzxxbw6helm.cloudworkstations.dev/ficha-tecnica

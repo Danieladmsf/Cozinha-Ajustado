@@ -1,0 +1,34 @@
+{
+  "name": "consolidador-ingredientes",
+  "version": "1.0.0",
+  "description": "Skill cirúrgica para consolidar ingredientes duplicados no Cozinha Afeto. Migra receitas, remove duplicatas e mantém auditoria completa.",
+  "author": "Cozinha Afeto Team",
+  "keywords": ["ingredientes", "duplicados", "consolidação", "migração", "banco de dados"],
+  "category": "database-management",
+  "trigger_patterns": [
+    "consolid.*ingrediente",
+    "migr.*ingrediente",
+    "remov.*duplicad",
+    "analis.*grupo.*ingrediente",
+    "simul.*consolidação"
+  ],
+  "use_cases": [
+    "Analisar grupos de ingredientes duplicados",
+    "Migrar receitas de um ID para outro",
+    "Remover ingredientes não utilizados",
+    "Consolidar grupos completos de duplicados",
+    "Validar integridade após consolidações"
+  ],
+  "api_endpoints": [
+    "https://cozinha-ajustado.vercel.app/api/ingredients",
+    "https://cozinha-ajustado.vercel.app/api/recipes"
+  ],
+  "data_files": [
+    "/tmp/DUPLICADOS_JSON.json",
+    "/tmp/all_recipes.json",
+    "/tmp/all_ingredients.json"
+  ],
+  "safety_level": "critical",
+  "requires_confirmation": true,
+  "backup_required": true
+}

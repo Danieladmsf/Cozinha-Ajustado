@@ -22,7 +22,22 @@ const createEntity = (collectionName) => {
     getAll: async () => {
       try {
         const querySnapshot = await getDocs(collection(db, collectionName));
-        const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const docs = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          const docId = doc.id;
+
+          // Log para debug - mostrar se o ID do documento é diferente do campo 'id' nos dados
+          if (data.id && data.id !== docId) {
+            console.log(`⚠️ [${collectionName}.getAll] Documento com ID divergente:`, {
+              firestoreDocId: docId,
+              dataFieldId: data.id,
+              name: data.name || data.commercial_name
+            });
+          }
+
+          // IMPORTANTE: Colocar id: docId DEPOIS do spread para garantir que o ID do Firestore seja usado
+          return { ...data, id: docId };
+        });
         return docs;
       } catch (error) {
         // Rethrow the error so calling code can handle it
@@ -34,12 +49,13 @@ const createEntity = (collectionName) => {
     list: async () => {
       try {
         const querySnapshot = await getDocs(collection(db, collectionName));
-        
+
         const docs = querySnapshot.docs.map(doc => {
-          const data = { id: doc.id, ...doc.data() };
+          // IMPORTANTE: Colocar id: doc.id DEPOIS do spread para garantir que o ID do Firestore seja usado
+          const data = { ...doc.data(), id: doc.id };
           return data;
         });
-        
+
         return docs;
       } catch (error) {
         // Rethrow the error so calling code can handle it
@@ -50,10 +66,16 @@ const createEntity = (collectionName) => {
     // Get document by ID
     getById: async (id) => {
       const startTime = Date.now();
-      
+
+      console.log(`🔵 [${collectionName}.getById] INÍCIO - Buscando documento com ID:`, id);
+      console.log(`🔵 [${collectionName}.getById] Tipo do ID:`, typeof id);
+      console.log(`🔵 [${collectionName}.getById] Tamanho do ID:`, id?.length);
+      console.log(`🔵 [${collectionName}.getById] ID em hex:`, Buffer.from(id || '', 'utf8').toString('hex'));
+
       try {
         // Handle temporary customer IDs for portal
         if (collectionName === 'Customer' && id?.startsWith('temp-')) {
+          console.log(`🔵 [${collectionName}.getById] ID temporário detectado, retornando mock`);
           return {
             id: id,
             name: 'Novo Cliente',
@@ -64,17 +86,29 @@ const createEntity = (collectionName) => {
             suspended: false
           };
         }
-        
+
+        console.log(`🔵 [${collectionName}.getById] Criando referência do documento...`);
         const docRef = doc(db, collectionName, id);
-        
+        console.log(`🔵 [${collectionName}.getById] Referência criada:`, docRef.path);
+
         // Add timeout wrapper for Firestore operations
+        console.log(`🔵 [${collectionName}.getById] Buscando documento no Firestore...`);
         const docSnapPromise = getDoc(docRef);
-        const timeoutPromise = new Promise((_, reject) => 
+        const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Firestore timeout')), 8000)
         );
-        
+
         const docSnap = await Promise.race([docSnapPromise, timeoutPromise]);
-        const result = docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+        console.log(`🔵 [${collectionName}.getById] Documento existe?`, docSnap.exists());
+
+        if (docSnap.exists()) {
+          console.log(`✅ [${collectionName}.getById] Documento ENCONTRADO:`, docSnap.id);
+          console.log(`✅ [${collectionName}.getById] Dados:`, docSnap.data());
+        } else {
+          console.log(`❌ [${collectionName}.getById] Documento NÃO EXISTE no Firestore`);
+        }
+
+        const result = docSnap.exists() ? { ...docSnap.data(), id: docSnap.id } : null;
         
         const queryTime = Date.now() - startTime;
         if (queryTime > 1000) {
@@ -136,7 +170,7 @@ const createEntity = (collectionName) => {
           collection: collectionName
         });
         
-        return { id: docRef.id, ...docData };
+        return { ...docData, id: docRef.id };
       } catch (error) {
         const errorTime = Date.now() - startTime;
         console.error(`❌ [${collectionName.toUpperCase()}.CREATE] Erro:`, {
@@ -271,7 +305,7 @@ const createEntity = (collectionName) => {
         }
 
         const querySnapshot = await getDocs(q);
-        const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const docs = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         return docs;
       } catch (error) {
         throw new Error(`Failed to query ${collectionName}: ${error.message}`);
@@ -300,7 +334,7 @@ const createEntity = (collectionName) => {
         const unsubscribe = onSnapshot(
           q,
           (querySnapshot) => {
-            const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const docs = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
             callback(docs);
           },
           (error) => {
