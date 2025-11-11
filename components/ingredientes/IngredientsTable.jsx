@@ -3,14 +3,13 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, DollarSign, Trash2, Package, Plus, TrendingUp, Search, X, Leaf, Calendar, Check } from "lucide-react";
+import { MoreHorizontal, Edit, DollarSign, Trash2, Package, Plus, TrendingUp, Leaf, Calendar, Check, X, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import PriceEditor from "./PriceEditor";
 import PriceHistoryViewer from "./PriceHistoryViewer";
 import PriceUpdateModal from "./PriceUpdateModal";
@@ -20,15 +19,8 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
   const [selectedIngredientForHistory, setSelectedIngredientForHistory] = useState(null);
   const [selectedIngredientForPriceUpdate, setSelectedIngredientForPriceUpdate] = useState(null);
 
-  // Estados dos filtros
-  const [filters, setFilters] = useState({
-    name: '',
-    unit: '',
-    category: '',
-    brand: '',
-    supplier: '',
-    status: ''
-  });
+  // Estado de ordenação
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   // Lista de IDs problemáticos para filtrar (blacklist)
   const BLACKLISTED_IDS = [
@@ -39,41 +31,58 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
     '684bfe40ce1a5c4bb28d47d9', '684bfe3760647d247b5533f5'
   ];
 
-  // Filtrar ingredientes
-  const filteredIngredients = useMemo(() => {
-    return ingredients.filter(ingredient => {
-      // Filtrar IDs problemáticos da blacklist
-      if (BLACKLISTED_IDS.includes(ingredient.id)) {
-        return false;
-      }
+  // Filtrar e ordenar ingredientes
+  const sortedIngredients = useMemo(() => {
+    // Primeiro filtra IDs problemáticos
+    let filtered = ingredients.filter(ingredient => !BLACKLISTED_IDS.includes(ingredient.id));
 
-      const matchName = !filters.name || ingredient.name?.toLowerCase().includes(filters.name.toLowerCase());
-      const matchUnit = !filters.unit || ingredient.unit?.toLowerCase().includes(filters.unit.toLowerCase());
-      const matchCategory = !filters.category || ingredient.category?.toLowerCase().includes(filters.category.toLowerCase());
-      const matchBrand = !filters.brand || ingredient.displayBrand?.toLowerCase().includes(filters.brand.toLowerCase());
-      const matchSupplier = !filters.supplier || ingredient.displaySupplier?.toLowerCase().includes(filters.supplier.toLowerCase());
-      const matchStatus = !filters.status || (filters.status === 'ativo' ? ingredient.active : !ingredient.active);
+    // Depois ordena se houver configuração de ordenação
+    if (sortConfig.key) {
+      filtered.sort((a, b) => {
+        let aValue = a[sortConfig.key];
+        let bValue = b[sortConfig.key];
 
-      return matchName && matchUnit && matchCategory && matchBrand && matchSupplier && matchStatus;
-    });
-  }, [ingredients, filters]);
+        // Tratamento especial para campos específicos
+        if (sortConfig.key === 'displayPrice') {
+          aValue = parseFloat(aValue) || 0;
+          bValue = parseFloat(bValue) || 0;
+        } else if (sortConfig.key === 'last_update') {
+          aValue = aValue ? new Date(aValue).getTime() : 0;
+          bValue = bValue ? new Date(bValue).getTime() : 0;
+        } else if (sortConfig.key === 'active') {
+          aValue = aValue ? 1 : 0;
+          bValue = bValue ? 1 : 0;
+        } else if (typeof aValue === 'string') {
+          aValue = aValue?.toLowerCase() || '';
+          bValue = bValue?.toLowerCase() || '';
+        }
 
-  const updateFilter = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [ingredients, sortConfig]);
+
+  // Função para mudar ordenação
+  const handleSort = (key) => {
+    setSortConfig(prevConfig => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
+    }));
   };
 
-  const clearFilters = () => {
-    setFilters({
-      name: '',
-      unit: '',
-      category: '',
-      brand: '',
-      supplier: '',
-      status: ''
-    });
+  // Função para renderizar ícone de ordenação
+  const SortIcon = ({ columnKey }) => {
+    if (sortConfig.key !== columnKey) {
+      return <ChevronsUpDown className="w-3 h-3 text-slate-400" />;
+    }
+    return sortConfig.direction === 'asc'
+      ? <ChevronUp className="w-3 h-3 text-slate-600" />
+      : <ChevronDown className="w-3 h-3 text-slate-600" />;
   };
-
-  const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
   if (ingredients.length === 0) {
     return (
@@ -104,26 +113,13 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
     <>
     <Card className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200/60 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-              <Package className="w-4 h-4 text-white" />
-            </div>
-            <CardTitle className="text-xl text-slate-700">
-              Lista de Ingredientes ({filteredIngredients.length.toLocaleString()} {filteredIngredients.length !== ingredients.length && `de ${ingredients.length.toLocaleString()}`})
-            </CardTitle>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+            <Package className="w-4 h-4 text-white" />
           </div>
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearFilters}
-              className="text-slate-600 hover:text-slate-900 hover:bg-slate-200"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Limpar Filtros
-            </Button>
-          )}
+          <CardTitle className="text-xl text-slate-700">
+            Lista de Ingredientes ({sortedIngredients.length.toLocaleString()})
+          </CardTitle>
         </div>
       </CardHeader>
       <CardContent className="p-0">
@@ -131,104 +127,84 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
           <table className="w-full">
             <thead>
               <tr className="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-300">
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Search className="w-4 h-4 text-slate-400" />
-                      <span>Nome</span>
-                    </div>
-                    <Input
-                      placeholder="Filtrar nome..."
-                      value={filters.name}
-                      onChange={(e) => updateFilter('name', e.target.value)}
-                      className="h-8 text-xs bg-white border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
-                    />
+                <th
+                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => handleSort('name')}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>Nome</span>
+                    <SortIcon columnKey="name" />
                   </div>
                 </th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Search className="w-4 h-4 text-slate-400" />
-                      <span>Unidade</span>
-                    </div>
-                    <Input
-                      placeholder="Filtrar..."
-                      value={filters.unit}
-                      onChange={(e) => updateFilter('unit', e.target.value)}
-                      className="h-8 text-xs bg-white border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
-                    />
+                <th
+                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => handleSort('unit')}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>Unidade</span>
+                    <SortIcon columnKey="unit" />
                   </div>
                 </th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Search className="w-4 h-4 text-slate-400" />
-                      <span>Categoria</span>
-                    </div>
-                    <Input
-                      placeholder="Filtrar..."
-                      value={filters.category}
-                      onChange={(e) => updateFilter('category', e.target.value)}
-                      className="h-8 text-xs bg-white border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
-                    />
+                <th
+                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => handleSort('category')}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>Categoria</span>
+                    <SortIcon columnKey="category" />
                   </div>
                 </th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Search className="w-4 h-4 text-slate-400" />
-                      <span>Marca</span>
-                    </div>
-                    <Input
-                      placeholder="Filtrar..."
-                      value={filters.brand}
-                      onChange={(e) => updateFilter('brand', e.target.value)}
-                      className="h-8 text-xs bg-white border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
-                    />
+                <th
+                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => handleSort('displayBrand')}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>Marca</span>
+                    <SortIcon columnKey="displayBrand" />
                   </div>
                 </th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">
+                <th
+                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => handleSort('displayPrice')}
+                >
                   <div className="flex items-center gap-2">
                     <DollarSign className="w-4 h-4 text-slate-400" />
                     <span>Preço Atual</span>
+                    <SortIcon columnKey="displayPrice" />
                   </div>
                 </th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Search className="w-4 h-4 text-slate-400" />
-                      <span>Fornecedor</span>
-                    </div>
-                    <Input
-                      placeholder="Filtrar..."
-                      value={filters.supplier}
-                      onChange={(e) => updateFilter('supplier', e.target.value)}
-                      className="h-8 text-xs bg-white border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
-                    />
+                <th
+                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => handleSort('displaySupplier')}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>Fornecedor</span>
+                    <SortIcon columnKey="displaySupplier" />
                   </div>
                 </th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">
-                  Última Atualização
+                <th
+                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => handleSort('last_update')}
+                >
+                  <div className="flex items-center gap-2">
+                    <span>Última Atualização</span>
+                    <SortIcon columnKey="last_update" />
+                  </div>
                 </th>
-                <th className="text-left p-4 text-sm font-semibold text-slate-600">
-                  <div className="space-y-2">
+                <th
+                  className="text-left p-4 text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={() => handleSort('active')}
+                >
+                  <div className="flex items-center gap-2">
                     <span>Status</span>
-                    <select
-                      value={filters.status}
-                      onChange={(e) => updateFilter('status', e.target.value)}
-                      className="h-8 w-full text-xs bg-white border border-slate-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500"
-                    >
-                      <option value="">Todos</option>
-                      <option value="ativo">Ativo</option>
-                      <option value="inativo">Inativo</option>
-                    </select>
+                    <SortIcon columnKey="active" />
                   </div>
                 </th>
                 <th className="text-center p-4 text-sm font-semibold text-slate-600">Ações</th>
               </tr>
             </thead>
             <tbody>
-              {filteredIngredients.map((ingredient, index) => (
+              {sortedIngredients.map((ingredient, index) => (
                 <tr key={ingredient.id || `ingredient-${index}`} className="border-b border-slate-100 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-emerald-50/50 group transition-all duration-200">
                   <td className="p-4">
                     <div className="space-y-2">
