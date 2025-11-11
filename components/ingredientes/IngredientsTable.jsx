@@ -206,9 +206,12 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
             <tbody>
               {sortedIngredients.map((ingredient, index) => (
                 <tr key={ingredient.id || `ingredient-${index}`} className="border-b border-slate-100 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-emerald-50/50 group transition-all duration-200">
-                  <td className="px-3 py-2 font-mono text-xs">
+                  <td className="px-3 py-2 font-mono text-xs max-w-[200px]">
                     <div className="space-y-1">
-                      <div className="font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors duration-200 whitespace-nowrap">
+                      <div
+                        className="font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors duration-200 truncate"
+                        title={ingredient.name}
+                      >
                         {ingredient.name}
                       </div>
                       {ingredient.taco_variations && ingredient.taco_variations.length > 0 && (
@@ -224,8 +227,11 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                       {ingredient.unit}
                     </span>
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
-                    <Badge className="bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800 border-purple-300 font-medium text-xs">
+                  <td className="px-3 py-2 font-mono text-xs max-w-[150px]">
+                    <Badge
+                      className="bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800 border-purple-300 font-medium text-xs truncate block"
+                      title={ingredient.category || 'N/A'}
+                    >
                       {ingredient.category || (
                         <span className="flex items-center gap-1">
                           <Package className="w-3 h-3" />
@@ -234,8 +240,13 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                       )}
                     </Badge>
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
-                    <span className="text-slate-600 font-medium">{ingredient.displayBrand}</span>
+                  <td className="px-3 py-2 font-mono text-xs max-w-[150px]">
+                    <span
+                      className="text-slate-600 font-medium truncate block"
+                      title={ingredient.displayBrand}
+                    >
+                      {ingredient.displayBrand}
+                    </span>
                   </td>
                   <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
                     <PriceEditor
@@ -243,10 +254,15 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                       onEdit={() => setSelectedIngredientForPriceUpdate(ingredient)}
                     />
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
+                  <td className="px-3 py-2 font-mono text-xs max-w-[180px]">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                      <span className="text-slate-600 font-medium">{ingredient.displaySupplier}</span>
+                      <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
+                      <span
+                        className="text-slate-600 font-medium truncate"
+                        title={ingredient.displaySupplier}
+                      >
+                        {ingredient.displaySupplier}
+                      </span>
                     </div>
                   </td>
                   <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
