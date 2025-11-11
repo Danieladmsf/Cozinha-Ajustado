@@ -70,19 +70,19 @@ const MemoizedTableRow = ({
   
   return (
     <TableRow className="hover:bg-gray-50">
-      <TableCell>{item.recipe_name}</TableCell>
-      <TableCell>{item.category}</TableCell>
-      <TableCell>
+      <TableCell className="font-mono">{item.recipe_name}</TableCell>
+      <TableCell className="font-mono">{item.category}</TableCell>
+      <TableCell className="font-mono">
         <span className="text-sm text-gray-500">
           {item.suggested_quantity ? item.suggested_quantity.toFixed(1).replace('.', ',') : '0'}
         </span>
       </TableCell>
-      <TableCell>
+      <TableCell className="font-mono">
         <Select
           value={item.unit_type}
           onValueChange={(value) => handleUnitTypeChange(index, value)}
         >
-          <SelectTrigger className="w-[80px]">
+          <SelectTrigger className="w-[80px] font-mono">
             <SelectValue placeholder="Tipo" />
           </SelectTrigger>
           <SelectContent>
@@ -91,11 +91,11 @@ const MemoizedTableRow = ({
           </SelectContent>
         </Select>
       </TableCell>
-      <TableCell>
+      <TableCell className="font-mono">
         <Input
           data-quantity-input
           ref={inputRef}
-          className="w-20"
+          className="w-20 font-mono"
           type="text"
           value={isThisInputEditing ? editingValue : formattedQuantity(item.quantity)}
           onChange={(e) => handleQuantityInputChange(index, e.target.value)}
@@ -104,16 +104,16 @@ const MemoizedTableRow = ({
           onKeyDown={onQuantityKeyDown}
         />
       </TableCell>
-      <TableCell>
+      <TableCell className="font-mono">
         {formatWeight(calculateTotalWeight(item))}
       </TableCell>
-      <TableCell>
+      <TableCell className="font-mono">
         {formatCurrency(item.unit_price || 0)}
       </TableCell>
-      <TableCell>
+      <TableCell className="font-mono">
         {formatCurrency(item.total_price || 0)}
       </TableCell>
-      <TableCell>
+      <TableCell className="font-mono">
         <Textarea
           className="min-h-[35px] resize-none"
           placeholder="Observações do item"

@@ -23,9 +23,9 @@ const IngredientRow = ({ prep, ingredient, prepIndex, ingredientIndex }) => {
 
   return (
     <TableRow>
-      <TableCell className="font-medium">{ingredient.name}</TableCell>
-      <TableCell className="text-center">{formatCurrency(ingredient.price_per_kg_bruto)}</TableCell>
-      <TableCell className="text-center font-semibold text-green-700">{formatCurrency(getCleanCost(ingredient))}</TableCell>
+      <TableCell className="font-medium font-mono">{ingredient.name}</TableCell>
+      <TableCell className="text-center font-mono">{formatCurrency(ingredient.price_per_kg_bruto)}</TableCell>
+      <TableCell className="text-center font-semibold text-green-700 font-mono">{formatCurrency(getCleanCost(ingredient))}</TableCell>
 
       {Object.keys(processColumns).map(procKey => {
         if (!activeProcesses.includes(procKey)) return null;
@@ -35,20 +35,20 @@ const IngredientRow = ({ prep, ingredient, prepIndex, ingredientIndex }) => {
 
         return (
           <React.Fragment key={procKey}>
-            <TableCell>
-              <Input value={initialWeight} onChange={e => updateField(proc.fields[0], e.target.value)} className="w-24 text-center" />
+            <TableCell className="font-mono">
+              <Input value={initialWeight} onChange={e => updateField(proc.fields[0], e.target.value)} className="w-24 text-center font-mono" />
             </TableCell>
-            <TableCell>
-              <Input value={finalWeight} onChange={e => updateField(proc.fields[1], e.target.value)} className="w-24 text-center" />
+            <TableCell className="font-mono">
+              <Input value={finalWeight} onChange={e => updateField(proc.fields[1], e.target.value)} className="w-24 text-center font-mono" />
             </TableCell>
-            <TableCell className="text-center">
-              <Badge variant="secondary">{formatPercentage(calculateLoss(initialWeight, finalWeight))}</Badge>
+            <TableCell className="text-center font-mono">
+              <span className="text-slate-600">{formatPercentage(calculateLoss(initialWeight, finalWeight))}</span>
             </TableCell>
           </React.Fragment>
         );
       })}
 
-      <TableCell className="text-center font-bold"><Badge>{formatPercentage(getYield(ingredient))}</Badge></TableCell>
+      <TableCell className="text-center font-bold font-mono"><span className="text-slate-700">{formatPercentage(getYield(ingredient))}</span></TableCell>
       <TableCell className="text-right">
         <Button variant="ghost" size="icon" onClick={() => actions.removeIngredient(prep.id, ingredient.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
       </TableCell>
