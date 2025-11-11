@@ -505,9 +505,9 @@ export default function Customers() {
                   {/* Company */}
                   <TableCell className="font-mono capitalize">{customer.company || "-"}</TableCell>
                   {/* CNPJ */}
-                  <TableCell className="font-mono">{customer.cnpj || "-"}</TableCell>
+                  <TableCell className="font-mono capitalize">{customer.cnpj || "-"}</TableCell>
                   {/* Phone (Clickable for WhatsApp) */}
-                  <TableCell className="font-mono">
+                  <TableCell className="font-mono capitalize">
                     {customer.phone ? (
                       <span
                         className="cursor-pointer text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"
@@ -521,11 +521,11 @@ export default function Customers() {
                     )}
                   </TableCell>
                   {/* Email */}
-                  <TableCell className="font-mono">{customer.email || "-"}</TableCell>
+                  <TableCell className="font-mono capitalize">{customer.email || "-"}</TableCell>
                   {/* Billing Period */}
-                  <TableCell className="font-mono">
+                  <TableCell className="font-mono capitalize">
                     {customer.billing_period ? (
-                      <span className="capitalize text-purple-700 font-semibold">
+                      <span className="text-purple-700 font-semibold">
                         {customer.billing_period === "diario" ? "Diário" :
                          customer.billing_period === "semanal" ? "Semanal" :
                          customer.billing_period === "quinzenal" ? "Quinzenal" :
@@ -534,18 +534,18 @@ export default function Customers() {
                          }
                       </span>
                     ) : (
-                       <span className="capitalize text-purple-700 font-semibold">Mensal</span> // Default
+                       <span className="text-purple-700 font-semibold">Mensal</span> // Default
                     )}
                   </TableCell>
                   {/* Payment Day/Term */}
-                  <TableCell className="text-center font-mono">
+                  <TableCell className="text-center font-mono capitalize">
                     {customer.billing_period === 'mensal' && customer.payment_day ? `Dia ${customer.payment_day}` :
                      (customer.billing_period === 'semanal' || customer.billing_period === 'quinzenal') && customer.payment_day ? `${customer.payment_day} dias` :
                      customer.billing_period === 'diario' ? 'Na entrega' : // Example for daily
                      '-'}
                   </TableCell>
                   {/* Status */}
-                  <TableCell className="font-mono">
+                  <TableCell className="font-mono capitalize">
                     <span className={customer.pending_registration ? "text-orange-600 font-semibold" : (customer.active ? "text-green-700 font-semibold" : "text-gray-500 font-semibold")}>
                       {customer.pending_registration ? "Aguardando" : (customer.active ? "Ativo" : "Inativo")}
                     </span>

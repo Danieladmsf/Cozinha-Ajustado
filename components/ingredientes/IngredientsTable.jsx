@@ -222,7 +222,7 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                     </div>
                   </td>
                   <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
-                    <span className="text-slate-600 font-medium">
+                    <span className="text-slate-600 font-medium capitalize">
                       {ingredient.unit}
                     </span>
                   </td>
@@ -265,7 +265,7 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                     </div>
                   </td>
                   <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
-                    <span className="text-slate-500 text-xs font-medium flex items-center gap-1">
+                    <span className="text-slate-500 text-xs font-medium flex items-center gap-1 capitalize">
                       {ingredient.last_update ? (
                         <>
                           <Calendar className="w-3 h-3" />
@@ -282,8 +282,8 @@ export default function IngredientsTable({ ingredients, onDelete, updateIngredie
                   <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">
                     <span
                       className={ingredient.active
-                        ? "text-green-700 font-semibold flex items-center gap-1"
-                        : "text-red-700 font-semibold flex items-center gap-1"
+                        ? "text-green-700 font-semibold flex items-center gap-1 capitalize"
+                        : "text-red-700 font-semibold flex items-center gap-1 capitalize"
                       }
                     >
                       {ingredient.active ? (

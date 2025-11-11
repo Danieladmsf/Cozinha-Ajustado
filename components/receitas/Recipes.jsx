@@ -1483,13 +1483,13 @@ export default function Recipes() {
                                                   {ingredientsWithVariations.map((ing, idx) => (
                                                     <TableRow key={idx}>
                                                       <TableCell className="font-mono capitalize">{getIngredientName(ing.ingredient_id)}</TableCell>
-                                                      <TableCell className="text-right font-mono">
+                                                      <TableCell className="text-right font-mono capitalize">
                                                         {formatCurrency(ing.previousPrice)}/{ing.unit}
                                                       </TableCell>
-                                                      <TableCell className="text-right font-mono">
+                                                      <TableCell className="text-right font-mono capitalize">
                                                         {formatCurrency(ing.currentPrice)}/{ing.unit}
                                                       </TableCell>
-                                                      <TableCell className="text-right font-mono">
+                                                      <TableCell className="text-right font-mono capitalize">
                                                         {Math.abs(ing.percentChange) < 0.005 ? (
                                                           <span className="text-gray-600">0.00%</span>
                                                         ) : (
@@ -1499,7 +1499,7 @@ export default function Recipes() {
                                                           </span>
                                                         )}
                                                       </TableCell>
-                                                      <TableCell className="text-right font-mono">
+                                                      <TableCell className="text-right font-mono capitalize">
                                                         {Math.abs(ing.monetaryChange) < 0.005 ? (
                                                           <span className="text-gray-600">R$ 0,00</span>
                                                         ) : (
@@ -1512,10 +1512,10 @@ export default function Recipes() {
                                                   ))}
                                                   
                                                   <TableRow className="font-medium bg-gray-50">
-                                                    <TableCell className="font-mono">Total da Receita</TableCell>
-                                                    <TableCell className="text-right font-mono">{formatCurrency(variation.previousTotal)}</TableCell>
-                                                    <TableCell className="text-right font-mono">{formatCurrency(variation.currentTotal)}</TableCell>
-                                                    <TableCell className="text-right font-mono">
+                                                    <TableCell className="font-mono capitalize">Total da Receita</TableCell>
+                                                    <TableCell className="text-right font-mono capitalize">{formatCurrency(variation.previousTotal)}</TableCell>
+                                                    <TableCell className="text-right font-mono capitalize">{formatCurrency(variation.currentTotal)}</TableCell>
+                                                    <TableCell className="text-right font-mono capitalize">
                                                       {Math.abs(variation.percentChange) < 0.005 ? (
                                                         <span className="text-gray-600">0.00%</span>
                                                       ) : (
@@ -1525,7 +1525,7 @@ export default function Recipes() {
                                                         </span>
                                                       )}
                                                     </TableCell>
-                                                    <TableCell className="text-right font-mono">
+                                                    <TableCell className="text-right font-mono capitalize">
                                                       {Math.abs(variation.monetaryChange) < 0.005 ? (
                                                         <span className="text-gray-600">R$ 0,00</span>
                                                       ) : (

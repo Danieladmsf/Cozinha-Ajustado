@@ -365,16 +365,16 @@ export default function FechamentoPage() {
                           {customer.name}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right text-gray-700 font-mono">
+                      <TableCell className="text-right text-gray-700 font-mono capitalize">
                         {customer.totalMeals.toLocaleString('pt-BR')}
                       </TableCell>
-                      <TableCell className="text-right text-gray-700 font-mono">
+                      <TableCell className="text-right text-gray-700 font-mono capitalize">
                         {formatWeightDisplay(customer.totalWeight)}
                       </TableCell>
-                      <TableCell className="text-right text-gray-700 font-mono">
+                      <TableCell className="text-right text-gray-700 font-mono capitalize">
                         {utilFormatCurrency(customer.originalTotalAmount)}
                       </TableCell>
-                      <TableCell className="text-right font-mono">
+                      <TableCell className="text-right font-mono capitalize">
                         {customer.totalDepreciation + customer.totalNonReceivedDiscount > 0 ? (
                           <span className="text-red-700 font-semibold">
                             -{utilFormatCurrency(customer.totalDepreciation + customer.totalNonReceivedDiscount)}
@@ -383,12 +383,12 @@ export default function FechamentoPage() {
                           <span className="text-gray-400">-</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right font-mono">
+                      <TableCell className="text-right font-mono capitalize">
                         <span className="font-bold text-gray-900 text-lg">
                           {utilFormatCurrency(customer.finalTotalAmount)}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right font-mono">
+                      <TableCell className="text-right font-mono capitalize">
                         <span className="text-blue-700 font-semibold">
                           {utilFormatCurrency(customer.averageMealCost)}
                         </span>
