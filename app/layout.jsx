@@ -115,7 +115,7 @@ export default function RootLayout({ children }) {
           <title>Portal do Cliente - Cozinha Afeto</title>
         </head>
         <body>
-          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+          <div className="portal-layout min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
             {children}
           </div>
           <Toaster />

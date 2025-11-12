@@ -50,6 +50,14 @@
     overflow: hidden;
   }
 
+  /* Permite scroll no portal do cliente */
+  html:has(.portal-layout),
+  html:has(.portal-layout) body {
+    overflow: auto;
+    height: auto;
+    min-height: 100%;
+  }
+
   html {
     background-color: white;
   }

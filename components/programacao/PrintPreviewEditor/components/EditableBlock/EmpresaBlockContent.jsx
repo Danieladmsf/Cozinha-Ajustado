@@ -113,6 +113,11 @@ export function EmpresaBlockContent({
                     onBlur={(e) => handleEditEnd(e, item.recipe_name, normalizedCustomerName, 'name', block.title)}
                   >
                     {formatRecipeName(item.recipe_name)}
+                    {item.notes && item.notes.trim() && (
+                      <span className="notes" style={{ fontStyle: 'italic', color: '#6b7280', marginLeft: '4px' }}>
+                        ({item.notes.trim()})
+                      </span>
+                    )}
                   </span>
                 </Tooltip>
                 {/* Valor do portal entre parênteses (em caso de conflito não resolvido) */}

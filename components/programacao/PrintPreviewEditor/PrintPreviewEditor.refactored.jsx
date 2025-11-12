@@ -10,7 +10,7 @@
  * 4. Sistema de sincronização mais previsível
  */
 
-import React, { useState, useRef, useEffect, useCallback, useReducer, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw, GripVertical, Download, Users, Lock, AlertTriangle, Cloud, CheckCircle } from "lucide-react";
 import { useImpressaoProgramacao } from '@/hooks/programacao/useImpressaoProgramacao';
@@ -23,68 +23,38 @@ import { EditableBlock } from './components/EditableBlock';
 import { generateAndDownloadPDF } from './services/pdfGenerator';
 import './print-preview.css';
 
-// Reducer para centralizar todas as modificações de blocos
-function blocksReducer(state, action) {
-  switch (action.type) {
-    case 'INIT_BLOCKS':
-      return {
-        blocks: action.payload,
-        version: state.version + 1,
-        source: 'init'
-      };
-
-    case 'LOAD_FROM_FIREBASE':
-      return {
-        blocks: action.payload,
-        version: state.version + 1,
-        source: 'firebase'
-      };
-
-    case 'UPDATE_QUANTITIES':
-      return {
-        blocks: action.payload,
-        version: state.version + 1,
-        source: 'quantities'
-      };
-
-    case 'APPLY_EDITS':
-      return {
-        blocks: action.payload,
-        version: state.version + 1,
-        source: 'edits'
-      };
-
-    case 'UPDATE_BLOCKS':
-      return {
-        blocks: action.payload,
-        version: state.version + 1,
-        source: 'update'
-      };
-
-    default:
-      return state;
-  }
-}
+// Importar sistema de gerenciamento de estado
+import {
+  ensureCategoryOrderInBlocks,
+  reorganizeBlockItems,
+  createEditKey,
+  createEditRecord,
+  saveEditStateToLocal,
+  loadEditStateFromLocal,
+  getEditStateSummary,
+  processBlockItemsWithStates,
+  getItemDisplayInfo
+} from './utils';
 
 export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const { porEmpresaData, saladaData, acougueData, embalagemData, selectedDayInfo, formatQuantityDisplay, consolidateCustomerItems, recipes, originalOrders } = data;
 
-  // Usar useReducer em vez de useState para melhor controle
-  const [blocksState, dispatch] = useReducer(blocksReducer, {
-    blocks: [],
-    version: 0,
-    source: null
-  });
-
+  // Simplificar: usar useState ao invés de useReducer
+  const [editableBlocks, setEditableBlocks] = useState([]);
   const [zoom, setZoom] = useState(50);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [pdfProgress, setPdfProgress] = useState({ current: 0, total: 0 });
   const previewAreaRef = useRef(null);
 
+  // Estados para gerenciamento de edições e conflitos
+  const [editState, setEditState] = useState({});
+  const [portalUpdates, setPortalUpdates] = useState({});
+  const [resolvedConflicts, setResolvedConflicts] = useState({});
+  const [isLoadingState, setIsLoadingState] = useState(false);
+
   // Refs para controle de inicialização
   const hasInitializedRef = useRef(false);
-  const hasLoadedFromFirebaseRef = useRef(false);
-  const lastFirebaseSyncVersion = useRef(-1);
+  const canSaveToLocalStorageRef = useRef(false);
 
   // Hook de gerenciamento de fontes e ordem
   const {
@@ -114,55 +84,153 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     handleDrop,
     handleDragEnd,
     handleContentEdit
-  } = useBlockManagement(blocksState.blocks, (blocks) => {
-    dispatch({ type: 'UPDATE_BLOCKS', payload: blocks });
-  }, previewAreaRef, zoom);
+  } = useBlockManagement(editableBlocks, setEditableBlocks, previewAreaRef, zoom);
 
   // Extrair informações de semana/ano/dia
   const weekNumber = selectedDayInfo?.weekNumber || 0;
   const year = selectedDayInfo?.year || new Date().getFullYear();
   const dayNumber = selectedDayInfo?.dayNumber || 0;
 
-  // Hooks Firebase
-  const {
-    blocks: firebaseBlocks,
-    updateBlocks: updateFirebaseBlocks,
-    editedItems,
-    markItemAsEdited,
-    isItemEdited,
-    getItemEditInfo,
-    acceptPortalChange,
-    rejectPortalChange,
-    editingUsers,
-    isLocked,
-    isSyncing,
-    lastSyncTime,
-    sessionId
-  } = useImpressaoProgramacao(weekNumber, year, dayNumber, data);
+  // Carregar estado salvo ao montar o componente
+  useEffect(() => {
+    // Desabilitar salvamento durante carregamento
+    canSaveToLocalStorageRef.current = false;
+    setIsLoadingState(true);
 
-  // Hook de resolução de conflitos
-  const {
-    changedItems,
-    resolvedConflicts,
-    initialSnapshot,
-    hasChanges,
-    isItemChanged,
-    getItemChangeInfo,
-    getResolutionStatus,
-    handleAcceptPortalChange,
-    handleRejectPortalChange,
-    handleResetSnapshot
-  } = useConflictResolution(
-    originalOrders,
-    weekNumber,
-    year,
-    dayNumber,
-    markItemAsEdited,
-    rejectPortalChange
-  );
+    const weekKey = `programacao-edits-${weekNumber}-${year}`;
+    const savedState = loadEditStateFromLocal(weekKey);
+
+    console.log('[PrintPreviewEditor] Carregando estado salvo:', {
+      weekKey,
+      savedState
+    });
+
+    if (savedState && typeof savedState === 'object') {
+      if (savedState.edits) {
+        console.log('[PrintPreviewEditor] Restaurando edições:', Object.keys(savedState.edits).length);
+        setEditState(savedState.edits);
+      }
+      if (savedState.portalUpdates) setPortalUpdates(savedState.portalUpdates);
+      if (savedState.resolved) setResolvedConflicts(savedState.resolved);
+    } else {
+      // Limpar estados se não há nada salvo
+      setEditState({});
+      setPortalUpdates({});
+      setResolvedConflicts({});
+    }
+
+    // Marcar que terminou de carregar e HABILITAR salvamento após delay maior
+    setTimeout(() => {
+      setIsLoadingState(false);
+      console.log('[PrintPreviewEditor] Estado carregado');
+    }, 100);
+
+    // Habilitar salvamento somente após tudo estar pronto (delay maior)
+    setTimeout(() => {
+      canSaveToLocalStorageRef.current = true;
+      console.log('[PrintPreviewEditor] Salvamento habilitado');
+    }, 500);
+  }, [weekNumber, year]);
+
+  // Salvar estado quando mudar
+  useEffect(() => {
+    // NÃO salvar se está carregando estado inicial
+    if (isLoadingState) {
+      console.log('[PrintPreviewEditor] Salvamento bloqueado (carregando estado inicial)');
+      return;
+    }
+
+    // NÃO salvar se ainda não foi habilitado (durante inicialização)
+    if (!canSaveToLocalStorageRef.current) {
+      console.log('[PrintPreviewEditor] Salvamento bloqueado (ainda não habilitado)');
+      return;
+    }
+
+    const weekKey = `programacao-edits-${weekNumber}-${year}`;
+
+    const stateToSave = {
+      edits: editState,
+      portalUpdates,
+      resolved: resolvedConflicts
+    };
+
+    console.log('[PrintPreviewEditor] Salvando estado:', {
+      weekKey,
+      numEdits: Object.keys(editState).length,
+      numPortalUpdates: Object.keys(portalUpdates).length,
+      numResolved: Object.keys(resolvedConflicts).length
+    });
+
+    saveEditStateToLocal(weekKey, stateToSave);
+  }, [editState, portalUpdates, resolvedConflicts, weekNumber, year, isLoadingState]);
+
+  // Desabilitar Firebase temporariamente para corrigir loop infinito
+  // TODO: Reabilitar quando o hook useImpressaoProgramacao for corrigido
+  const editedItems = {};
+  const markItemAsEdited = () => {};
+  const isItemEdited = () => false;
+  const getItemEditInfo = () => null;
+  const editingUsers = [];
+  const isLocked = false;
+  const isSyncing = false;
+  const lastSyncTime = null;
+  const sessionId = null;
+
+  // const {
+  //   blocks: firebaseBlocks,
+  //   updateBlocks: updateFirebaseBlocks,
+  //   editedItems,
+  //   markItemAsEdited,
+  //   isItemEdited,
+  //   getItemEditInfo,
+  //   acceptPortalChange,
+  //   rejectPortalChange,
+  //   editingUsers,
+  //   isLocked,
+  //   isSyncing,
+  //   lastSyncTime,
+  //   sessionId
+  // } = useImpressaoProgramacao(weekNumber, year, dayNumber, data);
+
+  // Desabilitar resolução de conflitos antiga temporariamente
+  const changedItems = {};
+  // resolvedConflicts agora está sendo usado pelo novo sistema (linha 52)
+  const hasChanges = false;
+  const isItemChanged = () => false;
+  const getItemChangeInfo = () => null;
+  const getResolutionStatus = () => null;
+  const handleAcceptPortalChange = () => {};
+  const handleRejectPortalChange = () => {};
+  const handleResetSnapshot = () => {};
+
+  // const {
+  //   changedItems,
+  //   resolvedConflicts,
+  //   initialSnapshot,
+  //   hasChanges,
+  //   isItemChanged,
+  //   getItemChangeInfo,
+  //   getResolutionStatus,
+  //   handleAcceptPortalChange,
+  //   handleRejectPortalChange,
+  //   handleResetSnapshot
+  // } = useConflictResolution(
+  //   originalOrders,
+  //   weekNumber,
+  //   year,
+  //   dayNumber,
+  //   markItemAsEdited,
+  //   rejectPortalChange
+  // );
 
   // Função estável para aplicar edições (usando useCallback)
   const applyEditsToBlocks = useCallback((blocks, editedItemsMap) => {
+    // Garantir que blocks é sempre um array
+    if (!Array.isArray(blocks)) {
+      console.error('applyEditsToBlocks: blocks is not an array');
+      return [];
+    }
+
     if (!editedItemsMap || Object.keys(editedItemsMap).length === 0) {
       return blocks;
     }
@@ -175,9 +243,9 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         Object.entries(updatedBlock.items).forEach(([category, categoryItems]) => {
           newItems[category] = categoryItems.map(item => {
             const normalizedCustomerName = item.customer_name || 'sem_cliente';
-            const newFormatKey = `${updatedBlock.title}_${item.recipe_name}_${normalizedCustomerName}`;
-            const oldFormatKey = `${item.recipe_name}_${normalizedCustomerName}`;
-            const editInfo = editedItemsMap[newFormatKey] || editedItemsMap[oldFormatKey];
+            // Usar createEditKey (novo formato com ::)
+            const itemKey = createEditKey(item.recipe_name, normalizedCustomerName, updatedBlock.title);
+            const editInfo = editedItemsMap[itemKey];
 
             if (editInfo && editInfo.field === 'quantity') {
               const numMatch = editInfo.editedValue.match(/[\d.,]+/);
@@ -196,7 +264,8 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       if ((updatedBlock.type === 'detailed-section' || updatedBlock.type === 'embalagem-category') && updatedBlock.items) {
         updatedBlock.items = updatedBlock.items.map(recipe => {
           const newClientes = recipe.clientes.map(cliente => {
-            const itemKey = createItemKey(recipe.recipe_name, cliente.customer_name);
+            // Usar createEditKey (novo formato com ::)
+            const itemKey = createEditKey(recipe.recipe_name, cliente.customer_name);
             const editInfo = editedItemsMap[itemKey];
 
             if (editInfo && editInfo.field === 'quantity') {
@@ -223,12 +292,11 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     });
   }, []);
 
-  // Inicializar blocos APENAS UMA VEZ
-  useEffect(() => {
-    if (hasInitializedRef.current) return;
-    if (!porEmpresaData && !saladaData && !acougueData && !embalagemData) return;
+  // Inicializar blocos APENAS UMA VEZ com useMemo
+  const initialBlocks = useMemo(() => {
+    if (!porEmpresaData && !saladaData && !acougueData && !embalagemData) return [];
 
-    hasInitializedRef.current = true;
+    console.log('[PrintPreviewEditor] Inicializando blocos...');
 
     const blocks = [];
     const savedFontSizes = loadSavedFontSizes();
@@ -419,210 +487,149 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       ? savedOrder.map(id => blocks.find(b => b.id === id)).filter(Boolean)
       : blocks;
 
-    dispatch({ type: 'INIT_BLOCKS', payload: orderedBlocks });
-  }, [porEmpresaData, saladaData, acougueData, embalagemData, loadSavedFontSizes, loadSavedOrder, consolidateCustomerItems, selectedDayInfo]);
+    // GARANTIR ordem correta das categorias
+    const blocksWithOrderedCategories = ensureCategoryOrderInBlocks(orderedBlocks);
 
-  // Carregar do Firebase APENAS UMA VEZ
+    return Array.isArray(blocksWithOrderedCategories) ? blocksWithOrderedCategories : [];
+  }, [porEmpresaData, saladaData, acougueData, embalagemData, loadSavedFontSizes, loadSavedOrder, consolidateCustomerItems, selectedDayInfo, recipes]);
+
+  // Inicializar blocks quando initialBlocks estiver pronto
   useEffect(() => {
-    if (!firebaseBlocks || firebaseBlocks.length === 0) return;
-    if (hasLoadedFromFirebaseRef.current) return;
+    if (initialBlocks.length > 0 && editableBlocks.length === 0 && !isLoadingState) {
+      console.log('[PrintPreviewEditor] Setando blocos iniciais:', initialBlocks.length);
 
-    hasLoadedFromFirebaseRef.current = true;
-    const blocksWithEdits = applyEditsToBlocks(firebaseBlocks, editedItems);
-    dispatch({ type: 'LOAD_FROM_FIREBASE', payload: blocksWithEdits });
-  }, [firebaseBlocks, editedItems, applyEditsToBlocks]);
-
-  // Sincronizar com Firebase apenas quando necessário
-  useEffect(() => {
-    if (blocksState.blocks.length === 0) return;
-    if (!hasLoadedFromFirebaseRef.current && !hasInitializedRef.current) return;
-    if (blocksState.source === 'firebase') return; // Não sincronizar de volta para o Firebase
-    if (lastFirebaseSyncVersion.current === blocksState.version) return;
-
-    lastFirebaseSyncVersion.current = blocksState.version;
-
-    saveFontSizes(blocksState.blocks);
-    savePageOrder(blocksState.blocks);
-    updateFirebaseBlocks(blocksState.blocks);
-  }, [blocksState.version, blocksState.blocks, blocksState.source, updateFirebaseBlocks, saveFontSizes, savePageOrder]);
-
-  // Atualizar quantidades quando originalOrders mudar
-  const lastProcessedOrdersRef = useRef(null);
-  useEffect(() => {
-    if (!originalOrders || blocksState.blocks.length === 0) return;
-    if (!hasLoadedFromFirebaseRef.current && !hasInitializedRef.current) return;
-
-    const ordersHash = JSON.stringify(originalOrders);
-    if (lastProcessedOrdersRef.current === ordersHash) return;
-    lastProcessedOrdersRef.current = ordersHash;
-
-    const currentQuantities = {};
-    originalOrders.forEach(order => {
-      if (!order.items) return;
-      order.items.forEach(item => {
-        const itemKey = createItemKey(item.recipe_name, order.customer_name);
-        currentQuantities[itemKey] = {
-          quantity: item.quantity,
-          unit_type: item.unit_type
-        };
-      });
-    });
-
-    const updatedBlocks = blocksState.blocks.map(block => {
-      const updatedBlock = { ...block };
-
-      if (block.type === 'empresa' && block.items) {
-        const newItems = {};
-        Object.entries(block.items).forEach(([category, items]) => {
-          newItems[category] = items.map(item => {
-            const itemKey = createItemKey(item.recipe_name, item.customer_name || 'sem_cliente', block.title);
-            const editInfo = isItemEdited && isItemEdited(itemKey);
-
-            if (editInfo) return item;
-
-            const portalData = currentQuantities[itemKey];
-            if (portalData) {
-              return {
-                ...item,
-                quantity: portalData.quantity,
-                unit_type: portalData.unit_type
-              };
-            }
-            return item;
-          });
-        });
-        updatedBlock.items = newItems;
+      // Aplicar edições salvas aos blocos iniciais
+      if (Object.keys(editState).length > 0) {
+        const blocksWithEdits = applyEditsToBlocks(initialBlocks, editState);
+        console.log('[PrintPreviewEditor] Aplicando', Object.keys(editState).length, 'edições salvas aos blocos');
+        setEditableBlocks(blocksWithEdits);
+      } else {
+        console.log('[PrintPreviewEditor] Sem edições para aplicar, usando blocos originais');
+        setEditableBlocks(initialBlocks);
       }
-
-      // Atualizar blocos tipo 'detailed-section'
-      if (block.type === 'detailed-section' && block.items) {
-        updatedBlock.items = block.items.map(recipe => {
-          const newClientes = recipe.clientes.map(cliente => {
-            const itemKey = createItemKey(recipe.recipe_name, cliente.customer_name);
-            const editInfo = isItemEdited && isItemEdited(itemKey);
-
-            if (editInfo) return cliente;
-
-            const portalData = currentQuantities[itemKey];
-            if (portalData) {
-              return {
-                ...cliente,
-                quantity: portalData.quantity,
-                unit_type: portalData.unit_type
-              };
-            }
-            return cliente;
-          });
-
-          return { ...recipe, clientes: newClientes };
-        });
-      }
-
-      // Atualizar blocos tipo 'embalagem-category'
-      if (block.type === 'embalagem-category' && block.items) {
-        updatedBlock.items = block.items.map(recipe => {
-          const newClientes = recipe.clientes.map(cliente => {
-            const itemKey = createItemKey(recipe.recipe_name, cliente.customer_name);
-            const editInfo = isItemEdited && isItemEdited(itemKey);
-
-            if (editInfo) return cliente;
-
-            const portalData = currentQuantities[itemKey];
-            if (portalData) {
-              return {
-                ...cliente,
-                quantity: portalData.quantity,
-                unit_type: portalData.unit_type
-              };
-            }
-            return cliente;
-          });
-
-          return { ...recipe, clientes: newClientes };
-        });
-      }
-
-      return updatedBlock;
-    });
-
-    dispatch({ type: 'UPDATE_QUANTITIES', payload: updatedBlocks });
-  }, [originalOrders, isItemEdited, blocksState.blocks]);
+    }
+  }, [initialBlocks, editState, applyEditsToBlocks, isLoadingState]);
 
   const handleItemEdit = useCallback((itemName, clientName, originalValue, editedValue, field = 'content', blockTitle = null) => {
     const normalizedClientName = clientName || 'sem_cliente';
-    const itemKey = createItemKey(itemName, normalizedClientName, blockTitle);
 
+    // Criar chave única usando o novo sistema
+    const itemKey = createEditKey(itemName, normalizedClientName, blockTitle);
+
+    console.log('[PrintPreviewEditor] Editando item:', {
+      itemKey,
+      originalValue,
+      editedValue,
+      field
+    });
+
+    // Criar registro de edição
+    const editRecord = createEditRecord({
+      itemKey,
+      originalValue,
+      editedValue,
+      field,
+      userId: 'local-user',
+      userName: 'Usuário Local'
+    });
+
+    // Atualizar estado de edições
+    setEditState(prev => {
+      const newState = {
+        ...prev,
+        [itemKey]: editRecord
+      };
+      console.log('[PrintPreviewEditor] Novo editState:', newState);
+      return newState;
+    });
+
+    // Chamar markItemAsEdited original (Firebase - quando reabilitado)
     markItemAsEdited(itemKey, originalValue, editedValue, field);
 
-    const updatedBlocks = blocksState.blocks.map(block => {
-      const updatedBlock = { ...block };
-      let modified = false;
-
-      if (updatedBlock.type === 'empresa' && updatedBlock.items) {
-        const newItems = {};
-        Object.entries(updatedBlock.items).forEach(([category, categoryItems]) => {
-          newItems[category] = categoryItems.map(item => {
-            const matchesBlock = blockTitle ? updatedBlock.title === blockTitle : true;
-            if (matchesBlock &&
-                item.recipe_name === itemName &&
-                (item.customer_name || 'sem_cliente') === normalizedClientName) {
-              modified = true;
-              if (field === 'quantity') {
-                const numMatch = editedValue.match(/[\d.,]+/);
-                if (numMatch) {
-                  return { ...item, quantity: parseFloat(numMatch[0].replace(',', '.')) };
-                }
-              } else if (field === 'name') {
-                return { ...item, recipe_name: editedValue };
-              }
-            }
-            return item;
-          });
-        });
-        if (modified) {
-          updatedBlock.items = newItems;
-        }
+    // Usar atualização funcional para evitar dependência de editableBlocks
+    setEditableBlocks(prevBlocks => {
+      if (!Array.isArray(prevBlocks)) {
+        console.error('editableBlocks is not an array in handleItemEdit');
+        return prevBlocks;
       }
 
-      // Atualizar blocos tipo 'detailed-section' e 'embalagem-category'
-      if ((updatedBlock.type === 'detailed-section' || updatedBlock.type === 'embalagem-category') && updatedBlock.items) {
-        updatedBlock.items = updatedBlock.items.map(recipe => {
-          if (recipe.recipe_name === itemName || recipe.clientes?.some(c => c.customer_name === normalizedClientName)) {
-            const newClientes = recipe.clientes.map(cliente => {
-              if (cliente.customer_name === normalizedClientName) {
+      const updatedBlocks = prevBlocks.map(block => {
+        const updatedBlock = { ...block };
+        let modified = false;
+
+        if (updatedBlock.type === 'empresa' && updatedBlock.items) {
+          const newItems = {};
+          Object.entries(updatedBlock.items).forEach(([category, categoryItems]) => {
+            newItems[category] = categoryItems.map(item => {
+              const matchesBlock = blockTitle ? updatedBlock.title === blockTitle : true;
+              if (matchesBlock &&
+                  item.recipe_name === itemName &&
+                  (item.customer_name || 'sem_cliente') === normalizedClientName) {
                 modified = true;
                 if (field === 'quantity') {
                   const numMatch = editedValue.match(/[\d.,]+/);
                   if (numMatch) {
-                    return { ...cliente, quantity: parseFloat(numMatch[0].replace(',', '.')) };
+                    return { ...item, quantity: parseFloat(numMatch[0].replace(',', '.')) };
                   }
-                } else if (field === 'customer') {
-                  return { ...cliente, customer_name: editedValue };
+                } else if (field === 'name') {
+                  return { ...item, recipe_name: editedValue };
                 }
               }
-              return cliente;
+              return item;
             });
-
-            // Recalcular total se necessário
-            if (modified && recipe.showTotal) {
-              const newTotal = newClientes.reduce((sum, c) => sum + (c.quantity || 0), 0);
-              return { ...recipe, clientes: newClientes, total: Math.round(newTotal * 100) / 100 };
-            }
-
-            return { ...recipe, clientes: newClientes };
+          });
+          if (modified) {
+            updatedBlock.items = newItems;
+            // IMPORTANTE: Reorganizar para manter ordem das categorias
+            return reorganizeBlockItems(updatedBlock);
           }
-          return recipe;
-        });
-      }
+        }
 
-      return updatedBlock;
+        // Atualizar blocos tipo 'detailed-section' e 'embalagem-category'
+        if ((updatedBlock.type === 'detailed-section' || updatedBlock.type === 'embalagem-category') && updatedBlock.items) {
+          updatedBlock.items = updatedBlock.items.map(recipe => {
+            if (recipe.recipe_name === itemName || recipe.clientes?.some(c => c.customer_name === normalizedClientName)) {
+              const newClientes = recipe.clientes.map(cliente => {
+                if (cliente.customer_name === normalizedClientName) {
+                  modified = true;
+                  if (field === 'quantity') {
+                    const numMatch = editedValue.match(/[\d.,]+/);
+                    if (numMatch) {
+                      return { ...cliente, quantity: parseFloat(numMatch[0].replace(',', '.')) };
+                    }
+                  } else if (field === 'customer') {
+                    return { ...cliente, customer_name: editedValue };
+                  }
+                }
+                return cliente;
+              });
+
+              // Recalcular total se necessário
+              if (modified && recipe.showTotal) {
+                const newTotal = newClientes.reduce((sum, c) => sum + (c.quantity || 0), 0);
+                return { ...recipe, clientes: newClientes, total: Math.round(newTotal * 100) / 100 };
+              }
+
+              return { ...recipe, clientes: newClientes };
+            }
+            return recipe;
+          });
+        }
+
+        return updatedBlock;
+      });
+
+      return updatedBlocks;
     });
-
-    dispatch({ type: 'UPDATE_BLOCKS', payload: updatedBlocks });
-  }, [blocksState.blocks, markItemAsEdited]);
+  }, [markItemAsEdited]);
 
   const handlePrintFinal = useCallback(() => {
-    const blocksWithEditedContent = blocksState.blocks.map(block => {
+    if (!Array.isArray(editableBlocks)) {
+      console.error('editableBlocks is not an array');
+      return;
+    }
+
+    const blocksWithEditedContent = editableBlocks.map(block => {
       const element = document.getElementById(`block-${block.id}`);
       if (element) {
         const contentElement = element.querySelector('.block-content');
@@ -711,7 +718,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     setTimeout(() => {
       printWindow.print();
     }, 500);
-  }, [blocksState.blocks, selectedDayInfo]);
+  }, [selectedDayInfo]);
 
   const handleDownloadPDF = useCallback(async () => {
     await generateAndDownloadPDF({
@@ -723,13 +730,27 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     });
   }, [zoom, selectedDayInfo]);
 
+  // Processar blocos adicionando informações de estado (cores, labels, conflitos)
+  const processedBlocks = useMemo(() => {
+    if (!Array.isArray(editableBlocks)) return [];
+
+    return editableBlocks.map(block =>
+      processBlockItemsWithStates({
+        block,
+        editedItems: editState,
+        portalUpdates,
+        resolvedConflicts
+      })
+    );
+  }, [editableBlocks, editState, portalUpdates, resolvedConflicts]);
+
   return (
     <div className="print-preview-container">
       {/* Toolbar */}
       <div className="preview-toolbar">
         <div className="toolbar-left">
           <h2 className="text-lg font-bold">Editor de Impressão</h2>
-          <span className="text-sm text-gray-600">{blocksState.blocks.length} blocos</span>
+          <span className="text-sm text-gray-600">{Array.isArray(editableBlocks) ? editableBlocks.length : 0} blocos</span>
           {hasSavedSizes && (
             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
               ✓ Ajustes salvos
@@ -841,7 +862,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
             <p className="text-xs text-gray-500 mt-1">Arraste para reordenar</p>
           </div>
           <div className="sidebar-content">
-            {blocksState.blocks.map((block, index) => {
+            {Array.isArray(processedBlocks) && processedBlocks.map((block, index) => {
               const status = blockStatus[block.id];
               const isAdjusted = status && !status.isOverflowing;
               const needsFix = status && status.isOverflowing;
@@ -894,7 +915,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
           minWidth: '794px',
           paddingBottom: '20px'
         }}>
-          {blocksState.blocks.map((block, index) => (
+          {Array.isArray(processedBlocks) && processedBlocks.map((block, index) => (
             <EditableBlock
               key={block.id}
               block={block}

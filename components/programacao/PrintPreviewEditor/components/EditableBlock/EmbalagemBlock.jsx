@@ -93,6 +93,11 @@ export function EmbalagemBlock({
                     onBlur={(e) => handleEditEnd(e, recipe.recipe_name, cliente.customer_name, 'quantity')}
                   >
                     {formatQuantityDisplay(cliente)}
+                    {cliente.notes && cliente.notes.trim() && (
+                      <span className="notes" style={{ fontStyle: 'italic', color: '#6b7280', marginLeft: '4px' }}>
+                        ({cliente.notes.trim()})
+                      </span>
+                    )}
                   </span>
                 </Tooltip>
                 {/* Valor do portal entre parênteses (em caso de conflito não resolvido) */}

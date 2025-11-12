@@ -552,7 +552,10 @@ const ProgramacaoCozinhaTabs = () => {
                 ${items.map((item) => `
                   <div class="item-row" style="margin-bottom: ${spacing}px; gap: ${spacing}px;">
                     <span class="item-quantity" style="font-size: ${qtySize}px;">${formatQuantityDisplay(item)}</span>
-                    <span class="item-name" style="font-size: ${nameSize}px;">${item.recipe_name}</span>
+                    <span class="item-name" style="font-size: ${nameSize}px;">
+                      ${item.recipe_name}
+                      ${item.notes && item.notes.trim() ? `<span class="notes" style="font-style: italic; color: #6b7280;"> (${item.notes.trim()})</span>` : ''}
+                    </span>
                   </div>
                 `).join('')}
               </div>
@@ -568,6 +571,7 @@ const ProgramacaoCozinhaTabs = () => {
     const h2Size = Math.round(baseFontSize * 1.4);
     const textSize = Math.round(baseFontSize * 1.0);
     const qtySize = Math.round(baseFontSize * 1.1);
+    const notesSize = Math.round(baseFontSize * 0.85);
 
     return `
       <div class="print-page" style="font-size: ${baseFontSize}px;">
@@ -581,13 +585,20 @@ const ProgramacaoCozinhaTabs = () => {
               <div class="recipe-section" style="margin-bottom: ${baseFontSize}px;">
                 <h2 style="font-size: ${h2Size}px; margin-bottom: ${baseFontSize * 0.5}px;">${index + 1}. ${nomeReceita.toUpperCase()}</h2>
                 <div class="clients-list" style="padding-left: ${baseFontSize}px;">
-                  ${Object.entries(clientes).map(([customerName, dataCustomer]) => `
+                  ${Object.entries(clientes).map(([customerName, dataCustomer]) => {
+                    const notesText = dataCustomer.items && dataCustomer.items.length > 0 && dataCustomer.items[0].notes
+                      ? dataCustomer.items[0].notes.trim()
+                      : '';
+                    return `
                     <div class="client-line" style="margin-bottom: ${baseFontSize * 0.4}px; gap: ${baseFontSize * 0.3}px;">
                       <span style="font-size: ${textSize}px;">${customerName.toUpperCase()}</span>
                       <span style="font-size: ${textSize}px;">→</span>
-                      <span style="font-size: ${qtySize}px;">${formatQuantityForDisplay(dataCustomer.quantity, dataCustomer.unitType, globalKitchenFormat)}</span>
+                      <span style="font-size: ${qtySize}px;">
+                        ${formatQuantityForDisplay(dataCustomer.quantity, dataCustomer.unitType, globalKitchenFormat)}
+                        ${notesText ? `<span class="notes" style="font-style: italic; color: #6b7280; font-size: ${notesSize}px;"> (${notesText})</span>` : ''}
+                      </span>
                     </div>
-                  `).join('')}
+                  `}).join('')}
                 </div>
               </div>
             `).join('')}
