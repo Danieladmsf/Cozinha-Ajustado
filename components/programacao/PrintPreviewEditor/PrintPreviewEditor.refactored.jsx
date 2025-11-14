@@ -27,7 +27,8 @@ import './print-preview.css';
 import {
   ensureCategoryOrderInBlocks,
   reorganizeBlockItems,
-  getItemDisplayInfo
+  getItemDisplayInfo,
+  processBlockItemsWithStates
 } from './utils';
 
 // NOVO: Sistema simplificado de edições
@@ -832,14 +833,20 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   }, [initialBlocks]);
 
   const handleItemEdit = useCallback((itemName, clientName, originalValue, editedValue, field = 'content', blockTitle = null) => {
-    const normalizedClientName = clientName || 'sem_cliente';
+    // CORREÇÃO: Para blocos empresa, usar blockTitle como customerName
+    // Isso garante que a edição seja salva para o cliente correto (ex: "Faap")
+    // ao invés de "sem_cliente"
+    const normalizedClientName = blockTitle || clientName || 'sem_cliente';
 
     console.log('[PrintPreviewEditor] 📝 NOVA EDIÇÃO (sistema simplificado):', {
       recipeName: itemName,
       customerName: normalizedClientName,
       originalValue,
       editedValue,
-      field
+      field,
+      blockTitle,
+      clientName,
+      usingBlockTitle: !!blockTitle
     });
 
     // NOVO: Salvar usando sistema simplificado
@@ -888,21 +895,51 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
         // BLOCOS CONSOLIDADOS: aplicar se contém cliente === customerName E receita
         if ((updatedBlock.type === 'detailed-section' || updatedBlock.type === 'embalagem-category') && updatedBlock.items) {
+          console.log('[handleItemEdit] 🔍 Verificando bloco consolidado:', {
+            blockType: updatedBlock.type,
+            blockTitle: updatedBlock.title,
+            lookingFor: { recipe: itemName, cliente: normalizedClientName },
+            totalRecipes: updatedBlock.items.length
+          });
+
           updatedBlock.items = updatedBlock.items.map(recipe => {
+            // Log para cada receita
+            const hasRecipe = recipe.recipe_name === itemName;
+            if (hasRecipe) {
+              console.log('[handleItemEdit] ✅ Receita encontrada:', {
+                recipe: recipe.recipe_name,
+                totalClientes: recipe.clientes?.length || 0,
+                clientes: recipe.clientes?.map(c => c.customer_name)
+              });
+            }
+
             if (recipe.recipe_name === itemName && recipe.clientes) {
               const newClientes = recipe.clientes.map(cliente => {
+                // Log para cada cliente
+                const matchesClient = cliente.customer_name === normalizedClientName;
+                if (matchesClient) {
+                  console.log('[handleItemEdit] ✅ Cliente encontrado:', {
+                    cliente: cliente.customer_name,
+                    oldQuantity: cliente.quantity,
+                    field: field
+                  });
+                }
+
                 if (cliente.customer_name === normalizedClientName && field === 'quantity') {
                   modified = true;
                   const numMatch = editedValue.match(/[\d.,]+/);
                   if (numMatch) {
+                    const newQty = parseFloat(numMatch[0].replace(',', '.'));
                     console.log('[handleItemEdit] 🔄 Atualizando bloco consolidado:', {
                       blockType: updatedBlock.type,
                       blockTitle: updatedBlock.title,
                       recipe: itemName,
                       cliente: normalizedClientName,
-                      quantity: parseFloat(numMatch[0].replace(',', '.'))
+                      oldQuantity: cliente.quantity,
+                      newQuantity: newQty,
+                      editedValue: editedValue
                     });
-                    return { ...cliente, quantity: parseFloat(numMatch[0].replace(',', '.')) };
+                    return { ...cliente, quantity: newQty };
                   }
                 }
                 return cliente;
@@ -911,6 +948,12 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
               // Recalcular total se necessário
               if (modified && recipe.showTotal) {
                 const newTotal = newClientes.reduce((sum, c) => sum + (c.quantity || 0), 0);
+                console.log('[handleItemEdit] 📊 Recalculando total:', {
+                  recipe: itemName,
+                  oldTotal: recipe.total,
+                  newTotal: Math.round(newTotal * 100) / 100,
+                  clientes: newClientes.map(c => ({ name: c.customer_name, qty: c.quantity }))
+                });
                 return { ...recipe, clientes: newClientes, total: Math.round(newTotal * 100) / 100 };
               }
 
