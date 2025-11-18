@@ -187,7 +187,6 @@ export function serializeEditState(editState) {
   try {
     return JSON.stringify(editState);
   } catch (error) {
-    console.error('Erro ao serializar estado de edições:', error);
     return '{}';
   }
 }
@@ -199,7 +198,6 @@ export function deserializeEditState(serialized) {
   try {
     return JSON.parse(serialized || '{}');
   } catch (error) {
-    console.error('Erro ao desserializar estado de edições:', error);
     return {};
   }
 }
@@ -213,7 +211,6 @@ export function saveEditStateToLocal(key, editState) {
     localStorage.setItem(key, serialized);
     return true;
   } catch (error) {
-    console.error('Erro ao salvar estado no localStorage:', error);
     return false;
   }
 }
@@ -226,7 +223,6 @@ export function loadEditStateFromLocal(key) {
     const serialized = localStorage.getItem(key);
     return deserializeEditState(serialized);
   } catch (error) {
-    console.error('Erro ao carregar estado do localStorage:', error);
     return {};
   }
 }

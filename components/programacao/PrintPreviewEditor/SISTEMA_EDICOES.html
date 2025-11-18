@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚦 Sistema de Edições com Semáforo Inteligente</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2563eb;
+            border-bottom: 4px solid #2563eb;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #1e40af;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-left: 5px solid #3b82f6;
+            padding-left: 15px;
+        }
+
+        h3 {
+            color: #1e3a8a;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin: 5px;
+        }
+
+        .badge-yellow {
+            background: #fef3c7;
+            color: #92400e;
+            border: 2px solid #fbbf24;
+        }
+
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+
+        .flow-box {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+
+        .flow-box code {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            display: block;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+        }
+
+        .comparison-table th {
+            background: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .semaphore-icon {
+            font-size: 1.5em;
+            vertical-align: middle;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+
+        .highlight-box h3 {
+            color: white;
+            margin-top: 0;
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .scenario {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .scenario h4 {
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+
+        .step {
+            padding: 10px;
+            margin: 10px 0;
+            background: #f8fafc;
+            border-left: 3px solid #3b82f6;
+            border-radius: 4px;
+        }
+
+        .checkmark {
+            color: #10b981;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚦 Sistema de Edições com Semáforo Inteligente</h1>
+
+        <p style="font-size: 1.1em; color: #6b7280; margin-bottom: 30px;">
+            Sistema simplificado e eficiente para gerenciar edições manuais e atualizações do Firebase.
+        </p>
+
+        <h2>📋 VISÃO GERAL</h2>
+
+        <p>O sistema decide automaticamente qual valor mostrar:</p>
+
+        <div style="margin: 20px 0;">
+            <span class="badge badge-yellow">🟡 Edição Manual</span>
+            <span style="margin: 0 10px;">→</span>
+            <span>Se você editou E Firebase não mudou</span>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <span class="badge badge-green">🟢 Firebase Atual</span>
+            <span style="margin: 0 10px;">→</span>
+            <span>Se Firebase mudou DEPOIS da sua edição</span>
+        </div>
+
+        <div class="highlight-box">
+            <h3>✨ Sem conflitos visuais, sem botões, sem complexidade.</h3>
+        </div>
+
+        <h2>🎯 COMO FUNCIONA</h2>
+
+        <h3>1. EDIÇÃO MANUAL</h3>
+
+        <p>Quando você edita na tela de impressão:</p>
+
+        <div class="flow-box">
+            <code>1. Captura valor ORIGINAL do Firebase (ex: 5 cubas)
+2. Gera "hash" do valor (ex: "num:5")
+3. Salva sua edição (ex: 8 cubas)
+4. Salva hash junto: { value: "8 cubas", firebaseValueHash: "num:5" }</code>
+        </div>
+
+        <h3>2. SEMÁFORO AUTOMÁTICO</h3>
+
+        <p>Ao abrir o editor novamente:</p>
+
+        <div class="scenario">
+            <h4>Para cada item com edição salva:</h4>
+
+            <div class="step">
+                1. Busca valor ATUAL do Firebase (ex: 5 cubas)
+            </div>
+            <div class="step">
+                2. Gera hash atual (ex: "num:5")
+            </div>
+            <div class="step">
+                3. Compara com hash salvo ("num:5")
+            </div>
+
+            <div style="margin-top: 20px;">
+                <div style="background: #fef3c7; padding: 15px; border-radius: 6px; margin: 10px 0;">
+                    <strong>SE hashes IGUAIS:</strong><br>
+                    <span class="semaphore-icon">🟡</span> Firebase NÃO mudou<br>
+                    → Mantém edição manual (8 cubas)
+                </div>
+
+                <div style="background: #d1fae5; padding: 15px; border-radius: 6px; margin: 10px 0;">
+                    <strong>SE hashes DIFERENTES:</strong><br>
+                    <span class="semaphore-icon">🟢</span> Firebase MUDOU depois da edição<br>
+                    → Descarta edição automática<br>
+                    → Usa novo valor do Firebase<br>
+                    → Remove edição do localStorage
+                </div>
+            </div>
+        </div>
+
+        <h2>🔄 FLUXO COMPLETO</h2>
+
+        <h3>Cenário 1: Edição Manual Simples</h3>
+        <div class="scenario">
+            <div class="step">1. Firebase: 5 cubas</div>
+            <div class="step">
+                2. Você edita: 5 → 8 cubas<br>
+                <span class="checkmark">✅</span> Salva: { value: "8", hash: "num:5" }
+            </div>
+            <div class="step">3. Recarrega página</div>
+            <div class="step">
+                → Firebase ainda: 5 cubas<br>
+                → Hash atual: "num:5"<br>
+                → Hash salvo: "num:5"<br>
+                → <span class="badge badge-yellow">🟡 IGUAIS!</span> Mantém edição: 8 cubas
+            </div>
+        </div>
+
+        <h3>Cenário 2: Firebase Atualizado (Cliente muda no portal)</h3>
+        <div class="scenario">
+            <div class="step">1. Firebase: 5 cubas</div>
+            <div class="step">
+                2. Você edita: 5 → 8 cubas<br>
+                <span class="checkmark">✅</span> Salva: { value: "8", hash: "num:5" }
+            </div>
+            <div class="step">3. Cliente edita no portal: 5 → 3 cubas</div>
+            <div class="step">4. Recarrega página</div>
+            <div class="step">
+                → Firebase agora: 3 cubas<br>
+                → Hash atual: "num:3"<br>
+                → Hash salvo: "num:5"<br>
+                → <span class="badge badge-green">🟢 DIFERENTES!</span> Firebase mudou!<br>
+                → Descarta edição antiga<br>
+                → Mostra: 3 cubas (valor do portal)
+            </div>
+        </div>
+
+        <h3>Cenário 3: Múltiplas Edições Manuais</h3>
+        <div class="scenario">
+            <div class="step">1. Firebase: 5 cubas</div>
+            <div class="step">
+                2. Edita: 5 → 8 cubas<br>
+                <span class="checkmark">✅</span> Salva: { value: "8", hash: "num:5" }
+            </div>
+            <div class="step">3. Recarrega → mostra 8</div>
+            <div class="step">
+                4. Edita novamente: 8 → 10 cubas<br>
+                → Busca Firebase ORIGINAL (não da tela!)<br>
+                → Firebase ainda é: 5 cubas<br>
+                <span class="checkmark">✅</span> Salva: { value: "10", hash: "num:5" }
+            </div>
+            <div class="step">5. Recarrega → mostra 10</div>
+        </div>
+
+        <h2>🎨 CORES E INDICADORES</h2>
+
+        <div class="scenario">
+            <h4>ÚNICO indicador visual:</h4>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Estado</th>
+                        <th>Cor</th>
+                        <th>Significado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Editado manualmente</strong></td>
+                        <td><span class="badge badge-yellow">🟡 Amarelo</span></td>
+                        <td>Você editou este item</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sem edição</strong></td>
+                        <td><span style="padding: 6px 14px;">⚪ Normal</span></td>
+                        <td>Valor original do Firebase</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="margin-top: 20px;">
+                <h4>Tooltip ao passar mouse:</h4>
+                <div style="background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
+                    <div style="font-weight: bold;">📝 Editado Manualmente</div>
+                    <div>Valor: 5 cubas G</div>
+                    <div style="font-size: 0.85em; color: #6b7280; margin-top: 4px;">14/11/2025 14:30:00</div>
+                </div>
+            </div>
+        </div>
+
+        <h2>📊 COMPARAÇÃO: ANTES vs DEPOIS</h2>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Aspecto</th>
+                    <th>Sistema Antigo (Conflitos)</th>
+                    <th>Sistema Novo (Semáforo)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Detecção</strong></td>
+                    <td>Snapshot + comparação temporal</td>
+                    <td>Hash do Firebase</td>
+                </tr>
+                <tr>
+                    <td><strong>Cores</strong></td>
+                    <td>🟡 Amarelo / 🟢 Verde / 🔴 Vermelho</td>
+                    <td>🟡 Apenas Amarelo</td>
+                </tr>
+                <tr>
+                    <td><strong>Conflitos</strong></td>
+                    <td>Visual (vermelho) + botões</td>
+                    <td><strong>Não existem</strong> (automático)</td>
+                </tr>
+                <tr>
+                    <td><strong>Resolução</strong></td>
+                    <td>Manual (botões aceitar/rejeitar)</td>
+                    <td>Automática (semáforo)</td>
+                </tr>
+                <tr>
+                    <td><strong>Código</strong></td>
+                    <td>~500 linhas</td>
+                    <td>~300 linhas</td>
+                </tr>
+                <tr>
+                    <td><strong>Estados</strong></td>
+                    <td>4 estados</td>
+                    <td>1 estado (editState)</td>
+                </tr>
+                <tr>
+                    <td><strong>UX</strong></td>
+                    <td>Precisa clicar "Resetar detecção"</td>
+                    <td>Automático ao abrir</td>
+                </tr>
+                <tr>
+                    <td><strong>Complexidade</strong></td>
+                    <td>Alta</td>
+                    <td>Baixa</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>🚀 RESUMO EXECUTIVO</h2>
+
+        <div class="highlight-box">
+            <h3>Uma frase:</h3>
+            <p style="font-size: 1.2em; margin: 0;">
+                Sistema inteligente que automaticamente usa sua edição manual OU o valor do Firebase,
+                dependendo de qual é mais recente.
+            </p>
+        </div>
+
+        <div style="margin: 30px 0;">
+            <h3>Como usuário:</h3>
+            <ul>
+                <li><span class="checkmark">✅</span> Edite à vontade → persiste (fundo amarelo)</li>
+                <li><span class="checkmark">✅</span> Firebase muda → atualiza automaticamente</li>
+                <li><span class="checkmark">✅</span> Sem conflitos visuais, sem botões extras</li>
+                <li><span class="checkmark">✅</span> Limpar edições quando quiser</li>
+            </ul>
+
+            <h3>Como desenvolvedor:</h3>
+            <ul>
+                <li><span class="checkmark">✅</span> Código limpo e simples (~300 linhas)</li>
+                <li><span class="checkmark">✅</span> Fácil de debugar (logs claros)</li>
+                <li><span class="checkmark">✅</span> Fácil de estender (1 função: shouldUseEdit)</li>
+                <li><span class="checkmark">✅</span> Performance otimizada</li>
+            </ul>
+
+            <h3>O que NÃO existe mais:</h3>
+            <ul style="list-style: none;">
+                <li>❌ Cores verde/vermelho</li>
+                <li>❌ Conflitos visuais</li>
+                <li>❌ Botões "Aceitar/Rejeitar"</li>
+                <li>❌ Sistema de snapshot</li>
+                <li>❌ Detecção de mudanças do portal</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 50px; padding-top: 30px; border-top: 2px solid #e5e7eb; color: #6b7280;">
+            <p>🎯 <strong>Sistema implementado em:</strong> 14/11/2025</p>
+            <p><span class="checkmark">✅</span> <strong>Status:</strong> Funcionando 100%</p>
+        </div>
+    </div>
+</body>
+</html>

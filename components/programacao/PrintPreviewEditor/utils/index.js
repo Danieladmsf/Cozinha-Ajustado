@@ -45,14 +45,3 @@ export {
   loadEditStateFromLocal,
   getEditStateSummary
 } from './editStateManager';
-
-// Resolvedor de conflitos
-export {
-  hasValueChanged,
-  detectItemConflict,
-  getItemDisplayInfo,
-  createDetailedTooltip,
-  applyConflictResolution,
-  processBlockItemsWithStates,
-  getConflictStatistics
-} from './conflictResolver';

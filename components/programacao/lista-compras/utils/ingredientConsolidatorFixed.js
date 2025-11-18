@@ -81,37 +81,16 @@ const getIngredientWeight = (ingredient) => {
 const extractIngredientsFromRecipe = (recipe, recipeMultiplier) => {
   const ingredientes = [];
 
-  console.log(`📦 [Extract] Receita: ${recipe.name}, Multiplicador: ${recipeMultiplier}x`);
-
   // Verificar estrutura de preparations
   if (!recipe.preparations || !Array.isArray(recipe.preparations)) {
-    console.warn(`⚠️ [Extract] Receita ${recipe.name} não tem preparations`);
     return ingredientes;
   }
 
   recipe.preparations.forEach((preparation, prepIndex) => {
     if (preparation.ingredients && Array.isArray(preparation.ingredients)) {
-      console.log(`  📋 Prep ${prepIndex}: ${preparation.ingredients.length} ingredientes`);
-
       preparation.ingredients.forEach((ingredient, ingIndex) => {
         if (!ingredient.name) {
-          console.warn(`  ⚠️ Ingrediente sem nome no índice ${ingIndex}`);
           return;
-        }
-
-        // DEBUG: Mostrar estrutura do ingrediente
-        if (ingIndex === 0) {
-          console.log(`  🔍 DEBUG - Estrutura do ingrediente "${ingredient.name}":`, {
-            quantity: ingredient.quantity,
-            weight: ingredient.weight,
-            weight_cooked: ingredient.weight_cooked,
-            weight_pre_cooking: ingredient.weight_pre_cooking,
-            weight_clean: ingredient.weight_clean,
-            weight_thawed: ingredient.weight_thawed,
-            weights: ingredient.weights,
-            raw_weight: ingredient.raw_weight,
-            allKeys: Object.keys(ingredient)
-          });
         }
 
         // Quantidade base do ingrediente na receita (quantas unidades)
@@ -121,15 +100,11 @@ const extractIngredientsFromRecipe = (recipe, recipeMultiplier) => {
         const unitWeight = getIngredientWeight(ingredient);
 
         if (!unitWeight || unitWeight === 0) {
-          console.warn(`  ⚠️ ${ingredient.name}: sem peso válido, PULANDO`);
-          console.log(`     Estrutura completa:`, ingredient);
           return; // Pular apenas se realmente não houver peso
         }
 
         // CORREÇÃO: Calcular peso total = (peso unitário × quantidade na receita) × multiplicador de receitas
         const totalWeight = unitWeight * baseQuantity * recipeMultiplier;
-
-        console.log(`  ✅ ${ingredient.name}: ${baseQuantity} × ${unitWeight}kg × ${recipeMultiplier}x = ${totalWeight}kg`);
 
         ingredientes.push({
           name: ingredient.name.trim(),
@@ -151,7 +126,6 @@ const extractIngredientsFromRecipe = (recipe, recipeMultiplier) => {
     }
   });
 
-  console.log(`  ✅ Total extraído: ${ingredientes.length} ingredientes`);
   return ingredientes;
 };
 
@@ -165,17 +139,12 @@ const extractIngredientsFromRecipe = (recipe, recipeMultiplier) => {
 const calculateRecipeQuantities = (orders, recipes) => {
   const recipeQuantities = {};
 
-  console.log(`\n🔍 [Calculate] Processando ${orders.length} pedidos...`);
-
   orders.forEach((order, orderIndex) => {
-    console.log(`\n📋 Pedido ${orderIndex + 1}: ${order.customer_name} - Dia ${order.day_of_week}`);
-
     if (order.items && Array.isArray(order.items)) {
       order.items.forEach((item) => {
         if (item.recipe_id && item.quantity) {
           const recipe = recipes.find(r => r.id === item.recipe_id);
           if (!recipe) {
-            console.warn(`  ⚠️ Receita não encontrada: ${item.recipe_id}`);
             return;
           }
 
@@ -184,13 +153,10 @@ const calculateRecipeQuantities = (orders, recipes) => {
           const itemQuantity = parseFloat(item.quantity);
           const unitType = (item.unit_type || '').toLowerCase();
 
-          console.log(`  📦 ${recipe.name}: ${itemQuantity} ${unitType}`);
-
           if (unitType === 'cuba' || unitType === 'cuba-g' || unitType === 'cuba-p') {
             // Para cubas: a quantidade é o número de cubas
             // Se pede 2 cubas, multiplica a receita por 2
             recipeMultiplier = itemQuantity;
-            console.log(`    ✅ Cuba: ${itemQuantity} cubas = ${recipeMultiplier}x receita`);
 
           } else if (unitType === 'unid.' || unitType === 'porção') {
             // Para unidades/porções: calcular quantas receitas são necessárias
@@ -198,18 +164,15 @@ const calculateRecipeQuantities = (orders, recipes) => {
             const cubaWeight = recipe.cuba_weight || 1; // peso de 1 cuba
             const portionsPerCuba = cubaWeight / portionWeight;
             recipeMultiplier = itemQuantity / portionsPerCuba;
-            console.log(`    ✅ Porção: ${itemQuantity} porções ÷ ${portionsPerCuba} porções/cuba = ${recipeMultiplier}x receita`);
 
           } else if (unitType === 'kg') {
             // Para kg: calcular baseado no rendimento da receita
             const yieldWeight = recipe.yield_weight || recipe.cuba_weight || 1;
             recipeMultiplier = itemQuantity / yieldWeight;
-            console.log(`    ✅ Kg: ${itemQuantity} kg ÷ ${yieldWeight} kg/receita = ${recipeMultiplier}x receita`);
 
           } else {
             // Fallback: assumir que é cuba
             recipeMultiplier = itemQuantity;
-            console.warn(`    ⚠️ Unidade desconhecida "${unitType}", assumindo como cuba`);
           }
 
           if (!recipeQuantities[item.recipe_id]) {
@@ -217,16 +180,9 @@ const calculateRecipeQuantities = (orders, recipes) => {
           }
 
           recipeQuantities[item.recipe_id] += recipeMultiplier;
-          console.log(`    📊 Total acumulado para ${recipe.name}: ${recipeQuantities[item.recipe_id]}x`);
         }
       });
     }
-  });
-
-  console.log(`\n✅ [Calculate] Resumo de receitas necessárias:`);
-  Object.entries(recipeQuantities).forEach(([recipeId, quantity]) => {
-    const recipe = recipes.find(r => r.id === recipeId);
-    console.log(`  - ${recipe?.name || recipeId}: ${quantity.toFixed(2)}x`);
   });
 
   return recipeQuantities;
@@ -239,8 +195,6 @@ const calculateRecipeQuantities = (orders, recipes) => {
  */
 const consolidateDuplicateIngredients = (allIngredients) => {
   const consolidated = {};
-
-  console.log(`\n🔄 [Consolidate] Consolidando ${allIngredients.length} ingredientes...`);
 
   allIngredients.forEach(ingredient => {
     const key = `${ingredient.name}_${ingredient.unit}`.toLowerCase();
@@ -255,8 +209,6 @@ const consolidateDuplicateIngredients = (allIngredients) => {
       if (!consolidated[key].recipes.includes(ingredient.recipe)) {
         consolidated[key].recipes.push(ingredient.recipe);
       }
-
-      console.log(`  ➕ ${ingredient.name}: +${ingredient.quantity}kg (total: ${consolidated[key].totalQuantity}kg)`);
     } else {
       consolidated[key] = {
         name: ingredient.name,
@@ -269,14 +221,10 @@ const consolidateDuplicateIngredients = (allIngredients) => {
         brand: ingredient.brand,
         notes: ingredient.notes
       };
-
-      console.log(`  🆕 ${ingredient.name}: ${ingredient.quantity}kg`);
     }
   });
 
   const result = Object.values(consolidated);
-  console.log(`\n✅ [Consolidate] Resultado: ${result.length} ingredientes únicos`);
-
   return result;
 };
 
@@ -288,15 +236,11 @@ const consolidateDuplicateIngredients = (allIngredients) => {
  */
 export const consolidateIngredientsFromRecipes = (orders, recipes) => {
   try {
-    console.log(`\n🚀 ========== CONSOLIDAÇÃO DE INGREDIENTES ==========`);
-    console.log(`📊 Input: ${orders.length} pedidos, ${recipes.length} receitas`);
-
     // 1. Calcular quantidades necessárias de cada receita
     const recipeQuantities = calculateRecipeQuantities(orders, recipes);
     const totalRecipesNeeded = Object.keys(recipeQuantities).length;
 
     if (totalRecipesNeeded === 0) {
-      console.warn(`⚠️ Nenhuma receita necessária encontrada`);
       return [];
     }
 
@@ -312,7 +256,6 @@ export const consolidateIngredientsFromRecipes = (orders, recipes) => {
     });
 
     if (allIngredients.length === 0) {
-      console.warn(`⚠️ Nenhum ingrediente extraído das receitas`);
       return [];
     }
 
@@ -322,14 +265,9 @@ export const consolidateIngredientsFromRecipes = (orders, recipes) => {
     // 4. Ordenar alfabeticamente
     consolidatedIngredients.sort((a, b) => a.name.localeCompare(b.name));
 
-    console.log(`\n✅ ========== CONSOLIDAÇÃO COMPLETA ==========`);
-    console.log(`📦 Total de ingredientes únicos: ${consolidatedIngredients.length}`);
-    console.log(`⚖️  Peso total: ${consolidatedIngredients.reduce((sum, i) => sum + i.totalWeight, 0).toFixed(2)}kg\n`);
-
     return consolidatedIngredients;
 
   } catch (error) {
-    console.error(`❌ Erro na consolidação:`, error);
     return [];
   }
 };

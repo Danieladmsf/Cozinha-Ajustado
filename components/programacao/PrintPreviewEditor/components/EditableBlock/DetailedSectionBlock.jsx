@@ -1,9 +1,5 @@
 import { Tooltip } from '../Tooltip';
-import { ConflictButtons } from '../ConflictButtons';
-import { ChangeTimestamp } from '../ChangeTimestamp';
-import { createItemKey } from '../../utils/itemKeyUtils';
 import { formatRecipeName } from '../../utils/formatUtils';
-import { getConflictLineStyles, getConflictTooltip } from '../../utils/conflictUtils';
 
 /**
  * Componente de renderização para blocos tipo 'detailed-section'
@@ -19,10 +15,7 @@ export function DetailedSectionBlock({
   isItemEdited,
   getItemEditInfo,
   isItemChanged,
-  getItemChangeInfo,
-  acceptPortalChange,
-  rejectPortalChange,
-  getResolutionStatus
+  getItemChangeInfo
 }) {
   if (!block.items) return null;
 
@@ -39,45 +32,75 @@ export function DetailedSectionBlock({
             {formatRecipeName(recipe.recipe_name)}
           </h2>
           {recipe.clientes.map((cliente, idx) => {
-            const itemKey = createItemKey(recipe.recipe_name, cliente.customer_name);
-            const edited = isItemEdited && isItemEdited(itemKey);
-            const changed = isItemChanged && isItemChanged(recipe.recipe_name, cliente.customer_name);
-            const editInfo = edited && getItemEditInfo ? getItemEditInfo(itemKey) : null;
-            const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(recipe.recipe_name, cliente.customer_name) : null;
+            // Verificar estados de edição
+            const edited = isItemEdited ? isItemEdited(cliente.customer_name, recipe.recipe_name) : false;
+            const changed = isItemChanged ? isItemChanged(cliente.customer_name, recipe.recipe_name) : false;
+            const editInfo = edited && getItemEditInfo ? getItemEditInfo(cliente.customer_name, recipe.recipe_name) : null;
+            const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(cliente.customer_name, recipe.recipe_name) : null;
 
-            const hasConflict = edited && changed;
-            const conflictResolution = getResolutionStatus ? getResolutionStatus(itemKey) : null;
+            // Determinar classe CSS baseada no estado
+            let lineClass = '';
+            let lineStyles = {};
 
-            // Usar utilitários para obter estilos e tooltip
-            const lineStyles = getConflictLineStyles({
-              conflictResolution,
-              hasConflict,
-              edited,
-              changed
-            });
+            if (edited) {
+              // Amarelo: edição manual local
+              lineClass = 'state-edited';
+              lineStyles = {
+                backgroundColor: '#fef3c7',
+                borderLeft: '3px solid #f59e0b',
+                paddingLeft: '8px',
+                borderRadius: '4px'
+              };
+            } else if (changed) {
+              // Verde: edição vinda do portal
+              lineClass = 'state-changed';
+              lineStyles = {
+                backgroundColor: '#d1fae5',
+                borderLeft: '3px solid #10b981',
+                paddingLeft: '8px',
+                borderRadius: '4px'
+              };
+            }
 
-            const tooltipContent = getConflictTooltip({
-              conflictResolution,
-              hasConflict,
-              edited,
-              changed,
-              editInfo,
-              changeInfo
-            });
+            // Tooltip para edição
+            const tooltipContent = edited && editInfo ? (
+              <div>
+                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>📝 Editado Manualmente</div>
+                <div>Valor: {editInfo.value}</div>
+                <div style={{ fontSize: '0.85em', color: '#6b7280', marginTop: '4px' }}>
+                  {new Date(editInfo.timestamp).toLocaleString('pt-BR')}
+                </div>
+              </div>
+            ) : changed && changeInfo ? (
+              <div>
+                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>🌐 Editado no Portal</div>
+                <div>Valor: {changeInfo.value}</div>
+                <div style={{ fontSize: '0.85em', color: '#6b7280', marginTop: '4px' }}>
+                  Por: {changeInfo.userId}
+                </div>
+                <div style={{ fontSize: '0.85em', color: '#6b7280' }}>
+                  {new Date(changeInfo.timestamp).toLocaleString('pt-BR')}
+                </div>
+              </div>
+            ) : null;
 
             return (
               <div
                 key={idx}
-                className="item-line"
+                className={`item-line ${lineClass}`}
                 style={lineStyles}
               >
+                {/* Indicador visual de debug para edições do portal */}
+                {changed && (
+                  <span style={{ color: '#10b981', fontWeight: 'bold', marginRight: '4px' }}>●</span>
+                )}
                 <Tooltip content={tooltipContent}>
                   <span
                     className="item-text"
                     style={{ textTransform: 'uppercase' }}
                     contentEditable={isSelected && !isLocked}
                     suppressContentEditableWarning
-                    onFocus={(e) => handleEditStart(e, itemKey)}
+                    onFocus={(e) => handleEditStart(e, recipe.recipe_name, cliente.customer_name)}
                     onBlur={(e) => handleEditEnd(e, recipe.recipe_name, cliente.customer_name, 'customer')}
                   >
                     {cliente.customer_name}
@@ -89,7 +112,7 @@ export function DetailedSectionBlock({
                     className="item-qty"
                     contentEditable={isSelected && !isLocked}
                     suppressContentEditableWarning
-                    onFocus={(e) => handleEditStart(e, itemKey)}
+                    onFocus={(e) => handleEditStart(e, recipe.recipe_name, cliente.customer_name)}
                     onBlur={(e) => handleEditEnd(e, recipe.recipe_name, cliente.customer_name, 'quantity')}
                   >
                     {formatQuantityDisplay(cliente)}
@@ -100,53 +123,17 @@ export function DetailedSectionBlock({
                     )}
                   </span>
                 </Tooltip>
-                {/* Valor do portal entre parênteses (em caso de conflito não resolvido) */}
-                {hasConflict && !conflictResolution && changeInfo?.currentQuantity && (
-                  <span className="portal-value no-print" style={{
-                    marginLeft: '8px',
-                    color: '#6b7280',
-                    fontSize: '0.95em'
-                  }}>
-                    ({formatQuantityDisplay({
-                      quantity: changeInfo.currentQuantity,
-                      unit_type: changeInfo.currentUnit || cliente.unit_type
-                    })})
-                  </span>
-                )}
-                {/* Timestamps e indicadores */}
-                {/* Conflito resolvido - mostrar resolução */}
-                {conflictResolution === 'accepted' && changeInfo?.detectedAt && (
-                  <ChangeTimestamp timestamp={changeInfo.detectedAt} color="#10b981" />
-                )}
-                {conflictResolution === 'rejected' && editInfo && (
+                {/* Indicador de edição manual */}
+                {edited && editInfo && (
                   <span className="no-print" style={{ marginLeft: '8px', fontSize: '0.85em', color: '#f59e0b', fontWeight: '600' }}>
-                    (editado)
+                    (editado {new Date(editInfo.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })})
                   </span>
                 )}
-                {/* Mudança do portal sem conflito */}
-                {!hasConflict && !conflictResolution && changed && changeInfo?.detectedAt && (
-                  <ChangeTimestamp timestamp={changeInfo.detectedAt} color="#10b981" />
-                )}
-                {/* Edição manual sem conflito */}
-                {!hasConflict && !conflictResolution && edited && !changed && (
-                  <span className="no-print" style={{ marginLeft: '8px', fontSize: '0.85em', color: '#f59e0b', fontWeight: '600' }}>
-                    (editado)
+                {/* Indicador de edição do portal */}
+                {changed && changeInfo && (
+                  <span className="no-print" style={{ marginLeft: '8px', fontSize: '0.85em', color: '#10b981', fontWeight: '600' }}>
+                    (portal {new Date(changeInfo.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })})
                   </span>
-                )}
-                {/* Botões de resolução de conflito */}
-                {hasConflict && !conflictResolution && changeInfo && (
-                  <ConflictButtons
-                    onAccept={() => acceptPortalChange(
-                      itemKey,
-                      formatQuantityDisplay({
-                        quantity: changeInfo.currentQuantity,
-                        unit_type: changeInfo.currentUnit || cliente.unit_type
-                      }),
-                      changeInfo.currentQuantity,
-                      changeInfo.currentUnit
-                    )}
-                    onReject={() => rejectPortalChange(itemKey, formatQuantityDisplay(cliente))}
-                  />
                 )}
               </div>
             );

@@ -159,6 +159,84 @@
   background: #9ca3af;
 }
 
+/* Seções do Sidebar */
+.sidebar-section {
+  margin-bottom: 8px;
+}
+
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.sidebar-section-header:hover {
+  background: #f3f4f6;
+}
+
+.sidebar-items {
+  padding-left: 4px;
+}
+
+/* Items de Categoria */
+.category-items {
+  background: #fefce8;
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 4px;
+}
+
+.sidebar-category-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  cursor: grab;
+  transition: all 0.2s;
+  background: white;
+  border: 1px solid #fde047;
+  user-select: none;
+  font-size: 12px;
+}
+
+.sidebar-category-item:hover {
+  background: #fef9c3;
+  border-color: #facc15;
+}
+
+.sidebar-category-item.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-category-item .category-name {
+  flex: 1;
+  font-weight: 500;
+  color: #713f12;
+}
+
+.sidebar-category-item .category-index {
+  width: 20px;
+  height: 20px;
+  background: #fbbf24;
+  color: #78350f;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
 /* Toolbar */
 .preview-toolbar {
   background: white;
@@ -387,8 +465,60 @@
   transition: background 0.2s;
 }
 
+/* Estados de mudança/edição com !important para sobrescrever inline styles */
+
+/* Mudança aceita do portal (roxo) */
+.item-line.state-accepted {
+  background-color: #e9d5ff !important;
+  border-left: 3px solid #9333ea !important;
+  padding-left: 8px !important;
+  border-radius: 4px !important;
+}
+
+/* Edição manual mantida - mudança rejeitada (laranja) */
+.item-line.state-rejected {
+  background-color: #fed7aa !important;
+  border-left: 3px solid #f97316 !important;
+  padding-left: 8px !important;
+  border-radius: 4px !important;
+}
+
+/* Conflito ativo não resolvido (vermelho/rosa) */
+.item-line.state-conflict {
+  background-color: #fee2e2 !important;
+  border-left: 4px solid #dc2626 !important;
+  padding-left: 8px !important;
+  border-radius: 4px !important;
+}
+
+/* Editado manualmente (amarelo) */
+.item-line.state-edited {
+  background-color: #fef3c7 !important;
+  border-left: 3px solid #f59e0b !important;
+  padding-left: 8px !important;
+  border-radius: 4px !important;
+}
+
+/* Mudado no portal (verde) */
+.item-line.state-changed {
+  background-color: #d1fae5 !important;
+  border-left: 3px solid #10b981 !important;
+  padding-left: 8px !important;
+  border-radius: 4px !important;
+}
+
 .item-line:hover {
   background: #f9fafb;
+}
+
+/* Manter background de estado no hover */
+.item-line.state-accepted:hover,
+.item-line.state-rejected:hover,
+.item-line.state-conflict:hover,
+.item-line.state-edited:hover,
+.item-line.state-changed:hover {
+  /* Mantém a cor de fundo original */
+  filter: brightness(0.95);
 }
 
 .item-qty {

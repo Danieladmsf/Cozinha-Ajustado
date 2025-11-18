@@ -1,8 +1,12 @@
 import { useState, useCallback } from 'react';
+import {
+  saveBlockOrder,
+  loadBlockOrderFromLocal
+} from '../utils/simpleEditManager';
 
 /**
  * Hook para gerenciar tamanhos de fonte e ordem de páginas
- * Persiste configurações no localStorage
+ * Persiste configurações no localStorage + Firebase (sync)
  */
 export function useFontSizeManager() {
   const [hasSavedSizes, setHasSavedSizes] = useState(false);
@@ -23,22 +27,22 @@ export function useFontSizeManager() {
 
   // Carregar ordem salva do localStorage
   const loadSavedOrder = useCallback(() => {
-    try {
-      const saved = localStorage.getItem('print-preview-page-order');
-      if (saved) {
-        return JSON.parse(saved);
-      }
-      return [];
-    } catch (error) {
-      return [];
-    }
+    return loadBlockOrderFromLocal();
   }, []);
 
-  // Salvar ordem no localStorage
-  const savePageOrder = useCallback((blocks) => {
+  // Salvar ordem no localStorage + Firebase
+  const savePageOrder = useCallback((blocks, weekDayKey = null) => {
     try {
       const order = blocks.map(block => block.id);
-      localStorage.setItem('print-preview-page-order', JSON.stringify(order));
+
+      // Salvar com sincronização Firebase
+      saveBlockOrder(order, weekDayKey);
+
+      // Salvar também a ordem dos nomes dos clientes (para uso nas abas)
+      const customerOrder = blocks
+        .filter(block => block.type === 'empresa')
+        .map(block => block.title);
+      localStorage.setItem('print-preview-customer-order', JSON.stringify(customerOrder));
     } catch (error) {
       // Silenciar erro
     }

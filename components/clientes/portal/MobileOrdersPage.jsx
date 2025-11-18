@@ -79,6 +79,9 @@ const ReceivingTab = dynamic(() => import("./tabs/ReceivingTab"), { ssr: false }
 const WasteTab = dynamic(() => import("./tabs/WasteTab"), { ssr: false });
 const HistoryTab = dynamic(() => import("./tabs/HistoryTab"), { ssr: false });
 
+// Sistema de edições para sincronização com PrintPreviewEditor
+import { saveEdit, clearEditsFromFirebase } from '@/components/programacao/PrintPreviewEditor/utils/simpleEditManager';
+
 // Refresh Button
 import { RefreshButton } from "@/components/ui/refresh-button";
 
@@ -94,9 +97,46 @@ import { calculateTotalWeight } from "@/lib/weightCalculator";
 const MobileOrdersPage = ({ customerId, customerData }) => {
   const { toast } = useToast();
   const { groupItemsByCategory, getOrderedCategories, generateCategoryStyles } = useCategoryDisplay();
-  
 
-  
+  // 🧹 LIMPEZA ÚNICA: Remove edições antigas com mapeamento incorreto
+  useEffect(() => {
+    const CLEANUP_FLAG = 'edits_cleanup_v3_done';
+    const alreadyCleaned = localStorage.getItem(CLEANUP_FLAG);
+
+    if (!alreadyCleaned) {
+      const cleanupOldEdits = async () => {
+        try {
+          // Limpar localStorage
+          localStorage.removeItem('print_preview_edits_v2');
+
+          // Limpar Firebase para todos os dias da semana atual
+          const today = new Date();
+          const currentYear = getYear(today);
+          const currentWeek = getWeek(today, { weekStartsOn: 1 });
+          const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+
+          // Limpar todos os dias da semana
+          for (const dayName of dayNames) {
+            const weekDayKey = `${currentYear}_W${String(currentWeek).padStart(2, '0')}_${dayName}`;
+            try {
+              await clearEditsFromFirebase(weekDayKey);
+            } catch (error) {
+              // Silenciar erro de dias específicos
+            }
+          }
+
+          localStorage.setItem(CLEANUP_FLAG, 'true');
+          console.log('🧹 Edições antigas removidas (localStorage + Firebase) - sistema atualizado!');
+        } catch (error) {
+          console.error('Erro ao limpar edições antigas:', error);
+        }
+      };
+
+      cleanupOldEdits();
+    }
+  }, []);
+
+
   // Estados principais
   const [currentDate, setCurrentDate] = useState(() => {
     return new Date();
@@ -1516,10 +1556,62 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
           toast({ description: "Pedido enviado com sucesso!" });
         }
       }
-      
+
       // REMOVIDO: A atualização agora é otimista para evitar race conditions com o DB
       // await loadExistingOrders();
-      
+
+      // SYNC: Salvar edições para o PrintPreviewEditor mostrar com cor verde
+      // Construir weekDayKey no formato "2025_W46_Seg" (abreviações em português)
+      // selectedDay é um número: 0=Dom, 1=Seg, 2=Ter, etc.
+      const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+      const weekDayKey = `${year}_W${String(weekNumber).padStart(2, '0')}_${dayNames[selectedDay]}`;
+
+      // Salvar APENAS itens que foram alterados em relação ao menu original
+      if (orderData.items && orderData.items.length > 0) {
+        let changedCount = 0;
+
+        // 🔍 LOG DEBUG: Ver todos os items
+        console.log('📋 [ALL ITEMS]', {
+          orderDataItems: orderData.items.map(i => ({ name: i.recipe_name, id: i.unique_id, qty: i.base_quantity })),
+          orderItems: orderItems.map(i => ({ name: i.recipe_name, id: i.unique_id, qty: i.base_quantity }))
+        });
+
+        for (const item of orderData.items) {
+          // Buscar item original do menu para comparar usando unique_id para mapeamento preciso
+          const originalItem = orderItems.find(oi => oi.unique_id === item.unique_id);
+          const originalQty = originalItem?.base_quantity || 0;
+          const currentQty = item.base_quantity || 0;
+
+          // Só salvar se a quantidade mudou
+          if (Math.abs(originalQty - currentQty) > 0.001) {
+            try {
+              // 🔍 LOG DEBUG: Verificar mapeamento
+              console.log('💾 [SAVE EDIT]', {
+                itemRecipeName: item.recipe_name,
+                itemRecipeId: item.recipe_id,
+                itemUniqueId: item.unique_id,
+                originalItemRecipeName: originalItem?.recipe_name,
+                originalItemUniqueId: originalItem?.unique_id,
+                match: item.unique_id === originalItem?.unique_id
+              });
+
+              await saveEdit(
+                customer.name,                    // customerName
+                item.recipe_name,                 // recipeName
+                currentQty,                       // editedValue (quantidade)
+                'quantity',                       // field
+                originalQty,                      // firebaseValue (valor original para comparação)
+                weekDayKey,                       // weekDayKey
+                'portal-client'                   // userId (para aparecer verde)
+              );
+              changedCount++;
+            } catch (editError) {
+              // Silently handle error
+            }
+          }
+        }
+      }
+
       // Ativar efeito de sucesso e depois sair do modo de edição
       setShowSuccessEffect(true);
       setTimeout(() => {

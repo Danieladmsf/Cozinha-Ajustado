@@ -9,6 +9,7 @@ import { parseQuantity } from "@/components/utils/orderUtils";
 
 // Utils
 import { formatQuantityForDisplay } from "../ProgramacaoCozinhaTabs";
+import { getCustomerOrder, sortClientesByOrder } from "../utils/customerOrderUtils";
 
 // Components
 import PesoBrutoCalculator from "./PesoBrutoCalculator";
@@ -118,6 +119,9 @@ const AcougueTab = ({
 
   const selectedDayInfo = weekDays?.find(d => d.dayNumber === selectedDay);
 
+  // Obter a ordem dos clientes salva (carrega sempre do localStorage)
+  const customerOrder = getCustomerOrder(orders);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -161,11 +165,11 @@ const AcougueTab = ({
                       </h2>
                     </div>
                     
-                    {/* Lista de clientes */}
+                    {/* Lista de clientes - ordenados conforme configuração */}
                     <div className="space-y-2 ml-4">
-                      {Object.entries(clientes).map(([customerName, data]) => {
+                      {sortClientesByOrder(clientes, customerOrder).map(([customerName, data]) => {
                         const hasNotes = data.items.some(item => item.notes && item.notes.trim());
-                        
+
                         return (
                           <div key={customerName} className="flex items-center gap-3">
                             <span className="font-semibold text-gray-800 min-w-[80px] text-left">

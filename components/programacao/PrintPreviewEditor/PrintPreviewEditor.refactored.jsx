@@ -15,11 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw, GripVertical, Download, Users, Lock, AlertTriangle, Cloud, CheckCircle } from "lucide-react";
 import { useImpressaoProgramacao } from '@/hooks/programacao/useImpressaoProgramacao';
 import { formatRecipeName } from './utils/formatUtils';
-// Removido: createEditKey do sistema antigo
-import { useConflictResolution } from './hooks/useConflictResolution';
 import { useFontSizeManager } from './hooks/useFontSizeManager';
 import { useBlockManagement } from './hooks/useBlockManagement';
+import { useCategoryOrder } from './hooks/useCategoryOrder';
 import { EditableBlock } from './components/EditableBlock';
+import { SidebarNavigation } from './components/SidebarNavigation';
 import { generateAndDownloadPDF } from './services/pdfGenerator';
 import './print-preview.css';
 
@@ -27,11 +27,10 @@ import './print-preview.css';
 import {
   ensureCategoryOrderInBlocks,
   reorganizeBlockItems,
-  getItemDisplayInfo,
-  processBlockItemsWithStates
+  sortCategoriesObject
 } from './utils';
 
-// NOVO: Sistema simplificado de edições
+// NOVO: Sistema simplificado de edições (com Firebase sync)
 import {
   saveEdit,
   getEdit,
@@ -40,17 +39,16 @@ import {
   loadAllEdits,
   clearAllEdits,
   getEditsSummary,
-  migrateFromOldSystem
+  migrateFromOldSystem,
+  shouldUseEdit,
+  loadEditsFromFirebase,
+  subscribeToEdits,
+  loadBlockOrderFromFirebase,
+  subscribeToBlockOrder
 } from './utils/simpleEditManager';
 
 export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const { porEmpresaData, saladaData, acougueData, embalagemData, selectedDayInfo, formatQuantityDisplay, consolidateCustomerItems, recipes, originalOrders } = data;
-
-  console.log('[PrintPreviewEditor] 🚀 VERSÃO ATUALIZADA v3.0 - ESTRUTURA CORRIGIDA - Componente montado', {
-    hasOriginalOrders: !!originalOrders,
-    ordersLength: originalOrders?.length || 0,
-    timestamp: new Date().toISOString()
-  });
 
   // Simplificar: usar useState ao invés de useReducer
   const [editableBlocks, setEditableBlocks] = useState([]);
@@ -60,28 +58,12 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const previewAreaRef = useRef(null);
 
   // Estados para gerenciamento de edições e conflitos
-  // NOVO: Estado simplificado - carrega do novo sistema
+  // NOVO: Estado simplificado - carrega do localStorage (Firebase será carregado via useEffect)
   const [editState, setEditState] = useState(() => {
     // Migrar automaticamente do sistema antigo se necessário
     migrateFromOldSystem();
-    const edits = loadAllEdits();
-
-    // Mostrar resumo das edições carregadas
-    const summary = getEditsSummary();
-    if (summary.totalEdits > 0) {
-      console.log('[PrintPreviewEditor] 📊 Edições carregadas (sistema simplificado):', summary);
-    }
-
-    return edits;
+    return loadAllEdits();
   });
-  const [portalUpdates, setPortalUpdates] = useState({});
-  const [resolvedConflicts, setResolvedConflicts] = useState({});
-  const [isLoadingState, setIsLoadingState] = useState(false);
-
-  // Refs para controle de inicialização
-  const hasInitializedRef = useRef(false);
-  const canSaveToLocalStorageRef = useRef(false);
-  const initialOrdersSnapshotRef = useRef(null);
 
   // Hook de gerenciamento de fontes e ordem
   const {
@@ -113,386 +95,138 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     handleContentEdit
   } = useBlockManagement(editableBlocks, setEditableBlocks, previewAreaRef, zoom);
 
+  // Hook de gerenciamento de ordem das categorias
+  const {
+    categoryOrder,
+    draggedCategoryIndex,
+    handleCategoryDragStart,
+    handleCategoryDragOver,
+    handleCategoryDrop,
+    handleCategoryDragEnd,
+    applyOrderToBlocks,
+    extractCategoriesFromBlocks,
+    applyCustomerOrderToConsolidatedBlocks
+  } = useCategoryOrder();
+
+  // Estado para seções expandidas no sidebar
+  const [expandedSections, setExpandedSections] = useState({
+    blocks: true,
+    categories: true
+  });
+
+  const toggleSection = useCallback((section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  }, []);
+
   // Extrair informações de semana/ano/dia
   const weekNumber = selectedDayInfo?.weekNumber || 0;
   const year = selectedDayInfo?.year || new Date().getFullYear();
   const dayNumber = selectedDayInfo?.dayNumber || 0;
 
-  // REMOVIDO: useEffect de carregamento do sistema antigo
-  // O novo sistema carrega automaticamente no useState inicial (linhas 62-75)
+  // Gerar chave única para este dia (para Firebase sync)
+  const weekDayKey = useMemo(() => {
+    if (!selectedDayInfo) return null;
+    const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+    const dayName = dayNames[dayNumber] || 'Seg';
+    return `${year}_W${String(weekNumber).padStart(2, '0')}_${dayName}`;
+  }, [year, weekNumber, dayNumber, selectedDayInfo]);
+
+  // Estado para ordem dos blocos vinda do Firebase
+  const [firebaseBlockOrder, setFirebaseBlockOrder] = useState([]);
+
+  // FIREBASE SYNC: Carregar edições e criar listener em tempo real
   useEffect(() => {
-    // Desabilitar salvamento durante carregamento
-    canSaveToLocalStorageRef.current = false;
-    setIsLoadingState(true);
+    if (!weekDayKey) return;
 
-    console.log('[PrintPreviewEditor] ✅ Sistema simplificado carregado no estado inicial');
-
-    // Nenhuma edição ou snapshot antigo para carregar - já carregado no useState
-    const edits = {}; // Vazio porque novo sistema já carregou
-    const portal = {};
-    const resolved = {};
-    const snapshot = null;
-
-    // Atualizar todos os estados de uma vez (mantido para compatibilidade)
-    setEditState(edits);
-    setPortalUpdates(portal);
-    setResolvedConflicts(resolved);
-
-    // Restaurar snapshot se existir (salvo anteriormente)
-    // CORREÇÃO: Validar se snapshot tem estrutura correta (keys devem ter recipe_name definido)
-    if (snapshot) {
-      const firstKey = Object.keys(snapshot)[0];
-      const firstItem = snapshot[firstKey];
-
-      if (firstItem && firstItem.recipe_name && firstItem.recipe_name !== 'undefined') {
-        initialOrdersSnapshotRef.current = snapshot;
-        console.log('[PrintPreviewEditor] 📸 Snapshot restaurado do localStorage');
-      } else {
-        console.log('[PrintPreviewEditor] ⚠️ Snapshot inválido detectado, será recriado');
-        initialOrdersSnapshotRef.current = null;
+    // 1. Carregar edições do Firebase ao montar
+    loadEditsFromFirebase(weekDayKey).then(firebaseEdits => {
+      if (Object.keys(firebaseEdits).length > 0) {
+        setEditState(firebaseEdits);
       }
-    }
-
-    // Marcar que terminou de carregar APÓS estados serem definidos
-    // Usar requestAnimationFrame para garantir que React atualizou
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setIsLoadingState(false);
-        console.log('[PrintPreviewEditor] ✅ Estado carregado completamente');
-
-        // Habilitar salvamento após um delay
-        setTimeout(() => {
-          canSaveToLocalStorageRef.current = true;
-          console.log('[PrintPreviewEditor] 💾 Salvamento habilitado');
-        }, 300);
-      });
     });
-  }, [weekNumber, year]);
 
-  // TESTE MOVIDO PARA CÁ
+    // 2. Criar listener em tempo real
+    const unsubscribe = subscribeToEdits(weekDayKey, (firebaseEdits) => {
+      setEditState(firebaseEdits);
+    });
+
+    // Cleanup: remover listener ao desmontar
+    return () => {
+      unsubscribe();
+    };
+  }, [weekDayKey]);
+
+  // FIREBASE SYNC: Carregar e sincronizar ordem dos blocos
   useEffect(() => {
-    console.log('[PrintPreviewEditor] ✅✅✅ TEST useEffect MOVIDO executou!');
+    if (!weekDayKey) return;
+
+    // 1. Carregar ordem do Firebase ao montar
+    loadBlockOrderFromFirebase(weekDayKey).then(firebaseOrder => {
+      if (firebaseOrder.length > 0) {
+        setFirebaseBlockOrder(firebaseOrder);
+      }
+    });
+
+    // 2. Criar listener em tempo real para ordem
+    const unsubscribe = subscribeToBlockOrder(weekDayKey, (firebaseOrder) => {
+      setFirebaseBlockOrder(firebaseOrder);
+    });
+
+    // Cleanup: remover listener ao desmontar
+    return () => {
+      unsubscribe();
+    };
+  }, [weekDayKey]);
+
+  // Funções para indicadores visuais de edição
+  // Usar editState ao invés de getEdit para ter dados sincronizados com Firebase
+
+  // Amarelo: edição local (userId === 'local-user')
+  const isItemEdited = useCallback((customerName, recipeName) => {
+    const edit = editState[customerName]?.[recipeName];
+    return !!(edit && edit.userId === 'local-user');
+  }, [editState]);
+
+  const getItemEditInfo = useCallback((customerName, recipeName) => {
+    const edit = editState[customerName]?.[recipeName];
+    return edit && edit.userId === 'local-user' ? edit : null;
+  }, [editState]);
+
+  // Verde: edição vinda do portal (userId !== 'local-user')
+  const isItemChanged = useCallback((customerName, recipeName) => {
+    const edit = editState[customerName]?.[recipeName];
+    return !!(edit && edit.userId !== 'local-user');
+  }, [editState]);
+
+  const getItemChangeInfo = useCallback((customerName, recipeName) => {
+    const edit = editState[customerName]?.[recipeName];
+    return edit && edit.userId !== 'local-user' ? edit : null;
+  }, [editState]);
+
+  // Vermelho: conflito (quando há edição local E do portal)
+  // Por enquanto, não implementado - precisaria rastrear ambos separadamente
+  const getResolutionStatus = useCallback((customerName, recipeName) => {
+    // TODO: Implementar detecção de conflito quando houver tracking separado
+    return null;
   }, []);
 
-  // ========== NOVOS USEEFFECTS PARA SNAPSHOT E PORTAL ===========
+  // Handlers para aceitar/rejeitar mudanças do portal
+  const handleAcceptPortalChange = useCallback((customerName, recipeName) => {
+    // A mudança do portal já está aplicada, apenas remover a edição local se existir
+  }, []);
 
-  // Criar snapshot inicial de todos os pedidos para detectar mudanças do portal
-  useEffect(() => {
-    console.log('[PrintPreviewEditor] 🔍 V3 useEffect SNAPSHOT executando:', {
-      hasSnapshot: !!initialOrdersSnapshotRef.current,
-      hasOriginalOrders: !!originalOrders,
-      ordersLength: originalOrders?.length || 0
-    });
+  const handleRejectPortalChange = useCallback((customerName, recipeName) => {
+    // Rejeitar = manter edição local e ignorar portal
+  }, []);
 
-    // Só criar snapshot uma vez, quando os dados carregam pela primeira vez
-    if (!initialOrdersSnapshotRef.current && originalOrders && originalOrders.length > 0) {
-      console.log('[PrintPreviewEditor] 📸 Criando snapshot inicial dos pedidos:', {
-        countOrders: originalOrders.length
-      });
-
-      // Criar mapa de pedidos: "recipeName::customerName" -> { quantity, unit }
-      // CORREÇÃO: originalOrders é array de pedidos, cada um com array de items
-      const snapshot = {};
-      originalOrders.forEach(order => {
-        const customerName = order.customer_name || 'sem_cliente';
-
-        // Iterar sobre os items dentro de cada pedido
-        if (order.items && Array.isArray(order.items)) {
-          order.items.forEach(item => {
-            const key = `${item.recipe_name}::${customerName}`;
-            snapshot[key] = {
-              quantity: parseFloat(item.quantity) || 0,
-              unit: item.unit || item.unit_type,
-              recipe_name: item.recipe_name,
-              customer_name: customerName
-            };
-          });
-        }
-      });
-
-      initialOrdersSnapshotRef.current = snapshot;
-      console.log('[PrintPreviewEditor] ✅ Snapshot criado com', Object.keys(snapshot).length, 'itens');
-    }
-  }, [originalOrders]);
-
-  // CORREÇÃO BUG #2: Detectar mudanças do portal comparando TODOS os pedidos com snapshot inicial
-  useEffect(() => {
-    console.log('[PrintPreviewEditor] 🔍 V3 useEffect detectar portal:', {
-      isLoadingState,
-      hasOriginalOrders: !!originalOrders,
-      ordersLength: originalOrders?.length || 0,
-      hasSnapshot: !!initialOrdersSnapshotRef.current,
-      snapshotSize: initialOrdersSnapshotRef.current ? Object.keys(initialOrdersSnapshotRef.current).length : 0
-    });
-
-    // Não processar durante carregamento ou sem dados ou sem snapshot
-    if (isLoadingState || !originalOrders || originalOrders.length === 0 || !initialOrdersSnapshotRef.current) {
-      console.log('[PrintPreviewEditor] ⏸️ Pulando detecção (carregando ou sem dados)');
-      return;
-    }
-
-    console.log('[PrintPreviewEditor] 🔄 Comparando TODOS os pedidos atuais com snapshot inicial...');
-    const newPortalUpdates = {};
-
-    // CORREÇÃO: originalOrders é array de pedidos, cada um com array de items
-    let totalItemsCompared = 0;
-    originalOrders.forEach(order => {
-      const customerName = order.customer_name || 'sem_cliente';
-
-      // Iterar sobre os items dentro de cada pedido
-      if (order.items && Array.isArray(order.items)) {
-        order.items.forEach(item => {
-          totalItemsCompared++;
-          const key = `${item.recipe_name}::${customerName}`;
-          const snapshotItem = initialOrdersSnapshotRef.current[key];
-          const currentQty = parseFloat(item.quantity) || 0;
-
-          console.log(`[PrintPreviewEditor] 🔎 Comparando item ${totalItemsCompared}:`, {
-            key,
-            currentQty,
-            snapshotQty: snapshotItem?.quantity || 'NÃO EXISTE NO SNAPSHOT',
-            hasSnapshot: !!snapshotItem
-          });
-
-          if (snapshotItem) {
-            const snapshotQty = snapshotItem.quantity;
-
-            // Detectar mudança
-            if (snapshotQty !== currentQty) {
-              console.log('[PrintPreviewEditor] 🌐 Mudança do portal detectada:', {
-                key,
-                snapshotQty,
-                currentQty,
-                recipe: item.recipe_name,
-                customer: customerName,
-                difference: currentQty - snapshotQty
-              });
-
-              newPortalUpdates[key] = {
-                itemKey: key,
-                previousQuantity: snapshotQty,
-                currentQuantity: currentQty,
-                previousUnit: snapshotItem.unit,
-                currentUnit: item.unit || item.unit_type,
-                detectedAt: new Date().toISOString(),
-                type: 'portal_update'
-              };
-            }
-          } else {
-            console.log('[PrintPreviewEditor] ⚠️ Item novo detectado (não estava no snapshot):', key);
-          }
-        });
-      }
-    });
-
-    // Atualizar estado de mudanças do portal se houver
-    if (Object.keys(newPortalUpdates).length > 0) {
-      console.log('[PrintPreviewEditor] ✅ Atualizando portalUpdates:', {
-        count: Object.keys(newPortalUpdates).length,
-        keys: Object.keys(newPortalUpdates),
-        details: newPortalUpdates
-      });
-      setPortalUpdates(prev => ({
-        ...prev,
-        ...newPortalUpdates
-      }));
-    } else {
-      console.log('[PrintPreviewEditor] ℹ️ Nenhuma mudança detectada no portal');
-    }
-  }, [originalOrders, isLoadingState]);
-
-  // ========== FIM DOS NOVOS USEEFFECTS ===========
-
-  // REMOVIDO: Sistema antigo de salvamento
-  // O novo sistema (simpleEditManager) salva automaticamente em cada operação
-  // Mantendo apenas para debug
-  useEffect(() => {
-    if (isLoadingState) return;
-
-    console.log('[PrintPreviewEditor] 📊 Estado atual (sistema simplificado):', {
-      totalCustomers: Object.keys(editState).length,
-      totalEdits: Object.values(editState).reduce((sum, recipes) => sum + Object.keys(recipes).length, 0)
-    });
-  }, [editState, isLoadingState]);
-
-  // Funções dummy para compatibilidade (Firebase desabilitado para evitar loop infinito)
-  const editedItems = {};
-  const markItemAsEdited = () => {};
-  const isItemEdited = () => false;
-  const getItemEditInfo = () => null;
-  const editingUsers = [];
   const isLocked = false;
-  const isSyncing = false;
-  const lastSyncTime = null;
-  const sessionId = null;
 
-  // const {
-  //   blocks: firebaseBlocks,
-  //   updateBlocks: updateFirebaseBlocks,
-  //   editedItems,
-  //   markItemAsEdited,
-  //   isItemEdited,
-  //   getItemEditInfo,
-  //   acceptPortalChange,
-  //   rejectPortalChange,
-  //   editingUsers,
-  //   isLocked,
-  //   isSyncing,
-  //   lastSyncTime,
-  //   sessionId
-  // } = useImpressaoProgramacao(weekNumber, year, dayNumber, data);
-
-  // CORREÇÃO BUG #3: Implementar sistema de resolução de conflitos
-  // Usar os estados editState e portalUpdates para detectar e resolver conflitos
-
-  // Detectar se um item mudou no portal (aceita recipeName e customerName OU itemKey diretamente)
-  const isItemChanged = useCallback((recipeNameOrKey, customerName = null) => {
-    // Se recebeu dois parâmetros, construir a chave
-    const key = customerName !== null
-      ? `${recipeNameOrKey}::${customerName || 'sem_cliente'}`
-      : recipeNameOrKey;
-
-    return !!portalUpdates[key];
-  }, [portalUpdates]);
-
-  // Obter informações da mudança do portal
-  const getItemChangeInfo = useCallback((recipeNameOrKey, customerName = null) => {
-    // Se recebeu dois parâmetros, construir a chave
-    const key = customerName !== null
-      ? `${recipeNameOrKey}::${customerName || 'sem_cliente'}`
-      : recipeNameOrKey;
-
-    return portalUpdates[key] || null;
-  }, [portalUpdates]);
-
-  const getResolutionStatus = useCallback((itemKey) => {
-    return resolvedConflicts[itemKey] || null;
-  }, [resolvedConflicts]);
-
-  // Aceitar mudança do portal (usar valor do portal)
-  const handleAcceptPortalChange = useCallback((itemKey) => {
-    console.log('[PrintPreviewEditor] ✅ Aceitando mudança do portal:', itemKey);
-
-    const portalUpdate = portalUpdates[itemKey];
-    if (!portalUpdate) {
-      console.warn('[PrintPreviewEditor] Nenhuma mudança do portal encontrada para:', itemKey);
-      return;
-    }
-
-    // Marcar conflito como resolvido (aceito)
-    setResolvedConflicts(prev => ({
-      ...prev,
-      [itemKey]: {
-        resolution: 'accepted',
-        timestamp: new Date().toISOString(),
-        portalValue: portalUpdate.currentQuantity,
-        editedValue: editState[itemKey]?.editedValue
-      }
-    }));
-
-    // Remover edição manual se existir (portal prevalece)
-    setEditState(prev => {
-      const newState = { ...prev };
-      delete newState[itemKey];
-      return newState;
-    });
-
-    // Atualizar blocos para refletir valor do portal
-    setEditableBlocks(prevBlocks => {
-      return prevBlocks.map(block => {
-        const updatedBlock = { ...block };
-        let modified = false;
-
-        // Parse da chave para extrair informações
-        const [blockTitle, recipeName, customerName] = itemKey.includes('::')
-          ? itemKey.split('::')
-          : [null, itemKey.split('::')[0], itemKey.split('::')[1]];
-
-        if (updatedBlock.type === 'empresa' && updatedBlock.items) {
-          const newItems = {};
-          Object.entries(updatedBlock.items).forEach(([category, categoryItems]) => {
-            newItems[category] = categoryItems.map(item => {
-              if (item.recipe_name === recipeName &&
-                  (item.customer_name || 'sem_cliente') === customerName) {
-                modified = true;
-                return { ...item, quantity: portalUpdate.currentQuantity };
-              }
-              return item;
-            });
-          });
-          if (modified) updatedBlock.items = newItems;
-        }
-
-        return updatedBlock;
-      });
-    });
-
-    console.log('[PrintPreviewEditor] ✅ Mudança do portal aceita e aplicada');
-  }, [portalUpdates, editState]);
-
-  // Rejeitar mudança do portal (manter edição manual)
-  const handleRejectPortalChange = useCallback((itemKey) => {
-    console.log('[PrintPreviewEditor] ⛔ Rejeitando mudança do portal (mantendo edição):', itemKey);
-
-    const editRecord = editState[itemKey];
-    const portalUpdate = portalUpdates[itemKey];
-
-    // Marcar conflito como resolvido (rejeitado)
-    setResolvedConflicts(prev => ({
-      ...prev,
-      [itemKey]: {
-        resolution: 'rejected',
-        timestamp: new Date().toISOString(),
-        portalValue: portalUpdate?.currentQuantity,
-        editedValue: editRecord?.editedValue
-      }
-    }));
-
-    // Remover atualização do portal (edição manual prevalece)
-    setPortalUpdates(prev => {
-      const newState = { ...prev };
-      delete newState[itemKey];
-      return newState;
-    });
-
-    console.log('[PrintPreviewEditor] ✅ Mudança do portal rejeitada, edição manual mantida');
-  }, [editState, portalUpdates]);
-
-  const handleResetSnapshot = useCallback(() => {
-    console.log('[PrintPreviewEditor] 🔄 Resetando snapshot de pedidos');
-    initialOrdersSnapshotRef.current = JSON.parse(JSON.stringify(originalOrders));
-    setPortalUpdates({});
-    setResolvedConflicts({});
-  }, [originalOrders]);
-
-  // Compatibilidade com código antigo
-  const changedItems = portalUpdates;
-  const hasChanges = Object.keys(portalUpdates).length > 0;
-
-  // const {
-  //   changedItems,
-  //   resolvedConflicts,
-  //   initialSnapshot,
-  //   hasChanges,
-  //   isItemChanged,
-  //   getItemChangeInfo,
-  //   getResolutionStatus,
-  //   handleAcceptPortalChange,
-  //   handleRejectPortalChange,
-  //   handleResetSnapshot
-  // } = useConflictResolution(
-  //   originalOrders,
-  //   weekNumber,
-  //   year,
-  //   dayNumber,
-  //   markItemAsEdited,
-  //   rejectPortalChange
-  // );
-
-  // NOVO: Função SIMPLIFICADA para aplicar edições usando sistema hierárquico
+  // SISTEMA DE SEMÁFORO: Aplica edições COM verificação inteligente
   const applyEditsToBlocks = useCallback((blocks, editsState) => {
     if (!Array.isArray(blocks)) {
-      console.error('[applyEditsToBlocks] blocks is not an array');
       return [];
     }
 
@@ -500,59 +234,44 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       return blocks;
     }
 
-    console.log('[applyEditsToBlocks] 🆕 Aplicando edições (sistema simplificado):', {
-      numBlocks: blocks.length,
-      totalCustomers: Object.keys(editsState).length
-    });
-
     return blocks.map(block => {
       const updatedBlock = { ...block };
 
       // BLOCOS EMPRESA: updatedBlock.title é o nome do cliente
       if (updatedBlock.type === 'empresa' && updatedBlock.items) {
-        const customerEdits = editsState[updatedBlock.title]; // Buscar diretamente pelo nome do cliente
-        if (!customerEdits) return updatedBlock;
-
         const newItems = {};
         Object.entries(updatedBlock.items).forEach(([category, categoryItems]) => {
           newItems[category] = categoryItems.map(item => {
-            const editInfo = customerEdits[item.recipe_name]; // Buscar diretamente pelo nome da receita
+            // SEMÁFORO: Verifica se deve usar edição ou Firebase
+            const decision = shouldUseEdit(
+              updatedBlock.title,
+              item.recipe_name,
+              item.quantity // Valor atual do Firebase
+            );
 
-            if (editInfo && editInfo.field === 'quantity' && editInfo.quantity !== null) {
-              console.log('[applyEditsToBlocks] ✏️ Aplicando quantidade (empresa):', {
-                bloco: updatedBlock.title,
-                item: item.recipe_name,
-                oldQty: item.quantity,
-                newQty: editInfo.quantity
-              });
-              return { ...item, quantity: editInfo.quantity };
+            if (decision && decision.quantity !== null) {
+              return { ...item, quantity: decision.quantity };
             }
             return item;
           });
         });
-        updatedBlock.items = newItems;
+        // CORREÇÃO: Garantir ordem das categorias após aplicar edições
+        updatedBlock.items = sortCategoriesObject(newItems);
       }
 
       // BLOCOS CONSOLIDADOS: procurar em todos os clientes
       if ((updatedBlock.type === 'detailed-section' || updatedBlock.type === 'embalagem-category') && updatedBlock.items) {
         updatedBlock.items = updatedBlock.items.map(recipe => {
           const newClientes = recipe.clientes.map(cliente => {
-            // Buscar edição para este cliente específico
-            const customerEdits = editsState[cliente.customer_name];
-            if (!customerEdits) return cliente;
+            // SEMÁFORO: Verifica se deve usar edição ou Firebase
+            const decision = shouldUseEdit(
+              cliente.customer_name,
+              recipe.recipe_name,
+              cliente.quantity // Valor atual do Firebase
+            );
 
-            const editInfo = customerEdits[recipe.recipe_name];
-
-            if (editInfo && editInfo.field === 'quantity' && editInfo.quantity !== null) {
-              console.log('[applyEditsToBlocks] ✏️ Aplicando quantidade (consolidado):', {
-                blockType: updatedBlock.type,
-                blockTitle: updatedBlock.title,
-                recipe: recipe.recipe_name,
-                cliente: cliente.customer_name,
-                oldQty: cliente.quantity,
-                newQty: editInfo.quantity
-              });
-              return { ...cliente, quantity: editInfo.quantity };
+            if (decision && decision.quantity !== null) {
+              return { ...cliente, quantity: decision.quantity };
             }
             return cliente;
           });
@@ -575,8 +294,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const initialBlocks = useMemo(() => {
     if (!porEmpresaData && !saladaData && !acougueData && !embalagemData) return [];
 
-    console.log('[PrintPreviewEditor] Inicializando blocos...');
-
     const blocks = [];
     const savedFontSizes = loadSavedFontSizes();
 
@@ -593,8 +310,16 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         const savedKey = `empresa:${customerData.customer_name}`;
         const fontSize = savedFontSizes[savedKey] || initialFontSize;
 
+        // Usar nome do cliente no ID para manter consistência entre recarregamentos
+        // Normalizar nome para criar ID válido (remover acentos e caracteres especiais)
+        const normalizedName = customerData.customer_name
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-zA-Z0-9]/g, '-')
+          .toLowerCase();
+
         blocks.push({
-          id: `empresa-${index}`,
+          id: `empresa-${normalizedName}`,
           type: 'empresa',
           title: customerData.customer_name,
           subtitle: `${selectedDayInfo?.fullDate} • ${customerData.total_meals} refeições`,
@@ -761,233 +486,230 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       });
     }
 
-    const savedOrder = loadSavedOrder();
-    const orderedBlocks = savedOrder.length > 0
-      ? savedOrder.map(id => blocks.find(b => b.id === id)).filter(Boolean)
-      : blocks;
+    // Prioridade: Firebase > localStorage
+    const localOrder = loadSavedOrder();
+    const savedOrder = firebaseBlockOrder.length > 0 ? firebaseBlockOrder : localOrder;
+    let orderedBlocks = blocks;
+
+    if (savedOrder.length > 0) {
+      // Tentar aplicar ordem salva
+      const matchedBlocks = savedOrder.map(id => blocks.find(b => b.id === id)).filter(Boolean);
+
+      // Se a ordem salva corresponde aos blocos, usar ela
+      // Caso contrário (IDs antigos), usar ordem padrão e adicionar blocos não encontrados
+      if (matchedBlocks.length > 0) {
+        // Adicionar blocos que não estavam na ordem salva
+        const unmatchedBlocks = blocks.filter(b => !savedOrder.includes(b.id));
+        orderedBlocks = [...matchedBlocks, ...unmatchedBlocks];
+      }
+    }
 
     // GARANTIR ordem correta das categorias
     const blocksWithOrderedCategories = ensureCategoryOrderInBlocks(orderedBlocks);
 
     return Array.isArray(blocksWithOrderedCategories) ? blocksWithOrderedCategories : [];
-  }, [porEmpresaData, saladaData, acougueData, embalagemData, loadSavedFontSizes, loadSavedOrder, consolidateCustomerItems, selectedDayInfo, recipes]);
+  }, [porEmpresaData, saladaData, acougueData, embalagemData, loadSavedFontSizes, loadSavedOrder, consolidateCustomerItems, selectedDayInfo, recipes, firebaseBlockOrder]);
 
-  // Inicializar blocks quando initialBlocks estiver pronto
-  // CORREÇÃO BUG #1: Remover condição editableBlocks.length === 0 para permitir reaplicação
+  // Ref para rastrear a ordem atual dos blocos (preservar durante edições)
+  const currentBlockOrderRef = useRef([]);
+
+  // Salvar ordem no localStorage quando blocos são reordenados via drag-and-drop
   useEffect(() => {
-    // Não fazer nada durante carregamento de estado
-    if (isLoadingState) {
-      console.log('[PrintPreviewEditor] Aguardando fim do carregamento de estado...');
-      return;
+    if (editableBlocks.length > 0) {
+      const currentOrder = editableBlocks.map(b => b.id);
+      const previousOrder = currentBlockOrderRef.current;
+
+      // Detectar se houve reordenação (drag-and-drop)
+      if (previousOrder.length > 0 &&
+          currentOrder.length === previousOrder.length &&
+          currentOrder.some((id, idx) => id !== previousOrder[idx])) {
+        // Ordem mudou - salvar no localStorage + Firebase
+        savePageOrder(editableBlocks, weekDayKey);
+
+        // Aplicar ordem dos clientes aos blocos consolidados
+        const blocksWithCustomerOrder = applyCustomerOrderToConsolidatedBlocks(editableBlocks);
+
+        // Verificar se houve mudança na ordem dos clientes
+        const clientOrderChanged = blocksWithCustomerOrder.some((block, idx) => {
+          if ((block.type === 'detailed-section' || block.type === 'embalagem-category') &&
+              block.items && editableBlocks[idx]?.items) {
+            return block.items.some((recipe, recipeIdx) => {
+              const originalRecipe = editableBlocks[idx].items[recipeIdx];
+              if (recipe.clientes && originalRecipe?.clientes) {
+                const newClientOrder = recipe.clientes.map(c => c.customer_name).join(',');
+                const oldClientOrder = originalRecipe.clientes.map(c => c.customer_name).join(',');
+                return newClientOrder !== oldClientOrder;
+              }
+              return false;
+            });
+          }
+          return false;
+        });
+
+        if (clientOrderChanged) {
+          setEditableBlocks(blocksWithCustomerOrder);
+        }
+      }
+
+      // Atualizar ref com ordem atual
+      currentBlockOrderRef.current = currentOrder;
+    }
+  }, [editableBlocks, savePageOrder, applyCustomerOrderToConsolidatedBlocks]);
+
+  // Aplicar edições aos blocos quando initialBlocks ou editState mudarem
+  useEffect(() => {
+    if (initialBlocks.length === 0) return;
+
+    // CORREÇÃO: Preservar a ordem atual dos blocos se houver
+    let blocksToUse = initialBlocks;
+    if (currentBlockOrderRef.current.length > 0 && editableBlocks.length > 0) {
+      // Reordenar initialBlocks de acordo com a ordem atual
+      const orderedInitialBlocks = currentBlockOrderRef.current
+        .map(id => initialBlocks.find(b => b.id === id))
+        .filter(Boolean);
+
+      // Adicionar blocos novos que não estavam na ordem anterior
+      const newBlocks = initialBlocks.filter(b => !currentBlockOrderRef.current.includes(b.id));
+      blocksToUse = [...orderedInitialBlocks, ...newBlocks];
     }
 
-    // Se não há blocos iniciais, não fazer nada
-    if (initialBlocks.length === 0) {
-      console.log('[PrintPreviewEditor] Sem blocos iniciais ainda');
-      return;
-    }
-
-    console.log('[PrintPreviewEditor] 🔄 Aplicando/Reaplicando blocos e edições:', {
-      numBlocks: initialBlocks.length,
-      numEdits: Object.keys(editState).length,
-      editKeys: Object.keys(editState),
-      editStatePreview: editState
-    });
-
-    // SEMPRE aplicar edições aos blocos iniciais (mesmo que editableBlocks já tenha conteúdo)
-    // Isso garante que após reload, as edições salvas sejam reaplicadas
     if (Object.keys(editState).length > 0) {
-      console.log('[PrintPreviewEditor] 📝 Aplicando edições:', editState);
-      const blocksWithEdits = applyEditsToBlocks(initialBlocks, editState);
-      console.log('[PrintPreviewEditor] ✅ Aplicando', Object.keys(editState).length, 'edições aos blocos');
-      setEditableBlocks(blocksWithEdits);
+      const blocksWithEdits = applyEditsToBlocks(blocksToUse, editState);
+      // CORREÇÃO: Garantir ordem das categorias após aplicar edições
+      const orderedBlocks = ensureCategoryOrderInBlocks(blocksWithEdits);
+      // Aplicar ordem customizada das categorias
+      const blocksWithCategoryOrder = applyOrderToBlocks(orderedBlocks);
+      // Aplicar ordem dos clientes aos blocos consolidados
+      const finalBlocks = applyCustomerOrderToConsolidatedBlocks(blocksWithCategoryOrder);
+      setEditableBlocks(finalBlocks);
     } else {
-      console.log('[PrintPreviewEditor] ⚪ Sem edições, usando blocos originais');
-      setEditableBlocks(initialBlocks);
+      // Aplicar ordem customizada das categorias
+      const blocksWithCategoryOrder = applyOrderToBlocks(blocksToUse);
+      // Aplicar ordem dos clientes aos blocos consolidados
+      const finalBlocks = applyCustomerOrderToConsolidatedBlocks(blocksWithCategoryOrder);
+      setEditableBlocks(finalBlocks);
     }
-  }, [initialBlocks, editState, applyEditsToBlocks, isLoadingState]);
+  }, [initialBlocks, editState, applyEditsToBlocks, applyOrderToBlocks, applyCustomerOrderToConsolidatedBlocks]);
+
+  // Reagir a mudanças na ordem das categorias
+  useEffect(() => {
+    if (editableBlocks.length > 0) {
+      const reorderedBlocks = applyOrderToBlocks(editableBlocks);
+      // Verificar se realmente houve mudança para evitar loop infinito
+      const changed = reorderedBlocks.some((block, idx) => {
+        if (block.type === 'empresa' && block.items && editableBlocks[idx]?.items) {
+          const newKeys = Object.keys(block.items).join(',');
+          const oldKeys = Object.keys(editableBlocks[idx].items).join(',');
+          return newKeys !== oldKeys;
+        }
+        return false;
+      });
+
+      if (changed) {
+        setEditableBlocks(reorderedBlocks);
+      }
+    }
+  }, [categoryOrder]);
 
   // Forçar sincronização de edições (reaplica todas as edições salvas aos blocos)
   const handleForceSyncEdits = useCallback(() => {
-    console.log('[PrintPreviewEditor] 🔄 Forçando sincronização de edições...');
-    console.log('[PrintPreviewEditor] 📋 Edições atuais:', editState);
-
     if (Object.keys(editState).length === 0) {
-      console.log('[PrintPreviewEditor] ⚠️ Nenhuma edição para sincronizar');
       return;
     }
 
-    // Reaplicar edições aos blocos iniciais
-    const syncedBlocks = applyEditsToBlocks(initialBlocks, editState);
-    console.log('[PrintPreviewEditor] ✅ Sincronização concluída, aplicando blocos atualizados');
-    setEditableBlocks(syncedBlocks);
+    // CORREÇÃO: Preservar a ordem atual dos blocos
+    let blocksToUse = initialBlocks;
+    if (currentBlockOrderRef.current.length > 0) {
+      const orderedInitialBlocks = currentBlockOrderRef.current
+        .map(id => initialBlocks.find(b => b.id === id))
+        .filter(Boolean);
+      const newBlocks = initialBlocks.filter(b => !currentBlockOrderRef.current.includes(b.id));
+      blocksToUse = [...orderedInitialBlocks, ...newBlocks];
+    }
+
+    // Reaplicar edições aos blocos
+    const syncedBlocks = applyEditsToBlocks(blocksToUse, editState);
+    // CORREÇÃO: Garantir ordem das categorias após sincronização
+    const orderedBlocks = ensureCategoryOrderInBlocks(syncedBlocks);
+    setEditableBlocks(orderedBlocks);
   }, [editState, initialBlocks, applyEditsToBlocks]);
 
-  // Limpar todas as edições salvas
-  const handleClearAllEdits = useCallback(() => {
-    console.log('[PrintPreviewEditor] 🗑️ Limpando todas as edições (novo sistema)...');
-    clearAllEdits(); // Novo sistema
+  // Limpar todas as edições salvas (localStorage + Firebase)
+  const handleClearAllEdits = useCallback(async () => {
+    await clearAllEdits(weekDayKey);
     setEditState({});
-    setEditableBlocks(initialBlocks);
-    console.log('[PrintPreviewEditor] ✅ Todas as edições foram removidas');
-  }, [initialBlocks]);
 
-  const handleItemEdit = useCallback((itemName, clientName, originalValue, editedValue, field = 'content', blockTitle = null) => {
+    // CORREÇÃO: Preservar a ordem atual dos blocos ao limpar edições
+    let blocksToUse = initialBlocks;
+    if (currentBlockOrderRef.current.length > 0) {
+      const orderedInitialBlocks = currentBlockOrderRef.current
+        .map(id => initialBlocks.find(b => b.id === id))
+        .filter(Boolean);
+      const newBlocks = initialBlocks.filter(b => !currentBlockOrderRef.current.includes(b.id));
+      blocksToUse = [...orderedInitialBlocks, ...newBlocks];
+    }
+
+    setEditableBlocks(blocksToUse);
+  }, [initialBlocks, weekDayKey]);
+
+  const handleItemEdit = useCallback(async (itemName, clientName, originalValue, editedValue, field = 'content', blockTitle = null) => {
     // CORREÇÃO: Para blocos empresa, usar blockTitle como customerName
     // Isso garante que a edição seja salva para o cliente correto (ex: "Faap")
     // ao invés de "sem_cliente"
     const normalizedClientName = blockTitle || clientName || 'sem_cliente';
 
-    console.log('[PrintPreviewEditor] 📝 NOVA EDIÇÃO (sistema simplificado):', {
-      recipeName: itemName,
-      customerName: normalizedClientName,
-      originalValue,
-      editedValue,
-      field,
-      blockTitle,
-      clientName,
-      usingBlockTitle: !!blockTitle
-    });
+    // CORREÇÃO SEMÁFORO: Buscar valor ORIGINAL do Firebase (não da tela)
+    // A tela pode mostrar valor editado anterior, mas precisamos do Firebase original
+    let firebaseQty = null;
+    if (field === 'quantity') {
+      // BUSCAR EM BLOCOS EMPRESA
+      const empresaBlock = initialBlocks.find(block =>
+        block.type === 'empresa' && block.title === normalizedClientName
+      );
 
-    // NOVO: Salvar usando sistema simplificado
-    const newEdits = saveEdit(normalizedClientName, itemName, editedValue, field);
-    setEditState(newEdits);
-
-    // Chamar markItemAsEdited original (Firebase - quando reabilitado)
-    // markItemAsEdited(itemName, originalValue, editedValue, field);
-
-    // NOVO: Atualização SIMPLIFICADA - propaga para todos os blocos que contenham a receita do cliente
-    setEditableBlocks(prevBlocks => {
-      if (!Array.isArray(prevBlocks)) {
-        console.error('editableBlocks is not an array in handleItemEdit');
-        return prevBlocks;
-      }
-
-      const updatedBlocks = prevBlocks.map(block => {
-        let modified = false;
-        const updatedBlock = { ...block };
-
-        // BLOCOS EMPRESA: aplicar se bloco.title === customerName E contém a receita
-        if (updatedBlock.type === 'empresa' && updatedBlock.title === normalizedClientName && updatedBlock.items) {
-          const newItems = {};
-          Object.entries(updatedBlock.items).forEach(([category, categoryItems]) => {
-            newItems[category] = categoryItems.map(item => {
-              if (item.recipe_name === itemName && field === 'quantity') {
-                modified = true;
-                const numMatch = editedValue.match(/[\d.,]+/);
-                if (numMatch) {
-                  console.log('[handleItemEdit] 🔄 Atualizando bloco empresa:', {
-                    block: updatedBlock.title,
-                    recipe: itemName,
-                    quantity: parseFloat(numMatch[0].replace(',', '.'))
-                  });
-                  return { ...item, quantity: parseFloat(numMatch[0].replace(',', '.')) };
-                }
-              }
-              return item;
-            });
-          });
-          if (modified) {
-            updatedBlock.items = newItems;
-            return reorganizeBlockItems(updatedBlock);
+      if (empresaBlock && empresaBlock.items) {
+        // Procurar item nos blocos empresa
+        for (const category of Object.values(empresaBlock.items)) {
+          const item = category.find(i => i.recipe_name === itemName);
+          if (item) {
+            firebaseQty = item.quantity;
+            break;
           }
         }
-
-        // BLOCOS CONSOLIDADOS: aplicar se contém cliente === customerName E receita
-        if ((updatedBlock.type === 'detailed-section' || updatedBlock.type === 'embalagem-category') && updatedBlock.items) {
-          console.log('[handleItemEdit] 🔍 Verificando bloco consolidado:', {
-            blockType: updatedBlock.type,
-            blockTitle: updatedBlock.title,
-            lookingFor: { recipe: itemName, cliente: normalizedClientName },
-            totalRecipes: updatedBlock.items.length
-          });
-
-          updatedBlock.items = updatedBlock.items.map(recipe => {
-            // Log para cada receita
-            const hasRecipe = recipe.recipe_name === itemName;
-            if (hasRecipe) {
-              console.log('[handleItemEdit] ✅ Receita encontrada:', {
-                recipe: recipe.recipe_name,
-                totalClientes: recipe.clientes?.length || 0,
-                clientes: recipe.clientes?.map(c => c.customer_name)
-              });
-            }
-
-            if (recipe.recipe_name === itemName && recipe.clientes) {
-              const newClientes = recipe.clientes.map(cliente => {
-                // Log para cada cliente
-                const matchesClient = cliente.customer_name === normalizedClientName;
-                if (matchesClient) {
-                  console.log('[handleItemEdit] ✅ Cliente encontrado:', {
-                    cliente: cliente.customer_name,
-                    oldQuantity: cliente.quantity,
-                    field: field
-                  });
-                }
-
-                if (cliente.customer_name === normalizedClientName && field === 'quantity') {
-                  modified = true;
-                  const numMatch = editedValue.match(/[\d.,]+/);
-                  if (numMatch) {
-                    const newQty = parseFloat(numMatch[0].replace(',', '.'));
-                    console.log('[handleItemEdit] 🔄 Atualizando bloco consolidado:', {
-                      blockType: updatedBlock.type,
-                      blockTitle: updatedBlock.title,
-                      recipe: itemName,
-                      cliente: normalizedClientName,
-                      oldQuantity: cliente.quantity,
-                      newQuantity: newQty,
-                      editedValue: editedValue
-                    });
-                    return { ...cliente, quantity: newQty };
-                  }
-                }
-                return cliente;
-              });
-
-              // Recalcular total se necessário
-              if (modified && recipe.showTotal) {
-                const newTotal = newClientes.reduce((sum, c) => sum + (c.quantity || 0), 0);
-                console.log('[handleItemEdit] 📊 Recalculando total:', {
-                  recipe: itemName,
-                  oldTotal: recipe.total,
-                  newTotal: Math.round(newTotal * 100) / 100,
-                  clientes: newClientes.map(c => ({ name: c.customer_name, qty: c.quantity }))
-                });
-                return { ...recipe, clientes: newClientes, total: Math.round(newTotal * 100) / 100 };
-              }
-
-              return { ...recipe, clientes: newClientes };
-            }
-            return recipe;
-          });
-        }
-
-        return updatedBlock;
-      });
-
-      // Log final
-      const modifiedBlocks = updatedBlocks.filter((block, idx) => {
-        const original = prevBlocks[idx];
-        return JSON.stringify(block) !== JSON.stringify(original);
-      });
-
-      if (modifiedBlocks.length > 0) {
-        console.log('[handleItemEdit] 🔗 SINCRONIZAÇÃO COMPLETA (novo sistema):', {
-          recipe: itemName,
-          customer: normalizedClientName,
-          blocksModified: modifiedBlocks.length,
-          blocks: modifiedBlocks.map(b => `${b.type}:${b.title}`)
-        });
       }
 
-      return updatedBlocks;
-    });
-  }, []);
+      // BUSCAR EM BLOCOS CONSOLIDADOS (se não encontrou em empresa)
+      if (firebaseQty === null) {
+        for (const block of initialBlocks) {
+          if (block.type === 'detailed-section' || block.type === 'embalagem-category') {
+            if (block.items && Array.isArray(block.items)) {
+              // block.items = [{ recipe_name, clientes: [{customer_name, quantity}] }]
+              for (const recipeItem of block.items) {
+                if (recipeItem.recipe_name === itemName) {
+                  const cliente = recipeItem.clientes.find(c => c.customer_name === normalizedClientName);
+                  if (cliente) {
+                    firebaseQty = cliente.quantity;
+                    break;
+                  }
+                }
+              }
+              if (firebaseQty !== null) break;
+            }
+          }
+        }
+      }
+    }
+
+    // SEMÁFORO + FIREBASE SYNC: Salvar com hash do Firebase ORIGINAL
+    const newEdits = await saveEdit(normalizedClientName, itemName, editedValue, field, firebaseQty, weekDayKey);
+    setEditState(newEdits);
+
+    // O sistema de semáforo (applyEditsToBlocks) vai aplicar a edição automaticamente
+    // via useEffect que observa editState. Não precisamos atualizar manualmente aqui.
+  }, [initialBlocks, weekDayKey]);
 
   const handlePrintFinal = useCallback(() => {
     if (!Array.isArray(editableBlocks)) {
-      console.error('editableBlocks is not an array');
       return;
     }
 
@@ -1092,19 +814,10 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     });
   }, [zoom, selectedDayInfo]);
 
-  // Processar blocos adicionando informações de estado (cores, labels, conflitos)
+  // Processar blocos (sem processamento de conflitos - sistema simplificado)
   const processedBlocks = useMemo(() => {
-    if (!Array.isArray(editableBlocks)) return [];
-
-    return editableBlocks.map(block =>
-      processBlockItemsWithStates({
-        block,
-        editedItems: editState,
-        portalUpdates,
-        resolvedConflicts
-      })
-    );
-  }, [editableBlocks, editState, portalUpdates, resolvedConflicts]);
+    return Array.isArray(editableBlocks) ? editableBlocks : [];
+  }, [editableBlocks]);
 
   return (
     <div className="print-preview-container">
@@ -1119,134 +832,25 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
             </span>
           )}
 
-          {/* NOVO: Indicadores de estado de edições e conflitos */}
+          {/* Indicador de edições manuais */}
           {Object.keys(editState).length > 0 && (
             <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-semibold">
               📝 {Object.keys(editState).length} {Object.keys(editState).length === 1 ? 'edição' : 'edições'}
             </span>
           )}
-          {Object.keys(portalUpdates).length > 0 && (
-            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
-              🌐 {Object.keys(portalUpdates).length} {Object.keys(portalUpdates).length === 1 ? 'atualização' : 'atualizações'} do portal
-            </span>
-          )}
-          {(() => {
-            const conflicts = Object.keys(editState).filter(key => portalUpdates[key] && !resolvedConflicts[key]);
-            return conflicts.length > 0 && (
-              <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-semibold animate-pulse">
-                ⚠️ {conflicts.length} {conflicts.length === 1 ? 'conflito' : 'conflitos'}
-              </span>
-            );
-          })()}
 
-          {/* Status de sincronização Firebase */}
-          {isSyncing && (
-            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold flex items-center gap-1">
-              <Cloud className="w-3 h-3 animate-pulse" />
-              Sincronizando...
-            </span>
-          )}
-          {!isSyncing && lastSyncTime && (
-            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold flex items-center gap-1">
-              <CheckCircle className="w-3 h-3" />
-              Sincronizado
-            </span>
-          )}
-
-          {/* Bloqueio de edição */}
-          {isLocked && (
-            <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-semibold flex items-center gap-1">
-              <Lock className="w-3 h-3" />
-              Bloqueado
-            </span>
-          )}
-
-          {/* Usuários editando */}
-          {editingUsers.length > 0 && (
-            <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-semibold flex items-center gap-1" title={editingUsers.map(u => u.userName).join(', ')}>
-              <Users className="w-3 h-3" />
-              {editingUsers.length} {editingUsers.length === 1 ? 'usuário' : 'usuários'}
-            </span>
-          )}
-
-          {/* NOVO: Painel de Debug */}
-          <details className="text-xs">
-            <summary className="cursor-pointer text-gray-500 hover:text-gray-700">🔍 Debug</summary>
-            <div className="absolute top-12 left-0 bg-white border border-gray-300 rounded shadow-lg p-3 z-50 max-w-md text-left">
-              <div className="font-bold mb-2 text-green-700">🆕 Sistema Simplificado:</div>
-              <div className="space-y-1 text-xs font-mono mb-3">
-                <div className="font-semibold">📝 Edições por Cliente:</div>
-                {Object.keys(editState).length > 0 ? (
-                  Object.entries(editState).map(([customerName, recipes]) => (
-                    <div key={customerName} className="pl-4">
-                      <div className="font-semibold text-blue-700">{customerName}:</div>
-                      {Object.entries(recipes).map(([recipeName, editData]) => (
-                        <div key={recipeName} className="pl-4 text-gray-600">
-                          • {recipeName}: {editData.value}
-                        </div>
-                      ))}
-                    </div>
-                  ))
-                ) : (
-                  <div className="pl-4 text-gray-500 italic">Nenhuma edição</div>
-                )}
-                <div className="mt-2 pt-2 border-t">
-                  📊 Total: {(() => {
-                    let total = 0;
-                    Object.values(editState).forEach(recipes => {
-                      total += Object.keys(recipes).length;
-                    });
-                    return total;
-                  })()} edições em {Object.keys(editState).length} clientes
-                </div>
-              </div>
-              <div className="space-y-1 text-xs font-mono border-t pt-2">
-                <div className="font-semibold">Sistema Legado:</div>
-                <div>🌐 Portal Updates: {Object.keys(portalUpdates).length}</div>
-                <div>✅ Resolvidos: {Object.keys(resolvedConflicts).length}</div>
-                <div>📦 Blocos: {Array.isArray(editableBlocks) ? editableBlocks.length : 0}</div>
-              </div>
-            </div>
-          </details>
-
-          {/* Mudanças nos pedidos originais */}
-          {hasChanges && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-semibold flex items-center gap-1" title="Pedidos originais foram modificados">
-                <AlertTriangle className="w-3 h-3" />
-                Pedidos alterados
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleResetSnapshot}
-                title="Resetar detecção: considerar valores atuais como novos valores base"
-                className="h-6 px-2 text-xs"
-              >
-                <RefreshCw className="w-3 h-3 mr-1" />
-                Resetar detecção
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleForceSyncEdits}
-                title="Forçar sincronização: reaplicar todas as edições salvas aos blocos"
-                className="h-6 px-2 text-xs"
-              >
-                <RefreshCw className="w-3 h-3 mr-1" />
-                Forçar Sincronização
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClearAllEdits}
-                title="Limpar edições: remover todas as edições salvas e voltar aos valores originais"
-                className="h-6 px-2 text-xs bg-red-50 hover:bg-red-100 text-red-700"
-              >
-                <X className="w-3 h-3 mr-1" />
-                Limpar Edições
-              </Button>
-            </div>
+          {/* Botão para limpar edições */}
+          {Object.keys(editState).length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearAllEdits}
+              title="Limpar edições: remover todas as edições salvas e voltar aos valores originais"
+              className="h-6 px-2 text-xs"
+            >
+              <X className="w-3 h-3 mr-1" />
+              Limpar Edições
+            </Button>
           )}
         </div>
 
@@ -1298,52 +902,30 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar Navigation */}
-        <div className="sidebar-navigation">
-          <div className="sidebar-header">
-            <h3 className="text-sm font-bold text-gray-700">Páginas</h3>
-            <p className="text-xs text-gray-500 mt-1">Arraste para reordenar</p>
-          </div>
-          <div className="sidebar-content">
-            {Array.isArray(processedBlocks) && processedBlocks.map((block, index) => {
-              const status = blockStatus[block.id];
-              const isAdjusted = status && !status.isOverflowing;
-              const needsFix = status && status.isOverflowing;
-
-              return (
-                <div
-                  key={block.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDrop={(e) => handleDrop(e, index)}
-                  onDragEnd={handleDragEnd}
-                  onClick={() => scrollToBlock(block.id)}
-                  className={`sidebar-item ${selectedBlock === block.id ? 'active' : ''} ${draggedIndex === index ? 'dragging' : ''}`}
-                  style={{ cursor: draggedIndex === index ? 'grabbing' : 'grab' }}
-                >
-                  <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                  <div className="sidebar-item-number">{index + 1}</div>
-                  <div className="sidebar-item-content">
-                    <div className="sidebar-item-title">{formatRecipeName(block.title)}</div>
-                    <div className="sidebar-item-meta">{block.fontSize}px</div>
-                  </div>
-                  {needsFix && (
-                    <div
-                      className="sidebar-badge badge-warning clickable"
-                      onClick={(e) => handleFixBlock(block.id, e)}
-                      title="Clique para corrigir automaticamente"
-                    >
-                      Corrigir
-                    </div>
-                  )}
-                  {isAdjusted && (
-                    <div className="sidebar-badge badge-success">Ajustado</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <SidebarNavigation
+          blocks={processedBlocks}
+          selectedBlock={selectedBlock}
+          blockStatus={blockStatus}
+          draggedIndex={draggedIndex}
+          // Handlers de blocos
+          handleDragStart={handleDragStart}
+          handleDragOver={handleDragOver}
+          handleDrop={handleDrop}
+          handleDragEnd={handleDragEnd}
+          scrollToBlock={scrollToBlock}
+          handleFixBlock={handleFixBlock}
+          // Props de categorias
+          categoryOrder={categoryOrder}
+          draggedCategoryIndex={draggedCategoryIndex}
+          handleCategoryDragStart={handleCategoryDragStart}
+          handleCategoryDragOver={handleCategoryDragOver}
+          handleCategoryDrop={handleCategoryDrop}
+          handleCategoryDragEnd={handleCategoryDragEnd}
+          extractCategoriesFromBlocks={extractCategoriesFromBlocks}
+          // Estados de expansão
+          expandedSections={expandedSections}
+          toggleSection={toggleSection}
+        />
 
         {/* Preview Area */}
         <div ref={previewAreaRef} className="preview-area">

@@ -27,6 +27,9 @@ import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import PrintPreviewEditor from './PrintPreviewEditor';
 
+// Utils de ordenação
+import { getCustomerOrder } from './utils/customerOrderUtils';
+
 // Hooks
 import { useProgramacaoRealtimeData } from '@/hooks/programacao/useProgramacaoRealtimeData';
 import { useOrderConsolidation } from "@/hooks/cardapio/useOrderConsolidation";
@@ -88,10 +91,30 @@ const ConsolidacaoContent = ({
               </CardContent>
             </Card>
           ) : (
-            ordersByCustomer.map((customerData) => {
+            // Ordenar empresas de acordo com a ordem salva
+            (() => {
+              // Criar array de pseudo-orders a partir de ordersByCustomer para extração
+              const pseudoOrders = ordersByCustomer.map(c => ({ customer_name: c.customer_name }));
+              const customerOrder = getCustomerOrder(pseudoOrders);
+              // Criar array lowercase para comparação case-insensitive
+              const customerOrderLower = customerOrder.map(c => c.toLowerCase());
+
+              return [...ordersByCustomer].sort((a, b) => {
+                if (customerOrder.length === 0) return 0;
+
+                const lowerA = a.customer_name.toLowerCase();
+                const lowerB = b.customer_name.toLowerCase();
+
+                const indexA = customerOrderLower.indexOf(lowerA);
+                const indexB = customerOrderLower.indexOf(lowerB);
+                const posA = indexA === -1 ? 9999 : indexA;
+                const posB = indexB === -1 ? 9999 : indexB;
+                return posA - posB;
+              });
+            })().map((customerData) => {
               const consolidatedItems = consolidateCustomerItems(customerData.orders);
               const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
-              
+
               return (
                 <Card 
                   key={customerData.customer_id} 
@@ -441,8 +464,6 @@ const ProgramacaoCozinhaTabs = () => {
         const html = generateHTMLFunc(midSize);
         const height = await measureHTMLHeight(html);
 
-        console.log(`Teste: ${midSize}px → Altura: ${height}px / ${MAX_HEIGHT}px`);
-
         if (height <= MAX_HEIGHT) {
           bestSize = midSize;
           minSize = midSize;
@@ -470,14 +491,12 @@ const ProgramacaoCozinhaTabs = () => {
         const customerData = porEmpresaData[i];
         const progress = Math.round((currentPage / totalPages) * 80);
         updateProgress(progress, `Calculando: ${customerData.customer_name}...`);
-        console.log(`\n🔍 Calculando fonte para: ${customerData.customer_name}`);
 
         const fontSize = await findOptimalFontSize((size) => {
           return generatePorEmpresaPageHTML(customerData, selectedDayInfo, size);
         });
 
         fontSizes.porEmpresa.push(fontSize);
-        console.log(`✅ ${customerData.customer_name}: ${fontSize}px`);
         currentPage++;
       }
     }
@@ -486,11 +505,9 @@ const ProgramacaoCozinhaTabs = () => {
     if (saladaData && Object.keys(saladaData).length > 0) {
       const progress = Math.round((currentPage / totalPages) * 80);
       updateProgress(progress, 'Calculando: Salada...');
-      console.log(`\n🔍 Calculando fonte para: Salada`);
       fontSizes.salada = await findOptimalFontSize((size) => {
         return generateSaladaPageHTML(saladaData, selectedDayInfo, size);
       });
-      console.log(`✅ Salada: ${fontSizes.salada}px`);
       currentPage++;
     }
 
@@ -498,11 +515,9 @@ const ProgramacaoCozinhaTabs = () => {
     if (acougueData && Object.keys(acougueData).length > 0) {
       const progress = Math.round((currentPage / totalPages) * 80);
       updateProgress(progress, 'Calculando: Açougue...');
-      console.log(`\n🔍 Calculando fonte para: Açougue`);
       fontSizes.acougue = await findOptimalFontSize((size) => {
         return generateAcouguePageHTML(acougueData, selectedDayInfo, size);
       });
-      console.log(`✅ Açougue: ${fontSizes.acougue}px`);
       currentPage++;
     }
 
@@ -510,16 +525,13 @@ const ProgramacaoCozinhaTabs = () => {
     if (embalagemData && Object.keys(embalagemData).length > 0) {
       const progress = Math.round((currentPage / totalPages) * 80);
       updateProgress(progress, 'Calculando: Embalagem...');
-      console.log(`\n🔍 Calculando fonte para: Embalagem`);
       fontSizes.embalagem = await findOptimalFontSize((size) => {
         return generateEmbalagemPageHTML(embalagemData, selectedDayInfo, size);
       });
-      console.log(`✅ Embalagem: ${fontSizes.embalagem}px`);
       currentPage++;
     }
 
     updateProgress(85, 'Cálculo concluído!');
-    console.log('\n✨ Cálculo concluído:', fontSizes);
     return fontSizes;
   };
 
@@ -704,7 +716,7 @@ const ProgramacaoCozinhaTabs = () => {
     // Não é mais necessário - fontes já são calculadas no React
     return `
       <script>
-        console.log('Impressão pronta - fontes já ajustadas pelo React');
+        // Impressão pronta - fontes já ajustadas pelo React
       </script>
     `;
   };
@@ -926,10 +938,6 @@ const ProgramacaoCozinhaTabs = () => {
               debugBanner.textContent = 'FONTE BASE: ' + Math.round(bestSize) + 'px | USO: ' + Math.round((content.scrollHeight / availableHeight) * 100) + '%';
               page.style.position = 'relative';
               page.insertBefore(debugBanner, page.firstChild);
-
-              console.log('Página', pageIndex + 1, '- Fonte ajustada para:', Math.round(bestSize) + 'px',
-                          '| Altura:', content.scrollHeight + 'px /', availableHeight + 'px',
-                          '| Utilização:', Math.round((content.scrollHeight / availableHeight) * 100) + '%');
             });
 
           }, 100);
@@ -1280,7 +1288,13 @@ const ProgramacaoCozinhaTabs = () => {
 
   // Renderizar editor de preview se estiver aberto
   if (showPreviewEditor) {
-    const selectedDayInfo = weekDays.find(d => d.dayNumber === selectedDay);
+    const dayInfo = weekDays.find(d => d.dayNumber === selectedDay);
+    // Adicionar weekNumber e year ao selectedDayInfo para o PrintPreviewEditor
+    const selectedDayInfo = {
+      ...dayInfo,
+      weekNumber,
+      year
+    };
     return (
       <PrintPreviewEditor
         data={{

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { createItemKey } from '../utils/itemKeyUtils';
+import { createEditKey as createItemKey } from '../utils/editStateManager';
 import { formatRecipeName } from '../utils/formatUtils';
 import { EmpresaBlockContent } from './EditableBlock/EmpresaBlockContent';
 import { DetailedSectionBlock } from './EditableBlock/DetailedSectionBlock';
@@ -54,10 +54,21 @@ export function EditableBlock({
   const handleEditEnd = (e, itemName, clientName, field, blockTitle = null) => {
     const itemKey = createItemKey(itemName, clientName, blockTitle);
     const originalValue = originalValuesRef.current[itemKey];
-    const newValue = e.target.textContent;
+    const newValueText = e.target.textContent.trim();
 
-    if (originalValue !== newValue && onItemEdit) {
-      onItemEdit(itemName, clientName, originalValue, newValue, field, blockTitle);
+    if (originalValue !== newValueText && onItemEdit) {
+      // Se for campo de quantidade, extrair o número
+      if (field === 'quantity') {
+        // Parse quantity (pode ser "5 cubas G", "10 kg", "3", etc)
+        const numMatch = newValueText.match(/^[\d.,]+/);
+        if (numMatch) {
+          const parsedQty = parseFloat(numMatch[0].replace(',', '.'));
+          onItemEdit(itemName, clientName, originalValue, parsedQty, field, blockTitle);
+        }
+      } else {
+        // Para outros campos (nome, etc), usar o texto diretamente
+        onItemEdit(itemName, clientName, originalValue, newValueText, field, blockTitle);
+      }
     }
   };
 
