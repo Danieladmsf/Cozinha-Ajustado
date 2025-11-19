@@ -33,7 +33,25 @@ const FIRESTORE_COLLECTION = 'programming_edits';
  *   - 'portal-client' ou outro: edição vinda do Portal do Cliente (verde)
  */
 export async function saveEdit(customerName, recipeName, editedValue, field = 'quantity', firebaseValue = null, weekDayKey = null, userId = 'local-user') {
-  const edits = loadAllEdits();
+  // IMPORTANTE: Carregar do Firebase primeiro para ter dados atualizados
+  // Isso evita race condition quando múltiplas edições são salvas rapidamente
+  let edits;
+  if (weekDayKey) {
+    try {
+      edits = await loadEditsFromFirebase(weekDayKey);
+      // Também atualizar localStorage com dados do Firebase
+      if (Object.keys(edits).length > 0) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(edits));
+      } else {
+        edits = loadAllEdits();
+      }
+    } catch (error) {
+      // Fallback para localStorage se Firebase falhar
+      edits = loadAllEdits();
+    }
+  } else {
+    edits = loadAllEdits();
+  }
 
   // Criar estrutura se não existir
   if (!edits[customerName]) {
@@ -407,17 +425,25 @@ const BLOCK_ORDER_FIRESTORE_COLLECTION = 'programming_block_order';
  */
 export async function saveBlockOrderToFirebase(weekDayKey, blockOrder) {
   if (!weekDayKey || !blockOrder) {
+    console.log('[saveBlockOrderToFirebase] ❌ Sem weekDayKey ou blockOrder:', { weekDayKey, blockOrder });
     return;
   }
 
   try {
+    console.log('[saveBlockOrderToFirebase] 💾 Salvando ordem no Firebase:', {
+      weekDayKey,
+      numBlocks: blockOrder.length,
+      order: blockOrder
+    });
     const docRef = doc(db, BLOCK_ORDER_FIRESTORE_COLLECTION, weekDayKey);
     await setDoc(docRef, {
       order: blockOrder,
       lastModified: new Date().toISOString(),
       modifiedBy: 'local-user'
     });
+    console.log('[saveBlockOrderToFirebase] ✅ Ordem salva com sucesso no Firebase');
   } catch (error) {
+    console.error('[saveBlockOrderToFirebase] ❌ Erro ao salvar no Firebase:', error);
     throw error;
   }
 }
@@ -429,20 +455,28 @@ export async function saveBlockOrderToFirebase(weekDayKey, blockOrder) {
  */
 export async function loadBlockOrderFromFirebase(weekDayKey) {
   if (!weekDayKey) {
+    console.log('[loadBlockOrderFromFirebase] ⚠️ Sem weekDayKey');
     return [];
   }
 
   try {
+    console.log('[loadBlockOrderFromFirebase] 📡 Carregando do Firebase:', weekDayKey);
     const docRef = doc(db, BLOCK_ORDER_FIRESTORE_COLLECTION, weekDayKey);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
       const data = docSnap.data();
+      console.log('[loadBlockOrderFromFirebase] ✅ Ordem encontrada:', {
+        numBlocks: data.order?.length,
+        order: data.order
+      });
       return data.order || [];
     } else {
+      console.log('[loadBlockOrderFromFirebase] ⚠️ Nenhuma ordem salva no Firebase');
       return [];
     }
   } catch (error) {
+    console.error('[loadBlockOrderFromFirebase] ❌ Erro ao carregar:', error);
     return [];
   }
 }
@@ -480,11 +514,18 @@ export function subscribeToBlockOrder(weekDayKey, callback) {
  * @param {string} weekDayKey - Ex: "2025_W46_Mon"
  */
 export async function saveBlockOrder(blockOrder, weekDayKey = null) {
+  console.log('[saveBlockOrder] 💾 Salvando ordem:', {
+    numBlocks: blockOrder.length,
+    weekDayKey,
+    order: blockOrder
+  });
+
   // Salvar no localStorage
   try {
     localStorage.setItem(BLOCK_ORDER_STORAGE_KEY, JSON.stringify(blockOrder));
+    console.log('[saveBlockOrder] ✅ Salvo no localStorage');
   } catch (error) {
-    // Silenciar erro
+    console.error('[saveBlockOrder] ❌ Erro ao salvar no localStorage:', error);
   }
 
   // Salvar no Firebase se temos weekDayKey
@@ -492,8 +533,10 @@ export async function saveBlockOrder(blockOrder, weekDayKey = null) {
     try {
       await saveBlockOrderToFirebase(weekDayKey, blockOrder);
     } catch (error) {
-      // Silenciar erro
+      console.error('[saveBlockOrder] ❌ Erro ao salvar no Firebase:', error);
     }
+  } else {
+    console.log('[saveBlockOrder] ⚠️ Sem weekDayKey, não salvando no Firebase');
   }
 }
 

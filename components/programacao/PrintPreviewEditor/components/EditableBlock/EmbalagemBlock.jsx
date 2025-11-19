@@ -15,7 +15,10 @@ export function EmbalagemBlock({
   isItemEdited,
   getItemEditInfo,
   isItemChanged,
-  getItemChangeInfo
+  getItemChangeInfo,
+  acceptPortalChange,
+  rejectPortalChange,
+  getResolutionStatus
 }) {
   if (!block.items) return null;
 
@@ -38,11 +41,23 @@ export function EmbalagemBlock({
             const editInfo = edited && getItemEditInfo ? getItemEditInfo(cliente.customer_name, recipe.recipe_name) : null;
             const changeInfo = changed && getItemChangeInfo ? getItemChangeInfo(cliente.customer_name, recipe.recipe_name) : null;
 
+            // Verificar conflito
+            const conflict = getResolutionStatus ? getResolutionStatus(cliente.customer_name, recipe.recipe_name) : null;
+
             // Determinar classe CSS baseada no estado
             let lineClass = '';
             let lineStyles = {};
 
-            if (edited) {
+            if (conflict) {
+              // Vermelho: conflito entre edição manual e portal
+              lineClass = 'state-conflict';
+              lineStyles = {
+                backgroundColor: '#fee2e2',
+                borderLeft: '3px solid #ef4444',
+                paddingLeft: '8px',
+                borderRadius: '4px'
+              };
+            } else if (edited) {
               // Amarelo: edição manual local
               lineClass = 'state-edited';
               lineStyles = {
@@ -63,7 +78,20 @@ export function EmbalagemBlock({
             }
 
             // Tooltip para edição
-            const tooltipContent = edited && editInfo ? (
+            const tooltipContent = conflict ? (
+              <div>
+                <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#ef4444' }}>⚠️ Conflito de Edição</div>
+                <div style={{ marginBottom: '4px' }}>
+                  <strong>Sua edição:</strong> {conflict.localEdit.value}
+                </div>
+                <div style={{ marginBottom: '4px' }}>
+                  <strong>Portal:</strong> {conflict.portalEdit.value}
+                </div>
+                <div style={{ fontSize: '0.85em', color: '#6b7280' }}>
+                  Escolha qual manter usando os botões
+                </div>
+              </div>
+            ) : edited && editInfo ? (
               <div>
                 <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>📝 Editado Manualmente</div>
                 <div>Valor: {editInfo.value}</div>
@@ -90,8 +118,12 @@ export function EmbalagemBlock({
                 className={`item-line ${lineClass}`}
                 style={lineStyles}
               >
+                {/* Indicador visual de debug para conflitos */}
+                {conflict && (
+                  <span style={{ color: '#ef4444', fontWeight: 'bold', marginRight: '4px' }}>⚠</span>
+                )}
                 {/* Indicador visual de debug para edições do portal */}
-                {changed && (
+                {!conflict && changed && (
                   <span style={{ color: '#10b981', fontWeight: 'bold', marginRight: '4px' }}>●</span>
                 )}
                 <Tooltip content={tooltipContent}>
@@ -124,15 +156,59 @@ export function EmbalagemBlock({
                   </span>
                 </Tooltip>
                 {/* Indicador de edição manual */}
-                {edited && editInfo && (
+                {!conflict && edited && editInfo && (
                   <span className="no-print" style={{ marginLeft: '8px', fontSize: '0.85em', color: '#f59e0b', fontWeight: '600' }}>
                     (editado {new Date(editInfo.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })})
                   </span>
                 )}
                 {/* Indicador de edição do portal */}
-                {changed && changeInfo && (
+                {!conflict && changed && changeInfo && (
                   <span className="no-print" style={{ marginLeft: '8px', fontSize: '0.85em', color: '#10b981', fontWeight: '600' }}>
                     (portal {new Date(changeInfo.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })})
+                  </span>
+                )}
+                {/* Botões de resolução de conflito */}
+                {conflict && (
+                  <span className="no-print" style={{ marginLeft: '8px', display: 'inline-flex', gap: '4px', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75em', color: '#6b7280', marginRight: '4px' }}>
+                      Local: {conflict.localEdit.value} | Portal: {conflict.portalEdit.value}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        rejectPortalChange && rejectPortalChange(cliente.customer_name, recipe.recipe_name);
+                      }}
+                      style={{
+                        padding: '2px 6px',
+                        fontSize: '0.7em',
+                        backgroundColor: '#f59e0b',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '3px',
+                        cursor: 'pointer'
+                      }}
+                      title="Manter sua edição local"
+                    >
+                      Local ✓
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        acceptPortalChange && acceptPortalChange(cliente.customer_name, recipe.recipe_name);
+                      }}
+                      style={{
+                        padding: '2px 6px',
+                        fontSize: '0.7em',
+                        backgroundColor: '#10b981',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '3px',
+                        cursor: 'pointer'
+                      }}
+                      title="Aceitar valor do Portal"
+                    >
+                      Portal ✓
+                    </button>
                   </span>
                 )}
               </div>

@@ -65,6 +65,13 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     return loadAllEdits();
   });
 
+  // Ref para rastrear edições locais feitas nesta sessão (para detecção de conflitos)
+  const localEditsRef = useRef({});
+
+  // Estado para conflitos: quando há edição local E edição do portal para o mesmo item
+  const [conflicts, setConflicts] = useState({});
+  // Estrutura: { "customerName::recipeName": { localEdit: {...}, portalEdit: {...} } }
+
   // Hook de gerenciamento de fontes e ordem
   const {
     hasSavedSizes,
@@ -128,10 +135,21 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
   // Gerar chave única para este dia (para Firebase sync)
   const weekDayKey = useMemo(() => {
-    if (!selectedDayInfo) return null;
+    if (!selectedDayInfo) {
+      console.log('[PrintPreviewEditor] ⚠️ Sem selectedDayInfo, weekDayKey = null');
+      return null;
+    }
     const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
     const dayName = dayNames[dayNumber] || 'Seg';
-    return `${year}_W${String(weekNumber).padStart(2, '0')}_${dayName}`;
+    const key = `${year}_W${String(weekNumber).padStart(2, '0')}_${dayName}`;
+    console.log('[PrintPreviewEditor] 🔑 weekDayKey gerado:', {
+      year,
+      weekNumber,
+      dayNumber,
+      dayName,
+      weekDayKey: key
+    });
+    return key;
   }, [year, weekNumber, dayNumber, selectedDayInfo]);
 
   // Estado para ordem dos blocos vinda do Firebase
@@ -143,13 +161,87 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
     // 1. Carregar edições do Firebase ao montar
     loadEditsFromFirebase(weekDayKey).then(firebaseEdits => {
+      console.log('[PrintPreviewEditor] 📥 Firebase edições carregadas:', {
+        weekDayKey,
+        numClientes: Object.keys(firebaseEdits).length,
+        clientes: Object.keys(firebaseEdits),
+        edits: firebaseEdits
+      });
       if (Object.keys(firebaseEdits).length > 0) {
+        // CORREÇÃO: Popular localEditsRef com edições locais existentes
+        // Isso permite detectar conflitos mesmo após reabrir o editor
+        Object.entries(firebaseEdits).forEach(([customerName, recipes]) => {
+          Object.entries(recipes).forEach(([recipeName, edit]) => {
+            if (edit.userId === 'local-user') {
+              const conflictKey = `${customerName}::${recipeName}`;
+              localEditsRef.current[conflictKey] = edit;
+              console.log('[PrintPreviewEditor] 📝 Edição local restaurada:', {
+                item: recipeName,
+                cliente: customerName,
+                value: edit.value
+              });
+            }
+          });
+        });
         setEditState(firebaseEdits);
       }
     });
 
-    // 2. Criar listener em tempo real
+    // 2. Criar listener em tempo real COM detecção de conflitos
     const unsubscribe = subscribeToEdits(weekDayKey, (firebaseEdits) => {
+      console.log('[PrintPreviewEditor] 🔄 Firebase edições atualizadas (listener):', {
+        numClientes: Object.keys(firebaseEdits).length,
+        clientes: Object.keys(firebaseEdits),
+        edits: firebaseEdits
+      });
+
+      // CORREÇÃO: Primeiro, atualizar localEditsRef com edições locais do Firebase
+      // Isso garante que temos todas as edições locais antes de detectar conflitos
+      Object.entries(firebaseEdits).forEach(([customerName, recipes]) => {
+        Object.entries(recipes).forEach(([recipeName, edit]) => {
+          if (edit.userId === 'local-user') {
+            const conflictKey = `${customerName}::${recipeName}`;
+            // Só adicionar se não existir (não sobrescrever edições da sessão atual)
+            if (!localEditsRef.current[conflictKey]) {
+              localEditsRef.current[conflictKey] = edit;
+            }
+          }
+        });
+      });
+
+      // Detectar conflitos: portal edit chegou para item com local edit
+      const newConflicts = {};
+      Object.entries(firebaseEdits).forEach(([customerName, recipes]) => {
+        Object.entries(recipes).forEach(([recipeName, edit]) => {
+          // Só verificar edições do portal
+          if (edit.userId !== 'local-user') {
+            const conflictKey = `${customerName}::${recipeName}`;
+            const localEdit = localEditsRef.current[conflictKey];
+
+            // Se há edição local para o mesmo item, é conflito
+            if (localEdit && localEdit.value !== edit.value) {
+              console.log('[PrintPreviewEditor] ⚠️ Conflito detectado:', {
+                item: recipeName,
+                cliente: customerName,
+                localValue: localEdit.value,
+                portalValue: edit.value
+              });
+              newConflicts[conflictKey] = {
+                localEdit,
+                portalEdit: edit,
+                customerName,
+                recipeName
+              };
+            }
+          }
+        });
+      });
+
+      // Atualizar conflitos se houver novos
+      if (Object.keys(newConflicts).length > 0) {
+        setConflicts(prev => ({ ...prev, ...newConflicts }));
+      }
+
       setEditState(firebaseEdits);
     });
 
@@ -161,10 +253,19 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
   // FIREBASE SYNC: Carregar e sincronizar ordem dos blocos
   useEffect(() => {
-    if (!weekDayKey) return;
+    if (!weekDayKey) {
+      console.log('[PrintPreviewEditor] ⚠️ useEffect ordem: sem weekDayKey');
+      return;
+    }
+
+    console.log('[PrintPreviewEditor] 📡 useEffect ordem: iniciando para', weekDayKey);
 
     // 1. Carregar ordem do Firebase ao montar
     loadBlockOrderFromFirebase(weekDayKey).then(firebaseOrder => {
+      console.log('[PrintPreviewEditor] 📥 Firebase ordem carregada:', {
+        numBlocks: firebaseOrder.length,
+        order: firebaseOrder
+      });
       if (firebaseOrder.length > 0) {
         setFirebaseBlockOrder(firebaseOrder);
       }
@@ -172,11 +273,16 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
     // 2. Criar listener em tempo real para ordem
     const unsubscribe = subscribeToBlockOrder(weekDayKey, (firebaseOrder) => {
+      console.log('[PrintPreviewEditor] 🔄 Firebase ordem atualizada (listener):', {
+        numBlocks: firebaseOrder.length,
+        order: firebaseOrder
+      });
       setFirebaseBlockOrder(firebaseOrder);
     });
 
     // Cleanup: remover listener ao desmontar
     return () => {
+      console.log('[PrintPreviewEditor] 🧹 Removendo listener de ordem');
       unsubscribe();
     };
   }, [weekDayKey]);
@@ -207,20 +313,68 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   }, [editState]);
 
   // Vermelho: conflito (quando há edição local E do portal)
-  // Por enquanto, não implementado - precisaria rastrear ambos separadamente
   const getResolutionStatus = useCallback((customerName, recipeName) => {
-    // TODO: Implementar detecção de conflito quando houver tracking separado
-    return null;
-  }, []);
+    const conflictKey = `${customerName}::${recipeName}`;
+    return conflicts[conflictKey] || null;
+  }, [conflicts]);
 
   // Handlers para aceitar/rejeitar mudanças do portal
-  const handleAcceptPortalChange = useCallback((customerName, recipeName) => {
-    // A mudança do portal já está aplicada, apenas remover a edição local se existir
-  }, []);
+  const handleAcceptPortalChange = useCallback(async (customerName, recipeName) => {
+    const conflictKey = `${customerName}::${recipeName}`;
+    const conflict = conflicts[conflictKey];
 
-  const handleRejectPortalChange = useCallback((customerName, recipeName) => {
-    // Rejeitar = manter edição local e ignorar portal
-  }, []);
+    if (!conflict) return;
+
+    console.log('[PrintPreviewEditor] ✅ Aceitando edição do portal:', {
+      item: recipeName,
+      cliente: customerName,
+      portalValue: conflict.portalEdit.value
+    });
+
+    // Remover edição local do tracking
+    delete localEditsRef.current[conflictKey];
+
+    // Remover conflito
+    setConflicts(prev => {
+      const newConflicts = { ...prev };
+      delete newConflicts[conflictKey];
+      return newConflicts;
+    });
+
+    // A edição do portal já está aplicada no editState
+  }, [conflicts]);
+
+  const handleRejectPortalChange = useCallback(async (customerName, recipeName) => {
+    const conflictKey = `${customerName}::${recipeName}`;
+    const conflict = conflicts[conflictKey];
+
+    if (!conflict) return;
+
+    console.log('[PrintPreviewEditor] ❌ Rejeitando edição do portal, mantendo local:', {
+      item: recipeName,
+      cliente: customerName,
+      localValue: conflict.localEdit.value
+    });
+
+    // Salvar edição local de volta para sobrescrever a do portal
+    const newEdits = await saveEdit(
+      customerName,
+      recipeName,
+      conflict.localEdit.value,
+      conflict.localEdit.field,
+      conflict.portalEdit.value, // Hash do valor atual (portal)
+      weekDayKey
+    );
+
+    setEditState(newEdits);
+
+    // Remover conflito (mas manter no localEditsRef)
+    setConflicts(prev => {
+      const newConflicts = { ...prev };
+      delete newConflicts[conflictKey];
+      return newConflicts;
+    });
+  }, [conflicts, weekDayKey]);
 
   const isLocked = false;
 
@@ -489,11 +643,26 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     // Prioridade: Firebase > localStorage
     const localOrder = loadSavedOrder();
     const savedOrder = firebaseBlockOrder.length > 0 ? firebaseBlockOrder : localOrder;
+
+    console.log('[initialBlocks] 📋 Definindo ordem dos blocos:', {
+      firebaseOrder: firebaseBlockOrder.length,
+      localOrder: localOrder.length,
+      usandoFirebase: firebaseBlockOrder.length > 0,
+      savedOrder: savedOrder.length
+    });
+
     let orderedBlocks = blocks;
 
     if (savedOrder.length > 0) {
       // Tentar aplicar ordem salva
       const matchedBlocks = savedOrder.map(id => blocks.find(b => b.id === id)).filter(Boolean);
+
+      console.log('[initialBlocks] 🔗 Matching blocos:', {
+        savedOrderIds: savedOrder,
+        blocksIds: blocks.map(b => b.id),
+        matchedCount: matchedBlocks.length,
+        unmatchedInSaved: savedOrder.filter(id => !blocks.find(b => b.id === id))
+      });
 
       // Se a ordem salva corresponde aos blocos, usar ela
       // Caso contrário (IDs antigos), usar ordem padrão e adicionar blocos não encontrados
@@ -501,6 +670,10 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         // Adicionar blocos que não estavam na ordem salva
         const unmatchedBlocks = blocks.filter(b => !savedOrder.includes(b.id));
         orderedBlocks = [...matchedBlocks, ...unmatchedBlocks];
+
+        console.log('[initialBlocks] ✅ Ordem aplicada:', {
+          finalOrder: orderedBlocks.map(b => b.id)
+        });
       }
     }
 
@@ -560,18 +733,40 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   useEffect(() => {
     if (initialBlocks.length === 0) return;
 
-    // CORREÇÃO: Preservar a ordem atual dos blocos se houver
-    let blocksToUse = initialBlocks;
-    if (currentBlockOrderRef.current.length > 0 && editableBlocks.length > 0) {
-      // Reordenar initialBlocks de acordo com a ordem atual
-      const orderedInitialBlocks = currentBlockOrderRef.current
-        .map(id => initialBlocks.find(b => b.id === id))
-        .filter(Boolean);
+    // CORRIGIDO: Usar ordem do initialBlocks (que já vem do Firebase)
+    // Não preservar ordem antiga quando Firebase atualiza
+    const initialOrder = initialBlocks.map(b => b.id).join(',');
+    const currentOrder = currentBlockOrderRef.current.join(',');
 
-      // Adicionar blocos novos que não estavam na ordem anterior
-      const newBlocks = initialBlocks.filter(b => !currentBlockOrderRef.current.includes(b.id));
-      blocksToUse = [...orderedInitialBlocks, ...newBlocks];
+    // Se a ordem mudou (Firebase update) ou é primeira carga, usar initialBlocks diretamente
+    const isFirebaseUpdate = firebaseBlockOrder.length > 0 && initialOrder !== currentOrder;
+
+    let blocksToUse = initialBlocks;
+
+    // Só preservar ordem antiga se NÃO for update do Firebase
+    if (!isFirebaseUpdate && currentBlockOrderRef.current.length > 0 && editableBlocks.length > 0) {
+      // Verificar se são os mesmos blocos (não mudou nada além de edições)
+      const sameBlocks = currentBlockOrderRef.current.length === initialBlocks.length &&
+        currentBlockOrderRef.current.every(id => initialBlocks.find(b => b.id === id));
+
+      if (sameBlocks) {
+        // Reordenar initialBlocks de acordo com a ordem atual (preservar drag-drop local)
+        const orderedInitialBlocks = currentBlockOrderRef.current
+          .map(id => initialBlocks.find(b => b.id === id))
+          .filter(Boolean);
+
+        // Adicionar blocos novos que não estavam na ordem anterior
+        const newBlocks = initialBlocks.filter(b => !currentBlockOrderRef.current.includes(b.id));
+        blocksToUse = [...orderedInitialBlocks, ...newBlocks];
+      }
     }
+
+    console.log('[useEffect edições] 🔄 Aplicando blocos:', {
+      isFirebaseUpdate,
+      initialOrder: initialBlocks.map(b => b.id),
+      currentRefOrder: currentBlockOrderRef.current,
+      finalOrder: blocksToUse.map(b => b.id)
+    });
 
     if (Object.keys(editState).length > 0) {
       const blocksWithEdits = applyEditsToBlocks(blocksToUse, editState);
@@ -589,7 +784,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       const finalBlocks = applyCustomerOrderToConsolidatedBlocks(blocksWithCategoryOrder);
       setEditableBlocks(finalBlocks);
     }
-  }, [initialBlocks, editState, applyEditsToBlocks, applyOrderToBlocks, applyCustomerOrderToConsolidatedBlocks]);
+  }, [initialBlocks, editState, applyEditsToBlocks, applyOrderToBlocks, applyCustomerOrderToConsolidatedBlocks, firebaseBlockOrder]);
 
   // Reagir a mudanças na ordem das categorias
   useEffect(() => {
@@ -703,6 +898,24 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     // SEMÁFORO + FIREBASE SYNC: Salvar com hash do Firebase ORIGINAL
     const newEdits = await saveEdit(normalizedClientName, itemName, editedValue, field, firebaseQty, weekDayKey);
     setEditState(newEdits);
+
+    // Rastrear edição local para detecção de conflitos
+    const conflictKey = `${normalizedClientName}::${itemName}`;
+    localEditsRef.current[conflictKey] = {
+      value: editedValue,
+      quantity: editedValue,
+      field,
+      timestamp: new Date().toISOString(),
+      userId: 'local-user',
+      firebaseValueHash: firebaseQty !== null ? `num:${firebaseQty}` : null
+    };
+
+    // Remover conflito se existir (usuário está editando manualmente)
+    setConflicts(prev => {
+      const newConflicts = { ...prev };
+      delete newConflicts[conflictKey];
+      return newConflicts;
+    });
 
     // O sistema de semáforo (applyEditsToBlocks) vai aplicar a edição automaticamente
     // via useEffect que observa editState. Não precisamos atualizar manualmente aqui.

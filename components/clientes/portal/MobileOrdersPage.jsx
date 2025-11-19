@@ -1230,9 +1230,10 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       }).filter(Boolean); // Remove itens nulos
 
       // Adicionar itens que estão no cardápio de hoje mas não estavam no pedido salvo
+      // IMPORTANTE: Criar cópias dos objetos para não modificar orderItems original
       const newItemsFromMenu = orderItems.filter(menuItem =>
         !existingOrder.items.some(savedItem => savedItem.recipe_id === menuItem.recipe_id)
-      );
+      ).map(item => ({ ...item }));
 
       const allItems = [...synchronizedItems, ...newItemsFromMenu];
 
@@ -1251,6 +1252,8 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
 
     } else if (orderItems.length > 0) {
       // Criar novo pedido se não houver um existente
+      // IMPORTANTE: Criar cópia profunda dos items para não modificar orderItems original
+      // Isso permite comparar valores originais vs editados no handleSubmitOrder
       const newOrder = {
         customer_id: customer?.id,
         customer_name: customer?.name,
@@ -1260,7 +1263,7 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
         date: format(addDays(weekStart, selectedDay - 1), "yyyy-MM-dd"),
         total_meals_expected: mealsExpected,
         general_notes: generalNotes,
-        items: orderItems,
+        items: orderItems.map(item => ({ ...item })),
       };
       setCurrentOrder(newOrder);
     } else {
@@ -1566,21 +1569,34 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
       const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
       const weekDayKey = `${year}_W${String(weekNumber).padStart(2, '0')}_${dayNames[selectedDay]}`;
 
-      // Salvar APENAS itens que foram alterados em relação ao menu original
+      // Salvar APENAS itens que foram alterados em relação ao pedido SALVO anteriormente
+      // (não comparar com menu original que tem tudo zerado)
       if (orderData.items && orderData.items.length > 0) {
         let changedCount = 0;
 
-        // 🔍 LOG DEBUG: Ver todos os items
-        console.log('📋 [ALL ITEMS]', {
-          orderDataItems: orderData.items.map(i => ({ name: i.recipe_name, id: i.unique_id, qty: i.base_quantity })),
-          orderItems: orderItems.map(i => ({ name: i.recipe_name, id: i.unique_id, qty: i.base_quantity }))
+        // Buscar pedido salvo anteriormente para comparação
+        const savedOrder = existingOrders[selectedDay];
+        const savedItems = savedOrder?.items || [];
+
+        // 🔍 LOG DEBUG: Ver todos os items e o pedido salvo
+        console.log('📋 [COMPARAÇÃO PARA EDIÇÕES]', {
+          existingOrderExists: !!existingOrders[selectedDay],
+          savedItemsCount: savedItems.length,
+          orderDataItems: orderData.items.map(i => ({ name: i.recipe_name, recipe_id: i.recipe_id, qty: i.base_quantity })),
+          savedItems: savedItems.map(i => ({ name: i.recipe_name, recipe_id: i.recipe_id, qty: i.base_quantity }))
         });
 
         for (const item of orderData.items) {
-          // Buscar item original do menu para comparar usando unique_id para mapeamento preciso
-          const originalItem = orderItems.find(oi => oi.unique_id === item.unique_id);
-          const originalQty = originalItem?.base_quantity || 0;
+          // Buscar item no pedido SALVO anteriormente (não no menu com zeros)
+          // Usar recipe_id pois unique_id pode mudar entre sessões
+          const savedItem = savedItems.find(si => si.recipe_id === item.recipe_id);
+          const originalQty = savedItem?.base_quantity || 0;
           const currentQty = item.base_quantity || 0;
+
+          // Log para cada item
+          if (!savedItem) {
+            console.log(`⚠️ [${item.recipe_name}] Não encontrado no pedido salvo (recipe_id: ${item.recipe_id})`);
+          }
 
           // Só salvar se a quantidade mudou
           if (Math.abs(originalQty - currentQty) > 0.001) {
@@ -1589,10 +1605,10 @@ const MobileOrdersPage = ({ customerId, customerData }) => {
               console.log('💾 [SAVE EDIT]', {
                 itemRecipeName: item.recipe_name,
                 itemRecipeId: item.recipe_id,
-                itemUniqueId: item.unique_id,
-                originalItemRecipeName: originalItem?.recipe_name,
-                originalItemUniqueId: originalItem?.unique_id,
-                match: item.unique_id === originalItem?.unique_id
+                savedItemRecipeName: savedItem?.recipe_name,
+                originalQty,
+                currentQty,
+                diff: Math.abs(originalQty - currentQty)
               });
 
               await saveEdit(
