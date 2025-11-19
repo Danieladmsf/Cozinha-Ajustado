@@ -224,7 +224,7 @@ export function DetailedSectionBlock({
                 suppressContentEditableWarning
                 style={{ cursor: isLocked ? 'not-allowed' : 'text' }}
               >
-                {formatQuantityDisplay({ quantity: recipe.total, unit_type: recipe.unit_type })}
+                {recipe.totalFormatted || formatQuantityDisplay({ quantity: recipe.total, unit_type: recipe.unit_type })}
               </span>
             </div>
           )}

@@ -12,7 +12,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
-import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw, GripVertical, Download, Users, Lock, AlertTriangle, Cloud, CheckCircle } from "lucide-react";
+import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw, GripVertical, Download, Users, Lock, AlertTriangle, Cloud, CheckCircle, ArrowLeft } from "lucide-react";
 import { useImpressaoProgramacao } from '@/hooks/programacao/useImpressaoProgramacao';
 import { formatRecipeName } from './utils/formatUtils';
 import { useFontSizeManager } from './hooks/useFontSizeManager';
@@ -47,6 +47,84 @@ import {
   subscribeToBlockOrder
 } from './utils/simpleEditManager';
 
+/**
+ * Soma quantidades agrupando por tipo de unidade (cuba-g, cuba-p, unid., etc.)
+ * Se todos são cuba-g, separa inteiros (G) e decimais (P)
+ * Retorna total formatado como "X cubas G + Y cubas P"
+ */
+function calculateTotalByUnitType(clientesList) {
+  const totals = {};
+
+  clientesList.forEach(cliente => {
+    const unitType = (cliente.unit_type || '').toLowerCase();
+    const quantity = cliente.quantity || 0;
+
+    if (!totals[unitType]) {
+      totals[unitType] = 0;
+    }
+    totals[unitType] += quantity;
+  });
+
+  // Formatar resultado
+  const parts = [];
+
+  // Ordem de prioridade: cuba-g, cuba-p, depois outros
+  const orderedTypes = ['cuba-g', 'cuba-p'];
+  const otherTypes = Object.keys(totals).filter(t => !orderedTypes.includes(t));
+
+  [...orderedTypes, ...otherTypes].forEach(unitType => {
+    if (totals[unitType] && totals[unitType] > 0) {
+      const qty = Math.round(totals[unitType] * 100) / 100;
+
+      if (unitType === 'cuba-g') {
+        // Separar inteiros (cubas G) e frações (converter para cubas P)
+        const integerPart = Math.floor(qty);
+        const decimalPart = Math.round((qty - integerPart) * 100) / 100;
+
+        // Cubas G inteiras (parte inteira)
+        if (integerPart > 0) {
+          parts.push(`${integerPart} ${integerPart === 1 ? 'cuba G' : 'cubas G'}`);
+        }
+
+        // Frações convertidas para cubas P (arredondar para cima)
+        if (decimalPart > 0) {
+          const cubasPDecimal = decimalPart * 2; // 1 cuba G = 2 cubas P
+          const cubasP = Math.ceil(cubasPDecimal); // Arredondar para cima
+
+          parts.push(`${cubasP} ${cubasP === 1 ? 'cuba P' : 'cubas P'}`);
+        }
+      } else if (unitType === 'cuba-p') {
+        // Formatar frações para cuba P
+        if (qty === 0.5) {
+          parts.push('½ cuba P');
+        } else if (qty === 1.5) {
+          parts.push('1½ cubas P');
+        } else if (qty === 2.5) {
+          parts.push('2½ cubas P');
+        } else {
+          parts.push(`${qty} ${qty === 1 ? 'cuba P' : 'cubas P'}`);
+        }
+      } else if (unitType.includes('unid')) {
+        parts.push(`${qty} unid.`);
+      } else if (unitType.includes('kg')) {
+        parts.push(`${qty} kg`);
+      } else if (unitType) {
+        parts.push(`${qty} ${unitType}`);
+      } else {
+        // Sem unidade - provavelmente é número puro (gramas, unidades, etc.)
+        parts.push(`${qty}`);
+      }
+    }
+  });
+
+  return {
+    formatted: parts.join(' + ') || '0',
+    totals,
+    // Para compatibilidade, retornar também o total numérico principal
+    numericTotal: Object.values(totals).reduce((sum, val) => sum + val, 0)
+  };
+}
+
 export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const { porEmpresaData, saladaData, acougueData, embalagemData, selectedDayInfo, formatQuantityDisplay, consolidateCustomerItems, recipes, originalOrders } = data;
 
@@ -69,8 +147,38 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   const localEditsRef = useRef({});
 
   // Estado para conflitos: quando há edição local E edição do portal para o mesmo item
-  const [conflicts, setConflicts] = useState({});
+  // Persistido no localStorage para sobreviver ao reload
+  const [conflicts, setConflicts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('print_preview_conflicts');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
   // Estrutura: { "customerName::recipeName": { localEdit: {...}, portalEdit: {...} } }
+
+  // Salvar conflitos no localStorage sempre que mudar
+  useEffect(() => {
+    try {
+      if (Object.keys(conflicts).length > 0) {
+        localStorage.setItem('print_preview_conflicts', JSON.stringify(conflicts));
+      } else {
+        localStorage.removeItem('print_preview_conflicts');
+      }
+    } catch {
+      // Silenciar erro
+    }
+  }, [conflicts]);
+
+  // Restaurar localEditsRef a partir dos conflitos salvos ao inicializar
+  useEffect(() => {
+    Object.entries(conflicts).forEach(([conflictKey, conflict]) => {
+      if (conflict.localEdit && !localEditsRef.current[conflictKey]) {
+        localEditsRef.current[conflictKey] = conflict.localEdit;
+      }
+    });
+  }, []);
 
   // Hook de gerenciamento de fontes e ordem
   const {
@@ -94,7 +202,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     handleStatusUpdate,
     scrollToBlock,
     handleFixBlock,
-    handleResetFontSizes,
     handleDragStart,
     handleDragOver,
     handleDrop,
@@ -302,15 +409,22 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
   }, [editState]);
 
   // Verde: edição vinda do portal (userId !== 'local-user')
+  // NÃO mostrar verde se há conflito (vermelho prevalece)
   const isItemChanged = useCallback((customerName, recipeName) => {
+    const conflictKey = `${customerName}::${recipeName}`;
+    if (conflicts[conflictKey]) return false; // Conflito prevalece
+
     const edit = editState[customerName]?.[recipeName];
     return !!(edit && edit.userId !== 'local-user');
-  }, [editState]);
+  }, [editState, conflicts]);
 
   const getItemChangeInfo = useCallback((customerName, recipeName) => {
+    const conflictKey = `${customerName}::${recipeName}`;
+    if (conflicts[conflictKey]) return null; // Conflito prevalece
+
     const edit = editState[customerName]?.[recipeName];
     return edit && edit.userId !== 'local-user' ? edit : null;
-  }, [editState]);
+  }, [editState, conflicts]);
 
   // Vermelho: conflito (quando há edição local E do portal)
   const getResolutionStatus = useCallback((customerName, recipeName) => {
@@ -396,6 +510,15 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         const newItems = {};
         Object.entries(updatedBlock.items).forEach(([category, categoryItems]) => {
           newItems[category] = categoryItems.map(item => {
+            // CONFLITO: Se há conflito, usar valor local
+            const conflictKey = `${updatedBlock.title}::${item.recipe_name}`;
+            if (conflicts[conflictKey]) {
+              const localValue = conflicts[conflictKey].localEdit?.quantity;
+              if (localValue !== null && localValue !== undefined) {
+                return { ...item, quantity: localValue };
+              }
+            }
+
             // SEMÁFORO: Verifica se deve usar edição ou Firebase
             const decision = shouldUseEdit(
               updatedBlock.title,
@@ -417,6 +540,15 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       if ((updatedBlock.type === 'detailed-section' || updatedBlock.type === 'embalagem-category') && updatedBlock.items) {
         updatedBlock.items = updatedBlock.items.map(recipe => {
           const newClientes = recipe.clientes.map(cliente => {
+            // CONFLITO: Se há conflito, usar valor local
+            const conflictKey = `${cliente.customer_name}::${recipe.recipe_name}`;
+            if (conflicts[conflictKey]) {
+              const localValue = conflicts[conflictKey].localEdit?.quantity;
+              if (localValue !== null && localValue !== undefined) {
+                return { ...cliente, quantity: localValue };
+              }
+            }
+
             // SEMÁFORO: Verifica se deve usar edição ou Firebase
             const decision = shouldUseEdit(
               cliente.customer_name,
@@ -430,10 +562,15 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
             return cliente;
           });
 
-          // Recalcular total se necessário
+          // Recalcular total se necessário (agrupando por tipo de unidade)
           if (recipe.showTotal) {
-            const newTotal = newClientes.reduce((sum, c) => sum + (c.quantity || 0), 0);
-            return { ...recipe, clientes: newClientes, total: Math.round(newTotal * 100) / 100 };
+            const totalResult = calculateTotalByUnitType(newClientes);
+            return {
+              ...recipe,
+              clientes: newClientes,
+              total: totalResult.numericTotal,
+              totalFormatted: totalResult.formatted
+            };
           }
 
           return { ...recipe, clientes: newClientes };
@@ -442,7 +579,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
       return updatedBlock;
     });
-  }, []);
+  }, [conflicts]);
 
   // Inicializar blocos APENAS UMA VEZ com useMemo
   const initialBlocks = useMemo(() => {
@@ -526,8 +663,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       const acougueItems = [];
       Object.entries(acougueData).forEach(([recipeName, clientes]) => {
         const clientesList = [];
-        let totalQuantity = 0;
-        let unitType = '';
 
         Object.entries(clientes).forEach(([customerName, clienteData]) => {
           clientesList.push({
@@ -535,18 +670,18 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
             quantity: clienteData.quantity,
             unit_type: clienteData.unitType
           });
-          totalQuantity += clienteData.quantity;
-          if (!unitType) unitType = clienteData.unitType;
         });
 
-        totalQuantity = Math.round(totalQuantity * 100) / 100;
+        // Calcular total agrupando por tipo de unidade
+        const totalResult = calculateTotalByUnitType(clientesList);
 
         acougueItems.push({
           recipe_name: recipeName,
           clientes: clientesList,
           showTotal: true,
-          total: totalQuantity,
-          unit_type: unitType
+          total: totalResult.numericTotal,
+          totalFormatted: totalResult.formatted,
+          unit_type: clientesList[0]?.unit_type || ''
         });
       });
 
@@ -592,8 +727,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
         if (targetCategory) {
           const clientesList = [];
-          let totalQuantity = 0;
-          let unitType = '';
 
           Object.entries(clientes).forEach(([customerName, clienteData]) => {
             if (clienteData && clienteData.quantity !== undefined) {
@@ -602,19 +735,19 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
                 quantity: clienteData.quantity,
                 unit_type: clienteData.unitType
               });
-              totalQuantity += clienteData.quantity;
-              if (!unitType) unitType = clienteData.unitType;
             }
           });
 
-          totalQuantity = Math.round(totalQuantity * 100) / 100;
+          // Calcular total agrupando por tipo de unidade
+          const totalResult = calculateTotalByUnitType(clientesList);
 
           categorias[targetCategory].push({
             recipe_name: recipeName,
             clientes: clientesList,
             showTotal: true,
-            total: totalQuantity,
-            unit_type: unitType
+            total: totalResult.numericTotal,
+            totalFormatted: totalResult.formatted,
+            unit_type: clientesList[0]?.unit_type || ''
           });
         }
       });
@@ -1037,6 +1170,15 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       {/* Toolbar */}
       <div className="preview-toolbar">
         <div className="toolbar-left">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            title="Voltar para a página de programação"
+            className="mr-2 hover:bg-gray-100"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
           <h2 className="text-lg font-bold">Editor de Impressão</h2>
           <span className="text-sm text-gray-600">{Array.isArray(editableBlocks) ? editableBlocks.length : 0} blocos</span>
           {hasSavedSizes && (
@@ -1078,10 +1220,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         </div>
 
         <div className="toolbar-right">
-          <Button variant="outline" size="sm" onClick={handleResetFontSizes} title="Resetar todos os tamanhos para os padrões">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Resetar
-          </Button>
           <Button variant="outline" onClick={onClose}>
             <X className="w-4 h-4 mr-2" />
             Cancelar
