@@ -555,3 +555,72 @@ export function loadBlockOrderFromLocal() {
     return [];
   }
 }
+
+// ============================================
+// GERENCIAMENTO DE BLOCOS CUSTOMIZADOS
+// ============================================
+
+const CUSTOM_BLOCKS_FIRESTORE_COLLECTION = 'programming_custom_blocks';
+
+/**
+ * Salva blocos customizados (duplicados) no Firebase
+ * @param {string} weekDayKey - Ex: "2025_W46_Mon"
+ * @param {array} customBlocks - Array de blocos customizados
+ */
+export async function saveCustomBlocksToFirebase(weekDayKey, customBlocks) {
+  if (!weekDayKey) {
+    console.log('[saveCustomBlocksToFirebase] ⚠️ Sem weekDayKey');
+    return;
+  }
+
+  try {
+    console.log('[saveCustomBlocksToFirebase] 💾 Salvando blocos customizados:', {
+      weekDayKey,
+      numBlocks: customBlocks.length,
+      blocks: customBlocks.map(b => ({ id: b.id, title: b.title, isDuplicated: b.isDuplicated }))
+    });
+
+    const docRef = doc(db, CUSTOM_BLOCKS_FIRESTORE_COLLECTION, weekDayKey);
+    await setDoc(docRef, {
+      customBlocks,
+      updatedAt: new Date().toISOString()
+    });
+
+    console.log('[saveCustomBlocksToFirebase] ✅ Blocos salvos no Firebase');
+  } catch (error) {
+    console.error('[saveCustomBlocksToFirebase] ❌ Erro ao salvar:', error);
+  }
+}
+
+/**
+ * Carrega blocos customizados do Firebase
+ * @param {string} weekDayKey - Ex: "2025_W46_Mon"
+ * @returns {array} Array de blocos customizados ou []
+ */
+export async function loadCustomBlocksFromFirebase(weekDayKey) {
+  if (!weekDayKey) {
+    console.log('[loadCustomBlocksFromFirebase] ⚠️ Sem weekDayKey');
+    return [];
+  }
+
+  try {
+    console.log('[loadCustomBlocksFromFirebase] 📡 Carregando do Firebase:', weekDayKey);
+    const docRef = doc(db, CUSTOM_BLOCKS_FIRESTORE_COLLECTION, weekDayKey);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      console.log('[loadCustomBlocksFromFirebase] ✅ Blocos encontrados:', {
+        numBlocks: data.customBlocks?.length,
+        blocks: data.customBlocks?.map(b => ({ id: b.id, title: b.title }))
+      });
+      return data.customBlocks || [];
+    } else {
+      console.log('[loadCustomBlocksFromFirebase] ⚠️ Nenhum bloco customizado salvo');
+      return [];
+    }
+  } catch (error) {
+    console.error('[loadCustomBlocksFromFirebase] ❌ Erro ao carregar:', error);
+    return [];
+  }
+}

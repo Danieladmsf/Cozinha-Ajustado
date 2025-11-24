@@ -45,7 +45,9 @@ import {
   loadEditsFromFirebase,
   subscribeToEdits,
   loadBlockOrderFromFirebase,
-  subscribeToBlockOrder
+  subscribeToBlockOrder,
+  saveCustomBlocksToFirebase,
+  loadCustomBlocksFromFirebase
 } from './utils/simpleEditManager';
 
 /**
@@ -62,10 +64,19 @@ function createConsolidatedItems(data, showTotal = false) {
       // Extrair notas do primeiro item (todas são iguais para o mesmo cliente/receita)
       const notes = clienteData.items?.[0]?.notes || '';
 
+      console.log('🔧 [createConsolidatedItems] Criando item de cliente:', {
+        recipe_name: recipeName,
+        customer_name: customerName,
+        recipe_id: clienteData.recipe_id,
+        quantity: clienteData.quantity,
+        unit_type: clienteData.unitType
+      });
+
       clientesList.push({
         customer_name: customerName,
         quantity: clienteData.quantity,
         unit_type: clienteData.unitType,
+        recipe_id: clienteData.recipe_id, // ✅ ADICIONAR recipe_id aqui
         notes: notes
       });
     });
@@ -289,6 +300,70 @@ export default function PrintPreviewEditor({
     }));
   }, []);
 
+  // Função para duplicar um bloco de empresa
+  const handleDuplicateBlock = useCallback((blockId) => {
+    console.log('[PrintPreviewEditor] 🔄 Duplicando bloco:', blockId);
+
+    setEditableBlocks(prevBlocks => {
+      const blockIndex = prevBlocks.findIndex(b => b.id === blockId);
+      if (blockIndex === -1) {
+        console.warn('[PrintPreviewEditor] ⚠️ Bloco não encontrado:', blockId);
+        return prevBlocks;
+      }
+
+      const originalBlock = prevBlocks[blockIndex];
+
+      // Criar novo bloco duplicado com ID único
+      const timestamp = Date.now();
+      const duplicatedBlock = {
+        ...originalBlock,
+        id: `${originalBlock.id}-copy-${timestamp}`,
+        title: `${originalBlock.title} (Cópia)`,
+        isDuplicated: true, // Marcar como duplicado
+        originalBlockId: originalBlock.id // Referência ao bloco original
+      };
+
+      console.log('[PrintPreviewEditor] ✅ Bloco duplicado:', {
+        originalId: originalBlock.id,
+        newId: duplicatedBlock.id,
+        title: duplicatedBlock.title
+      });
+
+      // Inserir logo após o bloco original
+      const newBlocks = [
+        ...prevBlocks.slice(0, blockIndex + 1),
+        duplicatedBlock,
+        ...prevBlocks.slice(blockIndex + 1)
+      ];
+
+      return newBlocks;
+    });
+  }, []);
+
+  // Função para excluir um bloco de empresa
+  const handleDeleteBlock = useCallback((blockId) => {
+    console.log('[PrintPreviewEditor] 🗑️ Excluindo bloco:', blockId);
+
+    setEditableBlocks(prevBlocks => {
+      const block = prevBlocks.find(b => b.id === blockId);
+
+      // Não permitir excluir blocos originais (apenas duplicados)
+      if (block && !block.isDuplicated) {
+        alert('Não é possível excluir blocos originais. Apenas cópias podem ser excluídas.');
+        return prevBlocks;
+      }
+
+      const newBlocks = prevBlocks.filter(b => b.id !== blockId);
+
+      console.log('[PrintPreviewEditor] ✅ Bloco excluído:', {
+        blockId,
+        blocksRestantes: newBlocks.length
+      });
+
+      return newBlocks;
+    });
+  }, []);
+
   // Extrair informações do dia selecionado
   const dayNumber = selectedDayInfo?.dayNumber || 0;
 
@@ -445,6 +520,54 @@ export default function PrintPreviewEditor({
       unsubscribe();
     };
   }, [weekDayKey]);
+
+  // FIREBASE SYNC: Carregar blocos customizados ao inicializar
+  useEffect(() => {
+    if (!weekDayKey) return;
+
+    console.log('[PrintPreviewEditor] 📡 Carregando blocos customizados do Firebase');
+
+    loadCustomBlocksFromFirebase(weekDayKey).then(customBlocks => {
+      if (customBlocks.length > 0) {
+        console.log('[PrintPreviewEditor] 📥 Blocos customizados carregados:', {
+          numBlocks: customBlocks.length,
+          blocks: customBlocks.map(b => ({ id: b.id, title: b.title }))
+        });
+
+        // Aplicar blocos customizados aos blocos atuais
+        setEditableBlocks(prevBlocks => {
+          // Criar mapa de blocos originais
+          const blockMap = new Map(prevBlocks.map(b => [b.id, b]));
+
+          // Adicionar blocos customizados que não existem
+          customBlocks.forEach(customBlock => {
+            if (!blockMap.has(customBlock.id)) {
+              blockMap.set(customBlock.id, customBlock);
+            }
+          });
+
+          return Array.from(blockMap.values());
+        });
+      }
+    });
+  }, [weekDayKey]);
+
+  // FIREBASE SYNC: Salvar blocos customizados quando mudam
+  useEffect(() => {
+    if (!weekDayKey) return;
+
+    // Filtrar apenas blocos customizados (duplicados)
+    const customBlocks = editableBlocks.filter(block => block.isDuplicated);
+
+    if (customBlocks.length > 0) {
+      console.log('[PrintPreviewEditor] 💾 Salvando blocos customizados:', {
+        numBlocks: customBlocks.length,
+        blocks: customBlocks.map(b => ({ id: b.id, title: b.title }))
+      });
+
+      saveCustomBlocksToFirebase(weekDayKey, customBlocks);
+    }
+  }, [editableBlocks, weekDayKey]);
 
   // Funções para indicadores visuais de edição
   // Usar editState ao invés de getEdit para ter dados sincronizados com Firebase
@@ -1177,6 +1300,8 @@ export default function PrintPreviewEditor({
           handleDragEnd={handleDragEnd}
           scrollToBlock={scrollToBlock}
           handleFixBlock={handleFixBlock}
+          handleDuplicateBlock={handleDuplicateBlock}
+          handleDeleteBlock={handleDeleteBlock}
           // Props de categorias
           categoryOrder={categoryOrder}
           draggedCategoryIndex={draggedCategoryIndex}

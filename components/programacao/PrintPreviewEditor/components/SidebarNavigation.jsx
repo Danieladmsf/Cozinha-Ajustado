@@ -1,5 +1,5 @@
 import React from 'react';
-import { GripVertical, ChevronDown, ChevronRight, ArrowLeft, ChevronLeft, ChevronRight as ChevronRightNav, X, Download, Printer, RefreshCw } from 'lucide-react';
+import { GripVertical, ChevronDown, ChevronRight, ArrowLeft, ChevronLeft, ChevronRight as ChevronRightNav, X, Download, Printer, RefreshCw, Plus, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { formatRecipeName } from '../utils/formatUtils';
 
@@ -19,6 +19,8 @@ export function SidebarNavigation({
   handleDragEnd,
   scrollToBlock,
   handleFixBlock,
+  handleDuplicateBlock,
+  handleDeleteBlock,
   // Props de categorias
   categoryOrder,
   draggedCategoryIndex,
@@ -318,6 +320,77 @@ export function SidebarNavigation({
                     {isAdjusted && (
                       <div className="sidebar-badge badge-success">Ajustado</div>
                     )}
+                    {/* Botões de ação para todos os blocos */}
+                    <div className="sidebar-item-actions" style={{ display: 'flex', gap: '4px', marginLeft: '8px' }}>
+                      {/* Botão de duplicar: aparece APENAS em blocos originais */}
+                      {!block.isDuplicated && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDuplicateBlock && handleDuplicateBlock(block.id);
+                          }}
+                          title="Duplicar card"
+                          className="action-button duplicate-button"
+                          style={{
+                            padding: '4px',
+                            border: 'none',
+                            background: '#10b981',
+                            color: 'white',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#059669';
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#10b981';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          <Plus style={{ width: '14px', height: '14px' }} />
+                        </button>
+                        )}
+                        {/* Botão de excluir: aparece APENAS em blocos duplicados */}
+                        {block.isDuplicated && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Tem certeza que deseja excluir o card "${block.title}"?`)) {
+                                handleDeleteBlock && handleDeleteBlock(block.id);
+                              }
+                            }}
+                            title="Excluir card"
+                            className="action-button delete-button"
+                            style={{
+                              padding: '4px',
+                              border: 'none',
+                              background: '#ef4444',
+                              color: 'white',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = '#dc2626';
+                              e.currentTarget.style.transform = 'scale(1.1)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = '#ef4444';
+                              e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                          >
+                            <Trash2 style={{ width: '14px', height: '14px' }} />
+                          </button>
+                        )}
+                    </div>
                   </div>
                 );
               })}

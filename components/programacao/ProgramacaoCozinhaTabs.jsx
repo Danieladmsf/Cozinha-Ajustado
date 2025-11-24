@@ -246,32 +246,100 @@ const ProgramacaoCozinhaTabs = () => {
   const formatQuantityDisplay = (item) => {
     // Validar quantidade - garantir que é um número válido
     let quantity = item.quantity ?? 0;
+    const originalQuantity = quantity;
+
+    console.log('🔍 [formatQuantityDisplay] ===================');
+    console.log('📦 Item recebido:', {
+      quantity: item.quantity,
+      unit_type: item.unit_type,
+      recipe_id: item.recipe_id,
+      recipe_name: item.recipeName || item.recipe_name
+    });
 
     // Arredondar para evitar problemas de precisão flutuante
     quantity = Math.round(quantity * 100) / 100;
 
     // Obter unit_type (pode ser null se item não tiver)
     let unitType = item.unit_type;
+    let unitsQuantity = 1; // Padrão se não tiver assembly_config
 
-    // Se não tiver unit_type, tentar buscar da receita
-    if (!unitType && item.recipe_id) {
+    // SEMPRE tentar buscar units_quantity da receita se tiver recipe_id
+    if (item.recipe_id) {
       const recipe = recipes.find(r => r.id === item.recipe_id);
+      console.log('🔎 Buscando receita por recipe_id:', item.recipe_id);
+      console.log('📖 Receita encontrada:', recipe ? recipe.name : 'NÃO ENCONTRADA');
+
       if (recipe) {
-        // Usar mesma lógica do portal para obter unit_type
+        // Buscar units_quantity SEMPRE (independente de ter unit_type)
         if (recipe.preparations && recipe.preparations.length > 0) {
           const lastPrep = recipe.preparations[recipe.preparations.length - 1];
-          unitType = lastPrep.assembly_config?.container_type;
+          console.log('🔧 Última preparação:', {
+            index: recipe.preparations.length - 1,
+            has_assembly_config: !!lastPrep.assembly_config,
+            container_type: lastPrep.assembly_config?.container_type,
+            units_quantity: lastPrep.assembly_config?.units_quantity
+          });
+
+          // Buscar units_quantity do assembly_config (Qtd. Unid.)
+          if (lastPrep.assembly_config?.units_quantity) {
+            unitsQuantity = parseFloat(lastPrep.assembly_config.units_quantity) || 1;
+            console.log('✅ units_quantity encontrado:', unitsQuantity);
+          } else {
+            console.log('⚠️ units_quantity NÃO encontrado, usando padrão: 1');
+          }
+
+          // Se não tiver unit_type, buscar da preparação
+          if (!unitType) {
+            unitType = lastPrep.assembly_config?.container_type;
+          }
+        } else {
+          console.log('⚠️ Receita sem preparações');
         }
+
+        // Se ainda não tiver unit_type, usar da receita
         if (!unitType) {
           unitType = recipe.container_type || recipe.unit_type;
+          console.log('📝 Usando unit_type alternativo:', unitType);
         }
       }
+    } else {
+      console.log('⚠️ RECIPE_ID NÃO FORNECIDO - impossível buscar units_quantity');
+      console.log('ℹ️ Usando unit_type fornecido:', unitType);
     }
+
+    // Multiplicar quantidade pelo units_quantity (Qtd. Unid.)
+    const quantityBeforeMultiply = quantity;
+    quantity = quantity * unitsQuantity;
+
+    console.log('🧮 Cálculo:', {
+      quantidade_original: originalQuantity,
+      quantidade_antes_multiplicar: quantityBeforeMultiply,
+      units_quantity: unitsQuantity,
+      quantidade_final: quantity,
+      calculo: `${quantityBeforeMultiply} × ${unitsQuantity} = ${quantity}`
+    });
+
+    // Arredondar novamente após multiplicação
+    quantity = Math.round(quantity * 100) / 100;
 
     // Normalizar para lowercase
     if (unitType) {
       unitType = unitType.toLowerCase();
     }
+
+    // Trocar "porção" por "unidade"
+    const originalUnitType = unitType;
+    if (unitType === 'porção' || unitType === 'porcao') {
+      unitType = 'unidade';
+    }
+
+    console.log('📊 Resultado final:', {
+      quantidade: quantity,
+      unit_type_original: originalUnitType,
+      unit_type_convertido: unitType,
+      display: `${quantity} ${unitType}`
+    });
+    console.log('===================\n');
 
     if (globalKitchenFormat && unitType === 'cuba-g') {
       const convertedQuantity = convertQuantityForKitchen(quantity, unitType);
@@ -289,10 +357,21 @@ const ProgramacaoCozinhaTabs = () => {
     const dayOrders = orders.filter(order => order.day_of_week === selectedDay);
     const saladaIngredientes = {};
 
+    console.log('🥗 [getSaladaData] Iniciando consolidação de Saladas');
+    console.log('📅 Pedidos do dia:', dayOrders.length);
+
     dayOrders.forEach(order => {
       order.items?.forEach(item => {
+        console.log('🔍 [getSaladaData] Item do pedido:', {
+          recipe_id: item.recipe_id,
+          quantity: item.quantity,
+          unit_type: item.unit_type,
+          customer: order.customer_name
+        });
+
         const recipe = recipes.find(r => r.id === item.recipe_id);
-        
+        console.log('📖 [getSaladaData] Receita encontrada:', recipe ? recipe.name : 'NÃO ENCONTRADA');
+
         if (recipe && recipe.category?.toLowerCase().includes('salada')) {
           const recipeName = recipe.name;
           const quantity = item.quantity;
@@ -304,9 +383,18 @@ const ProgramacaoCozinhaTabs = () => {
 
           const customerName = order.customer_name;
           if (!saladaIngredientes[recipeName][customerName]) {
+            console.log('✅ [getSaladaData] Criando entrada consolidada:', {
+              recipe_name: recipeName,
+              customer: customerName,
+              recipe_id: item.recipe_id,
+              quantity,
+              unitType
+            });
+
             saladaIngredientes[recipeName][customerName] = {
               quantity: 0,
               unitType: unitType,
+              recipe_id: item.recipe_id,
               items: []
             };
           }
@@ -316,12 +404,14 @@ const ProgramacaoCozinhaTabs = () => {
             recipeName,
             quantity,
             unitType,
+            recipe_id: item.recipe_id,
             notes: item.notes || ''
           });
         }
       });
     });
 
+    console.log('📦 [getSaladaData] Dados consolidados:', saladaIngredientes);
     return saladaIngredientes;
   };
 
@@ -329,10 +419,21 @@ const ProgramacaoCozinhaTabs = () => {
     const dayOrders = orders.filter(order => order.day_of_week === selectedDay);
     const acougueItems = {};
 
+    console.log('🥩 [getAcougueData] Iniciando consolidação de Açougue');
+    console.log('📅 Pedidos do dia:', dayOrders.length);
+
     dayOrders.forEach(order => {
       order.items?.forEach(item => {
+        console.log('🔍 [getAcougueData] Item do pedido:', {
+          recipe_id: item.recipe_id,
+          quantity: item.quantity,
+          unit_type: item.unit_type,
+          customer: order.customer_name
+        });
+
         const recipe = recipes.find(r => r.id === item.recipe_id);
-        
+        console.log('📖 [getAcougueData] Receita encontrada:', recipe ? recipe.name : 'NÃO ENCONTRADA');
+
         if (recipe && (recipe.category?.toLowerCase().includes('carne') || recipe.category?.toLowerCase().includes('açougue'))) {
           const recipeName = recipe.name;
           const quantity = item.quantity;
@@ -344,9 +445,18 @@ const ProgramacaoCozinhaTabs = () => {
 
           const customerName = order.customer_name;
           if (!acougueItems[recipeName][customerName]) {
+            console.log('✅ [getAcougueData] Criando entrada consolidada:', {
+              recipe_name: recipeName,
+              customer: customerName,
+              recipe_id: item.recipe_id,
+              quantity,
+              unitType
+            });
+
             acougueItems[recipeName][customerName] = {
               quantity: 0,
               unitType: unitType,
+              recipe_id: item.recipe_id,
               items: []
             };
           }
@@ -356,12 +466,14 @@ const ProgramacaoCozinhaTabs = () => {
             recipeName,
             quantity,
             unitType,
+            recipe_id: item.recipe_id,
             notes: item.notes || ''
           });
         }
       });
     });
 
+    console.log('📦 [getAcougueData] Dados consolidados:', acougueItems);
     return acougueItems;
   };
 
@@ -369,9 +481,20 @@ const ProgramacaoCozinhaTabs = () => {
     const dayOrders = orders.filter(order => order.day_of_week === selectedDay);
     const embalagemItems = {};
 
+    console.log('📦 [getEmbalagemData] Iniciando consolidação de Embalagem (Acompanhamentos)');
+    console.log('📅 Pedidos do dia:', dayOrders.length);
+
     dayOrders.forEach(order => {
       order.items?.forEach(item => {
+        console.log('🔍 [getEmbalagemData] Item do pedido:', {
+          recipe_id: item.recipe_id,
+          quantity: item.quantity,
+          unit_type: item.unit_type,
+          customer: order.customer_name
+        });
+
         const recipe = recipes.find(r => r.id === item.recipe_id);
+        console.log('📖 [getEmbalagemData] Receita encontrada:', recipe ? recipe.name : 'NÃO ENCONTRADA');
 
         if (recipe && !recipe.category?.toLowerCase().includes('salada') &&
             !recipe.category?.toLowerCase().includes('carne') &&
@@ -386,9 +509,18 @@ const ProgramacaoCozinhaTabs = () => {
 
           const customerName = order.customer_name;
           if (!embalagemItems[recipeName][customerName]) {
+            console.log('✅ [getEmbalagemData] Criando entrada consolidada:', {
+              recipe_name: recipeName,
+              customer: customerName,
+              recipe_id: item.recipe_id,
+              quantity,
+              unitType
+            });
+
             embalagemItems[recipeName][customerName] = {
               quantity: 0,
               unitType: unitType,
+              recipe_id: item.recipe_id,
               items: []
             };
           }
@@ -398,12 +530,14 @@ const ProgramacaoCozinhaTabs = () => {
             recipeName,
             quantity,
             unitType,
+            recipe_id: item.recipe_id,
             notes: item.notes || ''
           });
         }
       });
     });
 
+    console.log('📦 [getEmbalagemData] Dados consolidados:', embalagemItems);
     return embalagemItems;
   };
 
