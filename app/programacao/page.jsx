@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Settings, RefreshCw, ClipboardList, ShoppingCart } from "lucide-react";
@@ -45,11 +45,15 @@ export default function ProgramacaoPage() {
           </TabsList>
 
           <TabsContent value="programacao-cozinha" className="mt-6">
-            <ProgramacaoCozinhaTabs refreshKey={refreshKey} />
+            <Suspense fallback={<div className="flex items-center justify-center p-8">Carregando...</div>}>
+              <ProgramacaoCozinhaTabs refreshKey={refreshKey} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="lista-compras" className="mt-6">
-            <ListaCompras key={`lista-compras-${refreshKey}`} />
+            <Suspense fallback={<div className="flex items-center justify-center p-8">Carregando...</div>}>
+              <ListaCompras key={`lista-compras-${refreshKey}`} />
+            </Suspense>
           </TabsContent>
 
         </Tabs>
