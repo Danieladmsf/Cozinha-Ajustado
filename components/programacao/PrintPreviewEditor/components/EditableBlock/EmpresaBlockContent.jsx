@@ -161,13 +161,13 @@ export function EmpresaBlockContent({
                 {/* Indicador de edição manual */}
                 {!conflict && edited && editInfo && (
                   <span className="no-print" style={{ marginLeft: '8px', fontSize: '0.85em', color: '#f59e0b', fontWeight: '600' }}>
-                    (editado {new Date(editInfo.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })})
+                    (editado {new Date(editInfo.timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })})
                   </span>
                 )}
                 {/* Indicador de edição do portal */}
                 {!conflict && changed && changeInfo && (
                   <span className="no-print" style={{ marginLeft: '8px', fontSize: '0.85em', color: '#10b981', fontWeight: '600' }}>
-                    (portal {new Date(changeInfo.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })})
+                    (portal {new Date(changeInfo.timestamp).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })})
                   </span>
                 )}
                 {/* Botões de resolução de conflito */}

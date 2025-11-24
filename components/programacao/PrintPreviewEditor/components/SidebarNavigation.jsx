@@ -1,5 +1,6 @@
 import React from 'react';
-import { GripVertical, ChevronDown, ChevronRight } from 'lucide-react';
+import { GripVertical, ChevronDown, ChevronRight, ArrowLeft, ChevronLeft, ChevronRight as ChevronRightNav, X, Download, Printer, RefreshCw } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 import { formatRecipeName } from '../utils/formatUtils';
 
 /**
@@ -28,19 +29,242 @@ export function SidebarNavigation({
   extractCategoriesFromBlocks,
   // Estados de expansão
   expandedSections,
-  toggleSection
+  toggleSection,
+  // Props de controle
+  onClose,
+  totalEdits,
+  handleClearAllEdits,
+  handleDownloadPDF,
+  handlePrintFinal,
+  isGeneratingPDF,
+  weekDays,
+  selectedDay,
+  onDayChange,
+  weekNumber,
+  year,
+  onWeekNavigate
 }) {
   // Extrair categorias dos blocos
   const categories = extractCategoriesFromBlocks ? extractCategoriesFromBlocks(blocks) : [];
 
   return (
     <div className="sidebar-navigation">
-      <div className="sidebar-header">
-        <h3 className="text-sm font-bold text-gray-700">Páginas</h3>
-        <p className="text-xs text-gray-500 mt-1">Arraste para reordenar</p>
+      {/* Painel de Controles */}
+      <div style={{ padding: '10px 12px', borderBottom: '2px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
+        {/* Linha de Controles: ← Editor(20) | Limpar | PDF | Print */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontSize: '11px' }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            title="Voltar"
+            style={{ height: '28px', width: '28px', padding: 0, flexShrink: 0 }}
+          >
+            <ArrowLeft style={{ width: '14px', height: '14px' }} />
+          </Button>
+          <span style={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
+            Editor{totalEdits > 0 && `(${totalEdits})`}
+          </span>
+          <span style={{ color: '#cbd5e1', margin: '0 2px' }}>|</span>
+          {totalEdits > 0 && (
+            <>
+              <button
+                onClick={handleClearAllEdits}
+                title="Limpar edições"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#dc2626',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  padding: '0',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                Limpar
+              </button>
+              <span style={{ color: '#cbd5e1', margin: '0 2px' }}>|</span>
+            </>
+          )}
+          <button
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
+            title="Baixar PDF"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#059669',
+              fontWeight: '600',
+              cursor: isGeneratingPDF ? 'not-allowed' : 'pointer',
+              padding: '0',
+              opacity: isGeneratingPDF ? 0.5 : 1,
+              whiteSpace: 'nowrap'
+            }}
+          >
+            PDF
+          </button>
+          <span style={{ color: '#cbd5e1', margin: '0 2px' }}>|</span>
+          <button
+            onClick={handlePrintFinal}
+            title="Imprimir"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#2563eb',
+              fontWeight: '600',
+              cursor: 'pointer',
+              padding: '0',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            Print
+          </button>
+        </div>
+
+        {/* Indicador de Geração de PDF */}
+        {isGeneratingPDF && (
+          <div style={{
+            backgroundColor: '#d1fae5',
+            border: '1px solid #059669',
+            borderRadius: '6px',
+            padding: '8px 12px',
+            marginBottom: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <RefreshCw style={{
+              width: '14px',
+              height: '14px',
+              color: '#059669',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <span style={{ fontSize: '11px', fontWeight: '600', color: '#047857' }}>
+              Gerando PDF...
+            </span>
+          </div>
+        )}
+
+        {/* Navegação de Dias */}
+        {weekDays && weekDays.length > 0 && (
+          <div style={{ marginBottom: '12px' }}>
+            {/* Navegação Semana */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: '10px' }}>
+              <button
+                onClick={() => onWeekNavigate && onWeekNavigate(-1)}
+                className="nav-button"
+                style={{
+                  height: '28px',
+                  width: '28px',
+                  padding: 0,
+                  border: '1px solid #3b82f6',
+                  borderRadius: '6px',
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s',
+                  color: 'white',
+                  boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(59, 130, 246, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(59, 130, 246, 0.2)';
+                }}
+              >
+                <ChevronLeft style={{ width: '16px', height: '16px' }} />
+              </button>
+              <span style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', minWidth: '90px', textAlign: 'center' }}>
+                Semana {weekNumber}/{year}
+              </span>
+              <button
+                onClick={() => onWeekNavigate && onWeekNavigate(1)}
+                className="nav-button"
+                style={{
+                  height: '28px',
+                  width: '28px',
+                  padding: 0,
+                  border: '1px solid #3b82f6',
+                  borderRadius: '6px',
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s',
+                  color: 'white',
+                  boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(59, 130, 246, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(59, 130, 246, 0.2)';
+                }}
+              >
+                <ChevronRightNav style={{ width: '16px', height: '16px' }} />
+              </button>
+            </div>
+
+            {/* Lista de Dias */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {weekDays.map((day, index) => {
+                const isSelected = selectedDay === day.dayNumber;
+                return (
+                  <React.Fragment key={day.dayNumber}>
+                    <button
+                      onClick={() => onDayChange && onDayChange(day.dayNumber)}
+                      title={day.fullDate}
+                      style={{
+                        padding: '4px 8px',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        borderRadius: '4px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        backgroundColor: isSelected ? '#2563eb' : 'transparent',
+                        color: isSelected ? 'white' : '#475569',
+                        transition: 'all 0.2s',
+                        minWidth: '45px'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.backgroundColor = '#f1f5f9';
+                          e.currentTarget.style.color = '#1e293b';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = '#475569';
+                        }
+                      }}
+                    >
+                      {day.dayDate}
+                    </button>
+                    {index < weekDays.length - 1 && (
+                      <span style={{ color: '#cbd5e1', fontSize: '11px', fontWeight: '300' }}>|</span>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="sidebar-content">
+      <div className="sidebar-content" style={{ paddingTop: '8px' }}>
         {/* Seção de Blocos */}
         <div className="sidebar-section">
           <div

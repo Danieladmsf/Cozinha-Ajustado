@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from "react";
+import { useSearchParams, useRouter } from 'next/navigation';
 import '../cardapio/consolidacao/print-styles.css';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -201,11 +202,18 @@ const ProgramacaoCozinhaTabs = () => {
     navigateWeek
   } = useProgramacaoRealtimeData();
 
+  // URL params para persistir estado do editor
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   // Estados principais
   const [selectedDay, setSelectedDay] = useState(1);
   const [printing, setPrinting] = useState(false);
   const [activeTab, setActiveTab] = useState("por-empresa");
-  const [showPreviewEditor, setShowPreviewEditor] = useState(false);
+  const [showPreviewEditor, setShowPreviewEditor] = useState(() => {
+    // Inicializar com base no query param
+    return searchParams.get('preview') === 'true';
+  });
 
   // Filtros
   const [selectedCustomer, setSelectedCustomer] = useState("all");
@@ -535,9 +543,25 @@ const ProgramacaoCozinhaTabs = () => {
     return fontSizes;
   };
 
+  // Abrir editor de preview (atualiza URL)
+  const openPreviewEditor = () => {
+    setShowPreviewEditor(true);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('preview', 'true');
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  // Fechar editor de preview (remove da URL)
+  const closePreviewEditor = () => {
+    setShowPreviewEditor(false);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('preview');
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
   const handlePrint = () => {
     // Abrir o editor de preview interativo
-    setShowPreviewEditor(true);
+    openPreviewEditor();
   };
 
   // Funções auxiliares para gerar HTML de páginas individuais (para medição)
@@ -1308,10 +1332,17 @@ const ProgramacaoCozinhaTabs = () => {
           recipes,
           originalOrders: filteredOrders
         }}
-        onClose={() => setShowPreviewEditor(false)}
+        weekDays={weekDays}
+        selectedDay={selectedDay}
+        onDayChange={setSelectedDay}
+        weekNumber={weekNumber}
+        year={year}
+        currentDate={currentDate}
+        onWeekNavigate={navigateWeek}
+        onClose={closePreviewEditor}
         onPrint={() => {
           // Callback após impressão bem-sucedida
-          setShowPreviewEditor(false);
+          closePreviewEditor();
         }}
       />
     );

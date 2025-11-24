@@ -12,7 +12,8 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
-import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw, GripVertical, Download, Users, Lock, AlertTriangle, Cloud, CheckCircle, ArrowLeft } from "lucide-react";
+import { Printer, X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Save, Edit3, Maximize2, RefreshCw, GripVertical, Download, Users, Lock, AlertTriangle, Cloud, CheckCircle, ArrowLeft, Calendar } from "lucide-react";
+import { format, addDays } from "date-fns";
 import { useImpressaoProgramacao } from '@/hooks/programacao/useImpressaoProgramacao';
 import { formatRecipeName } from './utils/formatUtils';
 import { useFontSizeManager } from './hooks/useFontSizeManager';
@@ -46,6 +47,48 @@ import {
   loadBlockOrderFromFirebase,
   subscribeToBlockOrder
 } from './utils/simpleEditManager';
+
+/**
+ * Função helper para criar blocos consolidados (Salada, Açougue, Embalagem)
+ * Elimina duplicação de código entre diferentes tipos de blocos
+ */
+function createConsolidatedItems(data, showTotal = false) {
+  const items = [];
+
+  Object.entries(data).forEach(([recipeName, clientes]) => {
+    const clientesList = [];
+
+    Object.entries(clientes).forEach(([customerName, clienteData]) => {
+      // Extrair notas do primeiro item (todas são iguais para o mesmo cliente/receita)
+      const notes = clienteData.items?.[0]?.notes || '';
+
+      clientesList.push({
+        customer_name: customerName,
+        quantity: clienteData.quantity,
+        unit_type: clienteData.unitType,
+        notes: notes
+      });
+    });
+
+    const item = {
+      recipe_name: recipeName,
+      clientes: clientesList,
+      showTotal: showTotal
+    };
+
+    // Calcular total se necessário
+    if (showTotal && clientesList.length > 0) {
+      const totalResult = calculateTotalByUnitType(clientesList);
+      item.total = totalResult.numericTotal;
+      item.totalFormatted = totalResult.formatted;
+      item.unit_type = clientesList[0]?.unit_type || '';
+    }
+
+    items.push(item);
+  });
+
+  return items;
+}
 
 /**
  * Soma quantidades agrupando por tipo de unidade (cuba-g, cuba-p, unid., etc.)
@@ -125,7 +168,18 @@ function calculateTotalByUnitType(clientesList) {
   };
 }
 
-export default function PrintPreviewEditor({ data, onClose, onPrint }) {
+export default function PrintPreviewEditor({
+  data,
+  weekDays = [],
+  selectedDay,
+  onDayChange,
+  weekNumber,
+  year,
+  currentDate,
+  onWeekNavigate,
+  onClose,
+  onPrint
+}) {
   const { porEmpresaData, saladaData, acougueData, embalagemData, selectedDayInfo, formatQuantityDisplay, consolidateCustomerItems, recipes, originalOrders } = data;
 
   // Simplificar: usar useState ao invés de useReducer
@@ -235,9 +289,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     }));
   }, []);
 
-  // Extrair informações de semana/ano/dia
-  const weekNumber = selectedDayInfo?.weekNumber || 0;
-  const year = selectedDayInfo?.year || new Date().getFullYear();
+  // Extrair informações do dia selecionado
   const dayNumber = selectedDayInfo?.dayNumber || 0;
 
   // Gerar chave única para este dia (para Firebase sync)
@@ -492,6 +544,31 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
   const isLocked = false;
 
+  /**
+   * Helper: Aplica lógica de conflitos + semáforo a um item individual
+   * Elimina duplicação entre blocos empresa e consolidados
+   */
+  const applyEditToItem = useCallback((customerName, recipeName, currentQuantity) => {
+    const conflictKey = `${customerName}::${recipeName}`;
+
+    // PRIORIDADE 1: CONFLITO - usar valor local
+    if (conflicts[conflictKey]) {
+      const localValue = conflicts[conflictKey].localEdit?.quantity;
+      if (localValue !== null && localValue !== undefined) {
+        return localValue;
+      }
+    }
+
+    // PRIORIDADE 2: SEMÁFORO - verificar se deve usar edição ou Firebase
+    const decision = shouldUseEdit(customerName, recipeName, currentQuantity);
+    if (decision && decision.quantity !== null) {
+      return decision.quantity;
+    }
+
+    // PADRÃO: manter valor atual
+    return currentQuantity;
+  }, [conflicts]);
+
   // SISTEMA DE SEMÁFORO: Aplica edições COM verificação inteligente
   const applyEditsToBlocks = useCallback((blocks, editsState) => {
     if (!Array.isArray(blocks)) {
@@ -510,26 +587,12 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         const newItems = {};
         Object.entries(updatedBlock.items).forEach(([category, categoryItems]) => {
           newItems[category] = categoryItems.map(item => {
-            // CONFLITO: Se há conflito, usar valor local
-            const conflictKey = `${updatedBlock.title}::${item.recipe_name}`;
-            if (conflicts[conflictKey]) {
-              const localValue = conflicts[conflictKey].localEdit?.quantity;
-              if (localValue !== null && localValue !== undefined) {
-                return { ...item, quantity: localValue };
-              }
-            }
-
-            // SEMÁFORO: Verifica se deve usar edição ou Firebase
-            const decision = shouldUseEdit(
+            const newQuantity = applyEditToItem(
               updatedBlock.title,
               item.recipe_name,
-              item.quantity // Valor atual do Firebase
+              item.quantity
             );
-
-            if (decision && decision.quantity !== null) {
-              return { ...item, quantity: decision.quantity };
-            }
-            return item;
+            return { ...item, quantity: newQuantity };
           });
         });
         // CORREÇÃO: Garantir ordem das categorias após aplicar edições
@@ -540,26 +603,12 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
       if ((updatedBlock.type === 'detailed-section' || updatedBlock.type === 'embalagem-category') && updatedBlock.items) {
         updatedBlock.items = updatedBlock.items.map(recipe => {
           const newClientes = recipe.clientes.map(cliente => {
-            // CONFLITO: Se há conflito, usar valor local
-            const conflictKey = `${cliente.customer_name}::${recipe.recipe_name}`;
-            if (conflicts[conflictKey]) {
-              const localValue = conflicts[conflictKey].localEdit?.quantity;
-              if (localValue !== null && localValue !== undefined) {
-                return { ...cliente, quantity: localValue };
-              }
-            }
-
-            // SEMÁFORO: Verifica se deve usar edição ou Firebase
-            const decision = shouldUseEdit(
+            const newQuantity = applyEditToItem(
               cliente.customer_name,
               recipe.recipe_name,
-              cliente.quantity // Valor atual do Firebase
+              cliente.quantity
             );
-
-            if (decision && decision.quantity !== null) {
-              return { ...cliente, quantity: decision.quantity };
-            }
-            return cliente;
+            return { ...cliente, quantity: newQuantity };
           });
 
           // Recalcular total se necessário (agrupando por tipo de unidade)
@@ -579,7 +628,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
       return updatedBlock;
     });
-  }, [conflicts]);
+  }, [conflicts, applyEditToItem]);
 
   // Inicializar blocos APENAS UMA VEZ com useMemo
   const initialBlocks = useMemo(() => {
@@ -624,25 +673,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
     // Adicionar Salada (uma única página)
     if (saladaData && Object.keys(saladaData).length > 0) {
-      const saladaItems = [];
-      Object.entries(saladaData).forEach(([recipeName, clientes]) => {
-        const clientesList = [];
-
-        Object.entries(clientes).forEach(([customerName, clienteData]) => {
-          clientesList.push({
-            customer_name: customerName,
-            quantity: clienteData.quantity,
-            unit_type: clienteData.unitType
-          });
-        });
-
-        saladaItems.push({
-          recipe_name: recipeName,
-          clientes: clientesList,
-          showTotal: false  // Salada não mostra total
-        });
-      });
-
+      const saladaItems = createConsolidatedItems(saladaData, false); // false = não mostrar total
       const savedKey = 'detailed-section:Salada';
       const fontSize = savedFontSizes[savedKey] || 16;
 
@@ -660,31 +691,7 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
 
     // Adicionar Açougue (uma única página)
     if (acougueData && Object.keys(acougueData).length > 0) {
-      const acougueItems = [];
-      Object.entries(acougueData).forEach(([recipeName, clientes]) => {
-        const clientesList = [];
-
-        Object.entries(clientes).forEach(([customerName, clienteData]) => {
-          clientesList.push({
-            customer_name: customerName,
-            quantity: clienteData.quantity,
-            unit_type: clienteData.unitType
-          });
-        });
-
-        // Calcular total agrupando por tipo de unidade
-        const totalResult = calculateTotalByUnitType(clientesList);
-
-        acougueItems.push({
-          recipe_name: recipeName,
-          clientes: clientesList,
-          showTotal: true,
-          total: totalResult.numericTotal,
-          totalFormatted: totalResult.formatted,
-          unit_type: clientesList[0]?.unit_type || ''
-        });
-      });
-
+      const acougueItems = createConsolidatedItems(acougueData, true); // true = mostrar total
       const savedKey = 'detailed-section:Porcionamento Carnes';
       const fontSize = savedFontSizes[savedKey] || 16;
 
@@ -726,35 +733,18 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
         }
 
         if (targetCategory) {
-          const clientesList = [];
-
-          Object.entries(clientes).forEach(([customerName, clienteData]) => {
-            if (clienteData && clienteData.quantity !== undefined) {
-              clientesList.push({
-                customer_name: customerName,
-                quantity: clienteData.quantity,
-                unit_type: clienteData.unitType
-              });
-            }
-          });
-
-          // Calcular total agrupando por tipo de unidade
-          const totalResult = calculateTotalByUnitType(clientesList);
-
-          categorias[targetCategory].push({
-            recipe_name: recipeName,
-            clientes: clientesList,
-            showTotal: true,
-            total: totalResult.numericTotal,
-            totalFormatted: totalResult.formatted,
-            unit_type: clientesList[0]?.unit_type || ''
-          });
+          // Adicionar a receita à categoria correta
+          if (!categorias[targetCategory]) {
+            categorias[targetCategory] = {};
+          }
+          categorias[targetCategory][recipeName] = clientes;
         }
       });
 
       // Criar um bloco para cada categoria que tem itens
-      Object.entries(categorias).forEach(([categoryName, itemsList]) => {
-        if (itemsList.length > 0) {
+      Object.entries(categorias).forEach(([categoryName, recipesData]) => {
+        if (Object.keys(recipesData).length > 0) {
+          const itemsList = createConsolidatedItems(recipesData, true); // true = mostrar total
           const savedKey = `embalagem-category:${categoryName}`;
           const fontSize = savedFontSizes[savedKey] || 16;
 
@@ -1165,95 +1155,17 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
     return Array.isArray(editableBlocks) ? editableBlocks : [];
   }, [editableBlocks]);
 
+  // Calcular total de edições (todas as receitas editadas em todos os clientes)
+  const totalEdits = useMemo(() => {
+    return Object.values(editState).reduce((total, recipes) => {
+      return total + Object.keys(recipes).length;
+    }, 0);
+  }, [editState]);
+
   return (
     <div className="print-preview-container">
-      {/* Toolbar */}
-      <div className="preview-toolbar">
-        <div className="toolbar-left">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            title="Voltar para a página de programação"
-            className="mr-2 hover:bg-gray-100"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h2 className="text-lg font-bold">Editor de Impressão</h2>
-          <span className="text-sm text-gray-600">{Array.isArray(editableBlocks) ? editableBlocks.length : 0} blocos</span>
-          {hasSavedSizes && (
-            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
-              ✓ Ajustes salvos
-            </span>
-          )}
-
-          {/* Indicador de edições manuais */}
-          {Object.keys(editState).length > 0 && (
-            <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-semibold">
-              📝 {Object.keys(editState).length} {Object.keys(editState).length === 1 ? 'edição' : 'edições'}
-            </span>
-          )}
-
-          {/* Botão para limpar edições */}
-          {Object.keys(editState).length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleClearAllEdits}
-              title="Limpar edições: remover todas as edições salvas e voltar aos valores originais"
-              className="h-6 px-2 text-xs"
-            >
-              <X className="w-3 h-3 mr-1" />
-              Limpar Edições
-            </Button>
-          )}
-        </div>
-
-        <div className="toolbar-center">
-          <Button variant="outline" size="sm" onClick={() => setZoom(z => Math.max(50, z - 10))}>
-            <ZoomOut className="w-4 h-4" />
-          </Button>
-          <span className="zoom-label">{zoom}%</span>
-          <Button variant="outline" size="sm" onClick={() => setZoom(z => Math.min(150, z + 10))}>
-            <ZoomIn className="w-4 h-4" />
-          </Button>
-        </div>
-
-        <div className="toolbar-right">
-          <Button variant="outline" onClick={onClose}>
-            <X className="w-4 h-4 mr-2" />
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleDownloadPDF}
-            disabled={isGeneratingPDF}
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            {isGeneratingPDF ? (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                {pdfProgress.total > 0
-                  ? `Gerando ${pdfProgress.current}/${pdfProgress.total}...`
-                  : 'Preparando...'}
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4 mr-2" />
-                Baixar PDF
-              </>
-            )}
-          </Button>
-          <Button onClick={handlePrintFinal} className="bg-blue-600 hover:bg-blue-700">
-            <Printer className="w-4 h-4 mr-2" />
-            Imprimir
-          </Button>
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar Navigation */}
-        <SidebarNavigation
+      {/* Sidebar Navigation - Altura Total com Controles */}
+      <SidebarNavigation
           blocks={processedBlocks}
           selectedBlock={selectedBlock}
           blockStatus={blockStatus}
@@ -1276,10 +1188,23 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
           // Estados de expansão
           expandedSections={expandedSections}
           toggleSection={toggleSection}
+          // Props de controle
+          onClose={onClose}
+          totalEdits={totalEdits}
+          handleClearAllEdits={handleClearAllEdits}
+          handleDownloadPDF={handleDownloadPDF}
+          handlePrintFinal={handlePrintFinal}
+          isGeneratingPDF={isGeneratingPDF}
+          weekDays={weekDays}
+          selectedDay={selectedDay}
+          onDayChange={onDayChange}
+          weekNumber={weekNumber}
+          year={year}
+          onWeekNavigate={onWeekNavigate}
         />
 
-        {/* Preview Area */}
-        <div ref={previewAreaRef} className="preview-area">
+      {/* Coluna Direita: Preview Area Completa */}
+      <div ref={previewAreaRef} className="preview-area flex-1 overflow-auto" style={{ width: '100%' }}>
         <div style={{
           transform: `scale(${zoom / 100})`,
           transformOrigin: 'top center',
@@ -1313,7 +1238,6 @@ export default function PrintPreviewEditor({ data, onClose, onPrint }) {
               isLocked={isLocked}
             />
           ))}
-        </div>
         </div>
       </div>
     </div>
