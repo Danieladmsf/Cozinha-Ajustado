@@ -113,6 +113,7 @@ const extractIngredientsFromRecipe = (recipe, recipeMultiplier) => {
           quantity: totalWeight, // A quantidade total em kg
           weight: totalWeight, // Peso total em kg
           recipe: recipe.name,
+          recipeCategory: recipe.category || 'Outros', // ✅ ADICIONADO: Categoria da receita
           brand: ingredient.brand || '',
           notes: ingredient.notes || '',
           debug: {
@@ -190,6 +191,7 @@ const calculateRecipeQuantities = (orders, recipes) => {
 
 /**
  * Consolida ingredientes duplicados somando suas quantidades
+ * ✅ ATUALIZADO: Agora agrupa por categoria de receita
  * @param {Array} allIngredients - Array de todos os ingredientes extraídos
  * @returns {Array} Array de ingredientes consolidados sem duplicatas
  */
@@ -209,15 +211,21 @@ const consolidateDuplicateIngredients = (allIngredients) => {
       if (!consolidated[key].recipes.includes(ingredient.recipe)) {
         consolidated[key].recipes.push(ingredient.recipe);
       }
+
+      // ✅ NOVO: Combinar categorias de receitas
+      if (ingredient.recipeCategory && !consolidated[key].recipeCategories.includes(ingredient.recipeCategory)) {
+        consolidated[key].recipeCategories.push(ingredient.recipeCategory);
+      }
     } else {
       consolidated[key] = {
         name: ingredient.name,
-        category: ingredient.category,
+        category: ingredient.category, // Categoria do ingrediente (mantida para compatibilidade)
         unit: ingredient.unit,
         totalQuantity: ingredient.quantity,
         totalWeight: ingredient.weight,
         usedInRecipes: 1,
         recipes: [ingredient.recipe],
+        recipeCategories: [ingredient.recipeCategory || 'Outros'], // ✅ NOVO: Array com categorias das receitas
         brand: ingredient.brand,
         notes: ingredient.notes
       };
@@ -240,7 +248,20 @@ export const consolidateIngredientsFromRecipes = (orders, recipes) => {
     const recipeQuantities = calculateRecipeQuantities(orders, recipes);
     const totalRecipesNeeded = Object.keys(recipeQuantities).length;
 
+    console.log('🔍 DEBUG consolidateIngredients:', {
+      totalOrders: orders.length,
+      totalRecipes: recipes.length,
+      recipeQuantities,
+      primeirasReceitas: recipes.slice(0, 3).map(r => ({
+        id: r.id,
+        nome: r.name,
+        category: r.category,
+        temCategory: !!r.category
+      }))
+    });
+
     if (totalRecipesNeeded === 0) {
+      console.warn('⚠️ Nenhuma receita necessária');
       return [];
     }
 

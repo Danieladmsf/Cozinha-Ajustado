@@ -87,6 +87,16 @@ const IngredientesConsolidados = ({
   const ingredientesPorCategoria = useMemo(() => {
     const activeCategories = getActiveCategories;
 
+    console.log('🔍 DEBUG ingredientesPorCategoria:', {
+      totalIngredientes: ingredientesConsolidados.length,
+      activeCategories: activeCategories?.length || 0,
+      primeiroIngrediente: ingredientesConsolidados[0],
+      categoriasDosPrimeiros3: ingredientesConsolidados.slice(0, 3).map(ing => ({
+        nome: ing.name,
+        recipeCategories: ing.recipeCategories
+      }))
+    });
+
     // ✅ FALLBACK: Se não há categorias configuradas, agrupar por categorias das receitas
     if (!activeCategories || activeCategories.length === 0) {
       console.warn('⚠️ Sem categorias ativas - usando fallback com categorias das receitas');
@@ -95,6 +105,10 @@ const IngredientesConsolidados = ({
 
       ingredientesConsolidados.forEach(ingrediente => {
         const categoriasReceita = ingrediente.recipeCategories || [];
+
+        if (categoriasReceita.length === 0) {
+          console.warn('⚠️ Ingrediente sem categorias:', ingrediente.name, ingrediente);
+        }
 
         categoriasReceita.forEach(categoriaReceita => {
           if (!categoriasFallback[categoriaReceita]) {
@@ -111,6 +125,8 @@ const IngredientesConsolidados = ({
       Object.keys(categoriasFallback).forEach(catName => {
         categoriasFallback[catName].ingredientes.sort((a, b) => a.name.localeCompare(b.name));
       });
+
+      console.log('✅ Categorias fallback criadas:', Object.keys(categoriasFallback));
 
       return categoriasFallback;
     }
