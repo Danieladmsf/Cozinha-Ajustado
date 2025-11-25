@@ -22,7 +22,7 @@ import {
   Info
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { formatPrice } from "@/lib/formatUtils";
+import { formatCurrency } from "@/lib/formatUtils";
 import { Ingredient, PriceHistory, Supplier, Brand } from "@/app/api/entities";
 
 export default function PriceUpdateModal({ 
@@ -306,13 +306,13 @@ export default function PriceUpdateModal({
                 <div className="text-center p-4 bg-slate-50 rounded-lg">
                   <Label className="text-sm text-slate-600">Preço Atual</Label>
                   <div className="text-2xl font-bold text-slate-800 mt-1">
-                    {formatPrice(ingredient.current_price)}
+                    {formatCurrency(ingredient.current_price)}
                   </div>
                 </div>
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <Label className="text-sm text-blue-600">Novo Preço</Label>
                   <div className="text-2xl font-bold text-blue-800 mt-1">
-                    {formatPrice(formData.new_price)}
+                    {formatCurrency(formData.new_price)}
                   </div>
                 </div>
               </div>
