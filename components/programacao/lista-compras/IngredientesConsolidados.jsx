@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Calendar, Scale, Package, AlertCircle, List, Grid3x3 } from "lucide-react";
 
 // Utilitário para consolidação de ingredientes (VERSÃO CORRIGIDA)
@@ -372,7 +373,23 @@ const IngredientesConsolidados = ({
                               {ingrediente.totalWeight.toFixed(3)}
                             </td>
                             <td className={`border ${colors.border} px-4 py-2 text-center text-sm text-gray-600`}>
-                              {ingrediente.usedInRecipes} receitas
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="cursor-help underline decoration-dotted">
+                                      {ingrediente.usedInRecipes} receitas
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-xs bg-slate-800 text-white p-3">
+                                    <p className="font-semibold mb-2">Receitas que usam {ingrediente.name}:</p>
+                                    <ul className="list-disc list-inside space-y-1">
+                                      {ingrediente.recipes?.map((recipe, idx) => (
+                                        <li key={idx} className="text-sm">{recipe}</li>
+                                      ))}
+                                    </ul>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             </td>
                           </tr>
                         ))}
@@ -444,7 +461,23 @@ const IngredientesConsolidados = ({
                             </div>
                           </td>
                           <td className="border border-slate-300 px-4 py-2 text-center text-sm text-gray-600">
-                            {ingrediente.usedInRecipes}
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="cursor-help underline decoration-dotted">
+                                    {ingrediente.usedInRecipes} receitas
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs bg-slate-800 text-white p-3">
+                                  <p className="font-semibold mb-2">Receitas que usam {ingrediente.name}:</p>
+                                  <ul className="list-disc list-inside space-y-1">
+                                    {ingrediente.recipes?.map((recipe, idx) => (
+                                      <li key={idx} className="text-sm">{recipe}</li>
+                                    ))}
+                                  </ul>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </td>
                         </tr>
                       ))}
