@@ -86,7 +86,34 @@ const IngredientesConsolidados = ({
   // ✅ ATUALIZADO: Agrupar ingredientes por categoria de RECEITA (usando categorias do cardápio)
   const ingredientesPorCategoria = useMemo(() => {
     const activeCategories = getActiveCategories;
-    if (!activeCategories || activeCategories.length === 0) return {};
+
+    // ✅ FALLBACK: Se não há categorias configuradas, agrupar por categorias das receitas
+    if (!activeCategories || activeCategories.length === 0) {
+      console.warn('⚠️ Sem categorias ativas - usando fallback com categorias das receitas');
+
+      const categoriasFallback = {};
+
+      ingredientesConsolidados.forEach(ingrediente => {
+        const categoriasReceita = ingrediente.recipeCategories || [];
+
+        categoriasReceita.forEach(categoriaReceita => {
+          if (!categoriasFallback[categoriaReceita]) {
+            categoriasFallback[categoriaReceita] = {
+              name: categoriaReceita,
+              ingredientes: []
+            };
+          }
+          categoriasFallback[categoriaReceita].ingredientes.push(ingrediente);
+        });
+      });
+
+      // Ordenar ingredientes dentro de cada categoria
+      Object.keys(categoriasFallback).forEach(catName => {
+        categoriasFallback[catName].ingredientes.sort((a, b) => a.name.localeCompare(b.name));
+      });
+
+      return categoriasFallback;
+    }
 
     const categorias = {};
 
