@@ -237,6 +237,32 @@ const consolidateDuplicateIngredients = (allIngredients) => {
 };
 
 /**
+ * ✅ NOVA: Extrai todos os ingredientes SEM consolidação (para agrupamento por categoria)
+ * @param {Array} orders - Pedidos da semana
+ * @param {Array} recipes - Receitas disponíveis
+ * @returns {Array} Array de ingredientes NÃO consolidados com categoria de receita
+ */
+export const extractAllIngredientsWithoutConsolidation = (orders, recipes) => {
+  try {
+    const recipeQuantities = calculateRecipeQuantities(orders, recipes);
+    const allIngredients = [];
+
+    Object.entries(recipeQuantities).forEach(([recipeId, quantity]) => {
+      const recipe = recipes.find(r => r.id === recipeId);
+      if (recipe && quantity > 0) {
+        const ingredients = extractIngredientsFromRecipe(recipe, quantity);
+        allIngredients.push(...ingredients);
+      }
+    });
+
+    return allIngredients;
+  } catch (error) {
+    console.error('Erro ao extrair ingredientes:', error);
+    return [];
+  }
+};
+
+/**
  * Função principal para consolidar ingredientes de todas as receitas da semana
  * @param {Array} orders - Pedidos da semana
  * @param {Array} recipes - Receitas disponíveis

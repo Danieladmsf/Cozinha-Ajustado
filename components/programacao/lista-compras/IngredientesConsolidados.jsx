@@ -76,54 +76,87 @@ const IngredientesConsolidados = ({
     return uniqueOrders.filter(order => order.day_of_week === selectedDay);
   }, [orders, selectedDay, showWeekMode]);
 
-  // Consolidar todos os ingredientes (da semana ou do dia)
+  // Consolidar todos os ingredientes GLOBALMENTE (para aba alfabética)
   const ingredientesConsolidados = useMemo(() => {
     if (!filteredOrders.length || !recipes.length) return [];
 
     return consolidateIngredientsFromRecipes(filteredOrders, recipes);
   }, [filteredOrders, recipes, dataVersion]);
 
-  // ✅ ATUALIZADO: Agrupar ingredientes por categoria de RECEITA (usando categorias do cardápio)
+  // ✅ NOVO: Extrair ingredientes SEM consolidação global (para agrupamento por categoria)
+  const ingredientesSemConsolidacao = useMemo(() => {
+    if (!filteredOrders.length || !recipes.length) return [];
+
+    // Usar a mesma lógica mas sem a etapa de consolidação
+    const { extractAllIngredientsWithoutConsolidation } = require('./utils/ingredientConsolidatorFixed');
+    return extractAllIngredientsWithoutConsolidation(filteredOrders, recipes);
+  }, [filteredOrders, recipes, dataVersion]);
+
+  // ✅ ATUALIZADO: Agrupar ingredientes por categoria e consolidar DENTRO de cada categoria
   const ingredientesPorCategoria = useMemo(() => {
     const activeCategories = getActiveCategories;
 
     console.log('🔍 DEBUG ingredientesPorCategoria:', {
-      totalIngredientes: ingredientesConsolidados.length,
+      totalIngredientesSemConsolidar: ingredientesSemConsolidacao.length,
       activeCategories: activeCategories?.length || 0,
-      primeiroIngrediente: ingredientesConsolidados[0],
-      categoriasDosPrimeiros3: ingredientesConsolidados.slice(0, 3).map(ing => ({
-        nome: ing.name,
-        recipeCategories: ing.recipeCategories
-      }))
+      primeiroIngrediente: ingredientesSemConsolidacao[0]
     });
+
+    // Helper para consolidar ingredientes duplicados dentro de uma categoria
+    const consolidarDentroDeCategoria = (ingredientes) => {
+      const consolidated = {};
+
+      ingredientes.forEach(ing => {
+        const key = `${ing.name}_${ing.unit}`.toLowerCase();
+
+        if (consolidated[key]) {
+          consolidated[key].quantity += ing.quantity;
+          consolidated[key].weight += ing.weight;
+          consolidated[key].usedInRecipes += 1;
+          if (!consolidated[key].recipes.includes(ing.recipe)) {
+            consolidated[key].recipes.push(ing.recipe);
+          }
+        } else {
+          consolidated[key] = {
+            name: ing.name,
+            unit: ing.unit,
+            quantity: ing.quantity,
+            weight: ing.weight,
+            recipes: [ing.recipe],
+            usedInRecipes: 1,
+            totalQuantity: ing.quantity,
+            totalWeight: ing.weight
+          };
+        }
+      });
+
+      return Object.values(consolidated).sort((a, b) => a.name.localeCompare(b.name));
+    };
 
     // ✅ FALLBACK: Se não há categorias configuradas, agrupar por categorias das receitas
     if (!activeCategories || activeCategories.length === 0) {
-      console.warn('⚠️ Sem categorias ativas - usando fallback com categorias das receitas');
+      console.warn('⚠️ Sem categorias ativas - usando fallback');
 
       const categoriasFallback = {};
 
-      ingredientesConsolidados.forEach(ingrediente => {
-        const categoriasReceita = ingrediente.recipeCategories || [];
+      // Agrupar por categoria SEM consolidar
+      ingredientesSemConsolidacao.forEach(ingrediente => {
+        const categoriaReceita = ingrediente.recipeCategory || 'Outros';
 
-        if (categoriasReceita.length === 0) {
-          console.warn('⚠️ Ingrediente sem categorias:', ingrediente.name, ingrediente);
+        if (!categoriasFallback[categoriaReceita]) {
+          categoriasFallback[categoriaReceita] = {
+            name: categoriaReceita,
+            ingredientes: []
+          };
         }
-
-        categoriasReceita.forEach(categoriaReceita => {
-          if (!categoriasFallback[categoriaReceita]) {
-            categoriasFallback[categoriaReceita] = {
-              name: categoriaReceita,
-              ingredientes: []
-            };
-          }
-          categoriasFallback[categoriaReceita].ingredientes.push(ingrediente);
-        });
+        categoriasFallback[categoriaReceita].ingredientes.push(ingrediente);
       });
 
-      // Ordenar ingredientes dentro de cada categoria
+      // Consolidar dentro de cada categoria
       Object.keys(categoriasFallback).forEach(catName => {
-        categoriasFallback[catName].ingredientes.sort((a, b) => a.name.localeCompare(b.name));
+        categoriasFallback[catName].ingredientes = consolidarDentroDeCategoria(
+          categoriasFallback[catName].ingredientes
+        );
       });
 
       console.log('✅ Categorias fallback criadas:', Object.keys(categoriasFallback));
@@ -141,27 +174,25 @@ const IngredientesConsolidados = ({
       };
     });
 
-    // ✅ CORRIGIDO: Agrupar ingredientes em TODAS as categorias onde são usados
-    ingredientesConsolidados.forEach(ingrediente => {
-      // Verificar todas as categorias de receita (não apenas a primeira!)
-      const categoriasReceita = ingrediente.recipeCategories || [];
+    // Agrupar ingredientes por categoria SEM consolidar
+    ingredientesSemConsolidacao.forEach(ingrediente => {
+      const categoriaReceita = ingrediente.recipeCategory;
 
-      if (categoriasReceita.length === 0) return;
+      if (!categoriaReceita) return;
 
-      // Adicionar o ingrediente em TODAS as categorias onde é usado
-      categoriasReceita.forEach(categoriaReceita => {
-        // Encontrar a categoria correspondente no CategoryTree
-        const categoria = activeCategories.find(cat => cat.name === categoriaReceita);
+      // Encontrar a categoria correspondente no CategoryTree
+      const categoria = activeCategories.find(cat => cat.name === categoriaReceita);
 
-        if (categoria && categorias[categoria.id]) {
-          categorias[categoria.id].ingredientes.push(ingrediente);
-        }
-      });
+      if (categoria && categorias[categoria.id]) {
+        categorias[categoria.id].ingredientes.push(ingrediente);
+      }
     });
 
-    // Ordenar ingredientes dentro de cada categoria alfabeticamente
+    // Consolidar ingredientes DENTRO de cada categoria
     Object.keys(categorias).forEach(catId => {
-      categorias[catId].ingredientes.sort((a, b) => a.name.localeCompare(b.name));
+      categorias[catId].ingredientes = consolidarDentroDeCategoria(
+        categorias[catId].ingredientes
+      );
     });
 
     // Filtrar categorias vazias
@@ -173,7 +204,7 @@ const IngredientesConsolidados = ({
     });
 
     return categoriasComIngredientes;
-  }, [ingredientesConsolidados, getActiveCategories]);
+  }, [ingredientesSemConsolidacao, getActiveCategories]);
 
   // Calcular estatísticas
   const estatisticas = useMemo(() => {
