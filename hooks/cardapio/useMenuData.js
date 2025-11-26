@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { CategoryTree } from "@/app/api/entities";
 import { WeeklyMenu as WeeklyMenuEntity } from "@/app/api/entities";
 import { Recipe } from "@/app/api/entities";
-import { MenuCategory, MenuConfig } from "@/app/api/entities";
+import { MenuConfig } from "@/app/api/entities";
 import { Customer } from "@/app/api/entities";
 import { APP_CONSTANTS } from "@/lib/constants";
 import { getWeekInfo } from "../shared/weekUtils";
@@ -77,8 +77,17 @@ export const useMenuData = (currentDate) => {
   // Carregamento inicial com cache inteligente
   const loadInitialData = useCallback(async () => {
     try {
+      console.log('🔄 [useMenuData] Iniciando carregamento de dados...');
+
       // Se cache é válido, usar dados do cache
       if (isCacheValid()) {
+        console.log('✅ [useMenuData] Usando dados do cache válido');
+        console.log('📊 [useMenuData] Cache:', {
+          categories: globalCache.categories?.length,
+          recipes: globalCache.recipes?.length,
+          customers: globalCache.customers?.length,
+          menuConfig: globalCache.menuConfig ? 'presente' : 'ausente'
+        });
         setCategories(globalCache.categories);
         setRecipes(globalCache.recipes);
         setCustomers(globalCache.customers);
@@ -87,14 +96,22 @@ export const useMenuData = (currentDate) => {
         return;
       }
 
+      console.log('🔍 [useMenuData] Cache inválido ou ausente, carregando do banco...');
       setLoading(true);
-      
+
       const [categoriesData, recipesData, customersData, configData] = await Promise.all([
         CategoryTree.list(),
         Recipe.list(),
         Customer.list(),
         loadMenuConfig()
       ]);
+
+      console.log('📦 [useMenuData] Dados carregados do banco:', {
+        categories: categoriesData?.length || 0,
+        recipes: recipesData?.length || 0,
+        customers: customersData?.length || 0,
+        menuConfig: configData ? 'presente' : 'ausente'
+      });
 
       // Atualizar estado e cache global
       const newData = {
@@ -106,17 +123,19 @@ export const useMenuData = (currentDate) => {
       };
 
       globalCache = newData;
-      
+
       setCategories(newData.categories);
       setRecipes(newData.recipes);
       setCustomers(newData.customers);
       setMenuConfig(newData.menuConfig);
-      
+
+      console.log('✅ [useMenuData] Dados carregados e cache atualizado com sucesso');
+
       // Notificar outras instâncias
       notifyCacheUpdate('initialData', newData);
 
     } catch (error) {
-      // Error loading initial data
+      console.error('❌ [useMenuData] Erro ao carregar dados iniciais:', error);
     } finally {
       setLoading(false);
     }
@@ -194,41 +213,66 @@ export const useMenuData = (currentDate) => {
       const mockUserId = APP_CONSTANTS.MOCK_USER_ID;
       const { weekStart, weekKey, weekNumber, year } = getWeekInfo(date);
 
+      console.log('📅 [loadWeeklyMenu] Carregando menu semanal:', {
+        date: date.toLocaleDateString(),
+        weekKey,
+        weekNumber,
+        year,
+        userId: mockUserId
+      });
+
       // Verificar cache do menu semanal
       const cachedMenu = weeklyMenuCache.get(weekKey);
       if (cachedMenu && (Date.now() - cachedMenu.timestamp) < CACHE_DURATION) {
+        console.log('✅ [loadWeeklyMenu] Usando menu do cache');
+        console.log('📊 [loadWeeklyMenu] Menu em cache:', cachedMenu.data ? 'presente' : 'null');
         setWeeklyMenu(cachedMenu.data);
         return;
       }
 
+      console.log('🔍 [loadWeeklyMenu] Consultando banco...');
       const menus = await WeeklyMenuEntity.query([
         { field: 'user_id', operator: '==', value: mockUserId },
         { field: 'week_key', operator: '==', value: weekKey }
       ]);
 
+      console.log('📦 [loadWeeklyMenu] Resultado da query:', {
+        encontrados: menus?.length || 0
+      });
+
       if (menus && menus.length > 0) {
         const menu = menus[0];
+        console.log('✅ [loadWeeklyMenu] Menu encontrado:', {
+          id: menu.id,
+          weekKey: menu.week_key,
+          temMenuData: !!menu.menu_data,
+          diasComDados: menu.menu_data ? Object.keys(menu.menu_data).length : 0
+        });
+
         // Salvar no cache
         weeklyMenuCache.set(weekKey, {
           data: menu,
           timestamp: Date.now()
         });
         setWeeklyMenu(menu);
-        
+
         // Notificar outras instâncias
         notifyCacheUpdate('weeklyMenu', { weekKey, menu });
       } else {
+        console.log('⚠️ [loadWeeklyMenu] Nenhum menu encontrado para esta semana');
+
         // Salvar null no cache também
         weeklyMenuCache.set(weekKey, {
           data: null,
           timestamp: Date.now()
         });
         setWeeklyMenu(null);
-        
+
         // Notificar outras instâncias
         notifyCacheUpdate('weeklyMenu', { weekKey, menu: null });
       }
     } catch (error) {
+      console.error('❌ [loadWeeklyMenu] Erro ao carregar menu semanal:', error);
       setWeeklyMenu(null);
     }
   };

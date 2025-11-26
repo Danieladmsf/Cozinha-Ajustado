@@ -42,6 +42,24 @@ export default function WeeklyMenuComponent() {
     loadWeeklyMenu
   } = useMenuData(menuInterface.currentDate);
 
+  // Log para debug
+  console.log('📋 [WeeklyMenuComponent] Dados recebidos:', {
+    currentDate: menuInterface.currentDate.toLocaleDateString(),
+    currentDayIndex: menuInterface.currentDayIndex,
+    categories: categories?.length || 0,
+    recipes: recipes?.length || 0,
+    weeklyMenu: weeklyMenu ? {
+      id: weeklyMenu.id,
+      weekKey: weeklyMenu.week_key,
+      temMenuData: !!weeklyMenu.menu_data,
+      diasComDados: weeklyMenu.menu_data ? Object.keys(weeklyMenu.menu_data).length : 0,
+      diasDisponiveis: weeklyMenu.menu_data ? Object.keys(weeklyMenu.menu_data) : [],
+      menuData: weeklyMenu.menu_data
+    } : 'null',
+    menuConfig: menuConfig ? 'presente' : 'null',
+    loading
+  });
+
   const menuNotes = useMenuNotes(menuInterface.currentDate);
   const noteActions = useMenuNoteActions(menuNotes, categories, recipes);
 
@@ -201,6 +219,14 @@ export default function WeeklyMenuComponent() {
                   const fixedDropdowns = menuConfig?.fixed_dropdowns?.[category.id] || 0;
                   const items = menuHelpers.ensureMinimumItems(categoryItems, fixedDropdowns);
                   const categoryColor = getCategoryColor(category.id);
+
+                  console.log(`🍽️ [WeeklyMenuComponent] Categoria ${category.name} (${category.id}) - Dia ${menuInterface.currentDayIndex}:`, {
+                    categoryItems: categoryItems.length,
+                    fixedDropdowns,
+                    itemsAposEnsureMinimum: items.length,
+                    categoryItems,
+                    items
+                  });
 
                   return (
                     <CategoryMenuCard

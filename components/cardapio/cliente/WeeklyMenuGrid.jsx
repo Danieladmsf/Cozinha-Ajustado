@@ -29,6 +29,20 @@ export default function WeeklyMenuGrid({
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const locationSelection = useLocationSelection(getAllClientIds());
 
+  // Log para debug
+  console.log('📊 [WeeklyMenuGrid] Props recebidas:', {
+    currentDate: currentDate.toLocaleDateString(),
+    weeklyMenu: weeklyMenu ? {
+      id: weeklyMenu.id,
+      weekKey: weeklyMenu.week_key,
+      menuData: weeklyMenu.menu_data ? 'presente' : 'ausente',
+      diasComDados: weeklyMenu.menu_data ? Object.keys(weeklyMenu.menu_data).length : 0
+    } : 'null',
+    activeCategories: activeCategories?.length || 0,
+    recipes: recipes?.length || 0,
+    selectedCustomer: selectedCustomer ? selectedCustomer.name : 'null'
+  });
+
   // Função para obter clientes desmarcados de uma receita
   const getUncheckedClients = (item) => {
     if (!item || !item.locations || !locations) return [];
@@ -52,6 +66,12 @@ export default function WeeklyMenuGrid({
       {[1, 2, 3, 4, 5].map(day => {
         const dayDate = addDays(weekStart, day - 1);
         const dayItems = weeklyMenu?.menu_data[day] || {};
+
+        console.log(`📅 [WeeklyMenuGrid] Dia ${day} (${dayNames[day]}):`, {
+          temDados: !!weeklyMenu?.menu_data?.[day],
+          categorias: Object.keys(dayItems).length,
+          dayItems
+        });
 
         return (
           <div key={day} style={{ 

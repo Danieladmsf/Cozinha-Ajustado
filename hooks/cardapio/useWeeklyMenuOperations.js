@@ -14,6 +14,22 @@ export const useWeeklyMenuOperations = () => {
       const mockUserId = APP_CONSTANTS.MOCK_USER_ID;
       const { weekStart, weekKey, weekNumber, year } = getWeekInfo(currentDate);
 
+      // ✅ VERIFICAR SE JÁ EXISTE UM MENU PARA ESTA SEMANA
+      console.log('🔍 [createWeeklyMenu] Verificando se já existe menu para semana:', weekKey);
+
+      const existingMenus = await WeeklyMenuEntity.query([
+        { field: 'user_id', operator: '==', value: mockUserId },
+        { field: 'week_key', operator: '==', value: weekKey }
+      ]);
+
+      if (existingMenus && existingMenus.length > 0) {
+        console.log('✅ [createWeeklyMenu] Menu já existe, retornando o existente:', existingMenus[0].id);
+        return existingMenus[0];
+      }
+
+      // Só cria se não existir
+      console.log('➕ [createWeeklyMenu] Criando novo menu para semana:', weekKey);
+
       const menuData = {
         user_id: mockUserId,
         week_key: weekKey,
@@ -22,9 +38,11 @@ export const useWeeklyMenuOperations = () => {
       };
 
       const newMenu = await WeeklyMenuEntity.create(menuData);
+      console.log('✅ [createWeeklyMenu] Menu criado com sucesso:', newMenu.id);
 
       return newMenu;
     } catch (error) {
+      console.error('❌ [createWeeklyMenu] Erro ao criar menu:', error);
       throw error;
     } finally {
       setLoading(false);

@@ -34,6 +34,17 @@ export default function ClientMenuComponent() {
     loading
   } = useMenuData(menuInterface.currentDate);
 
+  // Log para debug
+  console.log('🖥️ [ClientMenuComponent] Dados recebidos:', {
+    currentDate: menuInterface.currentDate.toLocaleDateString(),
+    categories: categories?.length || 0,
+    recipes: recipes?.length || 0,
+    customers: customers?.length || 0,
+    weeklyMenu: weeklyMenu ? `ID: ${weeklyMenu.id}` : 'null',
+    menuConfig: menuConfig ? 'presente' : 'null',
+    loading
+  });
+
   const { locations, loading: locationsLoading, getLocationById, getAllClientIds } = useMenuLocations();
   const { applyClientConfig, getFilteredItemsForClient } = useClientConfig(menuConfig, getAllClientIds());
   const menuHelpers = useMenuHelpers();
